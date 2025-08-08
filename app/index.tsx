@@ -1,9 +1,9 @@
 import LoginForm from "@/components/LoginForm";
 import { useAuth } from "@/context/auth";
-import { ActivityIndicator, Text, View } from "react-native";
+import { ActivityIndicator, Button, Text, View } from "react-native";
 
 export default function Index() {
-  const { user, isLoading, signIn } = useAuth();
+  const { user, isLoading, signout } = useAuth();
 
   if (isLoading) {
     return (
@@ -25,6 +25,7 @@ export default function Index() {
         alignItems: "center",
       }}>
       <Text>{JSON.stringify(user)}</Text>
+      <Button title="Sign Out" onPress={() => signout()} />
     </View>
   );
 }
