@@ -1,4 +1,11 @@
-import { AuthError } from "expo-auth-session";
+import { BASE_URL } from "@/constants";
+import {
+  AuthError,
+  AuthRequestConfig,
+  DiscoveryDocument,
+  makeRedirectUri,
+  useAuthRequest,
+} from "expo-auth-session";
 import * as WebBrowser from "expo-web-browser";
 import * as React from "react";
 
@@ -17,23 +24,61 @@ export type AuthUser = {
   cookieExpiration?: number; ///added for web cookie expiration tracking
 };
 
-const AuthContext = React.createContext({
-  user: null,
-  signIn: () => {},
-  signout: () => {},
-  fetchWithAuth: async (url: string, options: RequestInit) => {
-    Promise.resolve(new Response("Not implemented"));
-  },
-  isLoading: false,
-  error: null as AuthError | null,
-});
+type AuthContextValue = {
+  user: AuthUser | null;
+  signIn: () => Promise<void>;
+  signOut: () => Promise<void>;
+  fetchWithAuth: (url: string, options?: RequestInit) => Promise<Response>;
+  isLoading: boolean;
+  error: AuthError | null;
+};
+
+const AuthContext = React.createContext<AuthContextValue | undefined>(
+  undefined
+);
+
+const config: AuthRequestConfig = {
+  clientId: "google",
+  scopes: ["openid", "profile", "email"],
+  redirectUri: makeRedirectUri(),
+};
+
+const discovery: DiscoveryDocument = {
+  authorizationEndpoint: `${BASE_URL}/api/auth/authorize`,
+  tokenEndpoint: `${BASE_URL}/api/auth/token`,
+};
 
 export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   const [user, setUser] = React.useState<AuthUser | null>(null);
   const [isLoading, setIsLoading] = React.useState(false);
   const [error, setError] = React.useState<AuthError | null>(null);
 
-  const signIn = async () => {};
+  const [request, response, promptAsync] = useAuthRequest(config, discovery);
+
+  React.useEffect(() => {
+    handleResponse();
+  }, [response]);
+
+  const handleResponse = async () => {
+    if (response?.type === "success") {
+      const { code } = response.params;
+      console.log("🚀 ~ handleResponse ~ code:", code);
+    } else if (response?.type === "error") {
+      setError(response.error as AuthError);
+    }
+  };
+
+  const signIn = async () => {
+    try {
+      if (!request) {
+        console.log("No request");
+        return;
+      }
+      await promptAsync();
+    } catch (error) {
+      console.log(error);
+    }
+  };
   const signOut = async () => {};
   const fetchWithAuth = async (url: string, options?: RequestInit) => {};
 

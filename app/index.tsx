@@ -3,7 +3,7 @@ import { useAuth } from "@/context/auth";
 import { ActivityIndicator, Button, Text, View } from "react-native";
 
 export default function Index() {
-  const { user, isLoading, signout } = useAuth();
+  const { user, isLoading, signOut } = useAuth();
 
   if (isLoading) {
     return (
@@ -25,7 +25,7 @@ export default function Index() {
         alignItems: "center",
       }}>
       <Text>{JSON.stringify(user)}</Text>
-      <Button title="Sign Out" onPress={() => signout()} />
+      <Button title="Sign Out" onPress={() => signOut()} />
     </View>
   );
 }

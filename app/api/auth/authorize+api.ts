@@ -1,6 +1,7 @@
 import {
   APP_SCHEME,
   BASE_URL,
+  GOOGLE_AUTH_URL,
   GOOGLE_CLIENT_ID,
   GOOGLE_REDIRECT_URI,
 } from "@/constants";
@@ -44,4 +45,6 @@ export async function GET(request: Request) {
     state: state,
     prompt: "select_account",
   });
+
+  return Response.redirect(GOOGLE_AUTH_URL + "?" + params.toString());
 }
