@@ -2,8 +2,8 @@
 export const COOKIE_NAME = "auth_token";
 export const TOKEN_KEY_NAME = "accessToken";
 export const REFRESH_COOKIE_NAME = "refresh_token";
-export const COOKIE_MAX_AGE = 20;
-export const JWT_EXPIRATION_TIME = "20s";
+export const COOKIE_MAX_AGE = 15 * 60;
+export const JWT_EXPIRATION_TIME = "15m";
 export const REFRESH_TOKEN_EXPIRY = "30d";
 export const REFRESH_TOKEN_MAX_AGE = 30 * 24 * 60 * 60;
 
@@ -27,7 +27,7 @@ export const JWT_SECRET = process.env.JWT_SECRET;
 export const COOKIE_OPTIONS = {
   httpOnly: true,
   secure: true,
-  sameSite: "Lax" as const,
+  sameSite: "None" as const,
   path: "/",
   maxAge: COOKIE_MAX_AGE,
 };
@@ -35,7 +35,7 @@ export const COOKIE_OPTIONS = {
 export const REFRESH_COOKIE_OPTIONS = {
   httpOnly: true,
   secure: true,
-  sameSite: "Lax" as const,
+  sameSite: "None" as const,
   path: "/api/auth/refresh",
   maxAge: REFRESH_TOKEN_MAX_AGE,
 };

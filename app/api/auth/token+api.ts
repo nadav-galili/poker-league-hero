@@ -7,6 +7,9 @@ import {
   GOOGLE_REDIRECT_URI,
   JWT_EXPIRATION_TIME,
   JWT_SECRET,
+  REFRESH_COOKIE_NAME,
+  REFRESH_COOKIE_OPTIONS,
+  REFRESH_TOKEN_EXPIRY,
 } from "@/constants";
 
 import * as jose from "jose";
@@ -55,6 +58,17 @@ export async function POST(request: Request) {
     .setIssuedAt(issuedAt)
     .sign(new TextEncoder().encode(JWT_SECRET));
 
+  // create refresh token (rotated by /api/auth/refresh)
+  const refreshToken = await new jose.SignJWT({
+    ...userInfoWithoutExp,
+    jti: crypto.randomUUID(),
+    type: "refresh",
+  })
+    .setProtectedHeader({ alg: "HS256" })
+    .setExpirationTime(REFRESH_TOKEN_EXPIRY)
+    .setIssuedAt(issuedAt)
+    .sign(new TextEncoder().encode(JWT_SECRET));
+
   if (platform === "web") {
     const response = Response.json({
       success: true,
@@ -72,10 +86,23 @@ export async function POST(request: Request) {
       } SameSite=${COOKIE_OPTIONS.sameSite};`
     );
 
+    // set refresh token cookie
+    response.headers.append(
+      "Set-Cookie",
+      `${REFRESH_COOKIE_NAME}=${refreshToken};Max-Age=${
+        REFRESH_COOKIE_OPTIONS.maxAge
+      };Path=${REFRESH_COOKIE_OPTIONS.path};${
+        REFRESH_COOKIE_OPTIONS.httpOnly ? "HttpOnly;" : ""
+      }${REFRESH_COOKIE_OPTIONS.secure ? "Secure;" : ""} SameSite=${
+        REFRESH_COOKIE_OPTIONS.sameSite
+      };`
+    );
+
     return response;
   }
 
   return Response.json({
     accessToken,
+    refreshToken,
   });
 }

@@ -58,12 +58,47 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   const [error, setError] = React.useState<AuthError | null>(null);
   const isWeb = Platform.OS === "web";
   const refreshInProgressRef = React.useRef(false);
+  const refreshTimerRef = React.useRef<ReturnType<typeof setTimeout> | null>(
+    null
+  );
 
   React.useEffect(() => {
     handleResponse();
   }, [response]);
 
   // Check if user is authenticated
+  React.useEffect(() => {
+    // clear any existing timer
+    if (refreshTimerRef.current) {
+      clearTimeout(refreshTimerRef.current);
+      refreshTimerRef.current = null;
+    }
+
+    if (isWeb && user?.cookieExpiration) {
+      const now = Math.floor(Date.now() / 1000);
+      const secondsLeft = user.cookieExpiration - now;
+      const leadSeconds = 5;
+      if (secondsLeft > leadSeconds) {
+        refreshTimerRef.current = setTimeout(() => {
+          refreshAccessToken();
+        }, (secondsLeft - leadSeconds) * 1000);
+      }
+      return;
+    }
+
+    if (!isWeb && accessToken) {
+      const decoded = jose.decodeJwt(accessToken) as any;
+      const now = Math.floor(Date.now() / 1000);
+      const secondsLeft = (decoded?.exp ?? now) - now;
+      const leadSeconds = 5;
+      if (secondsLeft > leadSeconds) {
+        refreshTimerRef.current = setTimeout(() => {
+          refreshAccessToken();
+        }, (secondsLeft - leadSeconds) * 1000);
+      }
+    }
+  }, [isWeb, user?.cookieExpiration, accessToken]);
+
   React.useEffect(() => {
     const restoreSession = async () => {
       setIsLoading(true);
@@ -212,6 +247,36 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
       } else {
         // For native: Use the refresh token
         if (!currentRefreshToken) {
+          // Fallback: try using current access token via Authorization header
+          if (accessToken) {
+            try {
+              const fallbackRes = await fetch(`${BASE_URL}/api/auth/refresh`, {
+                method: "POST",
+                headers: {
+                  "Content-Type": "application/json",
+                  Authorization: `Bearer ${accessToken}`,
+                },
+                body: JSON.stringify({ platform: "native" }),
+              });
+              if (fallbackRes.ok) {
+                const tokens = await fallbackRes.json();
+                const newAccessToken = tokens.accessToken;
+                const newRefreshToken = tokens.refreshToken;
+                if (newAccessToken) {
+                  setAccessToken(newAccessToken);
+                  await tokenCache?.saveToken("accessToken", newAccessToken);
+                  setUser(jose.decodeJwt(newAccessToken) as AuthUser);
+                }
+                if (newRefreshToken) {
+                  setRefreshToken(newRefreshToken);
+                  await tokenCache?.saveToken("refreshToken", newRefreshToken);
+                }
+                return newAccessToken ?? null;
+              }
+            } catch (err) {
+              console.error("Fallback refresh failed:", err);
+            }
+          }
           console.error("No refresh token available");
           signOut();
           return null;
