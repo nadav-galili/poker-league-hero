@@ -66,6 +66,7 @@ export async function GET(request: Request) {
         cookieExpiration,
       });
     } catch (error) {
+      console.log("🚀 ~ GET ~ error:", error);
       return Response.json({ error: "Invalid token" }, { status: 401 });
     }
   } catch (e) {
