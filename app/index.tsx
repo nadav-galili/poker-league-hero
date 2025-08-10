@@ -39,7 +39,7 @@ export default function Index() {
         justifyContent: "center",
         alignItems: "center",
       }}>
-      <Text>{user.sub}</Text>
+      <Text>{user.id}</Text>
       <Text>{user.name}</Text>
       <Text>{user.email}</Text>
       <Button title="Sign Out" onPress={signOut} />

@@ -5,7 +5,6 @@ import {
   GOOGLE_CLIENT_ID,
   GOOGLE_CLIENT_SECRET,
   GOOGLE_REDIRECT_URI,
-  JWT_EXPIRATION_TIME,
   JWT_SECRET,
   REFRESH_COOKIE_NAME,
   REFRESH_COOKIE_OPTIONS,
@@ -53,7 +52,8 @@ export async function POST(request: Request) {
   ///create access token short lived
   const accessToken = await new jose.SignJWT(userInfoWithoutExp)
     .setProtectedHeader({ alg: "HS256" })
-    .setExpirationTime(JWT_EXPIRATION_TIME)
+    // Use deterministic absolute exp (issuedAt + COOKIE_MAX_AGE seconds)
+    .setExpirationTime(issuedAt + COOKIE_MAX_AGE)
     .setSubject(sub)
     .setIssuedAt(issuedAt)
     .sign(new TextEncoder().encode(JWT_SECRET));

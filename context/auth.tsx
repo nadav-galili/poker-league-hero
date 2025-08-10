@@ -90,7 +90,8 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
       const decoded = jose.decodeJwt(accessToken) as any;
       const now = Math.floor(Date.now() / 1000);
       const secondsLeft = (decoded?.exp ?? now) - now;
-      const leadSeconds = 5;
+      // Avoid tight loops: only schedule if > 10s remaining; else let API-triggered 401 refresh handle it
+      const leadSeconds = 10;
       if (secondsLeft > leadSeconds) {
         refreshTimerRef.current = setTimeout(() => {
           refreshAccessToken();
