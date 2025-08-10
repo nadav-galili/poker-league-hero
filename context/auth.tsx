@@ -62,6 +62,31 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     handleResponse();
   }, [response]);
 
+  React.useEffect(() => {
+    const restoreSession = async () => {
+      setIsLoading(true);
+      try {
+        if (isWeb) {
+          const sessionResponse = await fetch(`${BASE_URL}/api/auth/session`, {
+            method: "GET",
+            credentials: "include",
+          });
+
+          if (sessionResponse.ok) {
+            const sessionData = await sessionResponse.json();
+            setUser(sessionData as AuthUser);
+          }
+        } else {
+        }
+      } catch (error) {
+        console.error("Error restoring session:", error);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+    restoreSession();
+  }, [isWeb]);
+
   const handleResponse = async () => {
     if (response?.type === "success") {
       const { code } = response.params;

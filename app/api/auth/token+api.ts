@@ -12,7 +12,9 @@ import {
 import * as jose from "jose";
 
 export async function POST(request: Request) {
-  const body = await request.formData();
+  const body = (await request.formData()) as unknown as {
+    get(name: string): any;
+  };
   const code = body.get("code") as string;
   const platform = (body.get("platform") as string) || "native";
   if (!code) {
