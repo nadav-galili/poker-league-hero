@@ -1,17 +1,23 @@
+import { getTheme } from "@/colors";
 import LoginForm from "@/components/LoginForm";
-import { BASE_URL } from "@/constants";
 import { useAuth } from "@/context/auth";
-import { useState } from "react";
-import { ActivityIndicator, Button, Text, View } from "react-native";
+import { Redirect } from "expo-router";
+import { ActivityIndicator, View } from "react-native";
 
 export default function Index() {
-  const { user, isLoading, signOut, fetchWithAuth } = useAuth();
-  const [data, setData] = useState();
+  const { user, isLoading } = useAuth();
+  const theme = getTheme("light");
 
   if (isLoading) {
     return (
-      <View style={{ flex: 1, justifyContent: "center", alignItems: "center" }}>
-        <ActivityIndicator />
+      <View
+        style={{
+          flex: 1,
+          justifyContent: "center",
+          alignItems: "center",
+          backgroundColor: theme.background,
+        }}>
+        <ActivityIndicator size="large" color={theme.primary} />
       </View>
     );
   }
@@ -20,31 +26,6 @@ export default function Index() {
     return <LoginForm />;
   }
 
-  async function getProtectedData() {
-    const response = await fetchWithAuth(`${BASE_URL}/api/protected/data`, {
-      method: "GET",
-    });
-
-    if (response.ok) {
-      const data = await response.json();
-      console.log(data);
-      setData(data);
-    }
-  }
-
-  return (
-    <View
-      style={{
-        flex: 1,
-        justifyContent: "center",
-        alignItems: "center",
-      }}>
-      <Text>{user.id}</Text>
-      <Text>{user.name}</Text>
-      <Text>{user.email}</Text>
-      <Button title="Sign Out" onPress={signOut} />
-      <Text>{JSON.stringify(data)}</Text>
-      <Button title="Get Protected Data" onPress={getProtectedData} />
-    </View>
-  );
+  // Redirect to home tabs when user is logged in
+  return <Redirect href="/(tabs)/my-leagues" />;
 }
