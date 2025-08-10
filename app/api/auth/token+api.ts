@@ -1,4 +1,7 @@
 import {
+  COOKIE_MAX_AGE,
+  COOKIE_NAME,
+  COOKIE_OPTIONS,
   GOOGLE_CLIENT_ID,
   GOOGLE_CLIENT_SECRET,
   GOOGLE_REDIRECT_URI,
@@ -51,6 +54,23 @@ export async function POST(request: Request) {
     .sign(new TextEncoder().encode(JWT_SECRET));
 
   if (platform === "web") {
+    const response = Response.json({
+      success: true,
+      issuedAt: issuedAt,
+      expiresAt: issuedAt + COOKIE_MAX_AGE,
+    });
+
+    ///set the access token in an HTTTP-only cookie
+    response.headers.set(
+      "Set-Cookie",
+      `${COOKIE_NAME}=${accessToken};Max-Age=${COOKIE_OPTIONS.maxAge};Path=${
+        COOKIE_OPTIONS.path
+      };${COOKIE_OPTIONS.httpOnly ? "HttpOnly;" : ""}${
+        COOKIE_OPTIONS.secure ? "Secure;" : ""
+      } SameSite=${COOKIE_OPTIONS.sameSite};`
+    );
+
+    return response;
   }
 
   return Response.json({

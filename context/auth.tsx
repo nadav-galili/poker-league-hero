@@ -76,6 +76,8 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
         }
         if (request?.codeVerifier) {
           formData.append("code_verifier", request.codeVerifier);
+        } else {
+          console.warn("No code verifier found");
         }
         const tokenResponse = await fetch(`${BASE_URL}/api/auth/token`, {
           method: "POST",
@@ -86,6 +88,17 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
         console.log("token response", tokenResponse);
 
         if (isWeb) {
+          const userData = await tokenResponse.json();
+          if (userData.success) {
+            const sessionResponse = await fetch(
+              `${BASE_URL}/api/auth/session`,
+              { method: "GET", credentials: "include" }
+            );
+            if (sessionResponse.ok) {
+              const sessionData = await sessionResponse.json();
+              setUser(sessionData as AuthUser);
+            }
+          }
         } else {
           const token = await tokenResponse.json();
           const accessToken = token.accessToken;

@@ -28,7 +28,7 @@ export const COOKIE_OPTIONS = {
   httpOnly: true,
   secure: true,
   sameSite: "Lax" as const,
-  patth: "/",
+  path: "/",
   maxAge: COOKIE_MAX_AGE,
 };
 
