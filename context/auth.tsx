@@ -55,7 +55,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   const [user, setUser] = React.useState<AuthUser | null>(null);
   const [isLoading, setIsLoading] = React.useState(false);
   const [error, setError] = React.useState<AuthError | null>(null);
-  const [accessToken, setAccessToken] = React.useState<string | null>(null);
+  const [accessToken, setAccessToken] = React.useState<string>();
   const [request, response, promptAsync] = useAuthRequest(config, discovery);
   const isWeb = Platform.OS === "web";
   React.useEffect(() => {
@@ -77,6 +77,26 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
             setUser(sessionData as AuthUser);
           }
         } else {
+          const storedAccessToken = await tokenCache?.getToken(TOKEN_KEY_NAME);
+          if (storedAccessToken) {
+            try {
+              const decoded = jose.decodeJwt(storedAccessToken);
+              const exp = (decoded as any).exp;
+              const now = Math.floor(Date.now() / 1000);
+              if (exp && exp > now) {
+                console.log("Access Token is valid using it");
+                setAccessToken(storedAccessToken);
+                setUser(decoded as AuthUser);
+              } else {
+                setUser(null);
+                tokenCache?.deleteToken(TOKEN_KEY_NAME);
+              }
+            } catch (error) {
+              console.log(error);
+            }
+          } else {
+            console.log("user is not authenticated");
+          }
         }
       } catch (error) {
         console.error("Error restoring session:", error);
@@ -164,7 +184,44 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     }
   };
   const signOut = async () => {};
-  const fetchWithAuth = async (url: string, options?: RequestInit) => {};
+  const fetchWithAuth = async (url: string, options: RequestInit) => {
+    if (isWeb) {
+      const response = await fetch(url, {
+        ...options,
+        credentials: "include",
+      });
+
+      if (response.status === 401) {
+        console.log("API request failed with 401 , attemting to refresh token");
+
+        ///IMPLEMENT REFRESH TOKEN LOGIC HERE
+        ///   await refreshAccessToken();
+
+        if (user) {
+          return fetch(url, {
+            ...options,
+            credentials: "include",
+          });
+        }
+      }
+
+      return response;
+    } else {
+      const response = await fetch(url, {
+        ...options,
+        headers: {
+          ...options.headers,
+          Authorization: `Bearer ${accessToken}`,
+        },
+        credentials: "same-origin",
+      });
+
+      if (response.status === 401) {
+        ///IMPLEMENT REFRESH TOKEN LOGIC HERE
+      }
+      return response;
+    }
+  };
 
   return (
     <AuthContext.Provider
