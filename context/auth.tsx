@@ -1,4 +1,4 @@
-import { BASE_URL } from "@/constants";
+import { BASE_URL, TOKEN_KEY_NAME } from "@/constants";
 import {
   AuthError,
   AuthRequestConfig,
@@ -8,7 +8,10 @@ import {
 } from "expo-auth-session";
 import * as WebBrowser from "expo-web-browser";
 import * as React from "react";
+import { Platform } from "react-native";
 
+import { tokenCache } from "@/utils/cache";
+import * as jose from "jose";
 WebBrowser.maybeCompleteAuthSession();
 
 export type AuthUser = {
@@ -52,9 +55,9 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   const [user, setUser] = React.useState<AuthUser | null>(null);
   const [isLoading, setIsLoading] = React.useState(false);
   const [error, setError] = React.useState<AuthError | null>(null);
-
+  const [accessToken, setAccessToken] = React.useState<string | null>(null);
   const [request, response, promptAsync] = useAuthRequest(config, discovery);
-
+  const isWeb = Platform.OS === "web";
   React.useEffect(() => {
     handleResponse();
   }, [response]);
@@ -62,6 +65,49 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   const handleResponse = async () => {
     if (response?.type === "success") {
       const { code } = response.params;
+
+      try {
+        setIsLoading(true);
+
+        const formData = new FormData();
+        formData.append("code", code);
+        if (isWeb) {
+          formData.append("platform", "web");
+        }
+        if (request?.codeVerifier) {
+          formData.append("code_verifier", request.codeVerifier);
+        }
+        const tokenResponse = await fetch(`${BASE_URL}/api/auth/token`, {
+          method: "POST",
+          body: formData,
+          credentials: isWeb ? "include" : "same-origin",
+        });
+
+        console.log("token response", tokenResponse);
+
+        if (isWeb) {
+        } else {
+          const token = await tokenResponse.json();
+          const accessToken = token.accessToken;
+          if (!accessToken) {
+            console.log("no access token found");
+            return;
+          }
+          setAccessToken(accessToken);
+          ///save token to local storage
+          tokenCache?.saveToken(TOKEN_KEY_NAME, accessToken);
+          console.log(accessToken);
+          //get user info
+          const decoded = jose.decodeJwt(accessToken);
+          setUser(decoded as AuthUser);
+          console.log("user", user);
+        }
+      } catch (error) {
+        console.log(error);
+      } finally {
+        setIsLoading(false);
+      }
+
       console.log("🚀 ~ handleResponse ~ code:", code);
     } else if (response?.type === "error") {
       setError(response.error as AuthError);

@@ -1,5 +1,6 @@
 //authentication constants
 export const COOKIE_NAME = "auth_token";
+export const TOKEN_KEY_NAME = "accessToken";
 export const REFRESH_COOKIE_NAME = "refresh_token";
 export const COOKIE_MAX_AGE = 20;
 export const JWT_EXPIRATION_TIME = "20s";
@@ -20,6 +21,7 @@ export const GOOGLE_AUTH_URL = "https://accounts.google.com/o/oauth2/v2/auth";
 export const BASE_URL = process.env.EXPO_PUBLIC_BASE_URL;
 export const APP_SCHEME = process.env.EXPO_PUBLIC_SCHEME;
 export const JWT_TOKEN = process.env.JWT_SECRET;
+export const JWT_SECRET = process.env.JWT_SECRET;
 
 ///cookie settings
 export const COOKIE_OPTIONS = {
