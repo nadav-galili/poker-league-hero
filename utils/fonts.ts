@@ -1,37 +1,37 @@
+import {
+  SpaceGrotesk_300Light,
+  SpaceGrotesk_400Regular,
+  SpaceGrotesk_500Medium,
+  SpaceGrotesk_600SemiBold,
+  SpaceGrotesk_700Bold,
+} from "@expo-google-fonts/space-grotesk";
 import * as Font from "expo-font";
-
-const fontMap = {
-  "SpaceGrotesk-Regular": require("../assets/fonts/SpaceGrotesk-Regular.ttf"),
-  "SpaceGrotesk-Medium": require("../assets/fonts/SpaceGrotesk-Medium.ttf"),
-  "SpaceGrotesk-SemiBold": require("../assets/fonts/SpaceGrotesk-SemiBold.ttf"),
-  "SpaceGrotesk-Bold": require("../assets/fonts/SpaceGrotesk-Bold.ttf"),
-};
-
-// Optional fonts that might fail to load
-const optionalFonts = {
-  "SpaceGrotesk-Light": require("../assets/fonts/SpaceGrotesk-Light.ttf"),
-};
 
 export async function loadFonts(): Promise<void> {
   try {
-    // Load core fonts first
-    await Font.loadAsync(fontMap);
-
-    // Try to load optional fonts
-    try {
-      await Font.loadAsync(optionalFonts);
-    } catch (error) {
-      console.warn("Failed to load optional fonts:", error);
-    }
+    await Font.loadAsync({
+      SpaceGrotesk_300Light,
+      SpaceGrotesk_400Regular,
+      SpaceGrotesk_500Medium,
+      SpaceGrotesk_600SemiBold,
+      SpaceGrotesk_700Bold,
+    });
+    console.log("Space Grotesk fonts loaded successfully");
   } catch (error) {
-    console.error("Failed to load core fonts:", error);
-    throw error;
+    console.error("Failed to load Space Grotesk fonts:", error);
+    // Don't throw error - continue with system fonts
   }
 }
 
-export const fontNames = Object.keys(fontMap) as Array<keyof typeof fontMap>;
+export const fontNames = [
+  "SpaceGrotesk_300Light",
+  "SpaceGrotesk_400Regular",
+  "SpaceGrotesk_500Medium",
+  "SpaceGrotesk_600SemiBold",
+  "SpaceGrotesk_700Bold",
+] as const;
 
-export function isFontLoaded(fontName: keyof typeof fontMap): boolean {
+export function isFontLoaded(fontName: string): boolean {
   return Font.isLoaded(fontName);
 }
 

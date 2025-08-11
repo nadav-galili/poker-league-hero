@@ -30,7 +30,7 @@ export default function TabLayout() {
           marginTop: 4,
         },
         tabBarActiveTintColor: theme.primary,
-        tabBarInactiveTintColor: colors.borderDark,
+        tabBarInactiveTintColor: colors.border,
         tabBarIconStyle: {
           marginTop: 4,
         },

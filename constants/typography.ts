@@ -10,29 +10,29 @@ export const FontWeights = {
 
 export const FontFamily = {
   Light: Platform.select({
-    ios: "SpaceGrotesk-Regular", // Fallback to Regular since Light might fail
-    android: "SpaceGrotesk-Regular",
-    web: "SpaceGrotesk-Regular, system-ui, sans-serif",
+    ios: "SpaceGrotesk_300Light",
+    android: "SpaceGrotesk_300Light",
+    web: "SpaceGrotesk_300Light, system-ui, sans-serif",
   }),
   Regular: Platform.select({
-    ios: "SpaceGrotesk-Regular",
-    android: "SpaceGrotesk-Regular",
-    web: "SpaceGrotesk-Regular, system-ui, sans-serif",
+    ios: "SpaceGrotesk_400Regular",
+    android: "SpaceGrotesk_400Regular",
+    web: "SpaceGrotesk_400Regular, system-ui, sans-serif",
   }),
   Medium: Platform.select({
-    ios: "SpaceGrotesk-Medium",
-    android: "SpaceGrotesk-Medium",
-    web: "SpaceGrotesk-Medium, system-ui, sans-serif",
+    ios: "SpaceGrotesk_500Medium",
+    android: "SpaceGrotesk_500Medium",
+    web: "SpaceGrotesk_500Medium, system-ui, sans-serif",
   }),
   SemiBold: Platform.select({
-    ios: "SpaceGrotesk-SemiBold",
-    android: "SpaceGrotesk-SemiBold",
-    web: "SpaceGrotesk-SemiBold, system-ui, sans-serif",
+    ios: "SpaceGrotesk_600SemiBold",
+    android: "SpaceGrotesk_600SemiBold",
+    web: "SpaceGrotesk_600SemiBold, system-ui, sans-serif",
   }),
   Bold: Platform.select({
-    ios: "SpaceGrotesk-Bold",
-    android: "SpaceGrotesk-Bold",
-    web: "SpaceGrotesk-Bold, system-ui, sans-serif",
+    ios: "SpaceGrotesk_700Bold",
+    android: "SpaceGrotesk_700Bold",
+    web: "SpaceGrotesk_700Bold, system-ui, sans-serif",
   }),
 } as const;
 

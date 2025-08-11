@@ -35,17 +35,13 @@
           "resizeMode": "contain",
           "backgroundColor": "#ffffff"
         }
-      ]
+      ],
+      "expo-font"
     ],
     "experiments": {
       "typedRoutes": true
     },
-    "fonts": [
-      "./assets/fonts/SpaceGrotesk-Regular.ttf",
-      "./assets/fonts/SpaceGrotesk-Medium.ttf",
-      "./assets/fonts/SpaceGrotesk-SemiBold.ttf",
-      "./assets/fonts/SpaceGrotesk-Bold.ttf"
-    ],
+
     "extra": {
       "router": {},
       "eas": {
