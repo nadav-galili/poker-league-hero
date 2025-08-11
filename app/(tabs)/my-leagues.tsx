@@ -560,21 +560,21 @@ const styles = StyleSheet.create({
     alignItems: "center",
     padding: 20,
     borderRadius: 12,
-    borderWidth: 4,
+    borderWidth: 6,
     position: "relative",
     overflow: "hidden",
   },
 
   brutalistShadow: {
-    shadowOffset: { width: 16, height: 16 },
+    shadowOffset: { width: 32, height: 32 },
     shadowOpacity: 1,
     shadowRadius: 0,
-    elevation: 32,
+    elevation: 60,
   },
 
   pressedCard: {
-    transform: [{ scale: 0.96 }, { translateX: 8 }, { translateY: 8 }],
-    shadowOffset: { width: 8, height: 8 },
+    transform: [{ scale: 0.96 }, { translateX: 16 }, { translateY: 16 }],
+    shadowOffset: { width: 16, height: 16 },
   },
 
   // Clean image styling
@@ -587,19 +587,19 @@ const styles = StyleSheet.create({
     width: 80,
     height: 80,
     borderRadius: 12,
-    borderWidth: 4,
+    borderWidth: 6,
     borderColor: colors.border,
   },
 
   imageFrame: {
     position: "absolute",
-    top: -6,
-    left: -6,
-    right: -6,
-    bottom: -6,
-    borderWidth: 4,
-    borderRadius: 18,
-    opacity: 0.8,
+    top: -8,
+    left: -8,
+    right: -8,
+    bottom: -8,
+    borderWidth: 6,
+    borderRadius: 20,
+    opacity: 0.9,
   },
 
   // Clean info styling

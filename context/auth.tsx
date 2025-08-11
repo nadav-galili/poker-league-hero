@@ -1,5 +1,6 @@
 import { BASE_URL } from "@/constants";
 import { tokenCache } from "@/utils/cache";
+import { captureException } from "@/utils/sentry";
 import {
   AuthError,
   AuthRequestConfig,
@@ -163,6 +164,13 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
               }
             } catch (e) {
               console.error("Error decoding stored token:", e);
+
+              //add sentry error
+              captureException(e as Error, {
+                function: "restoreSession",
+                screen: "Auth",
+                error: e as Error,
+              });
 
               // Try to refresh using the refresh token
               if (storedRefreshToken) {
