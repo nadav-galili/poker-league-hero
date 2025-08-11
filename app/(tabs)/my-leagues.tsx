@@ -3,9 +3,16 @@ import Button from "@/components/Button";
 import { LanguageSelector } from "@/components/LanguageSelector";
 import { Text } from "@/components/Text";
 import { useLocalization } from "@/context/localization";
+import {
+  addBreadcrumb,
+  captureException,
+  captureMessage,
+  setTag,
+} from "@/utils/sentry";
 import { Ionicons } from "@expo/vector-icons";
 import { Image } from "expo-image";
 import * as Linking from "expo-linking";
+import React from "react";
 import {
   Alert,
   FlatList,
@@ -73,34 +80,101 @@ export default function MyLeagues() {
   const theme = getTheme("light");
   const { t, isRTL } = useLocalization();
 
+  // Track screen visit
+  React.useEffect(() => {
+    addBreadcrumb("User visited My Leagues screen", "navigation", {
+      screen: "MyLeagues",
+      timestamp: new Date().toISOString(),
+    });
+    setTag("current_screen", "my_leagues");
+  }, []);
+
   const handleCreateLeague = () => {
-    console.log("Create League pressed");
-    // TODO: Navigate to create league form
-    Alert.alert(t("createLeague"), t("createLeaguePrompt"));
+    try {
+      addBreadcrumb("User clicked Create League", "user_action", {
+        screen: "MyLeagues",
+        action: "create_league",
+      });
+
+      console.log("Create League pressed");
+      // TODO: Navigate to create league form
+      Alert.alert(t("createLeague"), t("createLeaguePrompt"));
+
+      captureMessage("User initiated league creation", "info", {
+        screen: "MyLeagues",
+        feature: "create_league",
+      });
+    } catch (error) {
+      captureException(error as Error, {
+        function: "handleCreateLeague",
+        screen: "MyLeagues",
+      });
+      Alert.alert(t("error"), "Failed to open create league dialog");
+    }
   };
 
   const handleJoinLeague = () => {
-    console.log("Join League pressed");
-    // TODO: Show join league modal with code input
-    Alert.prompt(
-      t("joinLeague"),
-      t("enterLeagueCode"),
-      [
-        { text: t("cancel"), style: "cancel" },
-        {
-          text: t("join"),
-          onPress: (code) => {
-            console.log("Joining league with code:", code);
-            // TODO: Implement join league logic
+    try {
+      addBreadcrumb("User clicked Join League", "user_action", {
+        screen: "MyLeagues",
+        action: "join_league",
+      });
+
+      console.log("Join League pressed");
+      // TODO: Show join league modal with code input
+      Alert.prompt(
+        t("joinLeague"),
+        t("enterLeagueCode"),
+        [
+          { text: t("cancel"), style: "cancel" },
+          {
+            text: t("join"),
+            onPress: (code) => {
+              try {
+                console.log("Joining league with code:", code);
+                addBreadcrumb("User entered league code", "user_input", {
+                  screen: "MyLeagues",
+                  action: "join_league_code_entered",
+                  codeLength: code?.length || 0,
+                });
+                // TODO: Implement join league logic
+                captureMessage("User attempted to join league", "info", {
+                  screen: "MyLeagues",
+                  codeProvided: !!code,
+                  codeLength: code?.length || 0,
+                });
+              } catch (error) {
+                captureException(error as Error, {
+                  function: "handleJoinLeague.onPress",
+                  screen: "MyLeagues",
+                  code: code || "empty",
+                });
+                Alert.alert(t("error"), "Failed to process league code");
+              }
+            },
           },
-        },
-      ],
-      "plain-text"
-    );
+        ],
+        "plain-text"
+      );
+    } catch (error) {
+      captureException(error as Error, {
+        function: "handleJoinLeague",
+        screen: "MyLeagues",
+      });
+      Alert.alert(t("error"), "Failed to open join league dialog");
+    }
   };
 
   const shareLeagueCode = async (league: League) => {
     try {
+      addBreadcrumb("User initiated league share", "user_action", {
+        screen: "MyLeagues",
+        action: "share_league",
+        leagueId: league.id,
+        leagueName: league.name,
+        leagueCode: league.code,
+      });
+
       // Create deep link URL for joining the league
       const deepLinkUrl = Linking.createURL(`/join-league/${league.code}`, {
         queryParams: {
@@ -124,18 +198,43 @@ export default function MyLeagues() {
           dialogTitle: `${t("shareLeague")} ${league.name}`,
         }
       );
+
+      // Track successful share
+      captureMessage("League share completed successfully", "info", {
+        screen: "MyLeagues",
+        leagueId: league.id,
+        leagueName: league.name,
+        shareMethod: "native_share",
+      });
     } catch (error) {
       console.error("Error sharing league:", error);
+
       // Check if user cancelled the share
       if (error instanceof Error && error.message === "User did not share") {
-        // User cancelled, don't show error
+        addBreadcrumb("User cancelled league share", "user_action", {
+          screen: "MyLeagues",
+          action: "share_cancelled",
+          leagueId: league.id,
+        });
         return;
       }
+
+      // Capture actual errors
+      captureException(error as Error, {
+        function: "shareLeagueCode",
+        screen: "MyLeagues",
+        leagueId: league.id,
+        leagueName: league.name,
+        leagueCode: league.code,
+        deepLinkUrl: `join-league/${league.code}`,
+      });
+
       Alert.alert(t("error"), t("failedToShare"));
     }
   };
 
-  const renderLeagueCard = ({ item }: { item: League }) => (
+  // Create a profiled version of the render function for performance monitoring
+  const renderLeagueCardInternal = ({ item }: { item: League }) => (
     <Pressable
       style={({ pressed }) => [
         styles.leagueCard,
@@ -148,7 +247,30 @@ export default function MyLeagues() {
         pressed && styles.pressedCard,
       ]}
       onPress={() => {
-        console.log("League pressed:", item.name);
+        try {
+          addBreadcrumb("User tapped league card", "user_action", {
+            screen: "MyLeagues",
+            action: "league_card_tap",
+            leagueId: item.id,
+            leagueName: item.name,
+            leagueStatus: item.status,
+          });
+
+          console.log("League pressed:", item.name);
+          // TODO: Navigate to league details
+
+          captureMessage("User viewed league details", "info", {
+            screen: "MyLeagues",
+            leagueId: item.id,
+            leagueName: item.name,
+          });
+        } catch (error) {
+          captureException(error as Error, {
+            function: "renderLeagueCard.onPress",
+            screen: "MyLeagues",
+            leagueId: item.id,
+          });
+        }
       }}>
       {/* League Image with colored frame */}
       <View style={styles.imageContainer}>
@@ -156,6 +278,15 @@ export default function MyLeagues() {
           source={{ uri: item.image }}
           style={styles.leagueImage}
           contentFit="cover"
+          onError={(error) => {
+            captureException(new Error("Image loading failed"), {
+              function: "Image.onError",
+              screen: "MyLeagues",
+              leagueId: item.id,
+              imageUri: item.image,
+              error: error.toString(),
+            });
+          }}
         />
         <View style={[styles.imageFrame, { borderColor: item.themeColor }]} />
       </View>
@@ -185,7 +316,24 @@ export default function MyLeagues() {
 
           <Pressable
             style={[styles.shareButton, { backgroundColor: item.themeColor }]}
-            onPress={() => shareLeagueCode(item)}>
+            onPress={() => {
+              try {
+                addBreadcrumb("User tapped share button", "user_action", {
+                  screen: "MyLeagues",
+                  action: "share_button_tap",
+                  leagueId: item.id,
+                  leagueName: item.name,
+                });
+                shareLeagueCode(item);
+              } catch (error) {
+                captureException(error as Error, {
+                  function: "shareButton.onPress",
+                  screen: "MyLeagues",
+                  leagueId: item.id,
+                });
+                Alert.alert(t("error"), "Failed to initiate share");
+              }
+            }}>
             <Ionicons name="share" size={16} color="#FFFFFF" />
           </Pressable>
         </View>
@@ -199,6 +347,26 @@ export default function MyLeagues() {
       </View>
     </Pressable>
   );
+
+  // Wrap the render function with error tracking
+  const renderLeagueCard = React.useCallback(({ item }: { item: League }) => {
+    try {
+      return renderLeagueCardInternal({ item });
+    } catch (error) {
+      captureException(error as Error, {
+        function: "renderLeagueCard",
+        screen: "MyLeagues",
+        leagueId: item.id,
+        leagueName: item.name,
+      });
+      // Return a fallback UI
+      return (
+        <View style={styles.errorCard}>
+          <Text>Error loading league card</Text>
+        </View>
+      );
+    }
+  }, []);
 
   return (
     <View style={[styles.container, { backgroundColor: theme.background }]}>
@@ -260,6 +428,15 @@ export default function MyLeagues() {
           styles.listContainer,
           mockLeagues.length === 0 && styles.emptyListContainer,
         ]}
+        onScrollToIndexFailed={(info) => {
+          captureException(new Error("FlatList scroll to index failed"), {
+            function: "FlatList.onScrollToIndexFailed",
+            screen: "MyLeagues",
+            index: info.index,
+            highestMeasuredFrameIndex: info.highestMeasuredFrameIndex,
+            averageItemLength: info.averageItemLength,
+          });
+        }}
         showsVerticalScrollIndicator={false}
         ListEmptyComponent={
           <View style={styles.emptyState}>
@@ -305,7 +482,17 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
   },
-
+  errorCard: {
+    backgroundColor: "#ffebee",
+    borderColor: "#f44336",
+    borderWidth: 2,
+    borderRadius: 12,
+    padding: 20,
+    margin: 16,
+    alignItems: "center",
+    justifyContent: "center",
+    minHeight: 100,
+  },
   header: {
     paddingTop: 60,
     paddingBottom: 20,

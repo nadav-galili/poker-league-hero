@@ -5,7 +5,7 @@ import { Tabs } from "expo-router";
 
 export default function TabLayout() {
   const theme = getTheme("light");
-  const { t, isRTL } = useLocalization();
+  const { t } = useLocalization();
 
   return (
     <Tabs

@@ -68,6 +68,11 @@ export interface Translations {
   shareLeague: string;
   error: string;
   failedToShare: string;
+
+  // Error Boundary
+  errorOccurred: string;
+  errorMessage: string;
+  tryAgain: string;
 }
 
 // English translations
@@ -123,6 +128,11 @@ const enTranslations: Translations = {
   shareLeague: "Share League",
   error: "Error",
   failedToShare: "Failed to share league code",
+
+  // Error Boundary
+  errorOccurred: "Oops! Something went wrong",
+  errorMessage: "An unexpected error occurred. Our team has been notified.",
+  tryAgain: "Try Again",
 };
 
 // Hebrew translations
@@ -178,6 +188,11 @@ const heTranslations: Translations = {
   shareLeague: "שתף ליגה",
   error: "שגיאה",
   failedToShare: "נכשל בשיתוף קוד הליגה",
+
+  // Error Boundary
+  errorOccurred: "אופס! משהו השתבש",
+  errorMessage: "אירעה שגיאה בלתי צפויה. הצוות שלנו קיבל דיווח על הבעיה.",
+  tryAgain: "נסה שוב",
 };
 
 const translations = {

@@ -17,6 +17,7 @@
     "@react-navigation/bottom-tabs": "^7.3.10",
     "@react-navigation/elements": "^2.3.8",
     "@react-navigation/native": "^7.1.6",
+    "@sentry/react-native": "^6.19.0",
     "bun": "^1.2.19",
     "expo": "53.0.20",
     "expo-auth-session": "~6.2.1",

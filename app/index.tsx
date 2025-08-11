@@ -1,8 +1,9 @@
 import { getTheme } from "@/colors";
 import LoginForm from "@/components/LoginForm";
+import SentryDebug from "@/components/SentryDebug";
 import { useAuth } from "@/context/auth";
 import { Redirect } from "expo-router";
-import { ActivityIndicator, View } from "react-native";
+import { ActivityIndicator, ScrollView, View } from "react-native";
 
 export default function Index() {
   const { user, isLoading } = useAuth();
@@ -23,7 +24,12 @@ export default function Index() {
   }
 
   if (!user) {
-    return <LoginForm />;
+    return (
+      <ScrollView style={{ flex: 1, backgroundColor: theme.background }}>
+        <LoginForm />
+        <SentryDebug />
+      </ScrollView>
+    );
   }
 
   // Redirect to home tabs when user is logged in
