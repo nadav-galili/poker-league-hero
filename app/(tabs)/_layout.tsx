@@ -1,9 +1,11 @@
 import { colors, getTheme } from "@/colors";
+import { useLocalization } from "@/context/localization";
 import { Ionicons } from "@expo/vector-icons";
 import { Tabs } from "expo-router";
 
 export default function TabLayout() {
   const theme = getTheme("light");
+  const { t, isRTL } = useLocalization();
 
   return (
     <Tabs
@@ -38,7 +40,7 @@ export default function TabLayout() {
       <Tabs.Screen
         name="my-leagues"
         options={{
-          title: "MY LEAGUES",
+          title: t("myLeagues"),
           tabBarIcon: ({ color, size }) => (
             <Ionicons name="trophy" size={size} color={color} />
           ),
@@ -47,7 +49,7 @@ export default function TabLayout() {
       <Tabs.Screen
         name="account"
         options={{
-          title: "ACCOUNT",
+          title: t("account"),
           tabBarIcon: ({ color, size }) => (
             <Ionicons name="person" size={size} color={color} />
           ),
