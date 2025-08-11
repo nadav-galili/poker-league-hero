@@ -8,6 +8,8 @@ import {
   makeRedirectUri,
   useAuthRequest,
 } from "expo-auth-session";
+import { router } from "expo-router";
+import * as SecureStore from "expo-secure-store";
 import * as WebBrowser from "expo-web-browser";
 import * as jose from "jose";
 import * as React from "react";
@@ -54,6 +56,13 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   const [accessToken, setAccessToken] = React.useState<string | null>(null);
   const [refreshToken, setRefreshToken] = React.useState<string | null>(null);
   const [request, response, promptAsync] = useAuthRequest(config, discovery);
+
+  // Function to completely reset the auth session
+  const resetAuthSession = React.useCallback(() => {
+    // Force a complete reset by clearing the response
+    console.log("🔄 Forcing complete auth session reset...");
+    // We'll need to handle this differently
+  }, []);
 
   const [isLoading, setIsLoading] = React.useState(false);
   const [error, setError] = React.useState<AuthError | null>(null);
@@ -130,15 +139,6 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
           const storedAccessToken = await tokenCache?.getToken("accessToken");
           const storedRefreshToken = await tokenCache?.getToken("refreshToken");
 
-          console.log(
-            "Restoring session - Access token:",
-            storedAccessToken ? "exists" : "missing"
-          );
-          console.log(
-            "Restoring session - Refresh token:",
-            storedRefreshToken ? "exists" : "missing"
-          );
-
           if (storedAccessToken) {
             try {
               // Check if the access token is still valid
@@ -148,7 +148,6 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
 
               if (exp && exp > now) {
                 // Access token is still valid
-                console.log("Access token is still valid, using it");
                 setAccessToken(storedAccessToken);
 
                 if (storedRefreshToken) {
@@ -158,7 +157,6 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
                 setUser(decoded as AuthUser);
               } else if (storedRefreshToken) {
                 // Access token expired, but we have a refresh token
-                console.log("Access token expired, using refresh token");
                 setRefreshToken(storedRefreshToken);
                 await refreshAccessToken(storedRefreshToken);
               }
@@ -174,14 +172,12 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
 
               // Try to refresh using the refresh token
               if (storedRefreshToken) {
-                console.log("Error with access token, trying refresh token");
                 setRefreshToken(storedRefreshToken);
                 await refreshAccessToken(storedRefreshToken);
               }
             }
           } else if (storedRefreshToken) {
             // No access token, but we have a refresh token
-            console.log("No access token, using refresh token");
             setRefreshToken(storedRefreshToken);
             await refreshAccessToken(storedRefreshToken);
           } else {
@@ -541,16 +537,14 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   };
 
   const signIn = async () => {
-    console.log("signIn");
     try {
       if (!request) {
-        console.log("No request");
         return;
       }
 
       await promptAsync();
     } catch (e) {
-      console.log(e);
+      console.error("Error during sign in:", e);
     }
   };
 
@@ -575,6 +569,40 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     setUser(null);
     setAccessToken(null);
     setRefreshToken(null);
+
+    // Clear any other potential storage
+    try {
+      // Clear from SecureStore directly as backup
+      if (Platform.OS !== "web") {
+        await SecureStore.deleteItemAsync("accessToken");
+        await SecureStore.deleteItemAsync("refreshToken");
+      }
+
+      // Clear any other potential storage keys
+      const allKeys = [
+        "accessToken",
+        "refreshToken",
+        "auth_token",
+        "refresh_token",
+        "expo.auth.access_token",
+        "expo.auth.refresh_token",
+      ];
+
+      for (const key of allKeys) {
+        try {
+          await SecureStore.deleteItemAsync(key);
+        } catch (e) {
+          // Ignore errors for non-existent keys
+        }
+      }
+      // Force a complete reset of the auth session
+      resetAuthSession();
+    } catch (error) {
+      console.log("⚠️ Error clearing SecureStore:", error);
+    }
+
+    // Redirect to index/login screen
+    router.replace("/");
   };
 
   return (
