@@ -2,93 +2,90 @@
 // Source: design.md (Design Tokens section)
 // Use semantic names for easy color scheme changes
 
-// Raw color values (internal use only)
+// Neo-Brutalist Color Palette
 const rawColors = {
-  // Modern neutral palette
-  ink: "#131629",
-  bone: "#F6F5F2",
-  slate200: "#D9DCE3",
-  slate400: "#B4BAC8",
-  slate600: "#64748B",
-  slate800: "#1E293B",
+  // Base neutrals - high contrast
+  ink: "#000000", // Pure black for maximum contrast
+  paper: "#FFFFFF", // Pure white for stark contrast
+  bone: "#F8F8F8", // Off-white for subtle backgrounds
+  concrete: "#F0F0F0", // Light gray for cards
+  shadow: "#000000", // Black shadows for depth
 
-  // // Modern brand colors (cohesive palette)
-  // indigo600: "#4F46E5", // Primary - modern indigo
-  // indigo500: "#6366F1", // Primary light
-  // indigo700: "#4338CA", // Primary dark
+  // Neo-brutalist accent colors - bold and electric
+  electricBlue: "#0066FF", // Primary brand - vivid blue
+  hotPink: "#FF1493", // Secondary - shocking pink
+  neonYellow: "#FFFF00", // Warning/highlight - pure yellow
+  acidGreen: "#32FF32", // Success - bright green
+  blazeOrange: "#FF4500", // Error/danger - red-orange
 
-  // emerald500: "#10B981", // Success/accent
-  // emerald600: "#059669", // Success dark
+  // Supporting vibrant colors
+  cyberPurple: "#8A2BE2", // Purple accent
+  toxicLime: "#CCFF00", // Lime accent
+  shockRed: "#FF0000", // Pure red
 
-  // rose500: "#F43F5E", // Warning/error
-  // amber500: "#F59E0B", // Info/warning
+  // Toned versions for backgrounds
+  electricBlue20: "rgba(0, 102, 255, 0.2)",
+  hotPink20: "rgba(255, 20, 147, 0.2)",
+  neonYellow20: "rgba(255, 255, 0, 0.2)",
+  acidGreen20: "rgba(50, 255, 50, 0.2)",
+  blazeOrange20: "rgba(255, 69, 0, 0.2)",
 
-  // // Surface colors
-  // night850: "#1A2134",
-  // panel800: "#222A3F",
-  // paper: "#FBFBFA",
-  // card: "#FFFFFF",
-
-  electricViolet: "#9B5DE5",
-  mintGreen: "#00F5D4",
-  brightSaffron: "#FEE440",
-
-  violet200: "#A8A6FF",
-  violet300: "#918efa",
-  violet400: "#807dfa",
-  violet500: "#635fc7",
-  pink200: "#FFA6F6",
-  pink300: "#fa8cef",
-  pink400: "#fa7fee",
-  red200: "#FF9F9F",
-  red300: "#fa7a7a",
-  red400: "#f76363",
-  orange200: "#FFC29F",
-  orange300: "#FF965B",
-  orange400: "#fa8543",
-  yellow200: "#FFF066",
-  yellow300: "#FFE500",
-  yellow400: "#FFE500",
-  lime200: "#B8FF9F",
-  lime300: "#9dfc7c",
-  lime400: "#7df752",
-  cyan200: "#A6FAFF",
-  cyan300: "#79F7FF",
-  cyan400: "#53f2fc",
+  // Text colors
+  textPrimary: "#000000", // Black text on light
+  textSecondary: "#333333", // Dark gray for secondary
+  textMuted: "#666666", // Medium gray for muted
+  textInverse: "#FFFFFF", // White text on dark
 } as const;
 
 // Semantic color tokens (use these in components)
 export const colors = {
-  // Core semantic colors
-  text: rawColors.violet500,
-  textLight: rawColors.lime300,
-  textMuted: rawColors.slate600,
-  background: rawColors.bone,
-  surface: rawColors.lime400,
-  border: rawColors.slate200,
-  borderDark: rawColors.slate400,
+  // Core semantic colors - Neo-brutalist style
+  text: rawColors.textPrimary,
+  textSecondary: rawColors.textSecondary,
+  textMuted: rawColors.textMuted,
+  textInverse: rawColors.textInverse,
 
-  // Modern brand colors
-  primary: rawColors.violet400,
-  primaryLight: rawColors.violet300,
-  primaryDark: rawColors.violet500,
-  secondary: rawColors.pink300,
+  background: rawColors.paper, // Pure white background
+  surface: rawColors.concrete, // Light gray for cards
+  surfaceElevated: rawColors.paper, // White for elevated surfaces
 
-  warning: rawColors.red300,
-  error: rawColors.red400,
-  info: rawColors.slate600,
+  border: rawColors.ink, // Black borders for brutalist style
+  shadow: rawColors.shadow, // Black shadows
 
-  // Subtle background tints for cards
-  primaryTint: rawColors.violet200,
+  // Neo-brutalist brand colors - bold and electric
+  primary: rawColors.electricBlue, // Electric blue primary
+  primaryTint: rawColors.electricBlue20,
 
-  infoTint: rawColors.cyan200,
+  secondary: rawColors.hotPink, // Hot pink secondary
+  secondaryTint: rawColors.hotPink20,
 
-  // Dark theme surfaces
+  accent: rawColors.neonYellow, // Neon yellow accent
+  accentTint: rawColors.neonYellow20,
+
+  // Status colors - vibrant and bold
+  success: rawColors.acidGreen, // Acid green for success
+  successTint: rawColors.acidGreen20,
+
+  warning: rawColors.neonYellow, // Neon yellow for warnings
+  warningTint: rawColors.neonYellow20,
+
+  error: rawColors.blazeOrange, // Blaze orange for errors
+  errorTint: rawColors.blazeOrange20,
+
+  info: rawColors.cyberPurple, // Cyber purple for info
+  infoTint: "rgba(138, 43, 226, 0.2)",
+
+  // Additional accents for variety
+  highlight: rawColors.toxicLime, // Toxic lime for highlights
+  highlightTint: "rgba(204, 255, 0, 0.2)",
+
+  danger: rawColors.shockRed, // Shock red for danger
+  dangerTint: "rgba(255, 0, 0, 0.2)",
+
+  // Dark theme
   backgroundDark: rawColors.ink,
-
-  // Computed colors
-  borderOpacity: "rgba(19,22,41,0.20)",
-  borderOpacityDark: "rgba(251,251,250,0.10)",
+  surfaceDark: "#1A1A1A",
+  textDark: rawColors.textInverse,
 } as const;
 
 export type ThemeName = "light" | "dark";
@@ -97,13 +94,28 @@ export type Theme = {
   name: ThemeName;
   background: string;
   surface: string;
+  surfaceElevated: string;
   text: string;
+  textSecondary: string;
+  textMuted: string;
   border: string;
+  shadow: string;
   primary: string;
+  primaryTint: string;
   secondary: string;
+  secondaryTint: string;
   accent: string;
+  accentTint: string;
   info: string;
+  infoTint: string;
   warning: string;
+  warningTint: string;
+  error: string;
+  errorTint: string;
+  success: string;
+  successTint: string;
+  highlight: string;
+  highlightTint: string;
 };
 
 export const themes: Record<ThemeName, Theme> = {
@@ -111,26 +123,55 @@ export const themes: Record<ThemeName, Theme> = {
     name: "light",
     background: colors.background,
     surface: colors.surface,
+    surfaceElevated: colors.surfaceElevated,
     text: colors.text,
-    border: colors.borderOpacity,
+    textSecondary: colors.textSecondary,
+    textMuted: colors.textMuted,
+    border: colors.border,
+    shadow: colors.shadow,
     primary: colors.primary,
+    primaryTint: colors.primaryTint,
     secondary: colors.secondary,
-    accent: colors.primary,
-
+    secondaryTint: colors.secondaryTint,
+    accent: colors.accent,
+    accentTint: colors.accentTint,
     info: colors.info,
+    infoTint: colors.infoTint,
     warning: colors.warning,
+    warningTint: colors.warningTint,
+    error: colors.error,
+    errorTint: colors.errorTint,
+    success: colors.success,
+    successTint: colors.successTint,
+    highlight: colors.highlight,
+    highlightTint: colors.highlightTint,
   },
   dark: {
     name: "dark",
     background: colors.backgroundDark,
-    surface: colors.surface,
-    text: colors.textLight,
-    border: colors.borderOpacityDark,
+    surface: colors.surfaceDark,
+    surfaceElevated: colors.backgroundDark,
+    text: colors.textDark,
+    textSecondary: colors.textMuted,
+    textMuted: colors.textMuted,
+    border: colors.border,
+    shadow: colors.shadow,
     primary: colors.primary,
+    primaryTint: colors.primaryTint,
     secondary: colors.secondary,
-    accent: colors.primary,
+    secondaryTint: colors.secondaryTint,
+    accent: colors.accent,
+    accentTint: colors.accentTint,
     info: colors.info,
+    infoTint: colors.infoTint,
     warning: colors.warning,
+    warningTint: colors.warningTint,
+    error: colors.error,
+    errorTint: colors.errorTint,
+    success: colors.success,
+    successTint: colors.successTint,
+    highlight: colors.highlight,
+    highlightTint: colors.highlightTint,
   },
 };
 

@@ -13,7 +13,7 @@ import {
   View,
 } from "react-native";
 
-// Mock data for leagues with modern color themes
+// Mock data for leagues with neo-brutalist color themes
 const mockLeagues = [
   {
     id: "1",
@@ -23,8 +23,8 @@ const mockLeagues = [
       "https://images.unsplash.com/photo-1511193311914-0346f16efe90?w=400&h=400&fit=crop&crop=center",
     memberCount: 8,
     status: "active" as const,
-    themeColor: colors.primary,
-    accentColor: colors.primaryTint,
+    themeColor: colors.primary, // Electric blue
+    accentColor: colors.primaryTint, // Light blue
     variant: "primary" as const,
   },
   {
@@ -35,8 +35,8 @@ const mockLeagues = [
       "https://images.unsplash.com/photo-1606092195730-5d7b9af1efc5?w=400&h=400&fit=crop&crop=center",
     memberCount: 12,
     status: "active" as const,
-    themeColor: colors.secondary,
-    accentColor: colors.secondary,
+    themeColor: colors.secondary, // Hot pink
+    accentColor: colors.secondaryTint, // Light pink
     variant: "secondary" as const,
   },
   {
@@ -47,9 +47,21 @@ const mockLeagues = [
       "https://images.unsplash.com/photo-1578662996442-48f60103fc96?w=400&h=400&fit=crop&crop=center",
     memberCount: 15,
     status: "active" as const,
-    themeColor: colors.info,
-    accentColor: colors.infoTint,
-    variant: "info" as const,
+    themeColor: colors.highlight, // Toxic lime
+    accentColor: colors.highlightTint, // Light lime
+    variant: "highlight" as const,
+  },
+  {
+    id: "4",
+    name: "HIGH STAKES HEROES",
+    code: "HSH2024",
+    image:
+      "https://images.unsplash.com/photo-1596838132731-3301c3fd4317?w=400&h=400&fit=crop&crop=center",
+    memberCount: 6,
+    status: "active" as const,
+    themeColor: colors.accent, // Neon yellow
+    accentColor: colors.accentTint, // Light yellow
+    variant: "accent" as const,
   },
 ];
 
@@ -127,9 +139,9 @@ export default function MyLeagues() {
         styles.leagueCard,
         styles.brutalistShadow,
         {
-          backgroundColor: theme.surface,
-          borderColor: item.themeColor,
-          shadowColor: item.themeColor,
+          backgroundColor: theme.surfaceElevated,
+          borderColor: theme.border,
+          shadowColor: theme.shadow,
         },
         pressed && styles.pressedCard,
       ]}
@@ -178,7 +190,7 @@ export default function MyLeagues() {
 
         <Text
           variant="captionSmall"
-          color={colors.textMuted}
+          color={theme.textMuted}
           style={styles.memberCount}>
           {item.memberCount} MEMBERS
         </Text>
@@ -191,9 +203,12 @@ export default function MyLeagues() {
       <View
         style={[
           styles.header,
-          { backgroundColor: theme.surface, borderBottomColor: theme.border },
+          { backgroundColor: theme.primary, borderBottomColor: theme.border },
         ]}>
-        <Text variant="h1" color={theme.text} style={styles.headerTitle}>
+        <Text
+          variant="display"
+          color={colors.textInverse}
+          style={styles.headerTitle}>
           MY LEAGUES
         </Text>
 
@@ -205,8 +220,8 @@ export default function MyLeagues() {
             variant="outline"
             size="small"
             icon="enter"
-            backgroundColor={colors.secondary}
-            textColor="#FFFFFF"
+            backgroundColor={colors.accent}
+            textColor={colors.text}
           />
           <Button
             title="Create"
@@ -214,6 +229,7 @@ export default function MyLeagues() {
             variant="primary"
             size="small"
             icon="add-circle"
+            backgroundColor={colors.secondary}
           />
         </View>
       </View>
@@ -235,7 +251,7 @@ export default function MyLeagues() {
             </Text>
             <Text
               variant="body"
-              color={colors.textMuted}
+              color={theme.textMuted}
               style={styles.emptySubtitle}>
               Create your first league or join an existing one
             </Text>
@@ -274,12 +290,12 @@ const styles = StyleSheet.create({
     paddingTop: 60,
     paddingBottom: 20,
     paddingHorizontal: 24,
-    borderBottomWidth: 3,
-    shadowColor: colors.text,
-    shadowOffset: { width: 0, height: 6 },
-    shadowOpacity: 0.3,
+    borderBottomWidth: 6,
+    shadowColor: colors.shadow,
+    shadowOffset: { width: 0, height: 8 },
+    shadowOpacity: 1,
     shadowRadius: 0,
-    elevation: 8,
+    elevation: 12,
   },
 
   headerTitle: {
@@ -303,22 +319,22 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     alignItems: "center",
     padding: 20,
-    borderRadius: 16,
-    borderWidth: 2,
+    borderRadius: 12,
+    borderWidth: 4,
     position: "relative",
     overflow: "hidden",
   },
 
   brutalistShadow: {
-    shadowOffset: { width: 4, height: 4 },
-    shadowOpacity: 0.15,
+    shadowOffset: { width: 8, height: 8 },
+    shadowOpacity: 1,
     shadowRadius: 0,
-    elevation: 8,
+    elevation: 16,
   },
 
   pressedCard: {
-    transform: [{ scale: 0.98 }, { translateX: 2 }, { translateY: 2 }],
-    shadowOffset: { width: 2, height: 2 },
+    transform: [{ scale: 0.96 }, { translateX: 4 }, { translateY: 4 }],
+    shadowOffset: { width: 4, height: 4 },
   },
 
   // Clean image styling
@@ -330,20 +346,20 @@ const styles = StyleSheet.create({
   leagueImage: {
     width: 80,
     height: 80,
-    borderRadius: 16,
-    borderWidth: 2,
-    borderColor: "#FFFFFF",
+    borderRadius: 12,
+    borderWidth: 4,
+    borderColor: colors.border,
   },
 
   imageFrame: {
     position: "absolute",
-    top: -4,
-    left: -4,
-    right: -4,
-    bottom: -4,
-    borderWidth: 2,
-    borderRadius: 20,
-    opacity: 0.6,
+    top: -6,
+    left: -6,
+    right: -6,
+    bottom: -6,
+    borderWidth: 4,
+    borderRadius: 18,
+    opacity: 0.8,
   },
 
   // Clean info styling
@@ -365,9 +381,9 @@ const styles = StyleSheet.create({
   codeBadge: {
     flex: 1,
     paddingHorizontal: 12,
-    paddingVertical: 6,
-    borderRadius: 8,
-    borderWidth: 1.5,
+    paddingVertical: 8,
+    borderRadius: 6,
+    borderWidth: 3,
   },
 
   codeText: {
@@ -375,18 +391,18 @@ const styles = StyleSheet.create({
   },
 
   shareButton: {
-    width: 36,
-    height: 36,
-    borderRadius: 8,
-    borderWidth: 2,
-    borderColor: "#FFFFFF",
+    width: 40,
+    height: 40,
+    borderRadius: 6,
+    borderWidth: 3,
+    borderColor: colors.border,
     alignItems: "center",
     justifyContent: "center",
-    shadowColor: colors.text,
-    shadowOffset: { width: 2, height: 2 },
-    shadowOpacity: 0.2,
+    shadowColor: colors.shadow,
+    shadowOffset: { width: 4, height: 4 },
+    shadowOpacity: 1,
     shadowRadius: 0,
-    elevation: 4,
+    elevation: 8,
   },
 
   memberCount: {
