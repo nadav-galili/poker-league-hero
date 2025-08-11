@@ -1,6 +1,8 @@
 import { colors, getTheme } from "@/colors";
 import Button from "@/components/Button";
+import { LanguageSelector } from "@/components/LanguageSelector";
 import { Text } from "@/components/Text";
+import { useLocalization } from "@/context/localization";
 import { Ionicons } from "@expo/vector-icons";
 import { Image } from "expo-image";
 import * as Linking from "expo-linking";
@@ -69,26 +71,24 @@ type League = (typeof mockLeagues)[0];
 
 export default function MyLeagues() {
   const theme = getTheme("light");
+  const { t, isRTL } = useLocalization();
 
   const handleCreateLeague = () => {
     console.log("Create League pressed");
     // TODO: Navigate to create league form
-    Alert.alert(
-      "Create League",
-      "Navigation to create league form coming soon!"
-    );
+    Alert.alert(t("createLeague"), t("createLeaguePrompt"));
   };
 
   const handleJoinLeague = () => {
     console.log("Join League pressed");
     // TODO: Show join league modal with code input
     Alert.prompt(
-      "Join League",
-      "Enter league code:",
+      t("joinLeague"),
+      t("enterLeagueCode"),
       [
-        { text: "Cancel", style: "cancel" },
+        { text: t("cancel"), style: "cancel" },
         {
-          text: "Join",
+          text: t("join"),
           onPress: (code) => {
             console.log("Joining league with code:", code);
             // TODO: Implement join league logic
@@ -109,17 +109,19 @@ export default function MyLeagues() {
         },
       });
 
-      const shareMessage = `🎮 Join my poker league: "${league.name}"\n\nLeague Code: ${league.code}\n\nJoin here: ${deepLinkUrl}`;
+      const shareMessage = `${t("joinMyLeague")} "${league.name}"\n\n${t(
+        "leagueCode"
+      )} ${league.code}\n\n${t("joinHere")} ${deepLinkUrl}`;
 
       // Use React Native's built-in Share API which works with text/URLs
       await Share.share(
         {
           message: shareMessage,
           url: deepLinkUrl, // iOS will use this
-          title: `Join ${league.name} League`,
+          title: `${t("joinLeague")} ${league.name}`,
         },
         {
-          dialogTitle: `Share ${league.name} League`,
+          dialogTitle: `${t("shareLeague")} ${league.name}`,
         }
       );
     } catch (error) {
@@ -129,7 +131,7 @@ export default function MyLeagues() {
         // User cancelled, don't show error
         return;
       }
-      Alert.alert("Error", "Failed to share league code");
+      Alert.alert(t("error"), t("failedToShare"));
     }
   };
 
@@ -140,7 +142,7 @@ export default function MyLeagues() {
         styles.brutalistShadow,
         {
           backgroundColor: theme.surfaceElevated,
-          borderColor: theme.border,
+          borderColor: theme.primary,
           shadowColor: theme.shadow,
         },
         pressed && styles.pressedCard,
@@ -192,7 +194,7 @@ export default function MyLeagues() {
           variant="captionSmall"
           color={theme.textMuted}
           style={styles.memberCount}>
-          {item.memberCount} MEMBERS
+          {item.memberCount} {t("members")}
         </Text>
       </View>
     </Pressable>
@@ -205,17 +207,32 @@ export default function MyLeagues() {
           styles.header,
           { backgroundColor: theme.primary, borderBottomColor: theme.border },
         ]}>
-        <Text
-          variant="display"
-          color={colors.textInverse}
-          style={styles.headerTitle}>
-          MY LEAGUES
-        </Text>
+        {/* Header Title with Language Selector */}
+        <View
+          style={[
+            styles.headerTitleContainer,
+            isRTL && styles.rtlContainer,
+            isRTL && styles.rtlHeaderTitleContainer,
+          ]}>
+          <Text
+            variant="h1"
+            color={colors.textInverse}
+            style={[
+              styles.headerTitle,
+              isRTL && styles.rtlText,
+              isRTL && styles.rtlHeaderTitle,
+            ]}>
+            {t("myLeagues")}
+          </Text>
+          <View style={styles.languageSelectorWrapper}>
+            <LanguageSelector size="small" />
+          </View>
+        </View>
 
-        {/* Top Bar Action Buttons */}
-        <View style={styles.topButtonsContainer}>
+        {/* Action Buttons */}
+        <View style={[styles.actionButtons, isRTL && styles.rtlContainer]}>
           <Button
-            title="Join"
+            title={t("join")}
             onPress={handleJoinLeague}
             variant="outline"
             size="small"
@@ -224,7 +241,7 @@ export default function MyLeagues() {
             textColor={colors.text}
           />
           <Button
-            title="Create"
+            title={t("create")}
             onPress={handleCreateLeague}
             variant="primary"
             size="small"
@@ -246,19 +263,22 @@ export default function MyLeagues() {
         showsVerticalScrollIndicator={false}
         ListEmptyComponent={
           <View style={styles.emptyState}>
-            <Text variant="h2" color={theme.text} style={styles.emptyTitle}>
-              NO LEAGUES YET
+            <Text
+              variant="h2"
+              color={theme.text}
+              style={[styles.emptyTitle, isRTL && styles.rtlText]}>
+              {t("noLeaguesYet")}
             </Text>
             <Text
               variant="body"
               color={theme.textMuted}
-              style={styles.emptySubtitle}>
-              Create your first league or join an existing one
+              style={[styles.emptySubtitle, isRTL && styles.rtlText]}>
+              {t("createFirstLeague")}
             </Text>
 
             <View style={styles.emptyButtons}>
               <Button
-                title="Create League"
+                title={t("createLeague")}
                 onPress={handleCreateLeague}
                 variant="primary"
                 size="large"
@@ -266,7 +286,7 @@ export default function MyLeagues() {
                 fullWidth
               />
               <Button
-                title="Join League"
+                title={t("joinLeague")}
                 onPress={handleJoinLeague}
                 variant="outline"
                 size="large"
@@ -298,16 +318,49 @@ const styles = StyleSheet.create({
     elevation: 12,
   },
 
-  headerTitle: {
-    letterSpacing: 2,
-    textAlign: "center",
+  headerTitleContainer: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
     marginBottom: 16,
+    paddingRight: 8,
   },
 
-  topButtonsContainer: {
+  headerTitle: {
+    letterSpacing: 1,
+    flex: 1,
+    marginRight: 12,
+  },
+
+  languageSelectorWrapper: {
+    flexShrink: 0,
+    minWidth: 80,
+    maxWidth: 100,
+  },
+
+  actionButtons: {
     flexDirection: "row",
     justifyContent: "center",
     gap: 12,
+  },
+
+  rtlContainer: {
+    flexDirection: "row-reverse",
+  },
+
+  rtlText: {
+    textAlign: "right",
+  },
+
+  rtlHeaderTitleContainer: {
+    paddingRight: 0,
+    paddingLeft: 8,
+  },
+
+  rtlHeaderTitle: {
+    marginRight: 0,
+    marginLeft: 12,
+    textAlign: "center",
   },
 
   listContainer: {
@@ -326,15 +379,15 @@ const styles = StyleSheet.create({
   },
 
   brutalistShadow: {
-    shadowOffset: { width: 8, height: 8 },
+    shadowOffset: { width: 16, height: 16 },
     shadowOpacity: 1,
     shadowRadius: 0,
-    elevation: 16,
+    elevation: 32,
   },
 
   pressedCard: {
-    transform: [{ scale: 0.96 }, { translateX: 4 }, { translateY: 4 }],
-    shadowOffset: { width: 4, height: 4 },
+    transform: [{ scale: 0.96 }, { translateX: 8 }, { translateY: 8 }],
+    shadowOffset: { width: 8, height: 8 },
   },
 
   // Clean image styling

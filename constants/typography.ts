@@ -10,9 +10,9 @@ export const FontWeights = {
 
 export const FontFamily = {
   Light: Platform.select({
-    ios: "SpaceGrotesk-Light",
-    android: "SpaceGrotesk-Light",
-    web: "SpaceGrotesk-Light, system-ui, sans-serif",
+    ios: "SpaceGrotesk-Regular", // Fallback to Regular since Light might fail
+    android: "SpaceGrotesk-Regular",
+    web: "SpaceGrotesk-Regular, system-ui, sans-serif",
   }),
   Regular: Platform.select({
     ios: "SpaceGrotesk-Regular",

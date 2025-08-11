@@ -1,4 +1,5 @@
 import { AuthProvider } from "@/context/auth";
+import { LocalizationProvider } from "@/context/localization";
 import { loadFonts } from "@/utils/fonts";
 import { Stack } from "expo-router";
 import * as SplashScreen from "expo-splash-screen";
@@ -32,13 +33,15 @@ export default function RootLayout() {
 
   return (
     <SafeAreaView style={{ flex: 1 }}>
-      <AuthProvider>
-        <Stack
-          screenOptions={{
-            headerShown: false,
-          }}
-        />
-      </AuthProvider>
+      <LocalizationProvider>
+        <AuthProvider>
+          <Stack
+            screenOptions={{
+              headerShown: false,
+            }}
+          />
+        </AuthProvider>
+      </LocalizationProvider>
     </SafeAreaView>
   );
 }

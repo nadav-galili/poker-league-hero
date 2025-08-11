@@ -3,7 +3,7 @@ export const COOKIE_NAME = "auth_token";
 export const TOKEN_KEY_NAME = "accessToken";
 export const REFRESH_COOKIE_NAME = "refresh_token";
 export const COOKIE_MAX_AGE = 15 * 60;
-export const JWT_EXPIRATION_TIME = "15m";
+export const JWT_EXPIRATION_TIME = "10h";
 export const REFRESH_TOKEN_EXPIRY = "30d";
 export const REFRESH_TOKEN_MAX_AGE = 30 * 24 * 60 * 60;
 

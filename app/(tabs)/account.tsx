@@ -1,6 +1,7 @@
 import { colors, getTheme } from "@/colors";
 import { Text } from "@/components/Text";
 import { useAuth } from "@/context/auth";
+import { useLocalization } from "@/context/localization";
 import { Ionicons } from "@expo/vector-icons";
 import { Image } from "expo-image";
 import { Pressable, ScrollView, StyleSheet, View } from "react-native";
@@ -8,6 +9,7 @@ import { Pressable, ScrollView, StyleSheet, View } from "react-native";
 export default function Account() {
   const theme = getTheme("light");
   const { user, signOut } = useAuth();
+  const { t, isRTL } = useLocalization();
 
   if (!user) {
     return (
@@ -17,8 +19,11 @@ export default function Account() {
             styles.header,
             { backgroundColor: theme.surface, borderBottomColor: theme.border },
           ]}>
-          <Text variant="h1" color={theme.text} style={styles.headerTitle}>
-            ACCOUNT
+          <Text
+            variant="h1"
+            color={theme.text}
+            style={[styles.headerTitle, isRTL && styles.rtlText]}>
+            {t("account")}
           </Text>
         </View>
         <View style={styles.content}>
@@ -40,8 +45,11 @@ export default function Account() {
           styles.header,
           { backgroundColor: theme.surface, borderBottomColor: theme.border },
         ]}>
-        <Text variant="h1" color={theme.text} style={styles.headerTitle}>
-          ACCOUNT
+        <Text
+          variant="h1"
+          color={theme.text}
+          style={[styles.headerTitle, isRTL && styles.rtlText]}>
+          {t("account")}
         </Text>
       </View>
 
@@ -122,8 +130,11 @@ export default function Account() {
 
         {/* Account Actions */}
         <View style={styles.actionsContainer}>
-          <Text variant="h4" color={theme.text} style={styles.sectionTitle}>
-            ACCOUNT ACTIONS
+          <Text
+            variant="h4"
+            color={theme.text}
+            style={[styles.sectionTitle, isRTL && styles.rtlText]}>
+            {t("accountActions")}
           </Text>
 
           <Pressable
@@ -142,8 +153,11 @@ export default function Account() {
                 ]}>
                 <Ionicons name="log-out" size={20} color="#FFFFFF" />
               </View>
-              <Text variant="button" color="#FFFFFF" style={styles.actionText}>
-                SIGN OUT
+              <Text
+                variant="button"
+                color="#FFFFFF"
+                style={[styles.actionText, isRTL && styles.rtlText]}>
+                {t("signOut")}
               </Text>
             </View>
             <View style={[styles.actionBorder, { borderColor: colors.text }]} />
@@ -152,8 +166,11 @@ export default function Account() {
 
         {/* User Details */}
         <View style={styles.detailsContainer}>
-          <Text variant="h4" color={theme.text} style={styles.sectionTitle}>
-            USER DETAILS
+          <Text
+            variant="h4"
+            color={theme.text}
+            style={[styles.sectionTitle, isRTL && styles.rtlText]}>
+            {t("userDetails")}
           </Text>
 
           <View
@@ -451,5 +468,9 @@ const styles = StyleSheet.create({
     textAlign: "right",
     flex: 1,
     marginLeft: 16,
+  },
+
+  rtlText: {
+    textAlign: "right",
   },
 });
