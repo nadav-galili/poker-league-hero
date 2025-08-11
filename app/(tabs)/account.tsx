@@ -1,8 +1,9 @@
 import { colors, getTheme } from "@/colors";
+import { Text } from "@/components/Text";
 import { useAuth } from "@/context/auth";
 import { Ionicons } from "@expo/vector-icons";
 import { Image } from "expo-image";
-import { Pressable, ScrollView, StyleSheet, Text, View } from "react-native";
+import { Pressable, ScrollView, StyleSheet, View } from "react-native";
 
 export default function Account() {
   const theme = getTheme("light");
@@ -16,12 +17,15 @@ export default function Account() {
             styles.header,
             { backgroundColor: theme.surface, borderBottomColor: theme.border },
           ]}>
-          <Text style={[styles.headerTitle, { color: theme.text }]}>
+          <Text variant="h1" color={theme.text} style={styles.headerTitle}>
             ACCOUNT
           </Text>
         </View>
         <View style={styles.content}>
-          <Text style={[styles.placeholder, { color: colors.borderDark }]}>
+          <Text
+            variant="body"
+            color={colors.borderDark}
+            style={styles.placeholder}>
             Please sign in to view account details
           </Text>
         </View>
@@ -36,7 +40,9 @@ export default function Account() {
           styles.header,
           { backgroundColor: theme.surface, borderBottomColor: theme.border },
         ]}>
-        <Text style={[styles.headerTitle, { color: theme.text }]}>ACCOUNT</Text>
+        <Text variant="h1" color={theme.text} style={styles.headerTitle}>
+          ACCOUNT
+        </Text>
       </View>
 
       <ScrollView
@@ -75,7 +81,7 @@ export default function Account() {
           {/* User Info */}
           <View style={styles.userInfo}>
             <View style={styles.nameContainer}>
-              <Text style={[styles.userName, { color: theme.text }]}>
+              <Text variant="h3" color={theme.text} style={styles.userName}>
                 {user.name || "Unknown User"}
               </Text>
               <View
@@ -88,7 +94,10 @@ export default function Account() {
 
             <View style={styles.emailContainer}>
               <Ionicons name="mail" size={16} color={colors.info} />
-              <Text style={[styles.userEmail, { color: colors.borderDark }]}>
+              <Text
+                variant="body"
+                color={colors.borderDark}
+                style={styles.userEmail}>
                 {user.email || "No email"}
               </Text>
             </View>
@@ -100,7 +109,10 @@ export default function Account() {
                   size={16}
                   color={colors.primary}
                 />
-                <Text style={[styles.verifiedText, { color: colors.primary }]}>
+                <Text
+                  variant="labelSmall"
+                  color={colors.primary}
+                  style={styles.verifiedText}>
                   VERIFIED
                 </Text>
               </View>
@@ -110,7 +122,7 @@ export default function Account() {
 
         {/* Account Actions */}
         <View style={styles.actionsContainer}>
-          <Text style={[styles.sectionTitle, { color: theme.text }]}>
+          <Text variant="h4" color={theme.text} style={styles.sectionTitle}>
             ACCOUNT ACTIONS
           </Text>
 
@@ -130,7 +142,9 @@ export default function Account() {
                 ]}>
                 <Ionicons name="log-out" size={20} color="#FFFFFF" />
               </View>
-              <Text style={styles.actionText}>SIGN OUT</Text>
+              <Text variant="button" color="#FFFFFF" style={styles.actionText}>
+                SIGN OUT
+              </Text>
             </View>
             <View style={[styles.actionBorder, { borderColor: colors.text }]} />
           </Pressable>
@@ -138,7 +152,7 @@ export default function Account() {
 
         {/* User Details */}
         <View style={styles.detailsContainer}>
-          <Text style={[styles.sectionTitle, { color: theme.text }]}>
+          <Text variant="h4" color={theme.text} style={styles.sectionTitle}>
             USER DETAILS
           </Text>
 
@@ -148,10 +162,16 @@ export default function Account() {
               { backgroundColor: theme.surface, borderColor: theme.border },
             ]}>
             <View style={styles.detailRow}>
-              <Text style={[styles.detailLabel, { color: colors.borderDark }]}>
+              <Text
+                variant="labelSmall"
+                color={colors.borderDark}
+                style={styles.detailLabel}>
                 USER ID
               </Text>
-              <Text style={[styles.detailValue, { color: theme.text }]}>
+              <Text
+                variant="body"
+                color={theme.text}
+                style={styles.detailValue}>
                 {user.id}
               </Text>
             </View>
@@ -159,10 +179,15 @@ export default function Account() {
             {user.given_name && (
               <View style={styles.detailRow}>
                 <Text
-                  style={[styles.detailLabel, { color: colors.borderDark }]}>
+                  variant="labelSmall"
+                  color={colors.borderDark}
+                  style={styles.detailLabel}>
                   FIRST NAME
                 </Text>
-                <Text style={[styles.detailValue, { color: theme.text }]}>
+                <Text
+                  variant="body"
+                  color={theme.text}
+                  style={styles.detailValue}>
                   {user.given_name}
                 </Text>
               </View>
@@ -171,10 +196,15 @@ export default function Account() {
             {user.family_name && (
               <View style={styles.detailRow}>
                 <Text
-                  style={[styles.detailLabel, { color: colors.borderDark }]}>
+                  variant="labelSmall"
+                  color={colors.borderDark}
+                  style={styles.detailLabel}>
                   LAST NAME
                 </Text>
-                <Text style={[styles.detailValue, { color: theme.text }]}>
+                <Text
+                  variant="body"
+                  color={theme.text}
+                  style={styles.detailValue}>
                   {user.family_name}
                 </Text>
               </View>
@@ -183,10 +213,15 @@ export default function Account() {
             {user.provider && (
               <View style={styles.detailRow}>
                 <Text
-                  style={[styles.detailLabel, { color: colors.borderDark }]}>
+                  variant="labelSmall"
+                  color={colors.borderDark}
+                  style={styles.detailLabel}>
                   PROVIDER
                 </Text>
-                <Text style={[styles.detailValue, { color: theme.text }]}>
+                <Text
+                  variant="body"
+                  color={theme.text}
+                  style={styles.detailValue}>
                   {user.provider.toUpperCase()}
                 </Text>
               </View>
@@ -216,8 +251,6 @@ const styles = StyleSheet.create({
   },
 
   headerTitle: {
-    fontSize: 28,
-    fontWeight: "700",
     letterSpacing: 2,
     textAlign: "center",
   },
@@ -232,8 +265,6 @@ const styles = StyleSheet.create({
   },
 
   placeholder: {
-    fontSize: 16,
-    fontWeight: "500",
     textAlign: "center",
     marginTop: 40,
   },
@@ -300,10 +331,7 @@ const styles = StyleSheet.create({
   },
 
   userName: {
-    fontSize: 22,
-    fontWeight: "800",
     letterSpacing: 1.2,
-    lineHeight: 28,
   },
 
   nameUnderline: {
@@ -323,8 +351,6 @@ const styles = StyleSheet.create({
   },
 
   userEmail: {
-    fontSize: 16,
-    fontWeight: "600",
     letterSpacing: 0.5,
   },
 
@@ -336,8 +362,6 @@ const styles = StyleSheet.create({
   },
 
   verifiedText: {
-    fontSize: 12,
-    fontWeight: "800",
     letterSpacing: 1,
   },
 
@@ -351,8 +375,6 @@ const styles = StyleSheet.create({
   },
 
   sectionTitle: {
-    fontSize: 18,
-    fontWeight: "800",
     letterSpacing: 1.5,
   },
 
@@ -383,9 +405,6 @@ const styles = StyleSheet.create({
   },
 
   actionText: {
-    color: "#FFFFFF",
-    fontSize: 16,
-    fontWeight: "800",
     letterSpacing: 1.2,
   },
 
@@ -423,15 +442,11 @@ const styles = StyleSheet.create({
   },
 
   detailLabel: {
-    fontSize: 12,
-    fontWeight: "700",
     letterSpacing: 1,
     textTransform: "uppercase",
   },
 
   detailValue: {
-    fontSize: 14,
-    fontWeight: "600",
     letterSpacing: 0.5,
     textAlign: "right",
     flex: 1,

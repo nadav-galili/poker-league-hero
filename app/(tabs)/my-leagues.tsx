@@ -1,4 +1,6 @@
 import { colors, getTheme } from "@/colors";
+import Button from "@/components/Button";
+import { Text } from "@/components/Text";
 import { Ionicons } from "@expo/vector-icons";
 import { Image } from "expo-image";
 import * as Linking from "expo-linking";
@@ -8,11 +10,10 @@ import {
   Pressable,
   Share,
   StyleSheet,
-  Text,
   View,
 } from "react-native";
 
-// Mock data for leagues with color themes
+// Mock data for leagues with modern color themes
 const mockLeagues = [
   {
     id: "1",
@@ -23,8 +24,8 @@ const mockLeagues = [
     memberCount: 8,
     status: "active" as const,
     themeColor: colors.primary,
-    accentColor: colors.accent,
-    gradientColors: [colors.primary, colors.secondary],
+    accentColor: colors.primaryTint,
+    variant: "primary" as const,
   },
   {
     id: "2",
@@ -34,9 +35,21 @@ const mockLeagues = [
       "https://images.unsplash.com/photo-1606092195730-5d7b9af1efc5?w=400&h=400&fit=crop&crop=center",
     memberCount: 12,
     status: "active" as const,
-    themeColor: colors.warning,
-    accentColor: colors.info,
-    gradientColors: [colors.warning, colors.secondary],
+    themeColor: colors.secondary,
+    accentColor: colors.secondary,
+    variant: "secondary" as const,
+  },
+  {
+    id: "3",
+    name: "ROYAL FLUSH CLUB",
+    code: "RFC2024",
+    image:
+      "https://images.unsplash.com/photo-1578662996442-48f60103fc96?w=400&h=400&fit=crop&crop=center",
+    memberCount: 15,
+    status: "active" as const,
+    themeColor: colors.info,
+    accentColor: colors.infoTint,
+    variant: "info" as const,
   },
 ];
 
@@ -44,6 +57,35 @@ type League = (typeof mockLeagues)[0];
 
 export default function MyLeagues() {
   const theme = getTheme("light");
+
+  const handleCreateLeague = () => {
+    console.log("Create League pressed");
+    // TODO: Navigate to create league form
+    Alert.alert(
+      "Create League",
+      "Navigation to create league form coming soon!"
+    );
+  };
+
+  const handleJoinLeague = () => {
+    console.log("Join League pressed");
+    // TODO: Show join league modal with code input
+    Alert.prompt(
+      "Join League",
+      "Enter league code:",
+      [
+        { text: "Cancel", style: "cancel" },
+        {
+          text: "Join",
+          onPress: (code) => {
+            console.log("Joining league with code:", code);
+            // TODO: Implement join league logic
+          },
+        },
+      ],
+      "plain-text"
+    );
+  };
 
   const shareLeagueCode = async (league: League) => {
     try {
@@ -106,7 +148,7 @@ export default function MyLeagues() {
 
       {/* League Info with enhanced styling */}
       <View style={styles.leagueInfo}>
-        <Text style={[styles.leagueName, { color: theme.primary }]}>
+        <Text variant="h4" color={theme.text} style={styles.leagueName}>
           {item.name}
         </Text>
 
@@ -119,8 +161,11 @@ export default function MyLeagues() {
                 borderColor: item.themeColor,
               },
             ]}>
-            <Text style={[styles.codeText, { color: theme.text }]}>
-              LEAGUE CODE: {item.code}
+            <Text
+              variant="labelSmall"
+              color={item.themeColor}
+              style={styles.codeText}>
+              {item.code}
             </Text>
           </View>
 
@@ -131,7 +176,10 @@ export default function MyLeagues() {
           </Pressable>
         </View>
 
-        <Text style={[styles.memberCount, { color: colors.borderDark }]}>
+        <Text
+          variant="captionSmall"
+          color={colors.textMuted}
+          style={styles.memberCount}>
           {item.memberCount} MEMBERS
         </Text>
       </View>
@@ -145,9 +193,29 @@ export default function MyLeagues() {
           styles.header,
           { backgroundColor: theme.surface, borderBottomColor: theme.border },
         ]}>
-        <Text style={[styles.headerTitle, { color: theme.text }]}>
+        <Text variant="h1" color={theme.text} style={styles.headerTitle}>
           MY LEAGUES
         </Text>
+
+        {/* Top Bar Action Buttons */}
+        <View style={styles.topButtonsContainer}>
+          <Button
+            title="Join"
+            onPress={handleJoinLeague}
+            variant="outline"
+            size="small"
+            icon="enter"
+            backgroundColor={colors.secondary}
+            textColor="#FFFFFF"
+          />
+          <Button
+            title="Create"
+            onPress={handleCreateLeague}
+            variant="primary"
+            size="small"
+            icon="add-circle"
+          />
+        </View>
       </View>
 
       {/* Leagues List */}
@@ -155,8 +223,43 @@ export default function MyLeagues() {
         data={mockLeagues}
         renderItem={renderLeagueCard}
         keyExtractor={(item) => item.id}
-        contentContainerStyle={styles.listContainer}
+        contentContainerStyle={[
+          styles.listContainer,
+          mockLeagues.length === 0 && styles.emptyListContainer,
+        ]}
         showsVerticalScrollIndicator={false}
+        ListEmptyComponent={
+          <View style={styles.emptyState}>
+            <Text variant="h2" color={theme.text} style={styles.emptyTitle}>
+              NO LEAGUES YET
+            </Text>
+            <Text
+              variant="body"
+              color={colors.textMuted}
+              style={styles.emptySubtitle}>
+              Create your first league or join an existing one
+            </Text>
+
+            <View style={styles.emptyButtons}>
+              <Button
+                title="Create League"
+                onPress={handleCreateLeague}
+                variant="primary"
+                size="large"
+                icon="add-circle"
+                fullWidth
+              />
+              <Button
+                title="Join League"
+                onPress={handleJoinLeague}
+                variant="outline"
+                size="large"
+                icon="enter"
+                fullWidth
+              />
+            </View>
+          </View>
+        }
       />
     </View>
   );
@@ -180,10 +283,15 @@ const styles = StyleSheet.create({
   },
 
   headerTitle: {
-    fontSize: 28,
-    fontWeight: "700",
     letterSpacing: 2,
     textAlign: "center",
+    marginBottom: 16,
+  },
+
+  topButtonsContainer: {
+    flexDirection: "row",
+    justifyContent: "center",
+    gap: 12,
   },
 
   listContainer: {
@@ -195,22 +303,22 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     alignItems: "center",
     padding: 20,
-    borderRadius: 20,
-    borderWidth: 4,
+    borderRadius: 16,
+    borderWidth: 2,
     position: "relative",
     overflow: "hidden",
   },
 
   brutalistShadow: {
-    shadowOffset: { width: 8, height: 8 },
-    shadowOpacity: 0.4,
+    shadowOffset: { width: 4, height: 4 },
+    shadowOpacity: 0.15,
     shadowRadius: 0,
-    elevation: 16,
+    elevation: 8,
   },
 
   pressedCard: {
-    transform: [{ scale: 0.97 }, { translateX: 3 }, { translateY: 3 }],
-    shadowOffset: { width: 4, height: 4 },
+    transform: [{ scale: 0.98 }, { translateX: 2 }, { translateY: 2 }],
+    shadowOffset: { width: 2, height: 2 },
   },
 
   // Clean image styling
@@ -220,22 +328,22 @@ const styles = StyleSheet.create({
   },
 
   leagueImage: {
-    width: 88,
-    height: 88,
-    borderRadius: 22,
-    borderWidth: 3,
+    width: 80,
+    height: 80,
+    borderRadius: 16,
+    borderWidth: 2,
     borderColor: "#FFFFFF",
   },
 
   imageFrame: {
     position: "absolute",
-    top: -6,
-    left: -6,
-    right: -6,
-    bottom: -6,
-    borderWidth: 4,
-    borderRadius: 28,
-    opacity: 0.9,
+    top: -4,
+    left: -4,
+    right: -4,
+    bottom: -4,
+    borderWidth: 2,
+    borderRadius: 20,
+    opacity: 0.6,
   },
 
   // Clean info styling
@@ -245,11 +353,7 @@ const styles = StyleSheet.create({
   },
 
   leagueName: {
-    fontSize: 19,
-    color: colors.primary,
-    fontWeight: "800",
     letterSpacing: 1.2,
-    lineHeight: 24,
   },
 
   codeContainer: {
@@ -260,37 +364,61 @@ const styles = StyleSheet.create({
 
   codeBadge: {
     flex: 1,
-    paddingHorizontal: 14,
-    paddingVertical: 8,
-    borderRadius: 12,
-    borderWidth: 3,
+    paddingHorizontal: 12,
+    paddingVertical: 6,
+    borderRadius: 8,
+    borderWidth: 1.5,
   },
 
   codeText: {
-    fontSize: 13,
-    fontWeight: "900",
-    letterSpacing: 1.2,
+    letterSpacing: 1,
   },
 
   shareButton: {
-    width: 40,
-    height: 40,
-    borderRadius: 12,
-    borderWidth: 3,
+    width: 36,
+    height: 36,
+    borderRadius: 8,
+    borderWidth: 2,
     borderColor: "#FFFFFF",
     alignItems: "center",
     justifyContent: "center",
     shadowColor: colors.text,
-    shadowOffset: { width: 3, height: 3 },
-    shadowOpacity: 0.3,
+    shadowOffset: { width: 2, height: 2 },
+    shadowOpacity: 0.2,
     shadowRadius: 0,
-    elevation: 6,
+    elevation: 4,
   },
 
   memberCount: {
-    fontSize: 13,
-    fontWeight: "700",
     letterSpacing: 0.8,
     textTransform: "uppercase",
+  },
+
+  // Empty State
+  emptyListContainer: {
+    flexGrow: 1,
+    justifyContent: "center",
+  },
+
+  emptyState: {
+    alignItems: "center",
+    paddingHorizontal: 40,
+    paddingVertical: 60,
+  },
+
+  emptyTitle: {
+    letterSpacing: 2,
+    textAlign: "center",
+    marginBottom: 12,
+  },
+
+  emptySubtitle: {
+    textAlign: "center",
+    marginBottom: 40,
+  },
+
+  emptyButtons: {
+    width: "100%",
+    gap: 16,
   },
 });

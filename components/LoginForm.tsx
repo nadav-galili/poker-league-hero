@@ -2,7 +2,8 @@ import { colors, getTheme } from "@/colors";
 import { useAuth } from "@/context/auth";
 import { Ionicons } from "@expo/vector-icons";
 import { Image } from "expo-image";
-import { Pressable, StyleSheet, Text, View } from "react-native";
+import { Pressable, StyleSheet, View } from "react-native";
+import { Text } from "./Text";
 
 export default function LoginForm() {
   const { signIn } = useAuth();
@@ -26,10 +27,15 @@ export default function LoginForm() {
           <View style={styles.iconFrame} />
         </View>
 
-        <Text style={[styles.appTitle, { color: theme.text }]}>
+        <Text variant="display" color={theme.text} style={styles.appTitle}>
           POKER LEAGUE
         </Text>
-        <Text style={[styles.appSubtitle, { color: colors.accent }]}>HERO</Text>
+        <Text
+          variant="display"
+          color={theme.primary}
+          style={styles.appSubtitle}>
+          HERO
+        </Text>
       </View>
 
       {/* Action buttons */}
@@ -46,7 +52,9 @@ export default function LoginForm() {
             <View style={styles.iconBadge}>
               <Ionicons name="logo-google" size={24} color="#FFFFFF" />
             </View>
-            <Text style={styles.buttonText}>SIGN IN WITH GOOGLE</Text>
+            <Text variant="button" color="#FFFFFF" style={styles.buttonText}>
+              SIGN IN WITH GOOGLE
+            </Text>
           </View>
           {/* Neo-brutalist button border */}
           <View style={styles.buttonBorder} />
@@ -64,7 +72,9 @@ export default function LoginForm() {
             <View style={styles.iconBadge}>
               <Ionicons name="person" size={24} color="#FFFFFF" />
             </View>
-            <Text style={styles.buttonText}>CONTINUE AS GUEST</Text>
+            <Text variant="button" color="#FFFFFF" style={styles.buttonText}>
+              CONTINUE AS GUEST
+            </Text>
           </View>
           <View style={styles.buttonBorder} />
         </Pressable>
@@ -111,16 +121,11 @@ const styles = StyleSheet.create({
   },
 
   appTitle: {
-    fontSize: 34,
-    fontWeight: "700",
     letterSpacing: 2,
     textAlign: "center",
-    lineHeight: 40,
   },
 
   appSubtitle: {
-    fontSize: 34,
-    fontWeight: "700",
     letterSpacing: 2,
     textAlign: "center",
     marginTop: -8,
@@ -165,9 +170,6 @@ const styles = StyleSheet.create({
   },
 
   buttonText: {
-    color: "#FFFFFF",
-    fontWeight: "800",
-    fontSize: 16,
     letterSpacing: 1,
   },
 
