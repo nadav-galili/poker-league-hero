@@ -79,7 +79,7 @@ export async function POST(request: Request) {
         // User updated
       } else {
         // Insert new user
-        result = await db
+        await db
           .insert(users)
           .values({
             email: userInfo.email,
