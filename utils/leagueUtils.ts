@@ -1,0 +1,203 @@
+import { and, eq } from "drizzle-orm";
+
+/**
+ * Generate a secure, unique 5-character invite code
+ * Uses alphanumeric characters, excluding confusing characters (0, O, 1, I, l)
+ */
+export function generateInviteCode(): string {
+  const chars = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789";
+  let result = "";
+  for (let i = 0; i < 5; i++) {
+    result += chars.charAt(Math.floor(Math.random() * chars.length));
+  }
+  return result;
+}
+
+/**
+ * Check if an invite code is available (not already used)
+ */
+export async function isInviteCodeAvailable(
+  inviteCode: string
+): Promise<boolean> {
+  const { getDb, leagues } = await import("../db");
+  const db = getDb();
+
+  const existingLeague = await db
+    .select()
+    .from(leagues)
+    .where(eq(leagues.inviteCode, inviteCode))
+    .limit(1);
+
+  return existingLeague.length === 0;
+}
+
+/**
+ * Generate a unique invite code that's not already in use
+ */
+export async function generateUniqueInviteCode(): Promise<string> {
+  let inviteCode: string;
+  let attempts = 0;
+  const maxAttempts = 10;
+
+  do {
+    inviteCode = generateInviteCode();
+    attempts++;
+
+    if (attempts > maxAttempts) {
+      throw new Error(
+        "Failed to generate unique invite code after multiple attempts"
+      );
+    }
+  } while (!(await isInviteCodeAvailable(inviteCode)));
+
+  return inviteCode;
+}
+
+/**
+ * Create a new league
+ */
+export async function createLeague(data: {
+  name: string;
+  imageUrl?: string;
+  adminUserId: string;
+}): Promise<any> {
+  const { getDb, leagues } = await import("../db");
+  const db = getDb();
+
+  const inviteCode = await generateUniqueInviteCode();
+
+  const result = await db
+    .insert(leagues)
+    .values({
+      ...data,
+      inviteCode,
+    })
+    .returning();
+
+  return result[0];
+}
+
+/**
+ * Join a league using an invite code
+ */
+export async function joinLeagueByInviteCode(
+  inviteCode: string,
+  userId: string
+): Promise<any> {
+  const { getDb, leagues, leagueMembers } = await import("../db");
+  const { eq, and } = await import("drizzle-orm");
+  const db = getDb();
+
+  // Find the league by invite code
+  const league = await db
+    .select()
+    .from(leagues)
+    .where(eq(leagues.inviteCode, inviteCode))
+    .limit(1);
+
+  if (league.length === 0) {
+    throw new Error("Invalid invite code");
+  }
+
+  if (!league[0].isActive) {
+    throw new Error("League is not active");
+  }
+
+  // Check if user is already a member
+  const existingMember = await db
+    .select()
+    .from(leagueMembers)
+    .where(
+      and(
+        eq(leagueMembers.leagueId, league[0].id),
+        eq(leagueMembers.userId, userId)
+      )
+    )
+    .limit(1);
+
+  if (existingMember.length > 0) {
+    throw new Error("User is already a member of this league");
+  }
+
+  // Add user to league
+  const result = await db
+    .insert(leagueMembers)
+    .values({
+      leagueId: league[0].id,
+      userId,
+      role: "member",
+    })
+    .returning();
+
+  return result[0];
+}
+
+/**
+ * Get all leagues for a user
+ */
+export async function getUserLeagues(userId: string): Promise<any[]> {
+  const { getDb, leagueMembers, leagues } = await import("../db");
+  const { eq } = await import("drizzle-orm");
+  const db = getDb();
+
+  const userLeagues = await db
+    .select({
+      league: leagues,
+      memberRole: leagueMembers.role,
+      joinedAt: leagueMembers.joinedAt,
+    })
+    .from(leagueMembers)
+    .innerJoin(leagues, eq(leagueMembers.leagueId, leagues.id))
+    .where(
+      and(
+        eq(leagueMembers.userId, userId),
+        eq(leagueMembers.isActive, true),
+        eq(leagues.isActive, true)
+      )
+    );
+
+  return userLeagues;
+}
+
+/**
+ * Get league details with members
+ */
+export async function getLeagueDetails(leagueId: string): Promise<any> {
+  const { getDb, leagues, leagueMembers, users } = await import("../db");
+  const { eq } = await import("drizzle-orm");
+  const db = getDb();
+
+  const league = await db
+    .select()
+    .from(leagues)
+    .where(eq(leagues.id, leagueId))
+    .limit(1);
+
+  if (league.length === 0) {
+    throw new Error("League not found");
+  }
+
+  const members = await db
+    .select({
+      user: {
+        id: users.id,
+        fullName: users.fullName,
+        profileImageUrl: users.profileImageUrl,
+      },
+      memberRole: leagueMembers.role,
+      joinedAt: leagueMembers.joinedAt,
+    })
+    .from(leagueMembers)
+    .innerJoin(users, eq(leagueMembers.userId, users.id))
+    .where(
+      and(
+        eq(leagueMembers.leagueId, leagueId),
+        eq(leagueMembers.isActive, true)
+      )
+    );
+
+  return {
+    ...league[0],
+    members,
+  };
+}

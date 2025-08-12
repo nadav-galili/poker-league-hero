@@ -1,6 +1,6 @@
 import { drizzle } from "drizzle-orm/postgres-js";
 import postgres from "postgres";
-import { users } from "./schema";
+import { leagueMembers, leagues, users } from "./schema";
 
 let dbInstance: any = null;
 
@@ -18,6 +18,6 @@ export function getDb() {
     prepare: false,
   });
 
-  dbInstance = drizzle(client, { schema: { users } });
+  dbInstance = drizzle(client, { schema: { users, leagues, leagueMembers } });
   return dbInstance;
 }
