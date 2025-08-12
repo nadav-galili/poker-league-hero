@@ -55,6 +55,14 @@ export default function TabLayout() {
           ),
         }}
       />
+      <Tabs.Screen
+        name="create-league"
+        options={{
+          href: null,
+          presentation: "modal",
+          title: t("createLeague"),
+        }}
+      />
     </Tabs>
   );
 }
