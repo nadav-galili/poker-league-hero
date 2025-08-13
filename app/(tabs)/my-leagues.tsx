@@ -2,9 +2,9 @@ import { colors, getTheme } from "@/colors";
 import Button from "@/components/Button";
 import { LanguageSelector } from "@/components/LanguageSelector";
 import { Text } from "@/components/Text";
-import { useLocalization } from "@/context/localization";
 import { useAuth } from "@/context/auth";
-import { League, leagueMembers } from "@/db/schema";
+import { useLocalization } from "@/context/localization";
+import { League } from "@/db/schema";
 import { getUserLeagues } from "@/utils/leagueUtils";
 import {
   addBreadcrumb,
@@ -70,7 +70,7 @@ export default function MyLeagues() {
       });
       setLeagues(themedLeagues);
     } catch (error) {
-      captureException(error, {
+      captureException(error as Error, {
         extra: { message: "Failed to fetch user leagues" },
       });
       Alert.alert(t("error"), t("failedToFetchLeagues"));
@@ -287,9 +287,7 @@ export default function MyLeagues() {
               });
             }}
           />
-          <View
-            style={[styles.imageFrame, { borderColor: themeColor }]}
-          />
+          <View style={[styles.imageFrame, { borderColor: themeColor }]} />
         </View>
 
         {/* League Info with enhanced styling */}
@@ -430,60 +428,60 @@ export default function MyLeagues() {
           <Text>Loading...</Text>
         </View>
       ) : (
-      <FlatList
-        data={leagues}
-        renderItem={renderLeagueCard}
-        keyExtractor={(item) => item.league.id}
-        contentContainerStyle={[
-          styles.listContainer,
-          leagues.length === 0 && styles.emptyListContainer,
-        ]}
-        onScrollToIndexFailed={(info) => {
-          captureException(new Error("FlatList scroll to index failed"), {
-            function: "FlatList.onScrollToIndexFailed",
-            screen: "MyLeagues",
-            index: info.index,
-            highestMeasuredFrameIndex: info.highestMeasuredFrameIndex,
-            averageItemLength: info.averageItemLength,
-          });
-        }}
-        showsVerticalScrollIndicator={false}
-        ListEmptyComponent={
-          <View style={styles.emptyState}>
-            <Text
-              variant="h2"
-              color={theme.text}
-              style={[styles.emptyTitle, isRTL && styles.rtlText]}>
-              {t("noLeaguesYet")}
-            </Text>
-            <Text
-              variant="body"
-              color={theme.textMuted}
-              style={[styles.emptySubtitle, isRTL && styles.rtlText]}>
-              {t("createFirstLeague")}
-            </Text>
+        <FlatList
+          data={leagues}
+          renderItem={renderLeagueCard}
+          keyExtractor={(item) => item.league.id}
+          contentContainerStyle={[
+            styles.listContainer,
+            leagues.length === 0 && styles.emptyListContainer,
+          ]}
+          onScrollToIndexFailed={(info) => {
+            captureException(new Error("FlatList scroll to index failed"), {
+              function: "FlatList.onScrollToIndexFailed",
+              screen: "MyLeagues",
+              index: info.index,
+              highestMeasuredFrameIndex: info.highestMeasuredFrameIndex,
+              averageItemLength: info.averageItemLength,
+            });
+          }}
+          showsVerticalScrollIndicator={false}
+          ListEmptyComponent={
+            <View style={styles.emptyState}>
+              <Text
+                variant="h2"
+                color={theme.text}
+                style={[styles.emptyTitle, isRTL && styles.rtlText]}>
+                {t("noLeaguesYet")}
+              </Text>
+              <Text
+                variant="body"
+                color={theme.textMuted}
+                style={[styles.emptySubtitle, isRTL && styles.rtlText]}>
+                {t("createFirstLeague")}
+              </Text>
 
-            <View style={styles.emptyButtons}>
-              <Button
-                title={t("createLeague")}
-                onPress={handleCreateLeague}
-                variant="primary"
-                size="large"
-                icon="add-circle"
-                fullWidth
-              />
-              <Button
-                title={t("joinLeague")}
-                onPress={handleJoinLeague}
-                variant="outline"
-                size="large"
-                icon="enter"
-                fullWidth
-              />
+              <View style={styles.emptyButtons}>
+                <Button
+                  title={t("createLeague")}
+                  onPress={handleCreateLeague}
+                  variant="primary"
+                  size="large"
+                  icon="add-circle"
+                  fullWidth
+                />
+                <Button
+                  title={t("joinLeague")}
+                  onPress={handleJoinLeague}
+                  variant="outline"
+                  size="large"
+                  icon="enter"
+                  fullWidth
+                />
+              </View>
             </View>
-          </View>
-        }
-      />
+          }
+        />
       )}
     </View>
   );
