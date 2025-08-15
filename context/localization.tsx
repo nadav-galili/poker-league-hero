@@ -61,6 +61,19 @@ export interface Translations {
   join: string;
   create: string;
 
+  // Create League Screen
+  leagueName: string;
+  leagueDescription: string;
+  maxMembers: string;
+  privateLeague: string;
+  createLeagueButton: string;
+  backToLeagues: string;
+
+  // New Screens
+  games: string;
+  stats: string;
+  personalStats: string;
+
   // Share
   joinMyLeague: string;
   leagueCode: string;
@@ -121,6 +134,19 @@ const enTranslations: Translations = {
   join: "Join",
   create: "Create",
 
+  // Create League Screen
+  leagueName: "League Name",
+  leagueDescription: "Description",
+  maxMembers: "Max Members",
+  privateLeague: "Private League",
+  createLeagueButton: "Create League",
+  backToLeagues: "Back to Leagues",
+
+  // New Screens
+  games: "GAMES",
+  stats: "STATS",
+  personalStats: "PERSONAL STATS",
+
   // Share
   joinMyLeague: "🎮 Join my poker league:",
   leagueCode: "League Code:",
@@ -180,6 +206,19 @@ const heTranslations: Translations = {
   cancel: "ביטול",
   join: "הצטרף",
   create: "צור",
+
+  // Create League Screen
+  leagueName: "שם הליגה",
+  leagueDescription: "תיאור",
+  maxMembers: "מספר חברים מקסימלי",
+  privateLeague: "ליגה פרטית",
+  createLeagueButton: "צור ליגה",
+  backToLeagues: "חזור לליגות",
+
+  // New Screens
+  games: "משחקים",
+  stats: "סטטיסטיקות",
+  personalStats: "סטטיסטיקות אישיות",
 
   // Share
   joinMyLeague: "🎮 הצטרף לליגת הפוקר שלי:",

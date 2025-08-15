@@ -12,6 +12,7 @@ import {
 import { Ionicons } from "@expo/vector-icons";
 import { Image } from "expo-image";
 import * as Linking from "expo-linking";
+import { router } from "expo-router";
 import React from "react";
 import {
   Alert,
@@ -97,13 +98,13 @@ export default function MyLeagues() {
       });
 
       console.log("Create League pressed");
-      // TODO: Navigate to create league form
-      Alert.alert(t("createLeague"), t("createLeaguePrompt"));
+      router.push("/leagues/create-league");
 
       captureMessage("User initiated league creation", "info", {
         screen: "MyLeagues",
         feature: "create_league",
       });
+      // TODO: Navigate to create league form
     } catch (error) {
       captureException(error as Error, {
         function: "handleCreateLeague",
