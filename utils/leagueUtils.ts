@@ -1,5 +1,6 @@
 import { and, eq } from "drizzle-orm";
-
+import { users } from "../db";
+import { uploadImageToR2 } from "./cloudflareR2";
 /**
  * Generate a secure, unique 5-character invite code
  * Uses alphanumeric characters, excluding confusing characters (0, O, 1, I, l)
@@ -58,21 +59,41 @@ export async function generateUniqueInviteCode(): Promise<string> {
  */
 export async function createLeague(data: {
   name: string;
-  imageUrl?: string;
-  adminUserId: string;
+  image?: string;
+  adminUserEmail: string;
 }): Promise<any> {
+  console.log("🚀 ~ createLeague ~ data:", data);
   const { getDb, leagues } = await import("../db");
   const db = getDb();
-
+  ///gete user id from email
+  const user = await db
+    .select()
+    .from(users)
+    .where(eq(users.email, data.adminUserEmail));
+  if (!user) {
+    throw new Error("User not found");
+  }
+  const userId = user[0].id;
+  let imageUrl = data.image;
+  if (imageUrl && imageUrl.startsWith("file://")) {
+    // Upload to Cloudflare R2 first
+    const uploadedUrl = await uploadImageToR2(imageUrl);
+    imageUrl = uploadedUrl;
+  } else if (!imageUrl) {
+    imageUrl = "default-league.png";
+  }
+  data.image = imageUrl;
   const inviteCode = await generateUniqueInviteCode();
 
-  const result = await db
-    .insert(leagues)
-    .values({
-      ...data,
-      inviteCode,
-    })
-    .returning();
+  const leagueData = {
+    ...data,
+    adminUserId: userId,
+    inviteCode,
+    imageUrl, // Use the uploaded URL
+  };
+
+  console.log("🚀 ~ createLeague ~ leagueData:", leagueData);
+  const result = await db.insert(leagues).values(leagueData).returning();
 
   return result[0];
 }

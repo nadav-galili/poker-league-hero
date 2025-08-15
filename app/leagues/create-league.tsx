@@ -1,6 +1,8 @@
 import { colors, getTheme } from "@/colors";
 import Button from "@/components/Button";
 import { Text } from "@/components/Text";
+import { BASE_URL } from "@/constants";
+import { useAuth } from "@/context/auth";
 import { useLocalization } from "@/context/localization";
 import { Ionicons } from "@expo/vector-icons";
 import { Image } from "expo-image";
@@ -21,12 +23,20 @@ export default function CreateLeague() {
   const { t, isRTL } = useLocalization();
   const [formData, setFormData] = useState({
     name: "",
-    isPrivate: false,
     image: null as string | null,
+    adminUserEmail: "",
   });
-
+  //get user data from auth context
+  const { user } = useAuth();
+  console.log("🚀 ~ CreateLeague ~ user:", user);
   const handleCreateLeague = async () => {
     try {
+      if (!user) {
+        Alert.alert(t("error"), "Please login to create a league");
+        return;
+      }
+
+      formData.adminUserEmail = user.email;
       if (!formData.name.trim()) {
         Alert.alert(t("error"), "Please enter a league name");
         return;
@@ -35,14 +45,28 @@ export default function CreateLeague() {
       // TODO: Implement actual league creation API call
       console.log("Creating league:", formData);
 
-      Alert.alert("Success", "League created successfully!", [
-        {
-          text: "OK",
-          onPress: () => router.back(),
-        },
-      ]);
+      // Alert.alert("Success", "League created successfully!", [
+      //   {
+      //     text: "OK",
+      //     onPress: () => router.back(),
+      //   },
+      // ]);
+
+      //send data to backend
+      const response = await fetch(`${BASE_URL}/api/leagues/create`, {
+        method: "POST",
+        body: JSON.stringify(formData),
+      });
+
+      if (!response.ok) {
+        throw new Error("Failed to create league");
+      }
+
+      const data = await response.json();
+      console.log("League created:", data);
+      router.back();
     } catch (error) {
-      console.error("Failed to create league:", error);
+      console.error("Failed to create league", error);
       Alert.alert(t("error"), "Failed to create league");
     }
   };
@@ -122,42 +146,6 @@ export default function CreateLeague() {
               maxLength={50}
             />
           </View>
-        </View>
-
-        {/* Private League Toggle */}
-        <View style={styles.inputGroup}>
-          <TouchableOpacity
-            style={styles.toggleContainer}
-            onPress={() =>
-              setFormData({ ...formData, isPrivate: !formData.isPrivate })
-            }>
-            <View
-              style={[
-                styles.toggle,
-                {
-                  backgroundColor: formData.isPrivate
-                    ? colors.secondary
-                    : theme.border,
-                },
-              ]}>
-              <View
-                style={[
-                  styles.toggleThumb,
-                  {
-                    backgroundColor: theme.background,
-                    transform: [
-                      {
-                        translateX: formData.isPrivate ? 20 : 0,
-                      },
-                    ],
-                  },
-                ]}
-              />
-            </View>
-            <Text style={[styles.toggleLabel, { color: theme.text }]}>
-              {t("privateLeague")}
-            </Text>
-          </TouchableOpacity>
         </View>
 
         {/* League Image */}
@@ -292,31 +280,6 @@ const styles = StyleSheet.create({
     zIndex: 1,
   },
 
-  toggleContainer: {
-    flexDirection: "row",
-    alignItems: "center",
-  },
-  toggle: {
-    width: 50,
-    height: 30,
-    borderRadius: 15,
-    padding: 2,
-    marginRight: 16,
-  },
-  toggleThumb: {
-    width: 26,
-    height: 26,
-    borderRadius: 13,
-    shadowColor: colors.text,
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.2,
-    shadowRadius: 4,
-    elevation: 3,
-  },
-  toggleLabel: {
-    fontSize: 16,
-    fontWeight: "500",
-  },
   buttonContainer: {
     marginTop: 32,
   },
