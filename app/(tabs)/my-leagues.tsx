@@ -166,208 +166,216 @@ export default function MyLeagues() {
     }
   };
 
-  const shareLeagueCode = async (league: League) => {
-    try {
-      addBreadcrumb("User initiated league share", "user_action", {
-        screen: "MyLeagues",
-        action: "share_league",
-        leagueId: league.id,
-        leagueName: league.name,
-        leagueCode: league.code,
-      });
-
-      // Create deep link URL for joining the league
-      const deepLinkUrl = Linking.createURL(`/join-league/${league.code}`, {
-        queryParams: {
-          name: league.name,
-          id: league.id,
-        },
-      });
-
-      const shareMessage = `${t("joinMyLeague")} "${league.name}"\n\n${t(
-        "leagueCode"
-      )} ${league.code}\n\n${t("joinHere")} ${deepLinkUrl}`;
-
-      // Use React Native's built-in Share API which works with text/URLs
-      await Share.share(
-        {
-          message: shareMessage,
-          url: deepLinkUrl, // iOS will use this
-          title: `${t("joinLeague")} ${league.name}`,
-        },
-        {
-          dialogTitle: `${t("shareLeague")} ${league.name}`,
-        }
-      );
-
-      // Track successful share
-      captureMessage("League share completed successfully", "info", {
-        screen: "MyLeagues",
-        leagueId: league.id,
-        leagueName: league.name,
-        shareMethod: "native_share",
-      });
-    } catch (error) {
-      console.error("Error sharing league:", error);
-
-      // Check if user cancelled the share
-      if (error instanceof Error && error.message === "User did not share") {
-        addBreadcrumb("User cancelled league share", "user_action", {
+  const shareLeagueCode = React.useCallback(
+    async (league: League) => {
+      try {
+        addBreadcrumb("User initiated league share", "user_action", {
           screen: "MyLeagues",
-          action: "share_cancelled",
+          action: "share_league",
           leagueId: league.id,
+          leagueName: league.name,
+          leagueCode: league.code,
         });
-        return;
-      }
 
-      // Capture actual errors
-      captureException(error as Error, {
-        function: "shareLeagueCode",
-        screen: "MyLeagues",
-        leagueId: league.id,
-        leagueName: league.name,
-        leagueCode: league.code,
-        deepLinkUrl: `join-league/${league.code}`,
-      });
+        // Create deep link URL for joining the league
+        const deepLinkUrl = Linking.createURL(`/join-league/${league.code}`, {
+          queryParams: {
+            name: league.name,
+            id: league.id,
+          },
+        });
 
-      Alert.alert(t("error"), t("failedToShare"));
-    }
-  };
+        const shareMessage = `${t("joinMyLeague")} "${league.name}"\n\n${t(
+          "leagueCode"
+        )} ${league.code}\n\n${t("joinHere")} ${deepLinkUrl}`;
 
-  // Create a profiled version of the render function for performance monitoring
-  const renderLeagueCardInternal = ({ item }: { item: League }) => (
-    <Pressable
-      style={({ pressed }) => [
-        styles.leagueCard,
-        styles.brutalistShadow,
-        {
-          backgroundColor: theme.surfaceElevated,
-          borderColor: theme.primary,
-          shadowColor: theme.shadow,
-        },
-        pressed && styles.pressedCard,
-      ]}
-      onPress={() => {
-        try {
-          addBreadcrumb("User tapped league card", "user_action", {
+        // Use React Native's built-in Share API which works with text/URLs
+        await Share.share(
+          {
+            message: shareMessage,
+            url: deepLinkUrl, // iOS will use this
+            title: `${t("joinLeague")} ${league.name}`,
+          },
+          {
+            dialogTitle: `${t("shareLeague")} ${league.name}`,
+          }
+        );
+
+        // Track successful share
+        captureMessage("League share completed successfully", "info", {
+          screen: "MyLeagues",
+          leagueId: league.id,
+          leagueName: league.name,
+          shareMethod: "native_share",
+        });
+      } catch (error) {
+        console.error("Error sharing league:", error);
+
+        // Check if user cancelled the share
+        if (error instanceof Error && error.message === "User did not share") {
+          addBreadcrumb("User cancelled league share", "user_action", {
             screen: "MyLeagues",
-            action: "league_card_tap",
-            leagueId: item.id,
-            leagueName: item.name,
-            leagueStatus: item.status,
+            action: "share_cancelled",
+            leagueId: league.id,
           });
-
-          console.log("League pressed:", item.name);
-          // TODO: Navigate to league details
-
-          captureMessage("User viewed league details", "info", {
-            screen: "MyLeagues",
-            leagueId: item.id,
-            leagueName: item.name,
-          });
-        } catch (error) {
-          captureException(error as Error, {
-            function: "renderLeagueCard.onPress",
-            screen: "MyLeagues",
-            leagueId: item.id,
-          });
+          return;
         }
-      }}>
-      {/* League Image with colored frame */}
-      <View style={styles.imageContainer}>
-        <Image
-          source={{ uri: item.image }}
-          style={styles.leagueImage}
-          contentFit="cover"
-          onError={(error) => {
-            captureException(new Error("Image loading failed"), {
-              function: "Image.onError",
-              screen: "MyLeagues",
-              leagueId: item.id,
-              imageUri: item.image,
-              error: error.toString(),
-            });
-          }}
-        />
-        <View style={[styles.imageFrame, { borderColor: item.themeColor }]} />
-      </View>
 
-      {/* League Info with enhanced styling */}
-      <View style={styles.leagueInfo}>
-        <Text variant="h4" color={theme.text} style={styles.leagueName}>
-          {item.name}
-        </Text>
+        // Capture actual errors
+        captureException(error as Error, {
+          function: "shareLeagueCode",
+          screen: "MyLeagues",
+          leagueId: league.id,
+          leagueName: league.name,
+          leagueCode: league.code,
+          deepLinkUrl: `join-league/${league.code}`,
+        });
 
-        <View style={styles.codeContainer}>
-          <View
-            style={[
-              styles.codeBadge,
-              {
-                backgroundColor: item.accentColor,
-                borderColor: item.themeColor,
-              },
-            ]}>
-            <Text
-              variant="labelSmall"
-              color={item.themeColor}
-              style={styles.codeText}>
-              {item.code}
-            </Text>
-          </View>
-
-          <Pressable
-            style={[styles.shareButton, { backgroundColor: item.themeColor }]}
-            onPress={() => {
-              try {
-                addBreadcrumb("User tapped share button", "user_action", {
-                  screen: "MyLeagues",
-                  action: "share_button_tap",
-                  leagueId: item.id,
-                  leagueName: item.name,
-                });
-                shareLeagueCode(item);
-              } catch (error) {
-                captureException(error as Error, {
-                  function: "shareButton.onPress",
-                  screen: "MyLeagues",
-                  leagueId: item.id,
-                });
-                Alert.alert(t("error"), "Failed to initiate share");
-              }
-            }}>
-            <Ionicons name="share" size={16} color="#FFFFFF" />
-          </Pressable>
-        </View>
-
-        <Text
-          variant="captionSmall"
-          color={theme.textMuted}
-          style={styles.memberCount}>
-          {item.memberCount} {t("members")}
-        </Text>
-      </View>
-    </Pressable>
+        Alert.alert(t("error"), t("failedToShare"));
+      }
+    },
+    [t]
   );
 
   // Wrap the render function with error tracking
-  const renderLeagueCard = React.useCallback(({ item }: { item: League }) => {
-    try {
-      return renderLeagueCardInternal({ item });
-    } catch (error) {
-      captureException(error as Error, {
-        function: "renderLeagueCard",
-        screen: "MyLeagues",
-        leagueId: item.id,
-        leagueName: item.name,
-      });
-      // Return a fallback UI
-      return (
-        <View style={styles.errorCard}>
-          <Text>Error loading league card</Text>
-        </View>
-      );
-    }
-  }, []);
+  const renderLeagueCard = React.useCallback(
+    ({ item }: { item: League }) => {
+      try {
+        return (
+          <Pressable
+            style={({ pressed }) => [
+              styles.leagueCard,
+              styles.brutalistShadow,
+              {
+                backgroundColor: theme.surfaceElevated,
+                borderColor: theme.primary,
+                shadowColor: theme.shadow,
+              },
+              pressed && styles.pressedCard,
+            ]}
+            onPress={() => {
+              try {
+                addBreadcrumb("User tapped league card", "user_action", {
+                  screen: "MyLeagues",
+                  action: "league_card_tap",
+                  leagueId: item.id,
+                  leagueName: item.name,
+                  leagueStatus: item.status,
+                });
+
+                console.log("League pressed:", item.name);
+                // TODO: Navigate to league details
+
+                captureMessage("User viewed league details", "info", {
+                  screen: "MyLeagues",
+                  leagueId: item.id,
+                  leagueName: item.name,
+                });
+              } catch (error) {
+                captureException(error as Error, {
+                  function: "renderLeagueCard.onPress",
+                  screen: "MyLeagues",
+                  leagueId: item.id,
+                });
+              }
+            }}>
+            {/* League Image with colored frame */}
+            <View style={styles.imageContainer}>
+              <Image
+                source={{ uri: item.image }}
+                style={styles.leagueImage as any}
+                contentFit="cover"
+                onError={(error) => {
+                  captureException(new Error("Image loading failed"), {
+                    function: "Image.onError",
+                    screen: "MyLeagues",
+                    leagueId: item.id,
+                    imageUri: item.image,
+                    error: error.toString(),
+                  });
+                }}
+              />
+              <View
+                style={[styles.imageFrame, { borderColor: item.themeColor }]}
+              />
+            </View>
+
+            {/* League Info with enhanced styling */}
+            <View style={styles.leagueInfo}>
+              <Text variant="h4" color={theme.text} style={styles.leagueName}>
+                {item.name}
+              </Text>
+
+              <View style={styles.codeContainer}>
+                <View
+                  style={[
+                    styles.codeBadge,
+                    {
+                      backgroundColor: item.accentColor,
+                      borderColor: item.themeColor,
+                    },
+                  ]}>
+                  <Text
+                    variant="labelSmall"
+                    color={item.themeColor}
+                    style={styles.codeText}>
+                    {item.code}
+                  </Text>
+                </View>
+
+                <Pressable
+                  style={[
+                    styles.shareButton,
+                    { backgroundColor: item.themeColor },
+                  ]}
+                  onPress={() => {
+                    try {
+                      addBreadcrumb("User tapped share button", "user_action", {
+                        screen: "MyLeagues",
+                        action: "share_button_tap",
+                        leagueId: item.id,
+                        leagueName: item.name,
+                      });
+                      shareLeagueCode(item);
+                    } catch (error) {
+                      captureException(error as Error, {
+                        function: "shareButton.onPress",
+                        screen: "MyLeagues",
+                        leagueId: item.id,
+                      });
+                      Alert.alert(t("error"), "Failed to initiate share");
+                    }
+                  }}>
+                  <Ionicons name="share" size={16} color="#FFFFFF" />
+                </Pressable>
+              </View>
+
+              <Text
+                variant="captionSmall"
+                color={theme.textMuted}
+                style={styles.memberCount}>
+                {item.memberCount} {t("members")}
+              </Text>
+            </View>
+          </Pressable>
+        );
+      } catch (error) {
+        captureException(error as Error, {
+          function: "renderLeagueCard",
+          screen: "MyLeagues",
+          leagueId: item.id,
+          leagueName: item.name,
+        });
+        // Return a fallback UI
+        return (
+          <View style={styles.errorCard}>
+            <Text>Error loading league card</Text>
+          </View>
+        );
+      }
+    },
+    [theme, shareLeagueCode, t]
+  );
 
   return (
     <View style={[styles.container, { backgroundColor: theme.background }]}>

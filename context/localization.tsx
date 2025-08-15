@@ -68,6 +68,8 @@ export interface Translations {
   privateLeague: string;
   createLeagueButton: string;
   backToLeagues: string;
+  leagueImage: string;
+  selectImage: string;
 
   // New Screens
   games: string;
@@ -141,6 +143,8 @@ const enTranslations: Translations = {
   privateLeague: "Private League",
   createLeagueButton: "Create League",
   backToLeagues: "Back to Leagues",
+  leagueImage: "League Image",
+  selectImage: "Select Image",
 
   // New Screens
   games: "GAMES",
@@ -214,6 +218,8 @@ const heTranslations: Translations = {
   privateLeague: "ליגה פרטית",
   createLeagueButton: "צור ליגה",
   backToLeagues: "חזור לליגות",
+  leagueImage: "תמונת הליגה",
+  selectImage: "בחר תמונה",
 
   // New Screens
   games: "משחקים",
