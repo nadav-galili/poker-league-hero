@@ -16,6 +16,7 @@ interface ButtonProps {
   fullWidth?: boolean;
   backgroundColor?: string;
   textColor?: string;
+  style?: any;
 }
 
 export default function Button({
@@ -28,6 +29,7 @@ export default function Button({
   fullWidth = false,
   backgroundColor,
   textColor,
+  style,
 }: ButtonProps) {
   const theme = getTheme("light");
 
@@ -146,6 +148,7 @@ export default function Button({
         fullWidth && styles.fullWidth,
         disabled && styles.disabled,
         pressed && styles.pressed,
+        style,
       ]}
       onPress={onPress}
       disabled={disabled}>

@@ -27,10 +27,7 @@ export default function Account() {
           </Text>
         </View>
         <View style={styles.content}>
-          <Text
-            variant="body"
-            color={colors.borderDark}
-            style={styles.placeholder}>
+          <Text variant="body" color={colors.border} style={styles.placeholder}>
             Please sign in to view account details
           </Text>
         </View>
@@ -104,7 +101,7 @@ export default function Account() {
               <Ionicons name="mail" size={16} color={colors.info} />
               <Text
                 variant="body"
-                color={colors.borderDark}
+                color={colors.border}
                 style={styles.userEmail}>
                 {user.email || "No email"}
               </Text>
@@ -181,7 +178,7 @@ export default function Account() {
             <View style={styles.detailRow}>
               <Text
                 variant="labelSmall"
-                color={colors.borderDark}
+                color={colors.border}
                 style={styles.detailLabel}>
                 USER ID
               </Text>
@@ -197,7 +194,7 @@ export default function Account() {
               <View style={styles.detailRow}>
                 <Text
                   variant="labelSmall"
-                  color={colors.borderDark}
+                  color={colors.border}
                   style={styles.detailLabel}>
                   FIRST NAME
                 </Text>
@@ -214,7 +211,7 @@ export default function Account() {
               <View style={styles.detailRow}>
                 <Text
                   variant="labelSmall"
-                  color={colors.borderDark}
+                  color={colors.border}
                   style={styles.detailLabel}>
                   LAST NAME
                 </Text>
@@ -231,7 +228,7 @@ export default function Account() {
               <View style={styles.detailRow}>
                 <Text
                   variant="labelSmall"
-                  color={colors.borderDark}
+                  color={colors.border}
                   style={styles.detailLabel}>
                   PROVIDER
                 </Text>

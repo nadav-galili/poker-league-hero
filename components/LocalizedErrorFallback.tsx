@@ -16,9 +16,9 @@ const LocalizedErrorFallback: React.FC<Props> = ({ onRetry }) => {
 
   return (
     <View style={styles.container}>
-      <Text style={styles.title}>{t.errorOccurred}</Text>
-      <Text style={styles.message}>{t.errorMessage}</Text>
-      <Button title={t.tryAgain} onPress={onRetry} />
+      <Text style={styles.title}>{t("errorOccurred")}</Text>
+      <Text style={styles.message}>{t("errorMessage")}</Text>
+      <Button title={t("tryAgain")} onPress={onRetry} />
     </View>
   );
 };
