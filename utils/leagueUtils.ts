@@ -1,5 +1,5 @@
 import { and, eq } from "drizzle-orm";
-import { users } from "../db";
+import { leagueMembers, users } from "../db";
 import { uploadImageToR2 } from "./cloudflareR2";
 /**
  * Generate a secure, unique 5-character invite code
@@ -62,7 +62,6 @@ export async function createLeague(data: {
   image?: string;
   adminUserEmail: string;
 }): Promise<any> {
-  console.log("🚀 ~ createLeague ~ data:", data);
   const { getDb, leagues } = await import("../db");
   const db = getDb();
   ///gete user id from email
@@ -92,8 +91,18 @@ export async function createLeague(data: {
     imageUrl, // Use the uploaded URL
   };
 
-  console.log("🚀 ~ createLeague ~ leagueData:", leagueData);
   const result = await db.insert(leagues).values(leagueData).returning();
+  //add user to league_members
+  await db
+    .insert(leagueMembers)
+    .values({
+      leagueId: result[0].id,
+      userId,
+      role: "admin",
+      isActive: true,
+      joinedAt: new Date(),
+    })
+    .returning();
 
   return result[0];
 }
