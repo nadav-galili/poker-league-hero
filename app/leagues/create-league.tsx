@@ -3,6 +3,8 @@ import Button from "@/components/Button";
 import { Text } from "@/components/Text";
 import { useLocalization } from "@/context/localization";
 import { Ionicons } from "@expo/vector-icons";
+import { Image } from "expo-image";
+import * as ImagePicker from "expo-image-picker";
 import { router } from "expo-router";
 import React, { useState } from "react";
 import {
@@ -19,9 +21,8 @@ export default function CreateLeague() {
   const { t, isRTL } = useLocalization();
   const [formData, setFormData] = useState({
     name: "",
-    description: "",
-    maxMembers: "12",
     isPrivate: false,
+    image: null as string | null,
   });
 
   const handleCreateLeague = async () => {
@@ -50,18 +51,40 @@ export default function CreateLeague() {
     router.back();
   };
 
+  const pickImage = async () => {
+    try {
+      const result = await ImagePicker.launchImageLibraryAsync({
+        mediaTypes: ImagePicker.MediaTypeOptions.Images,
+        allowsEditing: true,
+        aspect: [1, 1],
+        quality: 0.8,
+      });
+
+      if (!result.canceled && result.assets[0]) {
+        setFormData({ ...formData, image: result.assets[0].uri });
+      }
+    } catch (error) {
+      console.error("Error picking image:", error);
+      Alert.alert(t("error"), "Failed to pick image");
+    }
+  };
+
+  const removeImage = () => {
+    setFormData({ ...formData, image: null });
+  };
+
   return (
     <View style={[styles.container, { backgroundColor: theme.background }]}>
       {/* Header */}
-      <View style={[styles.header, { backgroundColor: theme.surface }]}>
+      <View style={[styles.header, { backgroundColor: colors.secondary }]}>
         <TouchableOpacity onPress={handleBack} style={styles.backButton}>
           <Ionicons
             name={isRTL ? "arrow-forward" : "arrow-back"}
             size={24}
-            color={theme.primary}
+            color={colors.textInverse}
           />
         </TouchableOpacity>
-        <Text style={[styles.headerTitle, { color: theme.text }]}>
+        <Text style={[styles.headerTitle, { color: colors.textInverse }]}>
           {t("createLeague")}
         </Text>
         <View style={styles.placeholder} />
@@ -73,75 +96,32 @@ export default function CreateLeague() {
         showsVerticalScrollIndicator={false}>
         {/* League Name */}
         <View style={styles.inputGroup}>
-          <Text style={[styles.label, { color: theme.text }]}>
+          <Text style={[styles.label, { color: colors.secondary }]}>
             {t("leagueName")}
           </Text>
-          <TextInput
-            style={[
-              styles.input,
-              {
-                backgroundColor: theme.surface,
-                borderColor: theme.border,
-                color: theme.text,
-              },
-            ]}
-            value={formData.name}
-            onChangeText={(text) => setFormData({ ...formData, name: text })}
-            placeholder="Enter league name"
-            placeholderTextColor={theme.textSecondary}
-            maxLength={50}
-          />
-        </View>
-
-        {/* League Description */}
-        <View style={styles.inputGroup}>
-          <Text style={[styles.label, { color: theme.text }]}>
-            {t("leagueDescription")}
-          </Text>
-          <TextInput
-            style={[
-              styles.textArea,
-              {
-                backgroundColor: theme.surface,
-                borderColor: theme.border,
-                color: theme.text,
-              },
-            ]}
-            value={formData.description}
-            onChangeText={(text) =>
-              setFormData({ ...formData, description: text })
-            }
-            placeholder="Describe your league..."
-            placeholderTextColor={theme.textSecondary}
-            multiline
-            numberOfLines={4}
-            maxLength={200}
-          />
-        </View>
-
-        {/* Max Members */}
-        <View style={styles.inputGroup}>
-          <Text style={[styles.label, { color: theme.text }]}>
-            {t("maxMembers")}
-          </Text>
-          <TextInput
-            style={[
-              styles.input,
-              {
-                backgroundColor: theme.surface,
-                borderColor: theme.border,
-                color: theme.text,
-              },
-            ]}
-            value={formData.maxMembers}
-            onChangeText={(text) =>
-              setFormData({ ...formData, maxMembers: text })
-            }
-            placeholder="12"
-            placeholderTextColor={theme.textSecondary}
-            keyboardType="numeric"
-            maxLength={3}
-          />
+          <View style={styles.inputContainer}>
+            <Ionicons
+              name="trophy"
+              size={20}
+              color={colors.secondary}
+              style={styles.inputIcon}
+            />
+            <TextInput
+              style={[
+                styles.input,
+                {
+                  backgroundColor: colors.background,
+                  borderColor: colors.secondary,
+                  color: theme.text,
+                },
+              ]}
+              value={formData.name}
+              onChangeText={(text) => setFormData({ ...formData, name: text })}
+              placeholder="Enter league name"
+              placeholderTextColor={colors.secondaryTint}
+              maxLength={50}
+            />
+          </View>
         </View>
 
         {/* Private League Toggle */}
@@ -156,7 +136,7 @@ export default function CreateLeague() {
                 styles.toggle,
                 {
                   backgroundColor: formData.isPrivate
-                    ? theme.primary
+                    ? colors.secondary
                     : theme.border,
                 },
               ]}>
@@ -180,6 +160,49 @@ export default function CreateLeague() {
           </TouchableOpacity>
         </View>
 
+        {/* League Image */}
+        <View style={styles.inputGroup}>
+          <Text style={[styles.label, { color: theme.text }]}>
+            {t("leagueImage")} (Optional)
+          </Text>
+          <View style={styles.imageContainer}>
+            {formData.image ? (
+              <View style={styles.imagePreviewContainer}>
+                <Image
+                  source={{ uri: formData.image }}
+                  style={styles.imagePreview}
+                  contentFit="cover"
+                />
+                <TouchableOpacity
+                  style={styles.removeImageButton}
+                  onPress={removeImage}>
+                  <Ionicons
+                    name="close-circle"
+                    size={24}
+                    color={colors.error}
+                  />
+                </TouchableOpacity>
+              </View>
+            ) : (
+              <TouchableOpacity
+                style={[
+                  styles.imagePickerButton,
+                  {
+                    backgroundColor: colors.highlightTint,
+                    borderColor: colors.highlight,
+                  },
+                ]}
+                onPress={pickImage}>
+                <Ionicons name="camera" size={32} color={colors.highlight} />
+                <Text
+                  style={[styles.imagePickerText, { color: colors.highlight }]}>
+                  {t("selectImage")}
+                </Text>
+              </TouchableOpacity>
+            )}
+          </View>
+        </View>
+
         {/* Create Button */}
         <View style={styles.buttonContainer}>
           <Button
@@ -187,6 +210,8 @@ export default function CreateLeague() {
             onPress={handleCreateLeague}
             variant="primary"
             style={styles.createButton}
+            backgroundColor={colors.accent}
+            textColor={colors.text}
           />
         </View>
       </ScrollView>
@@ -204,8 +229,13 @@ const styles = StyleSheet.create({
     justifyContent: "space-between",
     paddingHorizontal: 20,
     paddingVertical: 16,
-    borderBottomWidth: 3,
-    borderBottomColor: colors.border,
+    borderBottomWidth: 6,
+    borderBottomColor: colors.text,
+    shadowColor: colors.text,
+    shadowOffset: { width: 0, height: 8 },
+    shadowOpacity: 1,
+    shadowRadius: 0,
+    elevation: 12,
   },
   backButton: {
     padding: 8,
@@ -237,23 +267,31 @@ const styles = StyleSheet.create({
     letterSpacing: 0.5,
   },
   input: {
+    flex: 1,
     height: 50,
-    borderWidth: 3,
-    borderRadius: 8,
+    borderWidth: 4,
+    borderRadius: 12,
     paddingHorizontal: 16,
+    paddingLeft: 48,
     fontSize: 16,
-    fontWeight: "500",
+    fontWeight: "600",
+    shadowColor: colors.text,
+    shadowOffset: { width: 4, height: 4 },
+    shadowOpacity: 1,
+    shadowRadius: 0,
+    elevation: 8,
   },
-  textArea: {
-    height: 100,
-    borderWidth: 3,
-    borderRadius: 8,
-    paddingHorizontal: 16,
-    paddingTop: 16,
-    fontSize: 16,
-    fontWeight: "500",
-    textAlignVertical: "top",
+  inputContainer: {
+    flexDirection: "row",
+    alignItems: "center",
+    position: "relative",
   },
+  inputIcon: {
+    position: "absolute",
+    left: 16,
+    zIndex: 1,
+  },
+
   toggleContainer: {
     flexDirection: "row",
     alignItems: "center",
@@ -284,5 +322,53 @@ const styles = StyleSheet.create({
   },
   createButton: {
     height: 56,
+    shadowColor: colors.text,
+    shadowOffset: { width: 6, height: 6 },
+    shadowOpacity: 1,
+    shadowRadius: 0,
+    elevation: 12,
+  },
+  imageContainer: {
+    alignItems: "center",
+  },
+  imagePreviewContainer: {
+    position: "relative",
+    alignItems: "center",
+  },
+  imagePreview: {
+    width: 120,
+    height: 120,
+    borderRadius: 12,
+    borderWidth: 3,
+    borderColor: colors.border,
+  },
+  removeImageButton: {
+    position: "absolute",
+    top: -8,
+    right: -8,
+    backgroundColor: colors.background,
+    borderRadius: 12,
+    borderWidth: 2,
+    borderColor: colors.border,
+  },
+  imagePickerButton: {
+    width: 120,
+    height: 120,
+    borderRadius: 12,
+    borderWidth: 4,
+    borderStyle: "dashed",
+    alignItems: "center",
+    justifyContent: "center",
+    gap: 8,
+    shadowColor: colors.text,
+    shadowOffset: { width: 4, height: 4 },
+    shadowOpacity: 1,
+    shadowRadius: 0,
+    elevation: 8,
+  },
+  imagePickerText: {
+    fontSize: 12,
+    fontWeight: "500",
+    textAlign: "center",
   },
 });
