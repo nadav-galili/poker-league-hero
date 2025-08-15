@@ -10,6 +10,7 @@ import * as ImagePicker from "expo-image-picker";
 import { router } from "expo-router";
 import React, { useState } from "react";
 import {
+  ActivityIndicator,
   Alert,
   ScrollView,
   StyleSheet,
@@ -17,10 +18,12 @@ import {
   TouchableOpacity,
   View,
 } from "react-native";
+import Toast from "react-native-toast-message";
 
 export default function CreateLeague() {
   const theme = getTheme("light");
   const { t, isRTL } = useLocalization();
+  const [isLoading, setIsLoading] = useState(false);
   const [formData, setFormData] = useState({
     name: "",
     image: null as string | null,
@@ -31,26 +34,28 @@ export default function CreateLeague() {
   console.log("🚀 ~ CreateLeague ~ user:", user);
   const handleCreateLeague = async () => {
     try {
+      setIsLoading(true);
       if (!user) {
-        Alert.alert(t("error"), "Please login to create a league");
+        Toast.show({
+          type: "error",
+          text1: t("error"),
+          text2: "Please login to create a league",
+        });
         return;
       }
 
       formData.adminUserEmail = user.email;
       if (!formData.name.trim()) {
-        Alert.alert(t("error"), "Please enter a league name");
+        Toast.show({
+          type: "error",
+          text1: t("error"),
+          text2: "Please enter a league name",
+        });
         return;
       }
 
       // TODO: Implement actual league creation API call
       console.log("Creating league:", formData);
-
-      // Alert.alert("Success", "League created successfully!", [
-      //   {
-      //     text: "OK",
-      //     onPress: () => router.back(),
-      //   },
-      // ]);
 
       //send data to backend
       const response = await fetch(`${BASE_URL}/api/leagues/create`, {
@@ -59,15 +64,31 @@ export default function CreateLeague() {
       });
 
       if (!response.ok) {
+        Toast.show({
+          type: "error",
+          text1: t("error"),
+          text2: "Failed to create league",
+        });
         throw new Error("Failed to create league");
       }
 
       const data = await response.json();
       console.log("League created:", data);
+      Toast.show({
+        type: "success",
+        text1: t("success"),
+        text2: "League created successfully",
+      });
       router.back();
     } catch (error) {
       console.error("Failed to create league", error);
-      Alert.alert(t("error"), "Failed to create league");
+      Toast.show({
+        type: "error",
+        text1: t("error"),
+        text2: "Failed to create league",
+      });
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -96,6 +117,13 @@ export default function CreateLeague() {
   const removeImage = () => {
     setFormData({ ...formData, image: null });
   };
+  if (isLoading) {
+    return (
+      <View style={styles.loadingContainer}>
+        <ActivityIndicator size="large" color={colors.primary} />
+      </View>
+    );
+  }
 
   return (
     <View style={[styles.container, { backgroundColor: theme.background }]}>
@@ -333,5 +361,10 @@ const styles = StyleSheet.create({
     fontSize: 12,
     fontWeight: "500",
     textAlign: "center",
+  },
+  loadingContainer: {
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
   },
 });
