@@ -2,7 +2,9 @@ import { colors, getTheme } from "@/colors";
 import Button from "@/components/Button";
 import { LanguageSelector } from "@/components/LanguageSelector";
 import { Text } from "@/components/Text";
+import { useAuth } from "@/context/auth";
 import { useLocalization } from "@/context/localization";
+import { League, fetchUserLeagues } from "@/utils/leagueService";
 import {
   addBreadcrumb,
   captureException,
@@ -15,6 +17,7 @@ import * as Linking from "expo-linking";
 import { router } from "expo-router";
 import React from "react";
 import {
+  ActivityIndicator,
   Alert,
   FlatList,
   Pressable,
@@ -23,63 +26,81 @@ import {
   View,
 } from "react-native";
 
-// Mock data for leagues with neo-brutalist color themes
-const mockLeagues = [
+// Color themes for leagues
+const leagueThemes = [
   {
-    id: "1",
-    name: "FRIDAY NIGHT POKER",
-    code: "FNP2024",
-    image:
-      "https://images.unsplash.com/photo-1511193311914-0346f16efe90?w=400&h=400&fit=crop&crop=center",
-    memberCount: 8,
-    status: "active" as const,
-    themeColor: colors.primary, // Electric blue
-    accentColor: colors.primaryTint, // Light blue
+    themeColor: colors.primary,
+    accentColor: colors.primaryTint,
     variant: "primary" as const,
   },
   {
-    id: "2",
-    name: "WEEKEND WARRIORS",
-    code: "WW2024",
-    image:
-      "https://images.unsplash.com/photo-1606092195730-5d7b9af1efc5?w=400&h=400&fit=crop&crop=center",
-    memberCount: 12,
-    status: "active" as const,
-    themeColor: colors.secondary, // Hot pink
-    accentColor: colors.secondaryTint, // Light pink
+    themeColor: colors.secondary,
+    accentColor: colors.secondaryTint,
     variant: "secondary" as const,
   },
   {
-    id: "3",
-    name: "ROYAL FLUSH CLUB",
-    code: "RFC2024",
-    image:
-      "https://images.unsplash.com/photo-1578662996442-48f60103fc96?w=400&h=400&fit=crop&crop=center",
-    memberCount: 15,
-    status: "active" as const,
-    themeColor: colors.highlight, // Toxic lime
-    accentColor: colors.highlightTint, // Light lime
+    themeColor: colors.highlight,
+    accentColor: colors.highlightTint,
     variant: "highlight" as const,
   },
   {
-    id: "4",
-    name: "HIGH STAKES HEROES",
-    code: "HSH2024",
-    image:
-      "https://images.unsplash.com/photo-1596838132731-3301c3fd4317?w=400&h=400&fit=crop&crop=center",
-    memberCount: 6,
-    status: "active" as const,
-    themeColor: colors.accent, // Neon yellow
-    accentColor: colors.accentTint, // Light yellow
+    themeColor: colors.accent,
+    accentColor: colors.accentTint,
     variant: "accent" as const,
   },
 ];
 
-type League = (typeof mockLeagues)[0];
+type LeagueWithTheme = League & {
+  themeColor: string;
+  accentColor: string;
+  variant: "primary" | "secondary" | "highlight" | "accent";
+};
 
 export default function MyLeagues() {
   const theme = getTheme("light");
   const { t, isRTL } = useLocalization();
+  const { fetchWithAuth } = useAuth();
+
+  const [leagues, setLeagues] = React.useState<LeagueWithTheme[]>([]);
+  const [isLoading, setIsLoading] = React.useState(true);
+  const [error, setError] = React.useState<string | null>(null);
+
+  // Function to assign theme colors to leagues
+  const addThemeToLeagues = (leagues: League[]): LeagueWithTheme[] => {
+    return leagues.map((league, index) => {
+      const theme = leagueThemes[index % leagueThemes.length];
+      return {
+        ...league,
+        ...theme,
+      };
+    });
+  };
+
+  // Function to load leagues
+  const loadLeagues = React.useCallback(async () => {
+    try {
+      setIsLoading(true);
+      setError(null);
+      const userLeagues = await fetchUserLeagues(fetchWithAuth);
+      const leaguesWithTheme = addThemeToLeagues(userLeagues);
+      setLeagues(leaguesWithTheme);
+    } catch (err) {
+      const errorMessage =
+        err instanceof Error ? err.message : "Failed to load leagues";
+      setError(errorMessage);
+      captureException(err as Error, {
+        function: "loadLeagues",
+        screen: "MyLeagues",
+      });
+    } finally {
+      setIsLoading(false);
+    }
+  }, [fetchWithAuth]);
+
+  // Load leagues on mount
+  React.useEffect(() => {
+    loadLeagues();
+  }, [loadLeagues]);
 
   // Track screen visit
   React.useEffect(() => {
@@ -167,7 +188,7 @@ export default function MyLeagues() {
   };
 
   const shareLeagueCode = React.useCallback(
-    async (league: League) => {
+    async (league: LeagueWithTheme) => {
       try {
         addBreadcrumb("User initiated league share", "user_action", {
           screen: "MyLeagues",
@@ -239,7 +260,7 @@ export default function MyLeagues() {
 
   // Wrap the render function with error tracking
   const renderLeagueCard = React.useCallback(
-    ({ item }: { item: League }) => {
+    ({ item }: { item: LeagueWithTheme }) => {
       try {
         return (
           <Pressable
@@ -428,61 +449,97 @@ export default function MyLeagues() {
         </View>
       </View>
 
-      {/* Leagues List */}
-      <FlatList
-        data={mockLeagues}
-        renderItem={renderLeagueCard}
-        keyExtractor={(item) => item.id}
-        contentContainerStyle={[
-          styles.listContainer,
-          mockLeagues.length === 0 && styles.emptyListContainer,
-        ]}
-        onScrollToIndexFailed={(info) => {
-          captureException(new Error("FlatList scroll to index failed"), {
-            function: "FlatList.onScrollToIndexFailed",
-            screen: "MyLeagues",
-            index: info.index,
-            highestMeasuredFrameIndex: info.highestMeasuredFrameIndex,
-            averageItemLength: info.averageItemLength,
-          });
-        }}
-        showsVerticalScrollIndicator={false}
-        ListEmptyComponent={
-          <View style={styles.emptyState}>
-            <Text
-              variant="h2"
-              color={theme.text}
-              style={[styles.emptyTitle, isRTL && styles.rtlText]}>
-              {t("noLeaguesYet")}
-            </Text>
-            <Text
-              variant="body"
-              color={theme.textMuted}
-              style={[styles.emptySubtitle, isRTL && styles.rtlText]}>
-              {t("createFirstLeague")}
-            </Text>
+      {/* Loading State */}
+      {isLoading && (
+        <View style={styles.loadingContainer}>
+          <ActivityIndicator size="large" color={theme.primary} />
+          <Text
+            variant="body"
+            color={theme.textMuted}
+            style={styles.loadingText}>
+            {t("loadingLeagues")}
+          </Text>
+        </View>
+      )}
 
-            <View style={styles.emptyButtons}>
-              <Button
-                title={t("createLeague")}
-                onPress={handleCreateLeague}
-                variant="primary"
-                size="large"
-                icon="add-circle"
-                fullWidth
-              />
-              <Button
-                title={t("joinLeague")}
-                onPress={handleJoinLeague}
-                variant="outline"
-                size="large"
-                icon="enter"
-                fullWidth
-              />
+      {/* Error State */}
+      {error && !isLoading && (
+        <View style={styles.errorContainer}>
+          <Text variant="h3" color={theme.error} style={styles.errorTitle}>
+            {t("error")}
+          </Text>
+          <Text
+            variant="body"
+            color={theme.textMuted}
+            style={styles.errorMessage}>
+            {error}
+          </Text>
+          <Button
+            title={t("retry")}
+            onPress={loadLeagues}
+            variant="outline"
+            size="small"
+          />
+        </View>
+      )}
+
+      {/* Leagues List */}
+      {!isLoading && !error && (
+        <FlatList
+          data={leagues}
+          renderItem={renderLeagueCard}
+          keyExtractor={(item) => item.id}
+          contentContainerStyle={[
+            styles.listContainer,
+            leagues.length === 0 && styles.emptyListContainer,
+          ]}
+          onScrollToIndexFailed={(info) => {
+            captureException(new Error("FlatList scroll to index failed"), {
+              function: "FlatList.onScrollToIndexFailed",
+              screen: "MyLeagues",
+              index: info.index,
+              highestMeasuredFrameIndex: info.highestMeasuredFrameIndex,
+              averageItemLength: info.averageItemLength,
+            });
+          }}
+          showsVerticalScrollIndicator={false}
+          ListEmptyComponent={
+            <View style={styles.emptyState}>
+              <Text
+                variant="h2"
+                color={theme.text}
+                style={[styles.emptyTitle, isRTL && styles.rtlText]}>
+                {t("noLeaguesYet")}
+              </Text>
+              <Text
+                variant="body"
+                color={theme.textMuted}
+                style={[styles.emptySubtitle, isRTL && styles.rtlText]}>
+                {t("createFirstLeague")}
+              </Text>
+
+              <View style={styles.emptyButtons}>
+                <Button
+                  title={t("createLeague")}
+                  onPress={handleCreateLeague}
+                  variant="primary"
+                  size="large"
+                  icon="add-circle"
+                  fullWidth
+                />
+                <Button
+                  title={t("joinLeague")}
+                  onPress={handleJoinLeague}
+                  variant="outline"
+                  size="large"
+                  icon="enter"
+                  fullWidth
+                />
+              </View>
             </View>
-          </View>
-        }
-      />
+          }
+        />
+      )}
     </View>
   );
 }
@@ -685,5 +742,37 @@ const styles = StyleSheet.create({
   emptyButtons: {
     width: "100%",
     gap: 16,
+  },
+
+  // Loading State
+  loadingContainer: {
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
+    paddingVertical: 60,
+  },
+
+  loadingText: {
+    marginTop: 16,
+    textAlign: "center",
+  },
+
+  // Error State
+  errorContainer: {
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
+    paddingHorizontal: 40,
+    paddingVertical: 60,
+  },
+
+  errorTitle: {
+    textAlign: "center",
+    marginBottom: 12,
+  },
+
+  errorMessage: {
+    textAlign: "center",
+    marginBottom: 24,
   },
 });

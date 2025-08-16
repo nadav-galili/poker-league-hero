@@ -1,18 +1,16 @@
 import { getUserLeagues } from "../../../utils/leagueUtils";
+import { withAuth } from "../../../utils/middleware";
 
-export async function GET(request: Request) {
+export const GET = withAuth(async (request: Request, user) => {
   try {
-    const { searchParams } = new URL(request.url);
-    const userId = searchParams.get("userId");
-
-    if (!userId) {
+    if (!user.userId) {
       return Response.json(
-        { error: "Missing required parameter: userId" },
+        { error: "User ID not found in token" },
         { status: 400 }
       );
     }
 
-    const userLeagues = await getUserLeagues(userId);
+    const userLeagues = await getUserLeagues(user.userId);
 
     return Response.json({
       leagues: userLeagues,
@@ -25,4 +23,4 @@ export async function GET(request: Request) {
       { status: 500 }
     );
   }
-}
+});

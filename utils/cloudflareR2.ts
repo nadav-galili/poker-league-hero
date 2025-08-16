@@ -15,7 +15,7 @@ export async function uploadImageToR2(filePath: string): Promise<string> {
     const cleanPath = filePath.replace("file://", "");
     const imageBuffer = readFileSync(cleanPath);
 
-    const fileName = `league-images/${uuidv4()}.jpg`;
+    const fileName = `poker-league-images/league-images/${uuidv4()}.jpg`;
 
     await s3Client
       .upload({
@@ -33,8 +33,8 @@ export async function uploadImageToR2(filePath: string): Promise<string> {
       console.warn("Failed to delete local file:", e);
     }
 
-    // Return public URL
-    return `https://${process.env.R2_BUCKET_NAME}.r2.dev/${fileName}`;
+    // Return public URL using the CLOUDFLARE_R2_PUBLIC_URL from .env
+    return `${process.env.CLOUDFLARE_R2_PUBLIC_URL}/${fileName}`;
   } catch (error) {
     console.error("R2 upload failed:", error);
     throw new Error("Failed to upload image to R2");

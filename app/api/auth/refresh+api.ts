@@ -260,9 +260,15 @@ export async function POST(request: Request) {
       };
     }
 
+    // Ensure userId is preserved from original token
+    const userInfoWithUserId = {
+      ...completeUserInfo,
+      userId: completeUserInfo.userId, // Preserve the database user ID
+    };
+
     // Create a new access token with complete user info
     const newAccessToken = await new jose.SignJWT({
-      ...completeUserInfo,
+      ...userInfoWithUserId,
       // Remove the refresh token specific fields from the access token
       type: undefined,
     })
@@ -274,7 +280,7 @@ export async function POST(request: Request) {
 
     // Create a new refresh token (token rotation)
     const newRefreshToken = await new jose.SignJWT({
-      ...completeUserInfo,
+      ...userInfoWithUserId,
       jti,
       type: "refresh",
     })
