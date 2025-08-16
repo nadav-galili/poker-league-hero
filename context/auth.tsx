@@ -27,6 +27,7 @@ export type AuthUser = {
   provider?: string;
   exp?: number;
   cookieExpiration?: number; // Added for web cookie expiration tracking
+  userId?: string; // Database user ID
 };
 
 const AuthContext = React.createContext({

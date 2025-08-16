@@ -167,7 +167,7 @@ export async function joinLeagueByInviteCode(
  */
 export async function getUserLeagues(userId: string): Promise<any[]> {
   const { getDb, leagueMembers, leagues } = await import("../db");
-  const { eq } = await import("drizzle-orm");
+  const { eq, count } = await import("drizzle-orm");
   const db = getDb();
 
   const userLeagues = await db
@@ -186,7 +186,55 @@ export async function getUserLeagues(userId: string): Promise<any[]> {
       )
     );
 
-  return userLeagues;
+  // Get member count for each league and format the data
+  const formattedLeagues = await Promise.all(
+    userLeagues.map(async (item) => {
+      // Get member count for this league
+      const memberCountResult = await db
+        .select({ count: count() })
+        .from(leagueMembers)
+        .where(
+          and(
+            eq(leagueMembers.leagueId, item.league.id),
+            eq(leagueMembers.isActive, true)
+          )
+        );
+
+      const memberCount = memberCountResult[0]?.count || 0;
+
+      // Format the image URL
+      let imageUrl = item.league.imageUrl;
+      if (imageUrl) {
+        if (imageUrl.startsWith('https://poker-league-images.r2.dev/')) {
+          // Replace the old restricted domain with the public URL
+          imageUrl = imageUrl.replace('https://poker-league-images.r2.dev/', `${process.env.CLOUDFLARE_R2_PUBLIC_URL}/poker-league-images/`);
+        } else if (!imageUrl.startsWith('http')) {
+          // If it's a relative path, construct the full R2 URL
+          // Handle both old format (just filename) and new format (full path)
+          if (imageUrl.includes('/')) {
+            // Already has path structure
+            imageUrl = `${process.env.CLOUDFLARE_R2_PUBLIC_URL}/${imageUrl}`;
+          } else {
+            // Just filename, add the path
+            imageUrl = `${process.env.CLOUDFLARE_R2_PUBLIC_URL}/poker-league-images/league-images/${imageUrl}`;
+          }
+        }
+      }
+
+      return {
+        id: item.league.id,
+        name: item.league.name,
+        code: item.league.inviteCode,
+        image: imageUrl,
+        memberCount,
+        status: item.league.isActive ? "active" : "inactive",
+        role: item.memberRole,
+        joinedAt: item.joinedAt,
+      };
+    })
+  );
+
+  return formattedLeagues;
 }
 
 /**

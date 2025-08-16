@@ -49,6 +49,7 @@ export async function POST(request: Request) {
     const userInfo = jose.decodeJwt(data.id_token) as any;
 
     // Insert/update user in database
+    let dbUserId: string | null = null;
     try {
       // Import database functions directly
       const { getDb, users } = await import("../../../db");
@@ -76,10 +77,10 @@ export async function POST(request: Request) {
           })
           .where(eq(users.googleId, userInfo.sub))
           .returning();
-        // User updated
+        dbUserId = result[0]?.id || existingUser[0].id;
       } else {
         // Insert new user
-        await db
+        const newUserResult = await db
           .insert(users)
           .values({
             email: userInfo.email,
@@ -90,7 +91,7 @@ export async function POST(request: Request) {
             lastLoginAt: new Date(),
           })
           .returning();
-        // User created
+        dbUserId = newUserResult[0]?.id;
       }
     } catch (error) {
       console.error("Error saving user to database:", error);
@@ -101,8 +102,14 @@ export async function POST(request: Request) {
     const sub = (userInfo as { sub: string }).sub;
     const issuedAt = Math.floor(Date.now() / 1000);
 
+    // Enhanced user info with database ID
+    const enhancedUserInfo = {
+      ...userInfoWithoutExp,
+      userId: dbUserId, // Add the database user ID
+    };
+
     ///create access token short lived
-    const accessToken = await new jose.SignJWT(userInfoWithoutExp)
+    const accessToken = await new jose.SignJWT(enhancedUserInfo)
       .setProtectedHeader({ alg: "HS256" })
       // Use deterministic absolute exp (issuedAt + COOKIE_MAX_AGE seconds)
       .setExpirationTime(issuedAt + COOKIE_MAX_AGE)
@@ -112,7 +119,7 @@ export async function POST(request: Request) {
 
     // create refresh token (rotated by /api/auth/refresh)
     const refreshToken = await new jose.SignJWT({
-      ...userInfoWithoutExp,
+      ...enhancedUserInfo,
       jti: crypto.randomUUID(),
       type: "refresh",
     })
