@@ -88,6 +88,14 @@ export interface Translations {
   errorOccurred: string;
   errorMessage: string;
   tryAgain: string;
+
+  // League Stats Screen
+  leagueStats: string;
+  loadingLeagueDetails: string;
+  leagueNotFound: string;
+  statistics: string;
+  statsComingSoon: string;
+  retry: string;
 }
 
 // English translations
@@ -163,6 +171,14 @@ const enTranslations: Translations = {
   errorOccurred: "Oops! Something went wrong",
   errorMessage: "An unexpected error occurred. Our team has been notified.",
   tryAgain: "Try Again",
+
+  // League Stats Screen
+  leagueStats: "LEAGUE STATS",
+  loadingLeagueDetails: "Loading league details...",
+  leagueNotFound: "League not found",
+  statistics: "STATISTICS",
+  statsComingSoon: "Statistics coming soon!",
+  retry: "Retry",
 };
 
 // Hebrew translations
@@ -238,6 +254,14 @@ const heTranslations: Translations = {
   errorOccurred: "אופס! משהו השתבש",
   errorMessage: "אירעה שגיאה בלתי צפויה. הצוות שלנו קיבל דיווח על הבעיה.",
   tryAgain: "נסה שוב",
+
+  // League Stats Screen
+  leagueStats: "סטטיסטיקות ליגה",
+  loadingLeagueDetails: "טוען פרטי ליגה...",
+  leagueNotFound: "הליגה לא נמצאה",
+  statistics: "סטטיסטיקות",
+  statsComingSoon: "סטטיסטיקות בקרוב!",
+  retry: "נסה שוב",
 };
 
 const translations = {
