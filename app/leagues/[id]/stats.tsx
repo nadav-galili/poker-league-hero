@@ -234,22 +234,209 @@ export default function LeagueStats() {
           </View>
         </View>
 
-        {/* Stats Placeholder - TODO: Add actual stats */}
+        {/* Quick Stats Overview */}
         <View
           style={[
-            styles.statsContainer,
+            styles.quickStatsContainer,
             { backgroundColor: theme.surfaceElevated },
           ]}>
           <Text variant="h3" color={theme.text} style={styles.sectionTitle}>
-            {t("statistics")}
+            {t("quickStats")}
           </Text>
 
-          <Text
-            variant="body"
-            color={theme.textMuted}
-            style={styles.comingSoon}>
-            {t("statsComingSoon")}
-          </Text>
+          <View style={styles.statsGrid}>
+            <View
+              style={[
+                styles.statCard,
+                {
+                  backgroundColor: colors.primaryTint,
+                  borderColor: colors.primary,
+                },
+              ]}>
+              <Text
+                variant="h1"
+                color={colors.primary}
+                style={styles.statNumber}>
+                12
+              </Text>
+              <Text
+                variant="captionSmall"
+                color={colors.primary}
+                style={styles.statLabel}>
+                {t("totalGames")}
+              </Text>
+            </View>
+
+            <View
+              style={[
+                styles.statCard,
+                {
+                  backgroundColor: colors.secondaryTint,
+                  borderColor: colors.secondary,
+                },
+              ]}>
+              <Text
+                variant="h1"
+                color={colors.secondary}
+                style={styles.statNumber}>
+                8
+              </Text>
+              <Text
+                variant="captionSmall"
+                color={colors.secondary}
+                style={styles.statLabel}>
+                {t("activePlayers")}
+              </Text>
+            </View>
+
+            <View
+              style={[
+                styles.statCard,
+                {
+                  backgroundColor: colors.highlightTint,
+                  borderColor: colors.highlight,
+                },
+              ]}>
+              <Text
+                variant="h1"
+                color={colors.highlight}
+                style={styles.statNumber}>
+                $2,450
+              </Text>
+              <Text
+                variant="captionSmall"
+                color={colors.highlight}
+                style={styles.statLabel}>
+                {t("totalPot")}
+              </Text>
+            </View>
+
+            <View
+              style={[
+                styles.statCard,
+                {
+                  backgroundColor: colors.accentTint,
+                  borderColor: colors.accent,
+                },
+              ]}>
+              <Text
+                variant="h1"
+                color={colors.accent}
+                style={styles.statNumber}>
+                5D
+              </Text>
+              <Text
+                variant="captionSmall"
+                color={colors.accent}
+                style={styles.statLabel}>
+                {t("lastGame")}
+              </Text>
+            </View>
+          </View>
+        </View>
+
+        {/* Main Action Cards */}
+        <View style={styles.actionsContainer}>
+          {/* View Detailed Stats Card */}
+          <TouchableOpacity
+            style={[
+              styles.actionCard,
+              styles.primaryActionCard,
+              {
+                backgroundColor: theme.surfaceElevated,
+                borderColor: colors.primary,
+              },
+            ]}
+            onPress={() => {
+              addBreadcrumb("User tapped View Stats", "user_action", {
+                screen: "LeagueStats",
+                leagueId: league.id,
+              });
+              // TODO: Navigate to detailed stats
+              console.log("Navigate to detailed stats");
+            }}>
+            <View
+              style={[
+                styles.actionIconContainer,
+                { backgroundColor: colors.primary },
+              ]}>
+              <Ionicons
+                name="stats-chart"
+                size={32}
+                color={colors.textInverse}
+              />
+            </View>
+
+            <View style={styles.actionContent}>
+              <Text variant="h3" color={theme.text} style={styles.actionTitle}>
+                {t("viewDetailedStats")}
+              </Text>
+              <Text
+                variant="body"
+                color={theme.textMuted}
+                style={styles.actionDescription}>
+                {t("viewStatsDescription")}
+              </Text>
+            </View>
+
+            <View style={styles.actionChevron}>
+              <Ionicons
+                name={isRTL ? "chevron-back" : "chevron-forward"}
+                size={24}
+                color={colors.primary}
+              />
+            </View>
+          </TouchableOpacity>
+
+          {/* Start New Game Card */}
+          <TouchableOpacity
+            style={[
+              styles.actionCard,
+              styles.secondaryActionCard,
+              {
+                backgroundColor: colors.secondary,
+                borderColor: colors.secondary,
+              },
+            ]}
+            onPress={() => {
+              addBreadcrumb("User tapped Start New Game", "user_action", {
+                screen: "LeagueStats",
+                leagueId: league.id,
+              });
+              // TODO: Navigate to create game
+              console.log("Navigate to create new game");
+            }}>
+            <View
+              style={[
+                styles.actionIconContainer,
+                { backgroundColor: colors.textInverse },
+              ]}>
+              <Ionicons name="play-circle" size={32} color={colors.secondary} />
+            </View>
+
+            <View style={styles.actionContent}>
+              <Text
+                variant="h3"
+                color={colors.textInverse}
+                style={styles.actionTitle}>
+                {t("startNewGame")}
+              </Text>
+              <Text
+                variant="body"
+                color={colors.textInverse}
+                style={[styles.actionDescription, { opacity: 0.9 }]}>
+                {t("startGameDescription")}
+              </Text>
+            </View>
+
+            <View style={styles.actionChevron}>
+              <Ionicons
+                name={isRTL ? "chevron-back" : "chevron-forward"}
+                size={24}
+                color={colors.textInverse}
+              />
+            </View>
+          </TouchableOpacity>
         </View>
       </ScrollView>
     </View>
@@ -368,11 +555,12 @@ const styles = StyleSheet.create({
     letterSpacing: 0.8,
     textTransform: "uppercase",
   },
-  statsContainer: {
+  quickStatsContainer: {
     padding: 20,
     borderRadius: 12,
     borderWidth: 6,
     borderColor: colors.border,
+    marginBottom: 20,
     shadowColor: colors.shadow,
     shadowOffset: { width: 8, height: 8 },
     shadowOpacity: 1,
@@ -383,8 +571,79 @@ const styles = StyleSheet.create({
     letterSpacing: 1.2,
     marginBottom: 16,
   },
-  comingSoon: {
+  statsGrid: {
+    flexDirection: "row",
+    flexWrap: "wrap",
+    gap: 12,
+  },
+  statCard: {
+    flex: 1,
+    minWidth: "45%",
+    padding: 16,
+    borderRadius: 8,
+    borderWidth: 3,
+    alignItems: "center",
+    shadowColor: colors.shadow,
+    shadowOffset: { width: 4, height: 4 },
+    shadowOpacity: 1,
+    shadowRadius: 0,
+    elevation: 8,
+  },
+  statNumber: {
+    fontSize: 28,
+    fontWeight: "800",
+    letterSpacing: 1,
+    marginBottom: 4,
+  },
+  statLabel: {
+    letterSpacing: 0.8,
+    textTransform: "uppercase",
     textAlign: "center",
-    fontStyle: "italic",
+    fontWeight: "600",
+  },
+  actionsContainer: {
+    gap: 16,
+  },
+  actionCard: {
+    flexDirection: "row",
+    alignItems: "center",
+    padding: 20,
+    borderRadius: 12,
+    borderWidth: 6,
+    shadowColor: colors.shadow,
+    shadowOffset: { width: 8, height: 8 },
+    shadowOpacity: 1,
+    shadowRadius: 0,
+    elevation: 12,
+  },
+  primaryActionCard: {
+    // Styles will be applied via backgroundColor prop
+  },
+  secondaryActionCard: {
+    // Styles will be applied via backgroundColor prop
+  },
+  actionIconContainer: {
+    width: 60,
+    height: 60,
+    borderRadius: 12,
+    alignItems: "center",
+    justifyContent: "center",
+    marginRight: 16,
+    borderWidth: 3,
+    borderColor: colors.border,
+  },
+  actionContent: {
+    flex: 1,
+  },
+  actionTitle: {
+    letterSpacing: 1.2,
+    marginBottom: 4,
+    fontWeight: "700",
+  },
+  actionDescription: {
+    lineHeight: 20,
+  },
+  actionChevron: {
+    marginLeft: 12,
   },
 });

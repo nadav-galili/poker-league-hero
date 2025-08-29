@@ -52,6 +52,8 @@ export interface Translations {
   language: string;
   english: string;
   hebrew: string;
+  success: string;
+  ok: string;
 
   // League Creation
   createLeaguePrompt: string;
@@ -60,6 +62,7 @@ export interface Translations {
   cancel: string;
   join: string;
   create: string;
+  joinedLeagueSuccess: string;
 
   // Create League Screen
   leagueName: string;
@@ -96,6 +99,15 @@ export interface Translations {
   statistics: string;
   statsComingSoon: string;
   retry: string;
+  quickStats: string;
+  totalGames: string;
+  activePlayers: string;
+  totalPot: string;
+  lastGame: string;
+  viewDetailedStats: string;
+  viewStatsDescription: string;
+  startNewGame: string;
+  startGameDescription: string;
 }
 
 // English translations
@@ -135,6 +147,8 @@ const enTranslations: Translations = {
   language: "LANGUAGE",
   english: "English",
   hebrew: "עברית",
+  success: "Success",
+  ok: "OK",
 
   // League Creation
   createLeaguePrompt: "Navigation to create league form coming soon!",
@@ -143,6 +157,7 @@ const enTranslations: Translations = {
   cancel: "Cancel",
   join: "Join",
   create: "Create",
+  joinedLeagueSuccess: "Successfully joined league",
 
   // Create League Screen
   leagueName: "League Name",
@@ -179,6 +194,16 @@ const enTranslations: Translations = {
   statistics: "STATISTICS",
   statsComingSoon: "Statistics coming soon!",
   retry: "Retry",
+  quickStats: "QUICK STATS",
+  totalGames: "TOTAL GAMES",
+  activePlayers: "ACTIVE PLAYERS",
+  totalPot: "TOTAL POT",
+  lastGame: "LAST GAME",
+  viewDetailedStats: "VIEW DETAILED STATS",
+  viewStatsDescription:
+    "See player rankings, game history, and performance analytics",
+  startNewGame: "START NEW GAME",
+  startGameDescription: "Create a new poker game for this league",
 };
 
 // Hebrew translations
@@ -218,6 +243,8 @@ const heTranslations: Translations = {
   language: "שפה",
   english: "English",
   hebrew: "עברית",
+  success: "הצלחה",
+  ok: "אישור",
 
   // League Creation
   createLeaguePrompt: "ניווט לטופס יצירת ליגה יגיע בקרוב!",
@@ -226,6 +253,7 @@ const heTranslations: Translations = {
   cancel: "ביטול",
   join: "הצטרף",
   create: "צור",
+  joinedLeagueSuccess: "הצטרפת בהצלחה לליגה",
 
   // Create League Screen
   leagueName: "שם הליגה",
@@ -262,6 +290,15 @@ const heTranslations: Translations = {
   statistics: "סטטיסטיקות",
   statsComingSoon: "סטטיסטיקות בקרוב!",
   retry: "נסה שוב",
+  quickStats: "סטטיסטיקות מהירות",
+  totalGames: "סה״כ משחקים",
+  activePlayers: "שחקנים פעילים",
+  totalPot: "סה״כ כדים",
+  lastGame: "משחק אחרון",
+  viewDetailedStats: "צפה בסטטיסטיקות מפורטות",
+  viewStatsDescription: "ראה דירוגי שחקנים, היסטוריית משחקים וניתוח ביצועים",
+  startNewGame: "התחל משחק חדש",
+  startGameDescription: "צור משחק פוקר חדש עבור הליגה הזו",
 };
 
 const translations = {

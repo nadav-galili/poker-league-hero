@@ -11,34 +11,8 @@ export async function GET(request: Request) {
 
     const league = await getLeagueDetails(id);
 
-    // Format the image URL for display
-    let imageUrl = league.imageUrl;
-    if (imageUrl && !imageUrl.startsWith("http")) {
-      //If it's a relative path, construct the full R2 URL
-      if (imageUrl.includes("/")) {
-        imageUrl = `${process.env.CLOUDFLARE_R2_PUBLIC_URL}/poker-league-images/${imageUrl}`;
-      } else {
-        imageUrl = `${process.env.CLOUDFLARE_R2_PUBLIC_URL}/poker-league-images/league-images/${imageUrl}`;
-      }
-    }
-
-    if (imageUrl && imageUrl.includes("poker-league-images.r2.dev")) {
-      // Fix old URLs that use the custom domain
-      imageUrl = imageUrl.replace(
-        "https://poker-league-images.r2.dev",
-        `${process.env.CLOUDFLARE_R2_PUBLIC_URL}/poker-league-images`
-      );
-    } else if (
-      imageUrl &&
-      imageUrl.includes("pub-6908906fe4c24b7b82ff61e803190c28.r2.dev") &&
-      !imageUrl.includes("poker-league-images")
-    ) {
-      // Fix URLs missing the poker-league-images prefix
-      imageUrl = imageUrl.replace(
-        "https://pub-6908906fe4c24b7b82ff61e803190c28.r2.dev/",
-        `${process.env.CLOUDFLARE_R2_PUBLIC_URL}/poker-league-images/`
-      );
-    }
+    // Image URL is already in correct format from database
+    const imageUrl = league.imageUrl;
 
     const formattedLeague = {
       id: league.id,

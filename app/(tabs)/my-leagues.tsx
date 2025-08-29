@@ -2,6 +2,7 @@ import { colors, getTheme } from "@/colors";
 import Button from "@/components/Button";
 import { LanguageSelector } from "@/components/LanguageSelector";
 import { Text } from "@/components/Text";
+import { BASE_URL } from "@/constants";
 import { useAuth } from "@/context/auth";
 import { useLocalization } from "@/context/localization";
 import { League, fetchUserLeagues } from "@/utils/leagueService";
@@ -55,6 +56,39 @@ type LeagueWithTheme = League & {
   accentColor: string;
   variant: "primary" | "secondary" | "highlight" | "accent";
 };
+
+// Simple client-side validation (without importing server dependencies)
+function validateInviteCodeClient(inviteCode: string): {
+  isValid: boolean;
+  error?: string;
+} {
+  if (!inviteCode || typeof inviteCode !== "string") {
+    return { isValid: false, error: "Invite code is required" };
+  }
+
+  const trimmedCode = inviteCode.trim();
+
+  if (trimmedCode.length !== 5) {
+    return {
+      isValid: false,
+      error: "Invite code must be exactly 5 characters",
+    };
+  }
+
+  const validChars = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789";
+  const codeUpper = trimmedCode.toUpperCase();
+
+  for (let i = 0; i < codeUpper.length; i++) {
+    if (!validChars.includes(codeUpper[i])) {
+      return {
+        isValid: false,
+        error: "Invite code contains invalid characters",
+      };
+    }
+  }
+
+  return { isValid: true };
+}
 
 export default function MyLeagues() {
   const theme = getTheme("light");
@@ -150,7 +184,7 @@ export default function MyLeagues() {
       });
 
       console.log("Join League pressed");
-      // TODO: Show join league modal with code input
+
       Alert.prompt(
         t("joinLeague"),
         t("enterLeagueCode"),
@@ -158,28 +192,8 @@ export default function MyLeagues() {
           { text: t("cancel"), style: "cancel" },
           {
             text: t("join"),
-            onPress: (code) => {
-              try {
-                console.log("Joining league with code:", code);
-                addBreadcrumb("User entered league code", "user_input", {
-                  screen: "MyLeagues",
-                  action: "join_league_code_entered",
-                  codeLength: code?.length || 0,
-                });
-                // TODO: Implement join league logic
-                captureMessage("User attempted to join league", "info", {
-                  screen: "MyLeagues",
-                  codeProvided: !!code,
-                  codeLength: code?.length || 0,
-                });
-              } catch (error) {
-                captureException(error as Error, {
-                  function: "handleJoinLeague.onPress",
-                  screen: "MyLeagues",
-                  code: code || "empty",
-                });
-                Alert.alert(t("error"), "Failed to process league code");
-              }
+            onPress: async (code) => {
+              await handleJoinLeagueWithCode(code);
             },
           },
         ],
@@ -191,6 +205,87 @@ export default function MyLeagues() {
         screen: "MyLeagues",
       });
       Alert.alert(t("error"), "Failed to open join league dialog");
+    }
+  };
+
+  const handleJoinLeagueWithCode = async (code?: string) => {
+    try {
+      if (!code) {
+        Alert.alert(t("error"), "Please enter a league code");
+        return;
+      }
+
+      addBreadcrumb("User entered league code", "user_input", {
+        screen: "MyLeagues",
+        action: "join_league_code_entered",
+        codeLength: code.length,
+      });
+
+      // Validate invite code format first
+      const validation = validateInviteCodeClient(code);
+      if (!validation.isValid) {
+        Alert.alert(
+          t("error"),
+          validation.error || "Invalid invite code format"
+        );
+        return;
+      }
+
+      // Show loading state
+      setIsLoading(true);
+
+      // Call API to join league
+      const response = await fetchWithAuth(`${BASE_URL}/api/leagues/join`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          inviteCode: code.toUpperCase(),
+        }),
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(data.error || "Failed to join league");
+      }
+
+      // Success! Show success message and refresh leagues
+      Alert.alert(
+        t("success"),
+        `${t("joinedLeagueSuccess")} "${data.league.name}"`,
+        [
+          {
+            text: t("ok"),
+            onPress: () => {
+              // Refresh the leagues list
+              loadLeagues();
+            },
+          },
+        ]
+      );
+
+      captureMessage("User successfully joined league", "info", {
+        screen: "MyLeagues",
+        leagueId: data.league.id,
+        leagueName: data.league.name,
+        codeUsed: code,
+      });
+    } catch (error) {
+      const errorMessage =
+        error instanceof Error ? error.message : "Failed to join league";
+
+      captureException(error as Error, {
+        function: "handleJoinLeagueWithCode",
+        screen: "MyLeagues",
+        code: code || "empty",
+        errorMessage,
+      });
+
+      Alert.alert(t("error"), errorMessage);
+    } finally {
+      setIsLoading(false);
     }
   };
 
