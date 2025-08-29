@@ -14,7 +14,7 @@ import {
 import { Ionicons } from "@expo/vector-icons";
 import { Image } from "expo-image";
 import * as Linking from "expo-linking";
-import { router } from "expo-router";
+import { router, useFocusEffect } from "expo-router";
 import React from "react";
 import {
   ActivityIndicator,
@@ -97,10 +97,17 @@ export default function MyLeagues() {
     }
   }, [fetchWithAuth]);
 
-  // Load leagues on mount
+  // Load leagues on mount and when screen comes into focus
   React.useEffect(() => {
     loadLeagues();
   }, [loadLeagues]);
+
+  // Refresh leagues when screen comes into focus (e.g., after creating a league)
+  useFocusEffect(
+    React.useCallback(() => {
+      loadLeagues();
+    }, [loadLeagues])
+  );
 
   // Track screen visit
   React.useEffect(() => {

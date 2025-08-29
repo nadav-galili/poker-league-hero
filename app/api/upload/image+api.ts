@@ -13,7 +13,7 @@ const s3Client = new AWS.S3({
 export async function POST(request: Request) {
   try {
     const formData = await request.formData();
-    const fileData = formData.get("file");
+    const fileData = (formData as any).get("file");
     const file = fileData as File;
 
     if (!file) {
@@ -38,7 +38,7 @@ export async function POST(request: Request) {
       .promise();
 
     // Return the actual R2 public URL (using the actual domain with bucket prefix)
-    const publicUrl = `https://pub-6908906fe4c24b7b82ff61e803190c28.r2.dev/poker-league-images/${fileName}`;
+    const publicUrl = `${process.env.CLOUDFLARE_R2_PUBLIC_URL}/poker-league-images/${fileName}`;
 
     return Response.json({
       success: true,
