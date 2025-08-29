@@ -14,6 +14,68 @@ export function generateInviteCode(): string {
 }
 
 /**
+ * Validate invite code format based on generation rules
+ */
+export function validateInviteCode(inviteCode: string): {
+  isValid: boolean;
+  error?: string;
+} {
+  // Check if code exists
+  if (!inviteCode || typeof inviteCode !== "string") {
+    return { isValid: false, error: "Invite code is required" };
+  }
+
+  // Trim whitespace
+  const trimmedCode = inviteCode.trim();
+
+  // Check length (exactly 5 characters)
+  if (trimmedCode.length !== 5) {
+    return {
+      isValid: false,
+      error: "Invite code must be exactly 5 characters",
+    };
+  }
+
+  // Check if contains only valid characters (same as generation)
+  const validChars = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789";
+  const codeUpper = trimmedCode.toUpperCase();
+
+  for (let i = 0; i < codeUpper.length; i++) {
+    if (!validChars.includes(codeUpper[i])) {
+      return {
+        isValid: false,
+        error: "Invite code contains invalid characters",
+      };
+    }
+  }
+
+  return { isValid: true };
+}
+
+/**
+ * Find league by invite code
+ */
+export async function findLeagueByInviteCode(
+  inviteCode: string
+): Promise<any | null> {
+  const { getDb, leagues } = await import("../db");
+  const db = getDb();
+
+  try {
+    const league = await db
+      .select()
+      .from(leagues)
+      .where(eq(leagues.inviteCode, inviteCode.toUpperCase()))
+      .limit(1);
+
+    return league.length > 0 ? league[0] : null;
+  } catch (error) {
+    console.error("Error finding league by invite code:", error);
+    throw new Error("Failed to search for league");
+  }
+}
+
+/**
  * Check if an invite code is available (not already used)
  */
 export async function isInviteCodeAvailable(
@@ -202,34 +264,8 @@ export async function getUserLeagues(userId: string): Promise<any[]> {
 
       const memberCount = memberCountResult[0]?.count || 0;
 
-      // Format the image URL
-      let imageUrl = item.league.imageUrl;
-      if (imageUrl && !imageUrl.startsWith("http")) {
-        // If it's a relative path, construct the full R2 URL using actual domain
-        if (imageUrl.includes("/")) {
-          // Already has path structure (like "league-images/filename.jpg")
-          imageUrl = `https://pub-6908906fe4c24b7b82ff61e803190c28.r2.dev/poker-league-images/${imageUrl}`;
-        } else {
-          // Just filename, add the league-images path
-          imageUrl = `https://pub-6908906fe4c24b7b82ff61e803190c28.r2.dev/poker-league-images/league-images/${imageUrl}`;
-        }
-      } else if (imageUrl && imageUrl.includes("poker-league-images.r2.dev")) {
-        // Fix old URLs that use the custom domain to use the actual R2 domain
-        imageUrl = imageUrl.replace(
-          "https://poker-league-images.r2.dev",
-          "https://pub-6908906fe4c24b7b82ff61e803190c28.r2.dev/poker-league-images"
-        );
-      } else if (
-        imageUrl &&
-        imageUrl.includes("pub-6908906fe4c24b7b82ff61e803190c28.r2.dev") &&
-        !imageUrl.includes("poker-league-images")
-      ) {
-        // Fix URLs that are missing the poker-league-images prefix
-        imageUrl = imageUrl.replace(
-          "https://pub-6908906fe4c24b7b82ff61e803190c28.r2.dev/",
-          "https://pub-6908906fe4c24b7b82ff61e803190c28.r2.dev/poker-league-images/"
-        );
-      }
+      // Image URL is already in correct format from database
+      const imageUrl = item.league.imageUrl;
 
       return {
         id: item.league.id,
