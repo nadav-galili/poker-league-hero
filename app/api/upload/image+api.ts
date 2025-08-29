@@ -13,7 +13,8 @@ const s3Client = new AWS.S3({
 export async function POST(request: Request) {
   try {
     const formData = await request.formData();
-    const file = formData.get("file") as File;
+    const fileData = formData.get("file");
+    const file = fileData as File;
 
     if (!file) {
       return Response.json({ error: "No file provided" }, { status: 400 });
