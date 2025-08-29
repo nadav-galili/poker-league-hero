@@ -14,15 +14,25 @@ export async function GET(request: Request) {
     // Image URL is already in correct format from database
     const imageUrl = league.imageUrl;
 
+    // Format members to flatten the structure
+    const formattedMembers =
+      league.members?.map((member: any) => ({
+        id: member.user.id,
+        fullName: member.user.fullName,
+        profileImageUrl: member.user.profileImageUrl,
+        role: member.memberRole,
+        joinedAt: member.joinedAt,
+      })) || [];
+
     const formattedLeague = {
       id: league.id,
       name: league.name,
       imageUrl,
       inviteCode: league.inviteCode,
-      memberCount: league.members?.length || 0,
+      memberCount: formattedMembers.length,
       isActive: league.isActive,
       createdAt: league.createdAt,
-      members: league.members,
+      members: formattedMembers,
     };
 
     return Response.json({

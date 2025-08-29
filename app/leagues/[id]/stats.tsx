@@ -403,8 +403,8 @@ export default function LeagueStats() {
                 screen: "LeagueStats",
                 leagueId: league.id,
               });
-              // TODO: Navigate to create game
-              console.log("Navigate to create new game");
+              // Navigate to select players screen
+              router.push(`/games/${league.id}/select-players`);
             }}>
             <View
               style={[

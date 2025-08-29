@@ -108,6 +108,18 @@ export interface Translations {
   viewStatsDescription: string;
   startNewGame: string;
   startGameDescription: string;
+
+  // Select Players Screen
+  selectPlayers: string;
+  loadingPlayers: string;
+  selectPlayersInstruction: string;
+  playersSelected: string;
+  noPlayersFound: string;
+  noPlayersMessage: string;
+  startGame: string;
+  minimumPlayersRequired: string;
+  admin: string;
+  member: string;
 }
 
 // English translations
@@ -204,6 +216,18 @@ const enTranslations: Translations = {
     "See player rankings, game history, and performance analytics",
   startNewGame: "START NEW GAME",
   startGameDescription: "Create a new poker game for this league",
+
+  // Select Players Screen
+  selectPlayers: "SELECT PLAYERS",
+  loadingPlayers: "Loading players...",
+  selectPlayersInstruction: "Choose players for the new game",
+  playersSelected: "PLAYERS SELECTED",
+  noPlayersFound: "NO PLAYERS FOUND",
+  noPlayersMessage: "This league has no members yet",
+  startGame: "START GAME",
+  minimumPlayersRequired: "Please select at least 2 players to start a game",
+  admin: "ADMIN",
+  member: "MEMBER",
 };
 
 // Hebrew translations
@@ -299,6 +323,18 @@ const heTranslations: Translations = {
   viewStatsDescription: "ראה דירוגי שחקנים, היסטוריית משחקים וניתוח ביצועים",
   startNewGame: "התחל משחק חדש",
   startGameDescription: "צור משחק פוקר חדש עבור הליגה הזו",
+
+  // Select Players Screen
+  selectPlayers: "בחר שחקנים",
+  loadingPlayers: "טוען שחקנים...",
+  selectPlayersInstruction: "בחר שחקנים למשחק החדש",
+  playersSelected: "שחקנים נבחרו",
+  noPlayersFound: "לא נמצאו שחקנים",
+  noPlayersMessage: "בליגה הזו אין עדיין חברים",
+  startGame: "התחל משחק",
+  minimumPlayersRequired: "בחר לפחות 2 שחקנים כדי להתחיל משחק",
+  admin: "מנהל",
+  member: "חבר",
 };
 
 const translations = {
