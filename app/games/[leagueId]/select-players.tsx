@@ -13,7 +13,10 @@ import {
   ActivityIndicator,
   Alert,
   FlatList,
+  Modal,
+  ScrollView,
   StyleSheet,
+  TextInput,
   TouchableOpacity,
   View,
 } from "react-native";
@@ -45,6 +48,10 @@ export default function SelectPlayers() {
   );
   const [isLoading, setIsLoading] = React.useState(true);
   const [error, setError] = React.useState<string | null>(null);
+  const [showGameSetup, setShowGameSetup] = React.useState(false);
+  const [buyIn, setBuyIn] = React.useState("");
+  const [gameName, setGameName] = React.useState("");
+  const [isCreatingGame, setIsCreatingGame] = React.useState(false);
 
   // Function to load league members
   const loadLeagueMembers = React.useCallback(async () => {
@@ -130,14 +137,83 @@ export default function SelectPlayers() {
       return;
     }
 
-    addBreadcrumb("User started game with selected players", "user_action", {
+    addBreadcrumb("User opened game setup modal", "user_action", {
       screen: "SelectPlayers",
       leagueId,
       selectedPlayerCount: selectedPlayers.size,
     });
 
-    // TODO: Navigate to game creation/setup screen with selected players
-    console.log("Starting game with players:", Array.from(selectedPlayers));
+    setShowGameSetup(true);
+  };
+
+  const handleCreateGame = async () => {
+    if (!buyIn || parseFloat(buyIn) <= 0) {
+      Alert.alert(t("error"), t("validBuyInRequired"));
+      return;
+    }
+
+    try {
+      setIsCreatingGame(true);
+
+      const response = await fetchWithAuth(`${BASE_URL}/api/games/create`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          leagueId,
+          selectedPlayers: Array.from(selectedPlayers),
+          buyIn,
+          gameName: gameName.trim() || null,
+        }),
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.error || "Failed to create game");
+      }
+
+      const data = await response.json();
+
+      addBreadcrumb("Game created successfully", "success", {
+        screen: "SelectPlayers",
+        gameId: data.game.id,
+        playerCount: selectedPlayers.size,
+        buyIn,
+      });
+
+      Alert.alert(t("success"), t("gameCreatedSuccess"), [
+        {
+          text: t("ok"),
+          onPress: () => {
+            // Navigate back to league stats or to the game screen
+            router.back();
+          },
+        },
+      ]);
+    } catch (error) {
+      const errorMessage =
+        error instanceof Error ? error.message : "Failed to create game";
+
+      captureException(error as Error, {
+        function: "handleCreateGame",
+        screen: "SelectPlayers",
+        leagueId,
+        selectedPlayerCount: selectedPlayers.size,
+        buyIn,
+      });
+
+      Alert.alert(t("error"), errorMessage);
+    } finally {
+      setIsCreatingGame(false);
+      setShowGameSetup(false);
+    }
+  };
+
+  const handleCancelGameSetup = () => {
+    setShowGameSetup(false);
+    setBuyIn("");
+    setGameName("");
   };
 
   const renderPlayerItem = ({ item }: { item: LeagueMember }) => {
@@ -398,6 +474,146 @@ export default function SelectPlayers() {
           />
         </View>
       )}
+
+      {/* Game Setup Modal */}
+      <Modal
+        visible={showGameSetup}
+        animationType="slide"
+        presentationStyle="pageSheet"
+        onRequestClose={handleCancelGameSetup}>
+        <View
+          style={[
+            styles.modalContainer,
+            { backgroundColor: theme.background },
+          ]}>
+          {/* Modal Header */}
+          <View
+            style={[styles.modalHeader, { backgroundColor: colors.primary }]}>
+            <TouchableOpacity
+              onPress={handleCancelGameSetup}
+              style={styles.modalBackButton}>
+              <Ionicons name="close" size={24} color={colors.textInverse} />
+            </TouchableOpacity>
+            <Text
+              style={[styles.modalHeaderTitle, { color: colors.textInverse }]}>
+              {t("gameSetup")}
+            </Text>
+            <View style={styles.placeholder} />
+          </View>
+
+          <ScrollView
+            style={styles.modalContent}
+            showsVerticalScrollIndicator={false}>
+            {/* Selected Players Summary */}
+            <View
+              style={[
+                styles.summaryCard,
+                { backgroundColor: theme.surfaceElevated },
+              ]}>
+              <Text variant="h3" color={theme.text} style={styles.summaryTitle}>
+                {t("selectedPlayers")} ({selectedPlayers.size})
+              </Text>
+              <View style={styles.selectedPlayersList}>
+                {league?.members
+                  .filter((member) => selectedPlayers.has(member.id))
+                  .map((member, index) => (
+                    <View key={member.id} style={styles.selectedPlayerItem}>
+                      <Image
+                        source={{
+                          uri:
+                            member.profileImageUrl ||
+                            "https://via.placeholder.com/30x30/cccccc/666666?text=?",
+                        }}
+                        style={styles.selectedPlayerImage}
+                        contentFit="cover"
+                      />
+                      <Text
+                        variant="body"
+                        color={theme.text}
+                        style={styles.selectedPlayerName}>
+                        {member.fullName}
+                      </Text>
+                    </View>
+                  ))}
+              </View>
+            </View>
+
+            {/* Game Name Input */}
+            <View
+              style={[
+                styles.inputCard,
+                { backgroundColor: theme.surfaceElevated },
+              ]}>
+              <Text variant="h4" color={theme.text} style={styles.inputLabel}>
+                {t("gameName")} ({t("optional")})
+              </Text>
+              <TextInput
+                style={[
+                  styles.textInput,
+                  {
+                    backgroundColor: theme.background,
+                    borderColor: theme.border,
+                    color: theme.text,
+                  },
+                ]}
+                placeholder={t("gameNamePlaceholder")}
+                placeholderTextColor={theme.textMuted}
+                value={gameName}
+                onChangeText={setGameName}
+                maxLength={50}
+              />
+            </View>
+
+            {/* Buy-in Input */}
+            <View
+              style={[
+                styles.inputCard,
+                { backgroundColor: theme.surfaceElevated },
+              ]}>
+              <Text variant="h4" color={theme.text} style={styles.inputLabel}>
+                {t("buyInAmount")} *
+              </Text>
+              <TextInput
+                style={[
+                  styles.textInput,
+                  {
+                    backgroundColor: theme.background,
+                    borderColor: buyIn ? colors.primary : theme.border,
+                    color: theme.text,
+                  },
+                ]}
+                placeholder="0.00"
+                placeholderTextColor={theme.textMuted}
+                value={buyIn}
+                onChangeText={setBuyIn}
+                keyboardType="decimal-pad"
+                maxLength={10}
+              />
+              <Text
+                variant="captionSmall"
+                color={theme.textMuted}
+                style={styles.inputHint}>
+                {t("buyInHint")}
+              </Text>
+            </View>
+          </ScrollView>
+
+          {/* Create Game Button */}
+          <View
+            style={[styles.modalFooter, { backgroundColor: theme.background }]}>
+            <Button
+              title={isCreatingGame ? t("creatingGame") : t("createGame")}
+              onPress={handleCreateGame}
+              variant="primary"
+              size="large"
+              backgroundColor={colors.secondary}
+              disabled={isCreatingGame || !buyIn || parseFloat(buyIn) <= 0}
+              loading={isCreatingGame}
+              fullWidth
+            />
+          </View>
+        </View>
+      </Modal>
     </View>
   );
 }
@@ -576,5 +792,115 @@ const styles = StyleSheet.create({
   },
   emptyMessage: {
     textAlign: "center",
+  },
+
+  // Modal Styles
+  modalContainer: {
+    flex: 1,
+  },
+  modalHeader: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+    paddingHorizontal: 20,
+    paddingTop: 60,
+    paddingBottom: 16,
+    borderBottomWidth: 6,
+    borderBottomColor: colors.text,
+  },
+  modalBackButton: {
+    padding: 8,
+  },
+  modalHeaderTitle: {
+    fontSize: 20,
+    fontWeight: "700",
+    textTransform: "uppercase",
+    letterSpacing: 1,
+  },
+  modalContent: {
+    flex: 1,
+    padding: 16,
+  },
+  summaryCard: {
+    padding: 16,
+    borderRadius: 12,
+    borderWidth: 3,
+    borderColor: colors.border,
+    marginBottom: 16,
+    shadowColor: colors.shadow,
+    shadowOffset: { width: 4, height: 4 },
+    shadowOpacity: 1,
+    shadowRadius: 0,
+    elevation: 8,
+  },
+  summaryTitle: {
+    letterSpacing: 1.2,
+    marginBottom: 12,
+  },
+  selectedPlayersList: {
+    flexDirection: "row",
+    flexWrap: "wrap",
+    gap: 8,
+  },
+  selectedPlayerItem: {
+    flexDirection: "row",
+    alignItems: "center",
+    backgroundColor: colors.primaryTint,
+    paddingHorizontal: 8,
+    paddingVertical: 6,
+    borderRadius: 8,
+    borderWidth: 2,
+    borderColor: colors.primary,
+  },
+  selectedPlayerImage: {
+    width: 24,
+    height: 24,
+    borderRadius: 4,
+    marginRight: 6,
+    borderWidth: 1,
+    borderColor: colors.border,
+  },
+  selectedPlayerName: {
+    fontSize: 12,
+    fontWeight: "600",
+    color: colors.primary,
+  },
+  inputCard: {
+    padding: 16,
+    borderRadius: 12,
+    borderWidth: 3,
+    borderColor: colors.border,
+    marginBottom: 16,
+    shadowColor: colors.shadow,
+    shadowOffset: { width: 4, height: 4 },
+    shadowOpacity: 1,
+    shadowRadius: 0,
+    elevation: 8,
+  },
+  inputLabel: {
+    letterSpacing: 1,
+    marginBottom: 8,
+  },
+  textInput: {
+    borderWidth: 3,
+    borderRadius: 8,
+    paddingHorizontal: 12,
+    paddingVertical: 12,
+    fontSize: 16,
+    fontWeight: "600",
+    letterSpacing: 0.5,
+  },
+  inputHint: {
+    marginTop: 6,
+    lineHeight: 16,
+  },
+  modalFooter: {
+    padding: 16,
+    paddingBottom: 32,
+    shadowColor: colors.shadow,
+    shadowOffset: { width: 0, height: -4 },
+    shadowOpacity: 1,
+    shadowRadius: 0,
+    elevation: 16,
   },
 });
