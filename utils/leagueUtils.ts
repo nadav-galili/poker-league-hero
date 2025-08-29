@@ -1,6 +1,5 @@
 import { and, eq } from "drizzle-orm";
 import { leagueMembers, users } from "../db";
-import { uploadImageToR2 } from "./cloudflareR2";
 /**
  * Generate a secure, unique 5-character invite code
  * Uses alphanumeric characters, excluding confusing characters (0, O, 1, I, l)
@@ -75,8 +74,9 @@ export async function createLeague(data: {
   const userId = user[0].id;
   let imageUrl = data.image;
   if (imageUrl && imageUrl.startsWith("file://")) {
-    // Upload to Cloudflare R2 first
-    const uploadedUrl = await uploadImageToR2(imageUrl);
+    // Upload to Cloudflare R2 first using server-side upload
+    const { uploadImageToR2Server } = await import("./serverUpload");
+    const uploadedUrl = await uploadImageToR2Server(imageUrl);
     imageUrl = uploadedUrl;
   } else if (!imageUrl) {
     imageUrl = "default-league.png";
@@ -188,7 +188,7 @@ export async function getUserLeagues(userId: string): Promise<any[]> {
 
   // Get member count for each league and format the data
   const formattedLeagues = await Promise.all(
-    userLeagues.map(async (item) => {
+    userLeagues.map(async (item: any) => {
       // Get member count for this league
       const memberCountResult = await db
         .select({ count: count() })
@@ -204,21 +204,31 @@ export async function getUserLeagues(userId: string): Promise<any[]> {
 
       // Format the image URL
       let imageUrl = item.league.imageUrl;
-      if (imageUrl) {
-        if (imageUrl.startsWith('https://poker-league-images.r2.dev/')) {
-          // Replace the old restricted domain with the public URL
-          imageUrl = imageUrl.replace('https://poker-league-images.r2.dev/', `${process.env.CLOUDFLARE_R2_PUBLIC_URL}/poker-league-images/`);
-        } else if (!imageUrl.startsWith('http')) {
-          // If it's a relative path, construct the full R2 URL
-          // Handle both old format (just filename) and new format (full path)
-          if (imageUrl.includes('/')) {
-            // Already has path structure
-            imageUrl = `${process.env.CLOUDFLARE_R2_PUBLIC_URL}/${imageUrl}`;
-          } else {
-            // Just filename, add the path
-            imageUrl = `${process.env.CLOUDFLARE_R2_PUBLIC_URL}/poker-league-images/league-images/${imageUrl}`;
-          }
+      if (imageUrl && !imageUrl.startsWith("http")) {
+        // If it's a relative path, construct the full R2 URL using actual domain
+        if (imageUrl.includes("/")) {
+          // Already has path structure (like "league-images/filename.jpg")
+          imageUrl = `https://pub-6908906fe4c24b7b82ff61e803190c28.r2.dev/poker-league-images/${imageUrl}`;
+        } else {
+          // Just filename, add the league-images path
+          imageUrl = `https://pub-6908906fe4c24b7b82ff61e803190c28.r2.dev/poker-league-images/league-images/${imageUrl}`;
         }
+      } else if (imageUrl && imageUrl.includes("poker-league-images.r2.dev")) {
+        // Fix old URLs that use the custom domain to use the actual R2 domain
+        imageUrl = imageUrl.replace(
+          "https://poker-league-images.r2.dev",
+          "https://pub-6908906fe4c24b7b82ff61e803190c28.r2.dev/poker-league-images"
+        );
+      } else if (
+        imageUrl &&
+        imageUrl.includes("pub-6908906fe4c24b7b82ff61e803190c28.r2.dev") &&
+        !imageUrl.includes("poker-league-images")
+      ) {
+        // Fix URLs that are missing the poker-league-images prefix
+        imageUrl = imageUrl.replace(
+          "https://pub-6908906fe4c24b7b82ff61e803190c28.r2.dev/",
+          "https://pub-6908906fe4c24b7b82ff61e803190c28.r2.dev/poker-league-images/"
+        );
       }
 
       return {
