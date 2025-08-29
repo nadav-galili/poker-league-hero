@@ -292,7 +292,8 @@ export default function MyLeagues() {
                 });
 
                 console.log("League pressed:", item.name);
-                // TODO: Navigate to league details
+                // Navigate to league stats
+                router.push(`/leagues/${item.id}/stats`);
 
                 captureMessage("User viewed league details", "info", {
                   screen: "MyLeagues",
