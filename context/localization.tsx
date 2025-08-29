@@ -120,6 +120,19 @@ export interface Translations {
   minimumPlayersRequired: string;
   admin: string;
   member: string;
+
+  // Game Setup Modal
+  gameSetup: string;
+  selectedPlayers: string;
+  gameName: string;
+  optional: string;
+  gameNamePlaceholder: string;
+  buyInAmount: string;
+  buyInHint: string;
+  createGame: string;
+  creatingGame: string;
+  gameCreatedSuccess: string;
+  validBuyInRequired: string;
 }
 
 // English translations
@@ -228,6 +241,19 @@ const enTranslations: Translations = {
   minimumPlayersRequired: "Please select at least 2 players to start a game",
   admin: "ADMIN",
   member: "MEMBER",
+
+  // Game Setup Modal
+  gameSetup: "GAME SETUP",
+  selectedPlayers: "SELECTED PLAYERS",
+  gameName: "GAME NAME",
+  optional: "OPTIONAL",
+  gameNamePlaceholder: "Enter game name...",
+  buyInAmount: "BUY-IN AMOUNT",
+  buyInHint: "Amount each player will pay to join the game",
+  createGame: "CREATE GAME",
+  creatingGame: "CREATING GAME...",
+  gameCreatedSuccess: "Game created successfully! Players can now join.",
+  validBuyInRequired: "Please enter a valid buy-in amount",
 };
 
 // Hebrew translations
@@ -335,6 +361,19 @@ const heTranslations: Translations = {
   minimumPlayersRequired: "בחר לפחות 2 שחקנים כדי להתחיל משחק",
   admin: "מנהל",
   member: "חבר",
+
+  // Game Setup Modal
+  gameSetup: "הגדרת משחק",
+  selectedPlayers: "שחקנים נבחרים",
+  gameName: "שם המשחק",
+  optional: "אופציונלי",
+  gameNamePlaceholder: "הכנס שם משחק...",
+  buyInAmount: "סכום כניסה",
+  buyInHint: "הסכום שכל שחקן ישלם כדי להצטרף למשחק",
+  createGame: "צור משחק",
+  creatingGame: "יוצר משחק...",
+  gameCreatedSuccess: "המשחק נוצר בהצלחה! השחקנים יכולים להצטרף כעת.",
+  validBuyInRequired: "אנא הכנס סכום כניסה תקין",
 };
 
 const translations = {
