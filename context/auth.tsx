@@ -35,7 +35,7 @@ const AuthContext = React.createContext({
   signIn: () => {},
   signOut: () => {},
 
-  fetchWithAuth: (url: string, options: RequestInit) =>
+  fetchWithAuth: (url: string, options: RequestInit = {}) =>
     Promise.resolve(new Response()),
   isLoading: false,
   error: null as AuthError | null,
@@ -479,7 +479,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     }
   }
 
-  const fetchWithAuth = async (url: string, options: RequestInit) => {
+  const fetchWithAuth = async (url: string, options: RequestInit = {}) => {
     if (isWeb) {
       // For web: Include credentials to send cookies
       const response = await fetch(url, {
