@@ -133,6 +133,38 @@ export interface Translations {
   creatingGame: string;
   gameCreatedSuccess: string;
   validBuyInRequired: string;
+
+  // Game Screen
+  gameDetails: string;
+  gameInProgress: string;
+  totalBuyIns: string;
+  totalBuyOuts: string;
+  currentProfit: string;
+  playerName: string;
+  initialBuyIn: string;
+  buyIn: string;
+  buyOut: string;
+  profit: string;
+  cashOut: string;
+  addPlayer: string;
+  removePlayer: string;
+  confirmCashOut: string;
+  enterCashOutAmount: string;
+  cashOutAmount: string;
+  invalidAmount: string;
+  playerCashedOut: string;
+  buyInSuccessful: string;
+  selectPlayerToAdd: string;
+  playerAdded: string;
+  confirmRemovePlayer: string;
+  removePlayerMessage: string;
+  playerRemoved: string;
+  endGame: string;
+  confirmEndGame: string;
+  endGameMessage: string;
+  gameEnded: string;
+  loadingGame: string;
+  gameNotFound: string;
 }
 
 // English translations
@@ -254,6 +286,40 @@ const enTranslations: Translations = {
   creatingGame: "CREATING GAME...",
   gameCreatedSuccess: "Game created successfully! Players can now join.",
   validBuyInRequired: "Please enter a valid buy-in amount",
+
+  // Game Screen
+  gameDetails: "GAME DETAILS",
+  gameInProgress: "GAME IN PROGRESS",
+  totalBuyIns: "TOTAL BUY-INS",
+  totalBuyOuts: "TOTAL BUY-OUTS",
+  currentProfit: "CURRENT PROFIT",
+  playerName: "PLAYER NAME",
+  initialBuyIn: "INITIAL BUY-IN",
+  buyIn: "BUY IN",
+  buyOut: "BUY OUT",
+  profit: "PROFIT",
+  cashOut: "CASH OUT",
+  addPlayer: "ADD PLAYER",
+  removePlayer: "REMOVE PLAYER",
+  confirmCashOut: "Confirm Cash Out",
+  enterCashOutAmount: "Enter the amount this player is cashing out with:",
+  cashOutAmount: "Cash Out Amount",
+  invalidAmount: "Please enter a valid amount",
+  playerCashedOut: "Player cashed out successfully",
+  buyInSuccessful: "Buy-in successful",
+  selectPlayerToAdd: "Select a player to add to the game",
+  playerAdded: "Player added to the game",
+  confirmRemovePlayer: "Remove Player",
+  removePlayerMessage:
+    "Are you sure you want to remove this player from the game?",
+  playerRemoved: "Player removed from the game",
+  endGame: "END GAME",
+  confirmEndGame: "End Game",
+  endGameMessage:
+    "Are you sure you want to end this game? This action cannot be undone.",
+  gameEnded: "Game ended successfully",
+  loadingGame: "Loading game details...",
+  gameNotFound: "Game not found",
 };
 
 // Hebrew translations
@@ -374,6 +440,39 @@ const heTranslations: Translations = {
   creatingGame: "יוצר משחק...",
   gameCreatedSuccess: "המשחק נוצר בהצלחה! השחקנים יכולים להצטרף כעת.",
   validBuyInRequired: "אנא הכנס סכום כניסה תקין",
+
+  // Game Screen
+  gameDetails: "פרטי המשחק",
+  gameInProgress: "משחק בעיצומו",
+  totalBuyIns: "סך כל הכניסות",
+  totalBuyOuts: "סך כל היציאות",
+  currentProfit: "רווח נוכחי",
+  playerName: "שם השחקן",
+  initialBuyIn: "כניסה ראשונית",
+  buyIn: "כניסה",
+  buyOut: "יציאה",
+  profit: "רווח",
+  cashOut: "משיכת כסף",
+  addPlayer: "הוסף שחקן",
+  removePlayer: "הסר שחקן",
+  confirmCashOut: "אשר משיכת כסף",
+  enterCashOutAmount: "הכנס את הסכום שהשחקן מושך:",
+  cashOutAmount: "סכום משיכה",
+  invalidAmount: "אנא הכנס סכום תקף",
+  playerCashedOut: "השחקן משך כסף בהצלחה",
+  buyInSuccessful: "כניסה בוצעה בהצלחה",
+  selectPlayerToAdd: "בחר שחקן להוסיף למשחק",
+  playerAdded: "השחקן נוסף למשחק",
+  confirmRemovePlayer: "הסר שחקן",
+  removePlayerMessage: "האם אתה בטוח שברצונך להסיר את השחקן מהמשחק?",
+  playerRemoved: "השחקן הוסר מהמשחק",
+  endGame: "סיים משחק",
+  confirmEndGame: "סיים משחק",
+  endGameMessage:
+    "האם אתה בטוח שברצונך לסיים את המשחק? פעולה זו לא ניתנת לביטול.",
+  gameEnded: "המשחק הסתיים בהצלחה",
+  loadingGame: "טוען פרטי משחק...",
+  gameNotFound: "המשחק לא נמצא",
 };
 
 const translations = {

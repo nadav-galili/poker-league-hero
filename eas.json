@@ -20,7 +20,12 @@
         "buildType": "apk"
       },
       "env": {
-        "SENTRY_DISABLE_AUTO_UPLOAD": "true"
+        "SENTRY_DISABLE_AUTO_UPLOAD": "true",
+        "EXPO_PUBLIC_BASE_URL": "your-production-api-url",
+        "EXPO_PUBLIC_SCHEME": "pokerleaguehero",
+        "GOOGLE_CLIENT_ID": "your-google-client-id",
+        "GOOGLE_CLIENT_SECRET": "your-google-client-secret",
+        "JWT_SECRET": "your-jwt-secret"
       }
     },
     "production": {
