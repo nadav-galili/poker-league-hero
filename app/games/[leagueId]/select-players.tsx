@@ -16,7 +16,6 @@ import {
   Modal,
   ScrollView,
   StyleSheet,
-  TextInput,
   TouchableOpacity,
   View,
 } from "react-native";
@@ -49,8 +48,7 @@ export default function SelectPlayers() {
   const [isLoading, setIsLoading] = React.useState(true);
   const [error, setError] = React.useState<string | null>(null);
   const [showGameSetup, setShowGameSetup] = React.useState(false);
-  const [buyIn, setBuyIn] = React.useState("");
-  const [gameName, setGameName] = React.useState("");
+  const [buyIn, setBuyIn] = React.useState("50");
   const [isCreatingGame, setIsCreatingGame] = React.useState(false);
 
   // Function to load league members
@@ -147,11 +145,6 @@ export default function SelectPlayers() {
   };
 
   const handleCreateGame = async () => {
-    if (!buyIn || parseFloat(buyIn) <= 0) {
-      Alert.alert(t("error"), t("validBuyInRequired"));
-      return;
-    }
-
     try {
       setIsCreatingGame(true);
 
@@ -164,7 +157,6 @@ export default function SelectPlayers() {
           leagueId,
           selectedPlayers: Array.from(selectedPlayers),
           buyIn,
-          gameName: gameName.trim() || null,
         }),
       });
 
@@ -212,8 +204,7 @@ export default function SelectPlayers() {
 
   const handleCancelGameSetup = () => {
     setShowGameSetup(false);
-    setBuyIn("");
-    setGameName("");
+    setBuyIn("50");
   };
 
   const renderPlayerItem = ({ item }: { item: LeagueMember }) => {
@@ -528,33 +519,7 @@ export default function SelectPlayers() {
               </View>
             </View>
 
-            {/* Game Name Input */}
-            <View
-              style={[
-                styles.inputCard,
-                { backgroundColor: theme.surfaceElevated },
-              ]}>
-              <Text variant="h4" color={theme.text} style={styles.inputLabel}>
-                {t("gameName")} ({t("optional")})
-              </Text>
-              <TextInput
-                style={[
-                  styles.textInput,
-                  {
-                    backgroundColor: theme.background,
-                    borderColor: theme.border,
-                    color: theme.text,
-                  },
-                ]}
-                placeholder={t("gameNamePlaceholder")}
-                placeholderTextColor={theme.textMuted}
-                value={gameName}
-                onChangeText={setGameName}
-                maxLength={50}
-              />
-            </View>
-
-            {/* Buy-in Input */}
+            {/* Buy-in Selector */}
             <View
               style={[
                 styles.inputCard,
@@ -563,22 +528,47 @@ export default function SelectPlayers() {
               <Text variant="h4" color={theme.text} style={styles.inputLabel}>
                 {t("buyInAmount")} *
               </Text>
-              <TextInput
-                style={[
-                  styles.textInput,
-                  {
-                    backgroundColor: theme.background,
-                    borderColor: buyIn ? colors.primary : theme.border,
-                    color: theme.text,
-                  },
-                ]}
-                placeholder="0.00"
-                placeholderTextColor={theme.textMuted}
-                value={buyIn}
-                onChangeText={setBuyIn}
-                keyboardType="decimal-pad"
-                maxLength={10}
-              />
+              <View style={styles.buyInSelector}>
+                <TouchableOpacity
+                  style={[
+                    styles.buyInOption,
+                    {
+                      backgroundColor:
+                        buyIn === "50" ? colors.primary : theme.background,
+                      borderColor:
+                        buyIn === "50" ? colors.primary : theme.border,
+                    },
+                  ]}
+                  onPress={() => setBuyIn("50")}
+                  activeOpacity={0.7}>
+                  <Text
+                    variant="h4"
+                    color={buyIn === "50" ? colors.textInverse : theme.text}
+                    style={styles.buyInOptionText}>
+                    ₪50
+                  </Text>
+                </TouchableOpacity>
+
+                <TouchableOpacity
+                  style={[
+                    styles.buyInOption,
+                    {
+                      backgroundColor:
+                        buyIn === "100" ? colors.primary : theme.background,
+                      borderColor:
+                        buyIn === "100" ? colors.primary : theme.border,
+                    },
+                  ]}
+                  onPress={() => setBuyIn("100")}
+                  activeOpacity={0.7}>
+                  <Text
+                    variant="h4"
+                    color={buyIn === "100" ? colors.textInverse : theme.text}
+                    style={styles.buyInOptionText}>
+                    ₪100
+                  </Text>
+                </TouchableOpacity>
+              </View>
               <Text
                 variant="captionSmall"
                 color={theme.textMuted}
@@ -597,7 +587,7 @@ export default function SelectPlayers() {
               variant="primary"
               size="large"
               backgroundColor={colors.secondary}
-              disabled={isCreatingGame || !buyIn || parseFloat(buyIn) <= 0}
+              disabled={isCreatingGame}
               loading={isCreatingGame}
               fullWidth
             />
@@ -880,14 +870,27 @@ const styles = StyleSheet.create({
     letterSpacing: 1,
     marginBottom: 8,
   },
-  textInput: {
+  buyInSelector: {
+    flexDirection: "row",
+    gap: 12,
+    marginBottom: 8,
+  },
+  buyInOption: {
+    flex: 1,
     borderWidth: 3,
     borderRadius: 8,
-    paddingHorizontal: 12,
-    paddingVertical: 12,
-    fontSize: 16,
-    fontWeight: "600",
-    letterSpacing: 0.5,
+    paddingVertical: 16,
+    alignItems: "center",
+    justifyContent: "center",
+    shadowColor: colors.shadow,
+    shadowOffset: { width: 2, height: 2 },
+    shadowOpacity: 1,
+    shadowRadius: 0,
+    elevation: 4,
+  },
+  buyInOptionText: {
+    letterSpacing: 1,
+    fontWeight: "700",
   },
   inputHint: {
     marginTop: 6,
