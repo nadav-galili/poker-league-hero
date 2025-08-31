@@ -11,7 +11,6 @@ import { router } from "expo-router";
 import React, { useState } from "react";
 import {
   ActivityIndicator,
-  Alert,
   ScrollView,
   StyleSheet,
   TextInput,
@@ -110,7 +109,11 @@ export default function CreateLeague() {
       }
     } catch (error) {
       console.error("Error picking image:", error);
-      Alert.alert(t("error"), "Failed to pick image");
+      Toast.show({
+        type: "error",
+        text1: t("error"),
+        text2: "Failed to pick image",
+      });
     }
   };
 

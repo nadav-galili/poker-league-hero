@@ -1,3 +1,4 @@
+import { colors } from "@/colors";
 import ErrorBoundary from "@/components/ErrorBoundary";
 import LocalizedErrorFallback from "@/components/LocalizedErrorFallback";
 import { AuthProvider } from "@/context/auth";
@@ -8,6 +9,11 @@ import { Stack } from "expo-router";
 import * as SplashScreen from "expo-splash-screen";
 import { useEffect, useState } from "react";
 import { SafeAreaView } from "react-native-safe-area-context";
+import Toast, {
+  BaseToast,
+  ErrorToast,
+  InfoToast,
+} from "react-native-toast-message";
 import "../global.css";
 
 Sentry.init({
@@ -28,6 +34,110 @@ Sentry.init({
 
 // Prevent the splash screen from auto-hiding before asset loading is complete.
 SplashScreen.preventAutoHideAsync();
+
+// Custom Toast configuration
+const toastConfig = {
+  success: (props: any) => (
+    <BaseToast
+      {...props}
+      style={{
+        backgroundColor: colors.success,
+        shadowColor: colors.shadow,
+        shadowOffset: { width: 4, height: 4 },
+        shadowOpacity: 1,
+        shadowRadius: 0,
+        elevation: 8,
+      }}
+      contentContainerStyle={{
+        paddingHorizontal: 15,
+      }}
+      text1Style={{
+        fontSize: 16,
+        fontWeight: "700",
+        color: colors.text,
+        textTransform: "uppercase",
+        letterSpacing: 0.5,
+      }}
+      text2Style={{
+        fontSize: 14,
+        fontWeight: "500",
+        color: colors.textSecondary,
+      }}
+    />
+  ),
+  error: (props: any) => (
+    <ErrorToast
+      {...props}
+      style={{
+        borderLeftColor: colors.error, // Blaze orange
+        borderLeftWidth: 6,
+        borderBottomColor: colors.border,
+        borderBottomWidth: 3,
+        borderRightColor: colors.border,
+        borderRightWidth: 3,
+        borderTopColor: colors.border,
+        borderTopWidth: 3,
+        backgroundColor: colors.background,
+        shadowColor: colors.shadow,
+        shadowOffset: { width: 4, height: 4 },
+        shadowOpacity: 1,
+        shadowRadius: 0,
+        elevation: 8,
+      }}
+      contentContainerStyle={{
+        paddingHorizontal: 15,
+      }}
+      text1Style={{
+        fontSize: 16,
+        fontWeight: "700",
+        color: colors.text,
+        textTransform: "uppercase",
+        letterSpacing: 0.5,
+      }}
+      text2Style={{
+        fontSize: 14,
+        fontWeight: "500",
+        color: colors.textSecondary,
+      }}
+    />
+  ),
+  info: (props: any) => (
+    <InfoToast
+      {...props}
+      style={{
+        borderLeftColor: colors.info, // Cyber purple
+        borderLeftWidth: 6,
+        borderBottomColor: colors.border,
+        borderBottomWidth: 3,
+        borderRightColor: colors.border,
+        borderRightWidth: 3,
+        borderTopColor: colors.border,
+        borderTopWidth: 3,
+        backgroundColor: colors.background,
+        shadowColor: colors.shadow,
+        shadowOffset: { width: 4, height: 4 },
+        shadowOpacity: 1,
+        shadowRadius: 0,
+        elevation: 8,
+      }}
+      contentContainerStyle={{
+        paddingHorizontal: 15,
+      }}
+      text1Style={{
+        fontSize: 16,
+        fontWeight: "700",
+        color: colors.text,
+        textTransform: "uppercase",
+        letterSpacing: 0.5,
+      }}
+      text2Style={{
+        fontSize: 14,
+        fontWeight: "500",
+        color: colors.textSecondary,
+      }}
+    />
+  ),
+};
 
 export default Sentry.wrap(function RootLayout() {
   const [fontsLoaded, setFontsLoaded] = useState(false);
@@ -70,6 +180,7 @@ export default Sentry.wrap(function RootLayout() {
           </AuthProvider>
         </ErrorBoundary>
       </LocalizationProvider>
+      <Toast config={toastConfig} />
     </SafeAreaView>
   );
 });

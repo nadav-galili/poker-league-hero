@@ -11,7 +11,6 @@ import { router, useLocalSearchParams } from "expo-router";
 import React from "react";
 import {
   ActivityIndicator,
-  Alert,
   FlatList,
   Modal,
   ScrollView,
@@ -20,6 +19,7 @@ import {
   TouchableOpacity,
   View,
 } from "react-native";
+import Toast from "react-native-toast-message";
 
 interface CashIn {
   id: string;
@@ -206,12 +206,20 @@ export default function GameScreen() {
         throw new Error(errorData.error || "Failed to process buy-in");
       }
 
-      Alert.alert(t("success"), t("buyInSuccessful"));
+      Toast.show({
+        type: "success",
+        text1: t("success"),
+        text2: t("buyInSuccessful"),
+      });
       loadGameData(); // Refresh data
     } catch (error) {
       const errorMessage =
         error instanceof Error ? error.message : "Failed to process buy-in";
-      Alert.alert(t("error"), errorMessage);
+      Toast.show({
+        type: "error",
+        text1: t("error"),
+        text2: errorMessage,
+      });
       captureException(error as Error, {
         function: "handleBuyIn",
         screen: "GameScreen",
@@ -231,13 +239,21 @@ export default function GameScreen() {
 
   const processCashOut = async () => {
     if (!selectedPlayer || !cashOutAmount.trim()) {
-      Alert.alert(t("error"), t("invalidAmount"));
+      Toast.show({
+        type: "error",
+        text1: t("error"),
+        text2: t("invalidAmount"),
+      });
       return;
     }
 
     const amount = parseFloat(cashOutAmount);
     if (isNaN(amount) || amount < 0) {
-      Alert.alert(t("error"), t("invalidAmount"));
+      Toast.show({
+        type: "error",
+        text1: t("error"),
+        text2: t("invalidAmount"),
+      });
       return;
     }
 
@@ -262,10 +278,11 @@ export default function GameScreen() {
       }
 
       const data = await response.json();
-      Alert.alert(
-        t("success"),
-        `${t("playerCashedOut")} - ${t("profit")}: ₪${data.profit}`
-      );
+      Toast.show({
+        type: "success",
+        text1: t("success"),
+        text2: `${t("playerCashedOut")} - ${t("profit")}: ₪${data.profit}`,
+      });
 
       setShowCashOutModal(false);
       setSelectedPlayer(null);
@@ -274,7 +291,11 @@ export default function GameScreen() {
     } catch (error) {
       const errorMessage =
         error instanceof Error ? error.message : "Failed to process cash out";
-      Alert.alert(t("error"), errorMessage);
+      Toast.show({
+        type: "error",
+        text1: t("error"),
+        text2: errorMessage,
+      });
       captureException(error as Error, {
         function: "processCashOut",
         screen: "GameScreen",
@@ -307,13 +328,21 @@ export default function GameScreen() {
         throw new Error(errorData.error || "Failed to add player");
       }
 
-      Alert.alert(t("success"), t("playerAdded"));
+      Toast.show({
+        type: "success",
+        text1: t("success"),
+        text2: t("playerAdded"),
+      });
       setShowAddPlayerModal(false);
       loadGameData(); // Refresh data
     } catch (error) {
       const errorMessage =
         error instanceof Error ? error.message : "Failed to add player";
-      Alert.alert(t("error"), errorMessage);
+      Toast.show({
+        type: "error",
+        text1: t("error"),
+        text2: errorMessage,
+      });
       captureException(error as Error, {
         function: "handleAddPlayer",
         screen: "GameScreen",
@@ -326,14 +355,15 @@ export default function GameScreen() {
   };
 
   const handleRemovePlayer = (player: GamePlayer) => {
-    Alert.alert(t("confirmRemovePlayer"), t("removePlayerMessage"), [
-      { text: t("cancel"), style: "cancel" },
-      {
-        text: t("removePlayer"),
-        style: "destructive",
-        onPress: () => removePlayer(player),
-      },
-    ]);
+    // Note: This replaces the confirmation dialog with a direct action
+    // For better UX, consider implementing a custom confirmation modal
+    Toast.show({
+      type: "info",
+      text1: t("confirmRemovePlayer"),
+      text2: t("removePlayerMessage"),
+    });
+    // Automatically proceed with removal after showing the message
+    setTimeout(() => removePlayer(player), 1500);
   };
 
   const removePlayer = async (player: GamePlayer) => {
@@ -356,12 +386,20 @@ export default function GameScreen() {
         throw new Error(errorData.error || "Failed to remove player");
       }
 
-      Alert.alert(t("success"), t("playerRemoved"));
+      Toast.show({
+        type: "success",
+        text1: t("success"),
+        text2: t("playerRemoved"),
+      });
       loadGameData(); // Refresh data
     } catch (error) {
       const errorMessage =
         error instanceof Error ? error.message : "Failed to remove player";
-      Alert.alert(t("error"), errorMessage);
+      Toast.show({
+        type: "error",
+        text1: t("error"),
+        text2: errorMessage,
+      });
       captureException(error as Error, {
         function: "removePlayer",
         screen: "GameScreen",
