@@ -8,6 +8,7 @@ import { Stack } from "expo-router";
 import * as SplashScreen from "expo-splash-screen";
 import { useEffect, useState } from "react";
 import { SafeAreaView } from "react-native-safe-area-context";
+import "../global.css";
 
 Sentry.init({
   dsn: "https://80a1df1974c168c03b552dea7be0c3ed@o4508240875618304.ingest.de.sentry.io/4509824848101456",

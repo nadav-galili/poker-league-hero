@@ -3,6 +3,7 @@ import Button from "@/components/Button";
 import { Text } from "@/components/Text";
 import { BASE_URL } from "@/constants";
 import { useLocalization } from "@/context/localization";
+import { tw, twMerge } from "@/styles/tw";
 import { addBreadcrumb, captureException, setTag } from "@/utils/sentry";
 import { Ionicons } from "@expo/vector-icons";
 import { Image } from "expo-image";
@@ -176,19 +177,31 @@ export default function LeagueStats() {
       </View>
 
       <ScrollView
-        style={styles.content}
-        contentContainerStyle={styles.contentContainer}
+        style={tw["flex-1"]}
+        contentContainerStyle={{ padding: 20, paddingBottom: 40 }}
         showsVerticalScrollIndicator={false}>
         {/* League Header */}
         <View
-          style={[
-            styles.leagueHeader,
-            { backgroundColor: theme.surfaceElevated },
-          ]}>
-          <View style={styles.leagueImageContainer}>
+          style={twMerge(
+            "flex-row",
+            "p-5",
+            "rounded-xl",
+            "border-6",
+            "border-border",
+            "bg-surfaceElevated",
+            "mb-5",
+            "shadow-lg"
+          )}>
+          <View style={tw["mr-5"]}>
             <Image
               source={{ uri: league.imageUrl }}
-              style={styles.leagueImage}
+              style={twMerge(
+                "w-25",
+                "h-25",
+                "rounded-xl",
+                "border-6",
+                "border-primary"
+              )}
               contentFit="cover"
               onError={(error) => {
                 captureException(new Error("League image loading failed"), {
@@ -202,24 +215,29 @@ export default function LeagueStats() {
             />
           </View>
 
-          <View style={styles.leagueInfo}>
-            <Text variant="h2" color={theme.text} style={styles.leagueName}>
+          <View style={twMerge("flex-1", "justify-center")}>
+            <Text
+              variant="h2"
+              color={theme.text}
+              style={twMerge("tracking-wider", "mb-3")}>
               {league.name}
             </Text>
 
-            <View style={styles.leagueMetaContainer}>
+            <View style={tw["gap-2"]}>
               <View
-                style={[
-                  styles.codeBadge,
-                  {
-                    backgroundColor: colors.primaryTint,
-                    borderColor: colors.primary,
-                  },
-                ]}>
+                style={twMerge(
+                  "self-start",
+                  "px-3",
+                  "py-1.5",
+                  "rounded-md",
+                  "border-3",
+                  "bg-primaryTint",
+                  "border-primary"
+                )}>
                 <Text
                   variant="labelSmall"
                   color={colors.primary}
-                  style={styles.codeText}>
+                  style={twMerge("tracking-wide", "font-bold")}>
                   {league.inviteCode}
                 </Text>
               </View>
@@ -227,7 +245,7 @@ export default function LeagueStats() {
               <Text
                 variant="captionSmall"
                 color={theme.textMuted}
-                style={styles.memberCount}>
+                style={twMerge("tracking-wide", "uppercase")}>
                 {league.memberCount} {t("members")}
               </Text>
             </View>
@@ -236,99 +254,163 @@ export default function LeagueStats() {
 
         {/* Quick Stats Overview */}
         <View
-          style={[
-            styles.quickStatsContainer,
-            { backgroundColor: theme.surfaceElevated },
-          ]}>
-          <Text variant="h3" color={theme.text} style={styles.sectionTitle}>
+          style={twMerge(
+            "p-5",
+            "rounded-xl",
+            "border-6",
+            "border-border",
+            "bg-surfaceElevated",
+            "mb-5",
+            "shadow-lg"
+          )}>
+          <Text
+            variant="h3"
+            color={theme.text}
+            style={twMerge("tracking-wider", "mb-4")}>
             {t("quickStats")}
           </Text>
 
-          <View style={styles.statsGrid}>
+          <View style={twMerge("flex-row", "flex-wrap", "gap-3")}>
             <View
-              style={[
-                styles.statCard,
-                {
-                  backgroundColor: colors.primaryTint,
-                  borderColor: colors.primary,
-                },
-              ]}>
+              style={twMerge(
+                "flex-1",
+                "min-w-[45%]",
+                "p-4",
+                "rounded-lg",
+                "border-3",
+                "bg-primaryTint",
+                "border-primary",
+                "items-center",
+                "shadow-md"
+              )}>
               <Text
                 variant="h1"
                 color={colors.primary}
-                style={styles.statNumber}>
+                style={twMerge(
+                  "text-3xl",
+                  "font-extrabold",
+                  "tracking-wide",
+                  "mb-1"
+                )}>
                 12
               </Text>
               <Text
                 variant="captionSmall"
                 color={colors.primary}
-                style={styles.statLabel}>
+                style={twMerge(
+                  "tracking-wide",
+                  "uppercase",
+                  "text-center",
+                  "font-semibold"
+                )}>
                 {t("totalGames")}
               </Text>
             </View>
 
             <View
-              style={[
-                styles.statCard,
-                {
-                  backgroundColor: colors.secondaryTint,
-                  borderColor: colors.secondary,
-                },
-              ]}>
+              style={twMerge(
+                "flex-1",
+                "min-w-[45%]",
+                "p-4",
+                "rounded-lg",
+                "border-3",
+                "bg-secondaryTint",
+                "border-secondary",
+                "items-center",
+                "shadow-md"
+              )}>
               <Text
                 variant="h1"
                 color={colors.secondary}
-                style={styles.statNumber}>
+                style={twMerge(
+                  "text-3xl",
+                  "font-extrabold",
+                  "tracking-wide",
+                  "mb-1"
+                )}>
                 8
               </Text>
               <Text
                 variant="captionSmall"
                 color={colors.secondary}
-                style={styles.statLabel}>
+                style={twMerge(
+                  "tracking-wide",
+                  "uppercase",
+                  "text-center",
+                  "font-semibold"
+                )}>
                 {t("activePlayers")}
               </Text>
             </View>
 
             <View
-              style={[
-                styles.statCard,
-                {
-                  backgroundColor: colors.highlightTint,
-                  borderColor: colors.highlight,
-                },
-              ]}>
+              style={twMerge(
+                "flex-1",
+                "min-w-[45%]",
+                "p-4",
+                "rounded-lg",
+                "border-3",
+                "bg-highlightTint",
+                "border-highlight",
+                "items-center",
+                "shadow-md"
+              )}>
               <Text
                 variant="h1"
                 color={colors.highlight}
-                style={styles.statNumber}>
+                style={twMerge(
+                  "text-3xl",
+                  "font-extrabold",
+                  "tracking-wide",
+                  "mb-1"
+                )}>
                 $2,450
               </Text>
               <Text
                 variant="captionSmall"
                 color={colors.highlight}
-                style={styles.statLabel}>
+                style={twMerge(
+                  "tracking-wide",
+                  "uppercase",
+                  "text-center",
+                  "font-semibold"
+                )}>
                 {t("totalPot")}
               </Text>
             </View>
 
             <View
-              style={[
-                styles.statCard,
-                {
-                  backgroundColor: colors.accentTint,
-                  borderColor: colors.accent,
-                },
-              ]}>
+              style={twMerge(
+                "flex-1",
+                "min-w-[45%]",
+                "p-4",
+                "rounded-lg",
+                "border-3",
+                "bg-accentTint",
+                "border-accent",
+                "items-center",
+                "shadow-md"
+              )}>
               <Text
                 variant="h1"
                 color={colors.accent}
-                style={styles.statNumber}>
+                style={twMerge(
+                  "text-3xl",
+                  "font-extrabold",
+                  "tracking-wide",
+                  "mb-1"
+                )}>
                 5D
               </Text>
               <Text
                 variant="captionSmall"
                 color={colors.accent}
-                style={styles.statLabel}>
+                style={twMerge(
+                  "tracking-wide",
+                  "uppercase",
+                  "text-center",
+                  "font-semibold"
+                )}>
                 {t("lastGame")}
               </Text>
             </View>
@@ -336,17 +418,19 @@ export default function LeagueStats() {
         </View>
 
         {/* Main Action Cards */}
-        <View style={styles.actionsContainer}>
+        <View style={tw["gap-4"]}>
           {/* View Detailed Stats Card */}
           <TouchableOpacity
-            style={[
-              styles.actionCard,
-              styles.primaryActionCard,
-              {
-                backgroundColor: theme.surfaceElevated,
-                borderColor: colors.primary,
-              },
-            ]}
+            style={twMerge(
+              "flex-row",
+              "items-center",
+              "p-5",
+              "rounded-xl",
+              "border-6",
+              "bg-surfaceElevated",
+              "border-primary",
+              "shadow-lg"
+            )}
             onPress={() => {
               addBreadcrumb("User tapped View Stats", "user_action", {
                 screen: "LeagueStats",
@@ -356,10 +440,17 @@ export default function LeagueStats() {
               console.log("Navigate to detailed stats");
             }}>
             <View
-              style={[
-                styles.actionIconContainer,
-                { backgroundColor: colors.primary },
-              ]}>
+              style={twMerge(
+                "w-15",
+                "h-15",
+                "rounded-xl",
+                "items-center",
+                "justify-center",
+                "mr-4",
+                "border-3",
+                "border-border",
+                "bg-primary"
+              )}>
               <Ionicons
                 name="stats-chart"
                 size={32}
@@ -367,19 +458,22 @@ export default function LeagueStats() {
               />
             </View>
 
-            <View style={styles.actionContent}>
-              <Text variant="h3" color={theme.text} style={styles.actionTitle}>
+            <View style={tw["flex-1"]}>
+              <Text
+                variant="h3"
+                color={theme.text}
+                style={twMerge("tracking-wider", "mb-1", "font-bold")}>
                 {t("viewDetailedStats")}
               </Text>
               <Text
                 variant="body"
                 color={theme.textMuted}
-                style={styles.actionDescription}>
+                style={tw["leading-5"]}>
                 {t("viewStatsDescription")}
               </Text>
             </View>
 
-            <View style={styles.actionChevron}>
+            <View style={tw["ml-3"]}>
               <Ionicons
                 name={isRTL ? "chevron-back" : "chevron-forward"}
                 size={24}
@@ -390,14 +484,16 @@ export default function LeagueStats() {
 
           {/* Start New Game Card */}
           <TouchableOpacity
-            style={[
-              styles.actionCard,
-              styles.secondaryActionCard,
-              {
-                backgroundColor: colors.secondary,
-                borderColor: colors.secondary,
-              },
-            ]}
+            style={twMerge(
+              "flex-row",
+              "items-center",
+              "p-5",
+              "rounded-xl",
+              "border-6",
+              "bg-secondary",
+              "border-secondary",
+              "shadow-lg"
+            )}
             onPress={() => {
               addBreadcrumb("User tapped Start New Game", "user_action", {
                 screen: "LeagueStats",
@@ -407,29 +503,36 @@ export default function LeagueStats() {
               router.push(`/games/${league.id}/select-players`);
             }}>
             <View
-              style={[
-                styles.actionIconContainer,
-                { backgroundColor: colors.textInverse },
-              ]}>
+              style={twMerge(
+                "w-15",
+                "h-15",
+                "rounded-xl",
+                "items-center",
+                "justify-center",
+                "mr-4",
+                "border-3",
+                "border-border",
+                "bg-textInverse"
+              )}>
               <Ionicons name="play-circle" size={32} color={colors.secondary} />
             </View>
 
-            <View style={styles.actionContent}>
+            <View style={tw["flex-1"]}>
               <Text
                 variant="h3"
                 color={colors.textInverse}
-                style={styles.actionTitle}>
+                style={twMerge("tracking-wider", "mb-1", "font-bold")}>
                 {t("startNewGame")}
               </Text>
               <Text
                 variant="body"
                 color={colors.textInverse}
-                style={[styles.actionDescription, { opacity: 0.9 }]}>
+                style={twMerge("leading-5", "opacity-90")}>
                 {t("startGameDescription")}
               </Text>
             </View>
 
-            <View style={styles.actionChevron}>
+            <View style={tw["ml-3"]}>
               <Ionicons
                 name={isRTL ? "chevron-back" : "chevron-forward"}
                 size={24}
@@ -474,13 +577,6 @@ const styles = StyleSheet.create({
   placeholder: {
     width: 40,
   },
-  content: {
-    flex: 1,
-  },
-  contentContainer: {
-    padding: 20,
-    paddingBottom: 40,
-  },
   loadingContainer: {
     flex: 1,
     justifyContent: "center",
@@ -505,145 +601,5 @@ const styles = StyleSheet.create({
   errorMessage: {
     textAlign: "center",
     marginBottom: 24,
-  },
-  leagueHeader: {
-    flexDirection: "row",
-    padding: 20,
-    borderRadius: 12,
-    borderWidth: 6,
-    borderColor: colors.border,
-    marginBottom: 20,
-    shadowColor: colors.shadow,
-    shadowOffset: { width: 8, height: 8 },
-    shadowOpacity: 1,
-    shadowRadius: 0,
-    elevation: 12,
-  },
-  leagueImageContainer: {
-    marginRight: 20,
-  },
-  leagueImage: {
-    width: 100,
-    height: 100,
-    borderRadius: 12,
-    borderWidth: 6,
-    borderColor: colors.primary,
-  },
-  leagueInfo: {
-    flex: 1,
-    justifyContent: "center",
-  },
-  leagueName: {
-    letterSpacing: 1.2,
-    marginBottom: 12,
-  },
-  leagueMetaContainer: {
-    gap: 8,
-  },
-  codeBadge: {
-    alignSelf: "flex-start",
-    paddingHorizontal: 12,
-    paddingVertical: 6,
-    borderRadius: 6,
-    borderWidth: 3,
-  },
-  codeText: {
-    letterSpacing: 1,
-    fontWeight: "700",
-  },
-  memberCount: {
-    letterSpacing: 0.8,
-    textTransform: "uppercase",
-  },
-  quickStatsContainer: {
-    padding: 20,
-    borderRadius: 12,
-    borderWidth: 6,
-    borderColor: colors.border,
-    marginBottom: 20,
-    shadowColor: colors.shadow,
-    shadowOffset: { width: 8, height: 8 },
-    shadowOpacity: 1,
-    shadowRadius: 0,
-    elevation: 12,
-  },
-  sectionTitle: {
-    letterSpacing: 1.2,
-    marginBottom: 16,
-  },
-  statsGrid: {
-    flexDirection: "row",
-    flexWrap: "wrap",
-    gap: 12,
-  },
-  statCard: {
-    flex: 1,
-    minWidth: "45%",
-    padding: 16,
-    borderRadius: 8,
-    borderWidth: 3,
-    alignItems: "center",
-    shadowColor: colors.shadow,
-    shadowOffset: { width: 4, height: 4 },
-    shadowOpacity: 1,
-    shadowRadius: 0,
-    elevation: 8,
-  },
-  statNumber: {
-    fontSize: 28,
-    fontWeight: "800",
-    letterSpacing: 1,
-    marginBottom: 4,
-  },
-  statLabel: {
-    letterSpacing: 0.8,
-    textTransform: "uppercase",
-    textAlign: "center",
-    fontWeight: "600",
-  },
-  actionsContainer: {
-    gap: 16,
-  },
-  actionCard: {
-    flexDirection: "row",
-    alignItems: "center",
-    padding: 20,
-    borderRadius: 12,
-    borderWidth: 6,
-    shadowColor: colors.shadow,
-    shadowOffset: { width: 8, height: 8 },
-    shadowOpacity: 1,
-    shadowRadius: 0,
-    elevation: 12,
-  },
-  primaryActionCard: {
-    // Styles will be applied via backgroundColor prop
-  },
-  secondaryActionCard: {
-    // Styles will be applied via backgroundColor prop
-  },
-  actionIconContainer: {
-    width: 60,
-    height: 60,
-    borderRadius: 12,
-    alignItems: "center",
-    justifyContent: "center",
-    marginRight: 16,
-    borderWidth: 3,
-    borderColor: colors.border,
-  },
-  actionContent: {
-    flex: 1,
-  },
-  actionTitle: {
-    letterSpacing: 1.2,
-    marginBottom: 4,
-    fontWeight: "700",
-  },
-  actionDescription: {
-    lineHeight: 20,
-  },
-  actionChevron: {
-    marginLeft: 12,
   },
 });

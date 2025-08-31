@@ -2,7 +2,7 @@ import { withAuth } from "@/utils/middleware";
 
 export const POST = withAuth(async (request: Request, user) => {
   try {
-    const { leagueId, selectedPlayers, buyIn, gameName } = await request.json();
+    const { leagueId, selectedPlayers, buyIn } = await request.json();
 
     if (!user.userId) {
       return Response.json(
@@ -35,7 +35,6 @@ export const POST = withAuth(async (request: Request, user) => {
       .values({
         leagueId,
         createdBy: user.userId,
-        name: gameName || null,
         buyIn: parseFloat(buyIn).toFixed(2),
         status: "active",
       })

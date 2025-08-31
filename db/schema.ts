@@ -59,7 +59,6 @@ export const games = pgTable("games", {
   createdBy: uuid("created_by")
     .notNull()
     .references(() => users.id, { onDelete: "cascade" }),
-  name: varchar("name", { length: 100 }), // Optional game name
   buyIn: decimal("buy_in", { precision: 10, scale: 2 }).notNull(), // Buy-in amount
   status: varchar("status", { length: 20 }).notNull().default("active"), // "active", "completed", "cancelled"
   startedAt: timestamp("started_at").defaultNow().notNull(),
