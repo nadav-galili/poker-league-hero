@@ -1,0 +1,8 @@
+---
+globs: *.tsx
+alwaysApply: false
+---
+
+every screen should be localized with the proper language.
+when creating a new screens or adding /updating elements,
+make sure you have the translation to hebrew for this element in localization.tsx

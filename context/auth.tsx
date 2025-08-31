@@ -1,5 +1,6 @@
 import { BASE_URL } from "@/constants";
 import { tokenCache } from "@/utils/cache";
+import { captureException } from "@/utils/sentry";
 import {
   AuthError,
   AuthRequestConfig,
@@ -7,6 +8,8 @@ import {
   makeRedirectUri,
   useAuthRequest,
 } from "expo-auth-session";
+import { router } from "expo-router";
+import * as SecureStore from "expo-secure-store";
 import * as WebBrowser from "expo-web-browser";
 import * as jose from "jose";
 import * as React from "react";
@@ -24,6 +27,7 @@ export type AuthUser = {
   provider?: string;
   exp?: number;
   cookieExpiration?: number; // Added for web cookie expiration tracking
+  userId?: string; // Database user ID
 };
 
 const AuthContext = React.createContext({
@@ -31,7 +35,7 @@ const AuthContext = React.createContext({
   signIn: () => {},
   signOut: () => {},
 
-  fetchWithAuth: (url: string, options: RequestInit) =>
+  fetchWithAuth: (url: string, options: RequestInit = {}) =>
     Promise.resolve(new Response()),
   isLoading: false,
   error: null as AuthError | null,
@@ -54,16 +58,59 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   const [refreshToken, setRefreshToken] = React.useState<string | null>(null);
   const [request, response, promptAsync] = useAuthRequest(config, discovery);
 
+  // Function to completely reset the auth session
+  const resetAuthSession = React.useCallback(() => {
+    // Force a complete reset by clearing the response
+    console.log("🔄 Forcing complete auth session reset...");
+    // We'll need to handle this differently
+  }, []);
+
   const [isLoading, setIsLoading] = React.useState(false);
   const [error, setError] = React.useState<AuthError | null>(null);
   const isWeb = Platform.OS === "web";
   const refreshInProgressRef = React.useRef(false);
+  const refreshTimerRef = React.useRef<ReturnType<typeof setTimeout> | null>(
+    null
+  );
 
   React.useEffect(() => {
     handleResponse();
   }, [response]);
 
   // Check if user is authenticated
+  React.useEffect(() => {
+    // clear any existing timer
+    if (refreshTimerRef.current) {
+      clearTimeout(refreshTimerRef.current);
+      refreshTimerRef.current = null;
+    }
+
+    if (isWeb && user?.cookieExpiration) {
+      const now = Math.floor(Date.now() / 1000);
+      const secondsLeft = user.cookieExpiration - now;
+      const leadSeconds = 5;
+      if (secondsLeft > leadSeconds) {
+        refreshTimerRef.current = setTimeout(() => {
+          refreshAccessToken();
+        }, (secondsLeft - leadSeconds) * 1000);
+      }
+      return;
+    }
+
+    if (!isWeb && accessToken) {
+      const decoded = jose.decodeJwt(accessToken) as any;
+      const now = Math.floor(Date.now() / 1000);
+      const secondsLeft = (decoded?.exp ?? now) - now;
+      // Avoid tight loops: only schedule if > 10s remaining; else let API-triggered 401 refresh handle it
+      const leadSeconds = 10;
+      if (secondsLeft > leadSeconds) {
+        refreshTimerRef.current = setTimeout(() => {
+          refreshAccessToken();
+        }, (secondsLeft - leadSeconds) * 1000);
+      }
+    }
+  }, [isWeb, user?.cookieExpiration, accessToken]);
+
   React.useEffect(() => {
     const restoreSession = async () => {
       setIsLoading(true);
@@ -93,15 +140,6 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
           const storedAccessToken = await tokenCache?.getToken("accessToken");
           const storedRefreshToken = await tokenCache?.getToken("refreshToken");
 
-          console.log(
-            "Restoring session - Access token:",
-            storedAccessToken ? "exists" : "missing"
-          );
-          console.log(
-            "Restoring session - Refresh token:",
-            storedRefreshToken ? "exists" : "missing"
-          );
-
           if (storedAccessToken) {
             try {
               // Check if the access token is still valid
@@ -111,7 +149,6 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
 
               if (exp && exp > now) {
                 // Access token is still valid
-                console.log("Access token is still valid, using it");
                 setAccessToken(storedAccessToken);
 
                 if (storedRefreshToken) {
@@ -121,23 +158,27 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
                 setUser(decoded as AuthUser);
               } else if (storedRefreshToken) {
                 // Access token expired, but we have a refresh token
-                console.log("Access token expired, using refresh token");
                 setRefreshToken(storedRefreshToken);
                 await refreshAccessToken(storedRefreshToken);
               }
             } catch (e) {
               console.error("Error decoding stored token:", e);
 
+              //add sentry error
+              captureException(e as Error, {
+                function: "restoreSession",
+                screen: "Auth",
+                error: e as Error,
+              });
+
               // Try to refresh using the refresh token
               if (storedRefreshToken) {
-                console.log("Error with access token, trying refresh token");
                 setRefreshToken(storedRefreshToken);
                 await refreshAccessToken(storedRefreshToken);
               }
             }
           } else if (storedRefreshToken) {
             // No access token, but we have a refresh token
-            console.log("No access token, using refresh token");
             setRefreshToken(storedRefreshToken);
             await refreshAccessToken(storedRefreshToken);
           } else {
@@ -212,6 +253,36 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
       } else {
         // For native: Use the refresh token
         if (!currentRefreshToken) {
+          // Fallback: try using current access token via Authorization header
+          if (accessToken) {
+            try {
+              const fallbackRes = await fetch(`${BASE_URL}/api/auth/refresh`, {
+                method: "POST",
+                headers: {
+                  "Content-Type": "application/json",
+                  Authorization: `Bearer ${accessToken}`,
+                },
+                body: JSON.stringify({ platform: "native" }),
+              });
+              if (fallbackRes.ok) {
+                const tokens = await fallbackRes.json();
+                const newAccessToken = tokens.accessToken;
+                const newRefreshToken = tokens.refreshToken;
+                if (newAccessToken) {
+                  setAccessToken(newAccessToken);
+                  await tokenCache?.saveToken("accessToken", newAccessToken);
+                  setUser(jose.decodeJwt(newAccessToken) as AuthUser);
+                }
+                if (newRefreshToken) {
+                  setRefreshToken(newRefreshToken);
+                  await tokenCache?.saveToken("refreshToken", newRefreshToken);
+                }
+                return newAccessToken ?? null;
+              }
+            } catch (err) {
+              console.error("Fallback refresh failed:", err);
+            }
+          }
           console.error("No refresh token available");
           signOut();
           return null;
@@ -408,7 +479,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     }
   }
 
-  const fetchWithAuth = async (url: string, options: RequestInit) => {
+  const fetchWithAuth = async (url: string, options: RequestInit = {}) => {
     if (isWeb) {
       // For web: Include credentials to send cookies
       const response = await fetch(url, {
@@ -467,16 +538,14 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   };
 
   const signIn = async () => {
-    console.log("signIn");
     try {
       if (!request) {
-        console.log("No request");
         return;
       }
 
       await promptAsync();
     } catch (e) {
-      console.log(e);
+      console.error("Error during sign in:", e);
     }
   };
 
@@ -501,6 +570,40 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     setUser(null);
     setAccessToken(null);
     setRefreshToken(null);
+
+    // Clear any other potential storage
+    try {
+      // Clear from SecureStore directly as backup
+      if (Platform.OS !== "web") {
+        await SecureStore.deleteItemAsync("accessToken");
+        await SecureStore.deleteItemAsync("refreshToken");
+      }
+
+      // Clear any other potential storage keys
+      const allKeys = [
+        "accessToken",
+        "refreshToken",
+        "auth_token",
+        "refresh_token",
+        "expo.auth.access_token",
+        "expo.auth.refresh_token",
+      ];
+
+      for (const key of allKeys) {
+        try {
+          await SecureStore.deleteItemAsync(key);
+        } catch (e) {
+          // Ignore errors for non-existent keys
+        }
+      }
+      // Force a complete reset of the auth session
+      resetAuthSession();
+    } catch (error) {
+      console.log("⚠️ Error clearing SecureStore:", error);
+    }
+
+    // Redirect to index/login screen
+    router.replace("/");
   };
 
   return (

@@ -1,0 +1,5 @@
+---
+description: this app is managed by bun , whenever installing new packages , do it with bun if possible
+globs:
+alwaysApply: true
+---
