@@ -178,8 +178,8 @@ export default function SelectPlayers() {
         {
           text: t("ok"),
           onPress: () => {
-            // Navigate back to league stats or to the game screen
-            router.back();
+            // Navigate to the new game screen
+            router.push(`/games/${data.game.id}`);
           },
         },
       ]);
