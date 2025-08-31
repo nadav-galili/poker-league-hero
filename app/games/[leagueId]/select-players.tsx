@@ -261,33 +261,12 @@ export default function SelectPlayers() {
 
         {/* Player Name */}
         <Text
-          variant="h5"
+          variant="labelSmall"
           color={isSelected ? colors.primary : theme.text}
           style={styles.gridPlayerName}
           numberOfLines={2}>
           {item.fullName}
         </Text>
-
-        {/* Role Badge */}
-        <View
-          style={[
-            styles.gridRoleBadge,
-            {
-              backgroundColor:
-                item.role === "admin" ? colors.accent : colors.secondaryTint,
-              borderColor:
-                item.role === "admin" ? colors.accent : colors.secondary,
-            },
-          ]}>
-          <Text
-            variant="captionSmall"
-            color={
-              item.role === "admin" ? colors.textInverse : colors.secondary
-            }
-            style={styles.gridRoleText}>
-            {item.role === "admin" ? t("admin") : t("member")}
-          </Text>
-        </View>
       </TouchableOpacity>
     );
   };
@@ -497,7 +476,7 @@ export default function SelectPlayers() {
               <View style={styles.selectedPlayersList}>
                 {league?.members
                   .filter((member) => selectedPlayers.has(member.id))
-                  .map((member, index) => (
+                  .map((member) => (
                     <View key={member.id} style={styles.selectedPlayerItem}>
                       <Image
                         source={{
@@ -588,7 +567,6 @@ export default function SelectPlayers() {
               size="large"
               backgroundColor={colors.secondary}
               disabled={isCreatingGame}
-              loading={isCreatingGame}
               fullWidth
             />
           </View>
@@ -677,17 +655,12 @@ const styles = StyleSheet.create({
   },
   playerGridCard: {
     width: "30%",
-    aspectRatio: 0.85, // Slightly taller than square
+    aspectRatio: 0.8, // More square since no role badge
     padding: 12,
     borderRadius: 12,
     borderWidth: 3,
     alignItems: "center",
-    justifyContent: "space-between",
-    shadowColor: colors.shadow,
-    shadowOffset: { width: 4, height: 4 },
-    shadowOpacity: 1,
-    shadowRadius: 0,
-    elevation: 8,
+    justifyContent: "center",
     position: "relative",
   },
   gridSelectionIndicator: {
@@ -715,24 +688,14 @@ const styles = StyleSheet.create({
   },
   gridPlayerName: {
     textAlign: "center",
-    letterSpacing: 0.5,
-    marginBottom: 8,
-    lineHeight: 18,
-    minHeight: 36, // Ensure consistent height for 2 lines
-  },
-  gridRoleBadge: {
-    paddingHorizontal: 6,
-    paddingVertical: 3,
-    borderRadius: 4,
-    borderWidth: 2,
-    alignSelf: "center",
-  },
-  gridRoleText: {
-    letterSpacing: 0.5,
-    textTransform: "uppercase",
+    letterSpacing: 0.3,
+    marginTop: 3,
+    marginBottom: 3,
+    lineHeight: 16,
+    paddingHorizontal: 4,
     fontWeight: "600",
-    fontSize: 10,
   },
+
   startGameContainer: {
     position: "absolute",
     bottom: 0,
@@ -829,29 +792,30 @@ const styles = StyleSheet.create({
   selectedPlayersList: {
     flexDirection: "row",
     flexWrap: "wrap",
-    gap: 8,
+    gap: 4,
   },
   selectedPlayerItem: {
     flexDirection: "row",
     alignItems: "center",
     backgroundColor: colors.primaryTint,
-    paddingHorizontal: 8,
-    paddingVertical: 6,
+    paddingHorizontal: 4,
+    paddingVertical: 4,
     borderRadius: 8,
     borderWidth: 2,
     borderColor: colors.primary,
   },
   selectedPlayerImage: {
-    width: 24,
-    height: 24,
+    width: 18,
+    height: 18,
     borderRadius: 4,
-    marginRight: 6,
+    marginRight: 4,
     borderWidth: 1,
     borderColor: colors.border,
   },
   selectedPlayerName: {
     fontSize: 12,
     fontWeight: "600",
+
     color: colors.primary,
   },
   inputCard: {
