@@ -70,6 +70,12 @@ export const Typography = {
     fontFamily: FontFamily.Medium,
     fontWeight: FontWeights.Medium,
   },
+  h5: {
+    fontSize: 12,
+    lineHeight: 18,
+    fontFamily: FontFamily.Medium,
+    fontWeight: FontWeights.Medium,
+  },
 
   // Body text styles
   bodyLarge: {
