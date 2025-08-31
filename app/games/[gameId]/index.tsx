@@ -416,6 +416,65 @@ export default function GameScreen() {
     setShowAddPlayerModal(true);
   };
 
+  const handleEndGame = async () => {
+    if (!game) return;
+
+    try {
+      // Validation: Check if all players are cashed out (not active)
+      const activePlayers = game.players.filter((player) => player.isActive);
+
+      if (activePlayers.length > 0) {
+        const activePlayerNames = activePlayers
+          .map((p) => p.fullName)
+          .join(", ");
+        Toast.show({
+          type: "error",
+          text1: t("cannotEndGame"),
+          text2: `${t("playersStillActive")}: ${activePlayerNames}`,
+        });
+        return;
+      }
+
+      setIsProcessing(true);
+
+      const response = await fetchWithAuth(
+        `${BASE_URL}/api/games/${gameId}/end-game`,
+        {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+        }
+      );
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.error || "Failed to end game");
+      }
+
+      Toast.show({
+        type: "success",
+        text1: t("success"),
+        text2: t("gameEndedSuccessfully"),
+      });
+
+      loadGameData(); // Refresh data to show updated status
+    } catch (error) {
+      const errorMessage =
+        error instanceof Error ? error.message : "Failed to end game";
+      Toast.show({
+        type: "error",
+        text1: t("error"),
+        text2: errorMessage,
+      });
+      captureException(error as Error, {
+        function: "handleEndGame",
+        screen: "GameScreen",
+        gameId,
+      });
+    } finally {
+      setIsProcessing(false);
+    }
+  };
+
   const renderPlayerCard = ({ item }: { item: GamePlayer }) => (
     <View
       style={[styles.playerCard, { backgroundColor: theme.surfaceElevated }]}>
@@ -610,9 +669,24 @@ export default function GameScreen() {
         <Text style={[styles.headerTitle, { color: colors.textInverse }]}>
           {t("gameDetails")}
         </Text>
-        <TouchableOpacity onPress={handleRefresh} style={styles.refreshButton}>
-          <Ionicons name="refresh" size={24} color={colors.textInverse} />
-        </TouchableOpacity>
+        <View style={styles.headerActions}>
+          <TouchableOpacity
+            onPress={handleRefresh}
+            style={styles.refreshButton}>
+            <Ionicons name="refresh" size={24} color={colors.textInverse} />
+          </TouchableOpacity>
+          {game?.status === "active" && (
+            <TouchableOpacity
+              onPress={handleEndGame}
+              style={styles.endGameButton}>
+              <Ionicons
+                name="stop-circle"
+                size={24}
+                color={colors.textInverse}
+              />
+            </TouchableOpacity>
+          )}
+        </View>
       </View>
 
       {/* Game Summary */}
@@ -909,8 +983,20 @@ const styles = StyleSheet.create({
   backButton: {
     padding: 8,
   },
+  headerActions: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 8,
+  },
   refreshButton: {
     padding: 8,
+  },
+  endGameButton: {
+    padding: 8,
+    backgroundColor: colors.error,
+    borderRadius: 6,
+    borderWidth: 2,
+    borderColor: colors.border,
   },
   headerTitle: {
     fontSize: 20,

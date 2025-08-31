@@ -110,6 +110,8 @@ export const POST = withAuth(async (request: Request, user) => {
       .set({
         finalAmount: totalBuyOutAmount.toFixed(2),
         profit: profit.toFixed(2),
+        isActive: false, // Mark player as inactive when they cash out
+        leftAt: new Date(), // Record when they left the game
       })
       .where(eq(gamePlayers.id, gamePlayerId));
 
