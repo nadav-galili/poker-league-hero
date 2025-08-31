@@ -222,7 +222,7 @@ export default function SelectPlayers() {
     return (
       <TouchableOpacity
         style={[
-          styles.playerCard,
+          styles.playerGridCard,
           {
             backgroundColor: isSelected
               ? colors.primaryTint
@@ -232,29 +232,29 @@ export default function SelectPlayers() {
         ]}
         onPress={() => togglePlayerSelection(item.id)}
         activeOpacity={0.7}>
-        {/* Selection Indicator */}
+        {/* Selection Indicator - Top Right */}
         <View
           style={[
-            styles.selectionIndicator,
+            styles.gridSelectionIndicator,
             {
-              backgroundColor: isSelected ? colors.primary : theme.border,
+              backgroundColor: isSelected ? colors.primary : "transparent",
               borderColor: isSelected ? colors.primary : theme.border,
             },
           ]}>
           {isSelected && (
-            <Ionicons name="checkmark" size={16} color={colors.textInverse} />
+            <Ionicons name="checkmark" size={14} color={colors.textInverse} />
           )}
         </View>
 
-        {/* Player Image */}
-        <View style={styles.playerImageContainer}>
+        {/* Player Image - Centered */}
+        <View style={styles.gridPlayerImageContainer}>
           <Image
             source={{
               uri:
                 item.profileImageUrl ||
-                "https://via.placeholder.com/60x60/cccccc/666666?text=?",
+                "https://via.placeholder.com/80x80/cccccc/666666?text=?",
             }}
-            style={styles.playerImage}
+            style={styles.gridPlayerImage}
             contentFit="cover"
             onError={(error) => {
               captureException(new Error("Player image loading failed"), {
@@ -268,47 +268,34 @@ export default function SelectPlayers() {
           />
         </View>
 
-        {/* Player Info */}
-        <View style={styles.playerInfo}>
+        {/* Player Name */}
+        <Text
+          variant="h5"
+          color={isSelected ? colors.primary : theme.text}
+          style={styles.gridPlayerName}
+          numberOfLines={2}>
+          {item.fullName}
+        </Text>
+
+        {/* Role Badge */}
+        <View
+          style={[
+            styles.gridRoleBadge,
+            {
+              backgroundColor:
+                item.role === "admin" ? colors.accent : colors.secondaryTint,
+              borderColor:
+                item.role === "admin" ? colors.accent : colors.secondary,
+            },
+          ]}>
           <Text
-            variant="h4"
-            color={isSelected ? colors.primary : theme.text}
-            style={styles.playerName}>
-            {item.fullName}
+            variant="captionSmall"
+            color={
+              item.role === "admin" ? colors.textInverse : colors.secondary
+            }
+            style={styles.gridRoleText}>
+            {item.role === "admin" ? t("admin") : t("member")}
           </Text>
-
-          <View style={styles.playerMeta}>
-            <View
-              style={[
-                styles.roleBadge,
-                {
-                  backgroundColor:
-                    item.role === "admin"
-                      ? colors.accent
-                      : colors.secondaryTint,
-                  borderColor:
-                    item.role === "admin" ? colors.accent : colors.secondary,
-                },
-              ]}>
-              <Text
-                variant="captionSmall"
-                color={
-                  item.role === "admin" ? colors.textInverse : colors.secondary
-                }
-                style={styles.roleText}>
-                {item.role === "admin" ? t("admin") : t("member")}
-              </Text>
-            </View>
-          </View>
-        </View>
-
-        {/* Selection Arrow */}
-        <View style={styles.selectionArrow}>
-          <Ionicons
-            name={isSelected ? "remove-circle" : "add-circle"}
-            size={24}
-            color={isSelected ? colors.primary : theme.textMuted}
-          />
         </View>
       </TouchableOpacity>
     );
@@ -434,13 +421,16 @@ export default function SelectPlayers() {
         </Text>
       </View>
 
-      {/* Players List */}
+      {/* Players Grid */}
       <FlatList
         data={league.members}
         renderItem={renderPlayerItem}
         keyExtractor={(item) => item.id}
-        contentContainerStyle={styles.listContainer}
+        numColumns={3}
+        columnWrapperStyle={styles.gridRow}
+        contentContainerStyle={styles.gridContainer}
         showsVerticalScrollIndicator={false}
+        ItemSeparatorComponent={() => <View style={styles.gridSeparator} />}
         ListEmptyComponent={
           <View style={styles.emptyState}>
             <Text variant="h3" color={theme.text} style={styles.emptyTitle}>
@@ -684,65 +674,74 @@ const styles = StyleSheet.create({
     letterSpacing: 1,
     fontWeight: "700",
   },
-  listContainer: {
+  gridContainer: {
     padding: 16,
     paddingBottom: 100, // Space for floating button
   },
-  playerCard: {
-    flexDirection: "row",
-    alignItems: "center",
-    padding: 16,
-    marginBottom: 12,
+  gridRow: {
+    justifyContent: "space-between",
+    paddingHorizontal: 4,
+  },
+  gridSeparator: {
+    height: 16,
+  },
+  playerGridCard: {
+    width: "30%",
+    aspectRatio: 0.85, // Slightly taller than square
+    padding: 12,
     borderRadius: 12,
     borderWidth: 3,
+    alignItems: "center",
+    justifyContent: "space-between",
     shadowColor: colors.shadow,
     shadowOffset: { width: 4, height: 4 },
     shadowOpacity: 1,
     shadowRadius: 0,
     elevation: 8,
+    position: "relative",
   },
-  selectionIndicator: {
-    width: 24,
-    height: 24,
-    borderRadius: 12,
+  gridSelectionIndicator: {
+    position: "absolute",
+    top: 8,
+    right: 8,
+    width: 20,
+    height: 20,
+    borderRadius: 10,
     borderWidth: 2,
     alignItems: "center",
     justifyContent: "center",
-    marginRight: 12,
+    zIndex: 1,
   },
-  playerImageContainer: {
-    marginRight: 12,
+  gridPlayerImageContainer: {
+    marginTop: 8,
+    marginBottom: 8,
   },
-  playerImage: {
-    width: 50,
-    height: 50,
+  gridPlayerImage: {
+    width: 60,
+    height: 60,
     borderRadius: 8,
     borderWidth: 2,
     borderColor: colors.border,
   },
-  playerInfo: {
-    flex: 1,
+  gridPlayerName: {
+    textAlign: "center",
+    letterSpacing: 0.5,
+    marginBottom: 8,
+    lineHeight: 18,
+    minHeight: 36, // Ensure consistent height for 2 lines
   },
-  playerName: {
-    letterSpacing: 1,
-    marginBottom: 6,
-  },
-  playerMeta: {
-    flexDirection: "row",
-  },
-  roleBadge: {
-    paddingHorizontal: 8,
-    paddingVertical: 4,
+  gridRoleBadge: {
+    paddingHorizontal: 6,
+    paddingVertical: 3,
     borderRadius: 4,
     borderWidth: 2,
+    alignSelf: "center",
   },
-  roleText: {
+  gridRoleText: {
     letterSpacing: 0.5,
     textTransform: "uppercase",
     fontWeight: "600",
-  },
-  selectionArrow: {
-    marginLeft: 8,
+    fontSize: 10,
   },
   startGameContainer: {
     position: "absolute",
