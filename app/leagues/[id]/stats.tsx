@@ -436,8 +436,8 @@ export default function LeagueStats() {
                 screen: "LeagueStats",
                 leagueId: league.id,
               });
-              // TODO: Navigate to detailed stats
-              console.log("Navigate to detailed stats");
+              // Navigate to detailed stats screen
+              router.push(`/leagues/${league.id}/league-stats-screen`);
             }}>
             <View
               style={twMerge(
