@@ -1,5 +1,29 @@
 ---
-description: this app is managed by bun , whenever installing new packages , do it with bun if possible
-globs:
+description: This React Native Expo app uses bun as the package manager. Always use bun commands instead of npm.
+globs: **/*
 alwaysApply: true
 ---
+
+# Bun Package Management
+
+🚀 **Always use these bun commands instead of npm:**
+
+- `bun install` (not `npm install`)
+- `bun add <package>` (not `npm install <package>`)
+- `bun remove <package>` (not `npm uninstall <package>`)
+- `bun run <script>` (not `npm run <script>`)
+
+## Important Notes:
+
+- The app structure is clean and consistent with bun
+- Only `bun.lock` should exist (no `package-lock.json` or `yarn.lock`)
+- All dependencies should be installed via bun to maintain consistency
+- Use `bun run start` to start the Expo development server
+
+## Troubleshooting:
+
+If you encounter mixed package manager issues:
+
+1. Remove `package-lock.json` and `yarn.lock` if they exist
+2. Delete `node_modules`
+3. Run `bun install` to reinstall all dependencies cleanly
