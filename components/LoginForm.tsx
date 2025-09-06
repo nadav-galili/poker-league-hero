@@ -65,7 +65,7 @@ export default function LoginForm() {
           style={({ pressed }) => [
             styles.secondaryButton,
             styles.brutalistShadow,
-            { backgroundColor: theme.warning },
+            { backgroundColor: theme.info },
             pressed && styles.pressedButton,
           ]}>
           <View style={styles.buttonContent}>
@@ -95,11 +95,13 @@ const styles = StyleSheet.create({
     alignItems: "center",
     marginBottom: 48,
     position: "relative",
+    paddingTop: 16, // Add padding to prevent icon frame from being cut off
   },
 
   iconContainer: {
     position: "relative",
     marginBottom: 24,
+    padding: 8, // Add padding to accommodate the frame
   },
 
   appIcon: {

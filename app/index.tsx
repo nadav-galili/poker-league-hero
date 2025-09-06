@@ -1,6 +1,5 @@
 import { getTheme } from "@/colors";
 import LoginForm from "@/components/LoginForm";
-import SentryDebug from "@/components/SentryDebug";
 import { useAuth } from "@/context/auth";
 import { Redirect } from "expo-router";
 import { ActivityIndicator, ScrollView, View } from "react-native";
@@ -25,9 +24,11 @@ export default function Index() {
 
   if (!user) {
     return (
-      <ScrollView style={{ flex: 1, backgroundColor: theme.background }}>
+      <ScrollView
+        style={{ flex: 1, backgroundColor: theme.background }}
+        contentContainerStyle={{ flexGrow: 1, paddingTop: 20 }}
+        showsVerticalScrollIndicator={false}>
         <LoginForm />
-        <SentryDebug />
       </ScrollView>
     );
   }
