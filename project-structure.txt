@@ -32,10 +32,18 @@
 │   │   ├── test
 │   │   ├── upload
 │   │   └── users
+│   ├── constants
+│   │   └── leagueThemes.ts
 │   ├── games
 │   │   ├── [gameId]
 │   │   ├── [leagueId]
 │   │   └── index.tsx
+│   ├── hooks
+│   │   ├── index.ts
+│   │   ├── useGameCreation.ts
+│   │   ├── useLeagueMembers.ts
+│   │   ├── useMyLeagues.ts
+│   │   └── usePlayerSelection.ts
 │   ├── index.tsx
 │   ├── leagues
 │   │   ├── [id]
@@ -43,8 +51,20 @@
 │   │   └── index.tsx
 │   ├── personal-stats
 │   │   └── index.tsx
-│   └── stats
-│       └── index.tsx
+│   ├── services
+│   │   ├── gameService.ts
+│   │   ├── index.ts
+│   │   ├── leagueOperationsService.ts
+│   │   ├── leagueService.ts
+│   │   ├── leagueSharingService.ts
+│   │   └── leagueValidationService.ts
+│   ├── stats
+│   │   └── index.tsx
+│   └── types
+│       ├── game.ts
+│       ├── index.ts
+│       ├── league.ts
+│       └── player.ts
 ├── app-example
 │   ├── app
 │   │   ├── _layout.tsx
@@ -91,13 +111,26 @@
 ├── colors.ts
 ├── components
 │   ├── Button.tsx
+│   ├── EmptyState.tsx
 │   ├── ErrorBoundary.tsx
+│   ├── ErrorState.tsx
 │   ├── LanguageSelector.tsx
+│   ├── LeagueCard.tsx
+│   ├── LoadingState.tsx
 │   ├── LocalizedErrorFallback.tsx
 │   ├── LoginForm.tsx
+│   ├── modals
+│   │   ├── GameSetupModal.tsx
+│   │   └── index.ts
+│   ├── MyLeaguesHeader.tsx
 │   ├── SentryDebug.tsx
 │   ├── Text.tsx
-│   └── TypographyDemo.tsx
+│   ├── TypographyDemo.tsx
+│   └── ui
+│       ├── BuyInSelector.tsx
+│       ├── index.ts
+│       ├── PlayerCard.tsx
+│       └── PlayerGrid.tsx
 ├── constants
 │   ├── README-Colors.md
 │   ├── README-Localization.md
@@ -206,4 +239,4 @@
     ├── sentry.ts
     └── serverUpload.ts
 
-92 directories, 115 files
+98 directories, 142 files
