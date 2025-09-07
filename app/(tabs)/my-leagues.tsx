@@ -1,18 +1,15 @@
-import { useMyLeagues } from "@/hooks";
-import { getTheme } from "@/colors";
 import { EmptyState } from "@/components/EmptyState";
 import { ErrorState } from "@/components/ErrorState";
 import { LeagueCard } from "@/components/LeagueCard";
 import { LoadingState } from "@/components/LoadingState";
 import { MyLeaguesHeader } from "@/components/MyLeaguesHeader";
 import { Text } from "@/components/Text";
+import { useMyLeagues } from "@/hooks";
 import { captureException } from "@/utils/sentry";
 import React from "react";
 import { FlatList, View } from "react-native";
 
 export default function MyLeagues() {
-  const theme = getTheme("light");
-
   const {
     leagues,
     isLoading,

@@ -3,10 +3,10 @@
  */
 
 import { addThemeToLeagues } from "@/constants/leagueThemes";
-import { joinLeagueWithCode, shareLeague } from "@/services";
-import { LeagueWithTheme } from "@/types/league";
 import { useAuth } from "@/context/auth";
 import { useLocalization } from "@/context/localization";
+import { joinLeagueWithCode, shareLeague } from "@/services";
+import { LeagueWithTheme } from "@/types/league";
 import { fetchUserLeagues } from "@/utils/leagueService";
 import {
   addBreadcrumb,

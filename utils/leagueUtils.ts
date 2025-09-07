@@ -141,7 +141,7 @@ export async function createLeague(data: {
     const uploadedUrl = await uploadImageToR2Server(imageUrl);
     imageUrl = uploadedUrl;
   } else if (!imageUrl) {
-    imageUrl = "default-league.png";
+    imageUrl = undefined; // No default image - let the UI handle the fallback
   }
   data.image = imageUrl;
   const inviteCode = await generateUniqueInviteCode();
@@ -150,7 +150,7 @@ export async function createLeague(data: {
     ...data,
     adminUserId: userId,
     inviteCode,
-    imageUrl, // Use the uploaded URL
+    imageUrl: imageUrl || undefined, // Use the uploaded URL
   };
 
   const result = await db.insert(leagues).values(leagueData).returning();
@@ -271,7 +271,7 @@ export async function getUserLeagues(userId: string): Promise<any[]> {
         id: item.league.id,
         name: item.league.name,
         code: item.league.inviteCode,
-        image: imageUrl,
+        image: imageUrl || null, // Ensure null for empty values
         memberCount,
         status: item.league.isActive ? "active" : "inactive",
         role: item.memberRole,

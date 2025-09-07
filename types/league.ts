@@ -54,8 +54,13 @@ export interface LeagueTheme {
   variant: "primary" | "secondary" | "highlight" | "accent";
 }
 
-export type LeagueWithTheme = League & LeagueTheme & {
+export type LeagueWithTheme = LeagueTheme & {
+  id: string;
+  name: string;
   code: string;
-  image: string;
+  image: string | null;
   memberCount: number;
+  status: "active" | "inactive";
+  role: string;
+  joinedAt: string;
 };

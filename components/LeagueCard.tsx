@@ -2,15 +2,15 @@
  * League Card Component
  */
 
-import React from "react";
-import { Pressable, View, Alert } from "react-native";
-import { Image } from "expo-image";
-import { Ionicons } from "@expo/vector-icons";
-import { getTheme, colors } from "@/colors";
+import { getTheme } from "@/colors";
 import { Text } from "@/components/Text";
 import { useLocalization } from "@/context/localization";
 import { LeagueWithTheme } from "@/types/league";
 import { captureException } from "@/utils/sentry";
+import { Ionicons } from "@expo/vector-icons";
+import { Image } from "expo-image";
+import React from "react";
+import { Alert, Pressable, View } from "react-native";
 
 interface LeagueCardProps {
   league: LeagueWithTheme;
@@ -58,20 +58,32 @@ export function LeagueCard({ league, onPress, onShare }: LeagueCardProps) {
       onPress={handlePress}>
       {/* League Image with colored frame */}
       <View className="relative mr-5">
-        <Image
-          source={{ uri: league.image }}
-          className="w-20 h-20 rounded-xl border-[6px] border-border"
-          contentFit="cover"
-          onError={(error) => {
-            captureException(new Error("Image loading failed"), {
-              function: "LeagueCard.Image.onError",
-              screen: "MyLeagues",
-              leagueId: league.id,
-              imageUri: league.image,
-              error: error.toString(),
-            });
-          }}
-        />
+        {league.image && league.image.trim() !== "" ? (
+          <Image
+            source={{ uri: league.image }}
+            style={{
+              width: 80,
+              height: 80,
+              borderRadius: 12,
+              borderWidth: 6,
+              borderColor: "#E5E7EB",
+            }}
+            contentFit="cover"
+            onError={(error) => {
+              captureException(new Error("Image loading failed"), {
+                function: "LeagueCard.Image.onError",
+                screen: "MyLeagues",
+                leagueId: league.id,
+                imageUri: league.image,
+                error: error.toString(),
+              });
+            }}
+          />
+        ) : (
+          <View className="w-20 h-20 rounded-xl border-[6px] border-border bg-primary/20 items-center justify-center">
+            <Ionicons name="people" size={32} color={theme.primary} />
+          </View>
+        )}
         <View
           className="absolute -top-2 -left-2 -right-2 -bottom-2 border-[6px] rounded-[20px] opacity-90"
           style={{ borderColor: league.themeColor }}
@@ -80,7 +92,9 @@ export function LeagueCard({ league, onPress, onShare }: LeagueCardProps) {
 
       {/* League Info with enhanced styling */}
       <View className="flex-1 gap-3">
-        <Text variant="h4" className="tracking-widest font-bold uppercase text-base text-primary underline">
+        <Text
+          variant="h4"
+          className="tracking-widest font-bold uppercase text-base text-primary underline">
           {league.name}
         </Text>
 
@@ -120,4 +134,3 @@ export function LeagueCard({ league, onPress, onShare }: LeagueCardProps) {
     </Pressable>
   );
 }
-
