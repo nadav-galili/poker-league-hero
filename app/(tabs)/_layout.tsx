@@ -31,8 +31,8 @@ export default function TabLayout() {
           textTransform: "uppercase",
           marginTop: 4,
         },
-        tabBarActiveTintColor: theme.success,
-        tabBarInactiveTintColor: theme.border,
+        tabBarActiveTintColor: theme.accent,
+        tabBarInactiveTintColor: theme.surface,
         tabBarIconStyle: {
           marginTop: 4,
         },
