@@ -252,171 +252,6 @@ export default function LeagueStats() {
           </View>
         </View>
 
-        {/* Quick Stats Overview */}
-        <View
-          style={twMerge(
-            "p-5",
-            "rounded-xl",
-            "border-6",
-            "border-border",
-            "bg-surfaceElevated",
-            "mb-5",
-            "shadow-lg"
-          )}>
-          <Text
-            variant="h3"
-            color={theme.text}
-            style={twMerge("tracking-wider", "mb-4")}>
-            {t("quickStats")}
-          </Text>
-
-          <View style={twMerge("flex-row", "flex-wrap", "gap-3")}>
-            <View
-              style={twMerge(
-                "flex-1",
-                "min-w-[45%]",
-                "p-4",
-                "rounded-lg",
-                "border-3",
-                "bg-primaryTint",
-                "border-primary",
-                "items-center",
-                "shadow-md"
-              )}>
-              <Text
-                variant="h1"
-                color={colors.primary}
-                style={twMerge(
-                  "text-3xl",
-                  "font-extrabold",
-                  "tracking-wide",
-                  "mb-1"
-                )}>
-                12
-              </Text>
-              <Text
-                variant="captionSmall"
-                color={colors.primary}
-                style={twMerge(
-                  "tracking-wide",
-                  "uppercase",
-                  "text-center",
-                  "font-semibold"
-                )}>
-                {t("totalGames")}
-              </Text>
-            </View>
-
-            <View
-              style={twMerge(
-                "flex-1",
-                "min-w-[45%]",
-                "p-4",
-                "rounded-lg",
-                "border-3",
-                "bg-secondaryTint",
-                "border-secondary",
-                "items-center",
-                "shadow-md"
-              )}>
-              <Text
-                variant="h1"
-                color={colors.secondary}
-                style={twMerge(
-                  "text-3xl",
-                  "font-extrabold",
-                  "tracking-wide",
-                  "mb-1"
-                )}>
-                8
-              </Text>
-              <Text
-                variant="captionSmall"
-                color={colors.secondary}
-                style={twMerge(
-                  "tracking-wide",
-                  "uppercase",
-                  "text-center",
-                  "font-semibold"
-                )}>
-                {t("activePlayers")}
-              </Text>
-            </View>
-
-            <View
-              style={twMerge(
-                "flex-1",
-                "min-w-[45%]",
-                "p-4",
-                "rounded-lg",
-                "border-3",
-                "bg-highlightTint",
-                "border-highlight",
-                "items-center",
-                "shadow-md"
-              )}>
-              <Text
-                variant="h1"
-                color={colors.highlight}
-                style={twMerge(
-                  "text-3xl",
-                  "font-extrabold",
-                  "tracking-wide",
-                  "mb-1"
-                )}>
-                $2,450
-              </Text>
-              <Text
-                variant="captionSmall"
-                color={colors.highlight}
-                style={twMerge(
-                  "tracking-wide",
-                  "uppercase",
-                  "text-center",
-                  "font-semibold"
-                )}>
-                {t("totalPot")}
-              </Text>
-            </View>
-
-            <View
-              style={twMerge(
-                "flex-1",
-                "min-w-[45%]",
-                "p-4",
-                "rounded-lg",
-                "border-3",
-                "bg-accentTint",
-                "border-accent",
-                "items-center",
-                "shadow-md"
-              )}>
-              <Text
-                variant="h1"
-                color={colors.accent}
-                style={twMerge(
-                  "text-3xl",
-                  "font-extrabold",
-                  "tracking-wide",
-                  "mb-1"
-                )}>
-                5D
-              </Text>
-              <Text
-                variant="captionSmall"
-                color={colors.accent}
-                style={twMerge(
-                  "tracking-wide",
-                  "uppercase",
-                  "text-center",
-                  "font-semibold"
-                )}>
-                {t("lastGame")}
-              </Text>
-            </View>
-          </View>
-        </View>
-
         {/* Main Action Cards */}
         <View style={tw["gap-4"]}>
           {/* View Detailed Stats Card */}
@@ -425,17 +260,13 @@ export default function LeagueStats() {
               "flex-row",
               "items-center",
               "p-5",
+              "bg-success",
               "rounded-xl",
               "border-6",
-              "bg-surfaceElevated",
-              "border-primary",
+              "border-border",
               "shadow-lg"
             )}
             onPress={() => {
-              addBreadcrumb("User tapped View Stats", "user_action", {
-                screen: "LeagueStats",
-                leagueId: league.id,
-              });
               // Navigate to detailed stats screen
               router.push(`/leagues/${league.id}/league-stats-screen`);
             }}>
@@ -474,11 +305,7 @@ export default function LeagueStats() {
             </View>
 
             <View style={tw["ml-3"]}>
-              <Ionicons
-                name={isRTL ? "chevron-back" : "chevron-forward"}
-                size={24}
-                color={colors.primary}
-              />
+              <Ionicons name="chevron-back" size={24} color={colors.primary} />
             </View>
           </TouchableOpacity>
 
@@ -491,14 +318,10 @@ export default function LeagueStats() {
               "rounded-xl",
               "border-6",
               "bg-secondary",
-              "border-secondary",
+              "border-border",
               "shadow-lg"
             )}
             onPress={() => {
-              addBreadcrumb("User tapped Start New Game", "user_action", {
-                screen: "LeagueStats",
-                leagueId: league.id,
-              });
               // Navigate to select players screen
               router.push(`/games/${league.id}/select-players`);
             }}>
@@ -534,7 +357,7 @@ export default function LeagueStats() {
 
             <View style={tw["ml-3"]}>
               <Ionicons
-                name={isRTL ? "chevron-back" : "chevron-forward"}
+                name="chevron-back"
                 size={24}
                 color={colors.textInverse}
               />

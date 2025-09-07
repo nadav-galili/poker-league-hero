@@ -12,7 +12,7 @@ export default function TabLayout() {
       screenOptions={{
         headerShown: false,
         tabBarStyle: {
-          backgroundColor: theme.surface,
+          backgroundColor: theme.primary,
           borderTopWidth: 3,
           borderTopColor: theme.border,
           paddingBottom: 8,
@@ -31,8 +31,8 @@ export default function TabLayout() {
           textTransform: "uppercase",
           marginTop: 4,
         },
-        tabBarActiveTintColor: theme.primary,
-        tabBarInactiveTintColor: colors.border,
+        tabBarActiveTintColor: theme.success,
+        tabBarInactiveTintColor: theme.border,
         tabBarIconStyle: {
           marginTop: 4,
         },
