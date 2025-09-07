@@ -4,5 +4,5 @@
 
 export { useGameCreation } from "./useGameCreation";
 export { useLeagueMembers } from "./useLeagueMembers";
-export { usePlayerSelection } from "./usePlayerSelection";
 export { useMyLeagues } from "./useMyLeagues";
+export { usePlayerSelection } from "./usePlayerSelection";
