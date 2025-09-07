@@ -2,7 +2,7 @@
  * Reusable PlayerCard component for displaying player information
  */
 
-import { LeagueMember } from "@/app/types";
+import { LeagueMember } from "@/types";
 import { colors, getTheme } from "@/colors";
 import { Text } from "@/components/Text";
 import { captureException } from "@/utils/sentry";

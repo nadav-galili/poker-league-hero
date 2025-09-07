@@ -1,3 +1,4 @@
+import { useLeagueStats } from "@/hooks/useLeagueStats";
 import { colors, getTheme } from "@/colors";
 import {
   AdditionalStatsCard,
@@ -7,7 +8,6 @@ import {
 } from "@/components/LeagueStats";
 import { Text } from "@/components/Text";
 import { useLocalization } from "@/context/localization";
-import { useLeagueStats } from "@/app/hooks/useLeagueStats";
 import { createStatCards, createTopPlayers } from "@/utils/leagueStatsHelpers";
 import { addBreadcrumb } from "@/utils/sentry";
 import { Ionicons } from "@expo/vector-icons";
@@ -16,6 +16,7 @@ import React from "react";
 import {
   ActivityIndicator,
   RefreshControl,
+  Text as RNText,
   ScrollView,
   StyleSheet,
   TouchableOpacity,
@@ -123,9 +124,9 @@ export default function LeagueStatsScreen() {
         }>
         {/* Main Stats Grid */}
         <View style={styles.section}>
-          <Text variant="h3" color={theme.text} style={styles.sectionTitle}>
+          <RNText className="text-primary text-center mb-4 text-2xl font-bold uppercase tracking-widest">
             {t("league Overview")}
-          </Text>
+          </RNText>
           <View style={styles.statsGrid}>
             {statCards.map((card, index) => (
               <StatCard key={index} card={card} />

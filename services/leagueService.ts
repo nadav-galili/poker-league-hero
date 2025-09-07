@@ -2,7 +2,7 @@
  * League Service - Handles all league-related API operations
  */
 
-import { League, LeagueData, LeagueStats } from "@/app/types";
+import { League, LeagueData, LeagueStats } from "@/types";
 import { BASE_URL } from "@/constants";
 
 export class LeagueService {

@@ -3,13 +3,13 @@
  */
 
 import React from "react";
-import { Pressable, View, StyleSheet, Alert } from "react-native";
+import { Pressable, View, Alert } from "react-native";
 import { Image } from "expo-image";
 import { Ionicons } from "@expo/vector-icons";
 import { getTheme, colors } from "@/colors";
 import { Text } from "@/components/Text";
 import { useLocalization } from "@/context/localization";
-import { LeagueWithTheme } from "@/app/types/league";
+import { LeagueWithTheme } from "@/types/league";
 import { captureException } from "@/utils/sentry";
 
 interface LeagueCardProps {
@@ -49,22 +49,18 @@ export function LeagueCard({ league, onPress, onShare }: LeagueCardProps) {
 
   return (
     <Pressable
-      style={({ pressed }) => [
-        styles.leagueCard,
-        styles.brutalistShadow,
-        {
-          backgroundColor: theme.surfaceElevated,
-          borderColor: theme.primary,
-          shadowColor: theme.shadow,
-        },
-        pressed && styles.pressedCard,
-      ]}
+      className="flex-row items-center p-5 rounded-xl border-[6px] border-primary bg-surfaceElevated relative overflow-hidden shadow-[32px_32px_0px_0px] shadow-shadow active:scale-95 active:translate-x-4 active:translate-y-4 active:shadow-[16px_16px_0px_0px]"
+      style={{
+        borderColor: theme.primary,
+        backgroundColor: theme.surfaceElevated,
+        shadowColor: theme.shadow,
+      }}
       onPress={handlePress}>
       {/* League Image with colored frame */}
-      <View style={styles.imageContainer}>
+      <View className="relative mr-5">
         <Image
           source={{ uri: league.image }}
-          style={styles.leagueImage as any}
+          className="w-20 h-20 rounded-xl border-[6px] border-border"
           contentFit="cover"
           onError={(error) => {
             captureException(new Error("Image loading failed"), {
@@ -77,41 +73,38 @@ export function LeagueCard({ league, onPress, onShare }: LeagueCardProps) {
           }}
         />
         <View
-          style={[styles.imageFrame, { borderColor: league.themeColor }]}
+          className="absolute -top-2 -left-2 -right-2 -bottom-2 border-[6px] rounded-[20px] opacity-90"
+          style={{ borderColor: league.themeColor }}
         />
       </View>
 
       {/* League Info with enhanced styling */}
-      <View style={styles.leagueInfo}>
-        <Text variant="h4" color={theme.text} style={styles.leagueName}>
+      <View className="flex-1 gap-3">
+        <Text variant="h4" className="tracking-widest font-bold uppercase text-base text-primary underline">
           {league.name}
         </Text>
 
-        <View style={styles.codeContainer}>
+        <View className="flex-row items-center gap-3">
           <View
-            style={[
-              styles.codeBadge,
-              {
-                backgroundColor: league.accentColor,
-                borderColor: league.themeColor,
-              },
-            ]}>
+            className="flex-1 px-3 py-2 rounded-md border-[3px]"
+            style={{
+              backgroundColor: league.accentColor,
+              borderColor: league.themeColor,
+            }}>
             <Text variant="labelSmall" color={league.themeColor}>
               {t("leagueCode")}
             </Text>
             <Text
               variant="body"
               color={league.themeColor}
-              style={styles.codeText}>
+              className="tracking-wide">
               {league.code}
             </Text>
           </View>
 
           <Pressable
-            style={[
-              styles.shareButton,
-              { backgroundColor: league.themeColor },
-            ]}
+            className="w-10 h-10 rounded-md border-[3px] border-border items-center justify-center shadow-[4px_4px_0px_0px] shadow-shadow"
+            style={{ backgroundColor: league.themeColor }}
             onPress={handleShare}>
             <Ionicons name="share" size={16} color="#FFFFFF" />
           </Pressable>
@@ -120,7 +113,7 @@ export function LeagueCard({ league, onPress, onShare }: LeagueCardProps) {
         <Text
           variant="captionSmall"
           color={theme.textMuted}
-          style={styles.memberCount}>
+          className="tracking-wide uppercase">
           {league.memberCount} {t("members")}
         </Text>
       </View>
@@ -128,104 +121,3 @@ export function LeagueCard({ league, onPress, onShare }: LeagueCardProps) {
   );
 }
 
-const styles = StyleSheet.create({
-  leagueCard: {
-    flexDirection: "row",
-    alignItems: "center",
-    padding: 20,
-    borderRadius: 12,
-    borderWidth: 6,
-    position: "relative",
-    overflow: "hidden",
-  },
-
-  brutalistShadow: {
-    shadowOffset: { width: 32, height: 32 },
-    shadowOpacity: 1,
-    shadowRadius: 0,
-    elevation: 60,
-  },
-
-  pressedCard: {
-    transform: [{ scale: 0.96 }, { translateX: 16 }, { translateY: 16 }],
-    shadowOffset: { width: 16, height: 16 },
-  },
-
-  // Clean image styling
-  imageContainer: {
-    position: "relative",
-    marginRight: 20,
-  },
-
-  leagueImage: {
-    width: 80,
-    height: 80,
-    borderRadius: 12,
-    borderWidth: 6,
-    borderColor: colors.border,
-  },
-
-  imageFrame: {
-    position: "absolute",
-    top: -8,
-    left: -8,
-    right: -8,
-    bottom: -8,
-    borderWidth: 6,
-    borderRadius: 20,
-    opacity: 0.9,
-  },
-
-  // Clean info styling
-  leagueInfo: {
-    flex: 1,
-    gap: 12,
-  },
-
-  leagueName: {
-    letterSpacing: 1.2,
-    fontWeight: "bold",
-    textTransform: "uppercase",
-    fontSize: 16,
-    color: colors.primary,
-    textDecorationLine: "underline",
-  },
-
-  codeContainer: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 12,
-  },
-
-  codeBadge: {
-    flex: 1,
-    paddingHorizontal: 12,
-    paddingVertical: 8,
-    borderRadius: 6,
-    borderWidth: 3,
-  },
-
-  codeText: {
-    letterSpacing: 1,
-  },
-
-  shareButton: {
-    width: 40,
-    height: 40,
-    borderRadius: 6,
-    borderWidth: 3,
-    borderColor: colors.border,
-    alignItems: "center",
-    justifyContent: "center",
-    shadowColor: colors.shadow,
-    shadowOffset: { width: 4, height: 4 },
-    shadowOpacity: 1,
-    shadowRadius: 0,
-    elevation: 8,
-  },
-
-  memberCount: {
-    letterSpacing: 0.8,
-    textTransform: "uppercase",
-  },
-});

@@ -2,7 +2,7 @@
  * League theme configurations
  */
 
-import { LeagueTheme } from "@/app/types/league";
+import { LeagueTheme } from "@/types/league";
 import { colors } from "@/colors";
 
 export const leagueThemes: LeagueTheme[] = [

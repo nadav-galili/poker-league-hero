@@ -1,5 +1,5 @@
 import { colors } from "@/colors";
-import { LeagueStats } from "@/app/hooks/useLeagueStats";
+import { LeagueStats } from "@/hooks/useLeagueStats";
 import { formatCurrency, formatDuration } from "./leagueStatsFormatters";
 
 export interface StatCard {

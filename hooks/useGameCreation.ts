@@ -2,8 +2,8 @@
  * Hook for managing game creation flow
  */
 
-import { createGameService } from "@/app/services";
-import { CreateGameRequest } from "@/app/types";
+import { createGameService } from "@/services";
+import { CreateGameRequest } from "@/types";
 import { useAuth } from "@/context/auth";
 import { useLocalization } from "@/context/localization";
 import { addBreadcrumb, captureException } from "@/utils/sentry";

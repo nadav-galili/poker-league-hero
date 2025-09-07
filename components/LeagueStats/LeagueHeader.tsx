@@ -1,6 +1,6 @@
 import { colors } from "@/colors";
 import { Text } from "@/components/Text";
-import { LeagueData } from "@/app/hooks/useLeagueStats";
+import { LeagueData } from "@/hooks/useLeagueStats";
 import { Ionicons } from "@expo/vector-icons";
 import { Image } from "expo-image";
 import React from "react";

@@ -2,9 +2,9 @@
  * Custom hook for managing user leagues
  */
 
-import { addThemeToLeagues } from "@/app/constants/leagueThemes";
-import { joinLeagueWithCode, shareLeague } from "@/app/services";
-import { LeagueWithTheme } from "@/app/types/league";
+import { addThemeToLeagues } from "@/constants/leagueThemes";
+import { joinLeagueWithCode, shareLeague } from "@/services";
+import { LeagueWithTheme } from "@/types/league";
 import { useAuth } from "@/context/auth";
 import { useLocalization } from "@/context/localization";
 import { fetchUserLeagues } from "@/utils/leagueService";

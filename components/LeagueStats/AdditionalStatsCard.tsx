@@ -1,6 +1,6 @@
 import { colors, getTheme } from "@/colors";
 import { Text } from "@/components/Text";
-import { LeagueData } from "@/app/hooks/useLeagueStats";
+import { LeagueData } from "@/hooks/useLeagueStats";
 import React from "react";
 import { StyleSheet, View } from "react-native";
 

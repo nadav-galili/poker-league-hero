@@ -2,7 +2,7 @@
  * Reusable PlayerGrid component for displaying players in a grid layout
  */
 
-import { LeagueMember } from "@/app/types";
+import { LeagueMember } from "@/types";
 import { getTheme } from "@/colors";
 import { Text } from "@/components/Text";
 import { useLocalization } from "@/context/localization";

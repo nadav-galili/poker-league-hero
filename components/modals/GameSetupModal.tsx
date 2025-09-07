@@ -2,7 +2,7 @@
  * GameSetupModal component for configuring game settings before creation
  */
 
-import { LeagueMember } from "@/app/types";
+import { LeagueMember } from "@/types";
 import { colors, getTheme } from "@/colors";
 import Button from "@/components/Button";
 import { Text } from "@/components/Text";

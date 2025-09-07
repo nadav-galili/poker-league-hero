@@ -2,8 +2,8 @@
  * Hook for managing league members data
  */
 
-import { createLeagueService } from "@/app/services";
-import { LeagueData } from "@/app/types";
+import { createLeagueService } from "@/services";
+import { LeagueData } from "@/types";
 import { useAuth } from "@/context/auth";
 import { addBreadcrumb, captureException, setTag } from "@/utils/sentry";
 import React from "react";

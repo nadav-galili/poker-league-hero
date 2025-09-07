@@ -7,7 +7,7 @@ import {
   useGameCreation,
   useLeagueMembers,
   usePlayerSelection,
-} from "@/app/hooks";
+} from "@/hooks";
 import { colors, getTheme } from "@/colors";
 import Button from "@/components/Button";
 import { Text } from "@/components/Text";
