@@ -176,7 +176,7 @@ export default function SelectPlayers() {
             { backgroundColor: colors.primaryTint },
           ]}>
           <Text variant="h4" color={colors.primary} style={styles.summaryText}>
-            {selectedCount} {t("playersSelected")}
+            {t("playersSelected", { count: selectedCount })}
           </Text>
         </View>
       )}

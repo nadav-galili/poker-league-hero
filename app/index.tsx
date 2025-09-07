@@ -34,5 +34,5 @@ export default function Index() {
   }
 
   // Redirect to home tabs when user is logged in
-  return <Redirect href="/(tabs)/my-leagues" />;
+  return <Redirect href={"/(tabs)/my-leagues" as any} />;
 }

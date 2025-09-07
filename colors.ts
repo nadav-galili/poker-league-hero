@@ -8,7 +8,7 @@ const rawColors = {
   ink: "#000000", // Pure black for maximum contrast
   paper: "#FFFFFF", // Pure white for stark contrast
   bone: "#F8F8F8", // Off-white for subtle backgrounds
-  concrete: "#F0F0F0", // Light gray for cards
+  concrete: "#c4c2c2", // Light gray for cards
   shadow: "#000000", // Black shadows for depth
 
   // Neo-brutalist accent colors - bold and electric
@@ -175,4 +175,4 @@ export const themes: Record<ThemeName, Theme> = {
   },
 };
 
-export const getTheme = (name: ThemeName = "light"): Theme => themes[name];
+export const getTheme = (name: ThemeName = "dark"): Theme => themes[name];

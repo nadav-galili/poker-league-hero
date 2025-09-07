@@ -14,7 +14,7 @@ export default function LoginForm() {
   };
 
   return (
-    <View style={[styles.container, { backgroundColor: theme.background }]}>
+    <View style={[styles.container, { backgroundColor: theme.surface }]}>
       {/* Hero section with app icon */}
       <View style={styles.heroSection}>
         <View style={styles.iconContainer}>
@@ -105,8 +105,9 @@ const styles = StyleSheet.create({
   },
 
   appIcon: {
-    width: 120,
-    height: 120,
+    backgroundColor: colors.textInverse,
+    width: 300,
+    height: 300,
     borderRadius: 28,
   },
 
@@ -116,9 +117,7 @@ const styles = StyleSheet.create({
     left: -8,
     right: -8,
     bottom: -8,
-    borderWidth: 4,
-    borderColor: colors.text,
-    borderRadius: 36,
+
     opacity: 0.8,
   },
 

@@ -159,14 +159,7 @@ export default function MyLeagues() {
         action: "create_league",
       });
 
-      console.log("Create League pressed");
       router.push("/leagues/create-league");
-
-      captureMessage("User initiated league creation", "info", {
-        screen: "MyLeagues",
-        feature: "create_league",
-      });
-      // TODO: Navigate to create league form
     } catch (error) {
       captureException(error as Error, {
         function: "handleCreateLeague",
@@ -178,13 +171,6 @@ export default function MyLeagues() {
 
   const handleJoinLeague = () => {
     try {
-      addBreadcrumb("User clicked Join League", "user_action", {
-        screen: "MyLeagues",
-        action: "join_league",
-      });
-
-      console.log("Join League pressed");
-
       Alert.prompt(
         t("joinLeague"),
         t("enterLeagueCode"),
@@ -378,15 +364,6 @@ export default function MyLeagues() {
             ]}
             onPress={() => {
               try {
-                addBreadcrumb("User tapped league card", "user_action", {
-                  screen: "MyLeagues",
-                  action: "league_card_tap",
-                  leagueId: item.id,
-                  leagueName: item.name,
-                  leagueStatus: item.status,
-                });
-
-                console.log("League pressed:", item.name);
                 // Navigate to league stats
                 router.push(`/leagues/${item.id}/stats`);
 
@@ -439,8 +416,11 @@ export default function MyLeagues() {
                       borderColor: item.themeColor,
                     },
                   ]}>
+                  <Text variant="labelSmall" color={item.themeColor}>
+                    {t("leagueCode")}
+                  </Text>
                   <Text
-                    variant="labelSmall"
+                    variant="body"
                     color={item.themeColor}
                     style={styles.codeText}>
                     {item.code}
@@ -454,12 +434,6 @@ export default function MyLeagues() {
                   ]}
                   onPress={() => {
                     try {
-                      addBreadcrumb("User tapped share button", "user_action", {
-                        screen: "MyLeagues",
-                        action: "share_button_tap",
-                        leagueId: item.id,
-                        leagueName: item.name,
-                      });
                       shareLeagueCode(item);
                     } catch (error) {
                       captureException(error as Error, {
@@ -538,7 +512,7 @@ export default function MyLeagues() {
             variant="outline"
             size="small"
             icon="enter"
-            backgroundColor={colors.accent}
+            backgroundColor={colors.success}
             textColor={colors.text}
           />
           <Button
@@ -779,6 +753,11 @@ const styles = StyleSheet.create({
 
   leagueName: {
     letterSpacing: 1.2,
+    fontWeight: "bold",
+    textTransform: "uppercase",
+    fontSize: 16,
+    color: colors.primary,
+    textDecorationLine: "underline",
   },
 
   codeContainer: {

@@ -368,7 +368,7 @@ const heTranslations: Translations = {
   enterLeagueCode: "הזן קוד ליגה:",
   cancel: "ביטול",
   join: "הצטרף",
-  create: "צור",
+  create: "ליגה חדשה",
   joinedLeagueSuccess: "הצטרפת בהצלחה לליגה",
 
   // Create League Screen
