@@ -3,22 +3,17 @@
  * Reduced from 873 lines to ~120 lines using extracted components and hooks
  */
 
-import { useGameCreation, useLeagueMembers, usePlayerSelection } from '@/hooks';
 import { colors, getTheme } from '@/colors';
 import Button from '@/components/Button';
 import { Text } from '@/components/Text';
 import { GameSetupModal } from '@/components/modals';
 import { PlayerGrid } from '@/components/ui';
 import { useLocalization } from '@/context/localization';
+import { useGameCreation, useLeagueMembers, usePlayerSelection } from '@/hooks';
 import { Ionicons } from '@expo/vector-icons';
 import { router, useLocalSearchParams } from 'expo-router';
 import React from 'react';
-import {
-   ActivityIndicator,
-   StyleSheet,
-   TouchableOpacity,
-   View,
-} from 'react-native';
+import { ActivityIndicator, TouchableOpacity, View } from 'react-native';
 
 export default function SelectPlayers() {
    const theme = getTheme('light');
@@ -67,11 +62,15 @@ export default function SelectPlayers() {
    // Loading state
    if (isLoading) {
       return (
-         <View
-            style={[styles.container, { backgroundColor: theme.background }]}
-         >
-            <View style={[styles.header, { backgroundColor: colors.primary }]}>
-               <TouchableOpacity onPress={handleBack} style={styles.backButton}>
+         <View className="flex-1" style={{ backgroundColor: theme.background }}>
+            <View
+               className="flex-row items-center justify-between px-5 pt-15 pb-4 border-b-[6px]"
+               style={{
+                  backgroundColor: colors.primary,
+                  borderBottomColor: colors.text,
+               }}
+            >
+               <TouchableOpacity onPress={handleBack} className="p-2">
                   <Ionicons
                      name="arrow-back"
                      size={24}
@@ -81,19 +80,19 @@ export default function SelectPlayers() {
                <Text
                   variant="h3"
                   color={colors.textInverse}
-                  style={styles.headerTitle}
+                  className="tracking-wider uppercase"
                >
                   {t('selectPlayers')}
                </Text>
-               <View style={styles.placeholder} />
+               <View className="w-10" />
             </View>
 
-            <View style={styles.loadingContainer}>
+            <View className="flex-1 justify-center items-center py-15">
                <ActivityIndicator size="large" color={theme.primary} />
                <Text
                   variant="body"
                   color={theme.textMuted}
-                  style={styles.loadingText}
+                  className="mt-4 text-center"
                >
                   {t('loadingLeagueMembers')}
                </Text>
@@ -105,11 +104,15 @@ export default function SelectPlayers() {
    // Error state
    if (error) {
       return (
-         <View
-            style={[styles.container, { backgroundColor: theme.background }]}
-         >
-            <View style={[styles.header, { backgroundColor: colors.primary }]}>
-               <TouchableOpacity onPress={handleBack} style={styles.backButton}>
+         <View className="flex-1" style={{ backgroundColor: theme.background }}>
+            <View
+               className="flex-row items-center justify-between px-5 pt-15 pb-4 border-b-[6px]"
+               style={{
+                  backgroundColor: colors.primary,
+                  borderBottomColor: colors.text,
+               }}
+            >
+               <TouchableOpacity onPress={handleBack} className="p-2">
                   <Ionicons
                      name="arrow-back"
                      size={24}
@@ -119,21 +122,25 @@ export default function SelectPlayers() {
                <Text
                   variant="h3"
                   color={colors.textInverse}
-                  style={styles.headerTitle}
+                  className="tracking-wider uppercase"
                >
                   {t('selectPlayers')}
                </Text>
-               <View style={styles.placeholder} />
+               <View className="w-10" />
             </View>
 
-            <View style={styles.errorContainer}>
-               <Text variant="h3" color={theme.error} style={styles.errorTitle}>
+            <View className="flex-1 justify-center items-center px-10 py-15">
+               <Text
+                  variant="h3"
+                  color={theme.error}
+                  className="text-center mb-3"
+               >
                   {t('errorLoadingPlayers')}
                </Text>
                <Text
                   variant="body"
                   color={theme.textMuted}
-                  style={styles.errorMessage}
+                  className="text-center mb-6 leading-5"
                >
                   {error}
                </Text>
@@ -149,10 +156,16 @@ export default function SelectPlayers() {
    }
 
    return (
-      <View style={[styles.container, { backgroundColor: theme.background }]}>
+      <View className="flex-1" style={{ backgroundColor: theme.background }}>
          {/* Header */}
-         <View style={[styles.header, { backgroundColor: colors.primary }]}>
-            <TouchableOpacity onPress={handleBack} style={styles.backButton}>
+         <View
+            className="flex-row items-center justify-between px-5 pt-15 pb-4 border-b-[6px]"
+            style={{
+               backgroundColor: colors.primary,
+               borderBottomColor: colors.text,
+            }}
+         >
+            <TouchableOpacity onPress={handleBack} className="p-2">
                <Ionicons
                   name="arrow-back"
                   size={24}
@@ -162,26 +175,31 @@ export default function SelectPlayers() {
             <Text
                variant="h3"
                color={colors.textInverse}
-               style={styles.headerTitle}
+               className="tracking-wider uppercase"
             >
                {t('selectPlayers')}
             </Text>
-            <View style={styles.placeholder} />
+            <View className="w-10" />
          </View>
 
          {/* League Info Header */}
          {league && (
             <View
-               style={[
-                  styles.leagueHeader,
-                  { backgroundColor: theme.surfaceElevated },
-               ]}
+               className="p-4 border-b-2"
+               style={{
+                  backgroundColor: theme.surfaceElevated,
+                  borderBottomColor: colors.border,
+               }}
             >
-               <Text variant="h3" color={theme.text} style={styles.leagueName}>
+               <Text
+                  variant="h3"
+                  color={theme.text}
+                  className="tracking-wide mb-1"
+               >
                   {league.name}
                </Text>
                <Text variant="body" color={theme.textMuted}>
-                  {t('selectPlayersForGame')}
+                  {t('Select Players For Game')}
                </Text>
             </View>
          )}
@@ -189,15 +207,16 @@ export default function SelectPlayers() {
          {/* Selection Summary */}
          {selectedCount > 0 && (
             <View
-               style={[
-                  styles.selectionSummary,
-                  { backgroundColor: colors.primaryTint },
-               ]}
+               className="px-4 py-3 border-b-2"
+               style={{
+                  backgroundColor: colors.primaryTint,
+                  borderBottomColor: colors.primary,
+               }}
             >
                <Text
                   variant="h4"
                   color={colors.primary}
-                  style={styles.summaryText}
+                  className="text-center tracking-wide"
                >
                   {selectedCount} {t('playersSelected')}
                </Text>
@@ -218,17 +237,22 @@ export default function SelectPlayers() {
          {/* Start Game Button */}
          {selectedCount > 0 && (
             <View
-               style={[
-                  styles.startGameContainer,
-                  { backgroundColor: theme.background },
-               ]}
+               className="absolute bottom-0 left-0 right-0 p-4 pb-8 shadow-lg"
+               style={{
+                  backgroundColor: theme.background,
+                  shadowColor: colors.shadow,
+                  shadowOffset: { width: 0, height: -4 },
+                  shadowOpacity: 1,
+                  shadowRadius: 0,
+                  elevation: 16,
+               }}
             >
                <Button
                   title={t('startGame')}
                   onPress={handleStartGame}
                   variant="primary"
                   size="large"
-                  backgroundColor={colors.secondary}
+                  className="bg-secondary"
                   fullWidth
                />
             </View>
@@ -249,101 +273,3 @@ export default function SelectPlayers() {
       </View>
    );
 }
-
-const styles = StyleSheet.create({
-   container: {
-      flex: 1,
-   },
-
-   header: {
-      flexDirection: 'row',
-      alignItems: 'center',
-      justifyContent: 'space-between',
-      paddingHorizontal: 20,
-      paddingTop: 60,
-      paddingBottom: 16,
-      borderBottomWidth: 6,
-      borderBottomColor: colors.text,
-   },
-
-   backButton: {
-      padding: 8,
-   },
-
-   headerTitle: {
-      letterSpacing: 1,
-      textTransform: 'uppercase',
-   },
-
-   placeholder: {
-      width: 40,
-   },
-
-   leagueHeader: {
-      padding: 16,
-      borderBottomWidth: 2,
-      borderBottomColor: colors.border,
-   },
-
-   leagueName: {
-      letterSpacing: 1,
-      marginBottom: 4,
-   },
-
-   selectionSummary: {
-      paddingHorizontal: 16,
-      paddingVertical: 12,
-      borderBottomWidth: 2,
-      borderBottomColor: colors.primary,
-   },
-
-   summaryText: {
-      textAlign: 'center',
-      letterSpacing: 0.5,
-   },
-
-   loadingContainer: {
-      flex: 1,
-      justifyContent: 'center',
-      alignItems: 'center',
-      paddingVertical: 60,
-   },
-
-   loadingText: {
-      marginTop: 16,
-      textAlign: 'center',
-   },
-
-   errorContainer: {
-      flex: 1,
-      justifyContent: 'center',
-      alignItems: 'center',
-      paddingHorizontal: 40,
-      paddingVertical: 60,
-   },
-
-   errorTitle: {
-      textAlign: 'center',
-      marginBottom: 12,
-   },
-
-   errorMessage: {
-      textAlign: 'center',
-      marginBottom: 24,
-      lineHeight: 20,
-   },
-
-   startGameContainer: {
-      position: 'absolute',
-      bottom: 0,
-      left: 0,
-      right: 0,
-      padding: 16,
-      paddingBottom: 32,
-      shadowColor: colors.shadow,
-      shadowOffset: { width: 0, height: -4 },
-      shadowOpacity: 1,
-      shadowRadius: 0,
-      elevation: 16,
-   },
-});

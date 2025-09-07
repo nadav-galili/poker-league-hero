@@ -7,7 +7,7 @@ export async function GET(request: Request) {
 
       if (!id) {
          return Response.json(
-            { error: 'League ID is required' },
+            { success: false, message: 'League ID is required' },
             { status: 400 }
          );
       }
@@ -39,6 +39,7 @@ export async function GET(request: Request) {
       };
 
       return Response.json({
+         success: true,
          league: formattedLeague,
          message: 'League details retrieved successfully',
       });
@@ -46,11 +47,14 @@ export async function GET(request: Request) {
       console.error('Error fetching league details:', error);
 
       if (error instanceof Error && error.message === 'League not found') {
-         return Response.json({ error: 'League not found' }, { status: 404 });
+         return Response.json(
+            { success: false, message: 'League not found' },
+            { status: 404 }
+         );
       }
 
       return Response.json(
-         { error: 'Failed to fetch league details' },
+         { success: false, message: 'Failed to fetch league details' },
          { status: 500 }
       );
    }

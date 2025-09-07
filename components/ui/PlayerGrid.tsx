@@ -2,12 +2,12 @@
  * Reusable PlayerGrid component for displaying players in a grid layout
  */
 
-import { LeagueMember } from '@/types';
 import { getTheme } from '@/colors';
 import { Text } from '@/components/Text';
 import { useLocalization } from '@/context/localization';
+import { LeagueMember } from '@/types';
 import React from 'react';
-import { FlatList, StyleSheet, View } from 'react-native';
+import { FlatList, View } from 'react-native';
 import { PlayerCard } from './PlayerCard';
 
 interface PlayerGridProps {
@@ -48,14 +48,14 @@ export function PlayerGrid({
    };
 
    const renderEmptyState = () => (
-      <View style={styles.emptyState}>
-         <Text variant="h3" color={theme.text} style={styles.emptyTitle}>
+      <View className="items-center py-15 px-5">
+         <Text variant="h3" color={theme.text} className="text-center mb-3">
             {t('noPlayersFound')}
          </Text>
          <Text
             variant="body"
             color={theme.textMuted}
-            style={styles.emptyMessage}
+            className="text-center leading-5"
          >
             {t('noPlayersFoundMessage')}
          </Text>
@@ -63,21 +63,21 @@ export function PlayerGrid({
    );
 
    const renderErrorState = () => (
-      <View style={styles.errorState}>
-         <Text variant="h3" color={theme.error} style={styles.errorTitle}>
+      <View className="items-center py-15 px-5">
+         <Text variant="h3" color={theme.error} className="text-center mb-3">
             {t('error')}
          </Text>
          <Text
             variant="body"
             color={theme.textMuted}
-            style={styles.errorMessage}
+            className="text-center leading-5"
          >
             {error || t('unknownError')}
          </Text>
       </View>
    );
 
-   const renderSeparator = () => <View style={styles.gridSeparator} />;
+   const renderSeparator = () => <View className="h-2" />;
 
    if (error) {
       return renderErrorState();
@@ -91,11 +91,26 @@ export function PlayerGrid({
          numColumns={variant === 'grid' ? numColumns : 1}
          key={variant} // Force re-render when variant changes
          columnWrapperStyle={
-            variant === 'grid' && numColumns > 1 ? styles.gridRow : undefined
+            variant === 'grid' && numColumns > 1
+               ? { justifyContent: 'space-between', paddingHorizontal: 8 }
+               : undefined
          }
          contentContainerStyle={[
-            variant === 'grid' ? styles.gridContainer : styles.listContainer,
-            members.length === 0 && styles.emptyContainer,
+            variant === 'grid'
+               ? {
+                    padding: 16,
+                    paddingBottom: 100,
+                    flexGrow: members.length === 0 ? 1 : 0,
+                    justifyContent:
+                       members.length === 0 ? 'center' : 'flex-start',
+                 }
+               : {
+                    padding: 8,
+                    paddingBottom: 100,
+                    flexGrow: members.length === 0 ? 1 : 0,
+                    justifyContent:
+                       members.length === 0 ? 'center' : 'flex-start',
+                 },
          ]}
          showsVerticalScrollIndicator={false}
          ItemSeparatorComponent={
@@ -103,69 +118,7 @@ export function PlayerGrid({
          }
          ListEmptyComponent={renderEmptyState}
          scrollEnabled={!loading}
-         style={styles.container}
+         className="flex-1"
       />
    );
 }
-
-const styles = StyleSheet.create({
-   container: {
-      flex: 1,
-   },
-
-   gridContainer: {
-      padding: 16,
-      paddingBottom: 100, // Extra space for floating button
-   },
-
-   listContainer: {
-      padding: 8,
-      paddingBottom: 100, // Extra space for floating button
-   },
-
-   emptyContainer: {
-      flexGrow: 1,
-      justifyContent: 'center',
-   },
-
-   gridRow: {
-      justifyContent: 'space-between',
-      paddingHorizontal: 4,
-   },
-
-   gridSeparator: {
-      height: 8,
-   },
-
-   emptyState: {
-      alignItems: 'center',
-      paddingVertical: 60,
-      paddingHorizontal: 20,
-   },
-
-   emptyTitle: {
-      textAlign: 'center',
-      marginBottom: 12,
-   },
-
-   emptyMessage: {
-      textAlign: 'center',
-      lineHeight: 20,
-   },
-
-   errorState: {
-      alignItems: 'center',
-      paddingVertical: 60,
-      paddingHorizontal: 20,
-   },
-
-   errorTitle: {
-      textAlign: 'center',
-      marginBottom: 12,
-   },
-
-   errorMessage: {
-      textAlign: 'center',
-      lineHeight: 20,
-   },
-});

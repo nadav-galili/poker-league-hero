@@ -2,12 +2,12 @@
  * GameSetupModal component for configuring game settings before creation
  */
 
-import { LeagueMember } from '@/types';
 import { colors, getTheme } from '@/colors';
 import Button from '@/components/Button';
 import { Text } from '@/components/Text';
 import { BuyInSelector } from '@/components/ui/BuyInSelector';
 import { useLocalization } from '@/context/localization';
+import { LeagueMember } from '@/types';
 import { Ionicons } from '@expo/vector-icons';
 import { Image } from 'expo-image';
 import React from 'react';
@@ -143,15 +143,6 @@ export function GameSetupModal({
                            >
                               {member.fullName}
                            </Text>
-                           {member.role === 'admin' && (
-                              <View style={styles.adminBadge}>
-                                 <Ionicons
-                                    name="crown"
-                                    size={12}
-                                    color={colors.warning}
-                                 />
-                              </View>
-                           )}
                         </View>
                      ))}
                   </View>
@@ -245,7 +236,7 @@ export function GameSetupModal({
                   onPress={onCreateGame}
                   variant="primary"
                   size="large"
-                  backgroundColor={colors.secondary}
+                  className="bg-secondary"
                   disabled={isCreatingGame}
                   fullWidth
                />

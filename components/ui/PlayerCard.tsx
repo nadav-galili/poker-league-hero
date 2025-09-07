@@ -2,14 +2,14 @@
  * Reusable PlayerCard component for displaying player information
  */
 
-import { LeagueMember } from '@/types';
 import { colors, getTheme } from '@/colors';
 import { Text } from '@/components/Text';
+import { LeagueMember } from '@/types';
 import { captureException } from '@/utils/sentry';
 import { Ionicons } from '@expo/vector-icons';
 import { Image } from 'expo-image';
 import React from 'react';
-import { StyleSheet, TouchableOpacity, View } from 'react-native';
+import { TouchableOpacity, View } from 'react-native';
 
 interface PlayerCardProps {
    player: LeagueMember;
@@ -36,43 +36,53 @@ export function PlayerCard({
       }
    };
 
-   const getCardStyle = () => {
-      const baseStyle = [styles.playerCard];
+   const getCardClassName = () => {
+      let baseClasses = 'rounded-xl border-2 p-3 relative shadow-lg';
 
       if (variant === 'grid') {
-         baseStyle.push(styles.gridCard);
+         baseClasses += ' flex-1 h-32 mx-1 my-1 items-center justify-center';
       } else if (variant === 'list') {
-         baseStyle.push(styles.listCard);
+         baseClasses +=
+            ' flex-row items-center my-1 mx-2 px-3 py-3 min-h-[72px]';
       } else if (variant === 'compact') {
-         baseStyle.push(styles.compactCard);
+         baseClasses +=
+            ' flex-row items-center px-2 py-1.5 my-0.5 min-h-[48px]';
       }
 
-      baseStyle.push({
+      return baseClasses;
+   };
+
+   const getCardStyle = () => {
+      return {
          backgroundColor: isSelected
             ? colors.primaryTint
             : theme.surfaceElevated,
          borderColor: isSelected ? colors.primary : theme.border,
          opacity: disabled ? 0.6 : 1,
-      });
-
-      return baseStyle;
+         shadowColor: colors.shadow,
+         shadowOffset: { width: 2, height: 2 },
+         shadowOpacity: 0.3,
+         shadowRadius: 0,
+         elevation: 4,
+      };
    };
 
    const getImageSize = () => {
       switch (variant) {
          case 'grid':
-            return { width: 60, height: 60 };
+            return { width: 50, height: 50 };
          case 'list':
             return { width: 48, height: 48 };
          case 'compact':
             return { width: 32, height: 32 };
          default:
-            return { width: 60, height: 60 };
+            return { width: 72, height: 72 };
       }
    };
 
    return (
       <TouchableOpacity
+         className={getCardClassName()}
          style={getCardStyle()}
          onPress={handlePress}
          activeOpacity={disabled ? 1 : 0.7}
@@ -81,15 +91,11 @@ export function PlayerCard({
          {/* Selection Indicator */}
          {showSelectionIndicator && variant === 'grid' && (
             <View
-               style={[
-                  styles.selectionIndicator,
-                  {
-                     backgroundColor: isSelected
-                        ? colors.primary
-                        : 'transparent',
-                     borderColor: isSelected ? colors.primary : theme.border,
-                  },
-               ]}
+               className="absolute top-2 right-2 w-6 h-6 rounded-full border-2 items-center justify-center z-10"
+               style={{
+                  backgroundColor: isSelected ? colors.primary : 'transparent',
+                  borderColor: isSelected ? colors.primary : theme.border,
+               }}
             >
                {isSelected && (
                   <Ionicons
@@ -102,20 +108,15 @@ export function PlayerCard({
          )}
 
          {/* Player Image */}
-         <View
-            style={
-               variant === 'grid'
-                  ? styles.gridImageContainer
-                  : styles.imageContainer
-            }
-         >
+         <View className={variant === 'grid' ? 'mt-2 mb-2' : 'mr-3'}>
             <Image
                source={{
                   uri:
                      player.profileImageUrl ||
                      'https://via.placeholder.com/80x80/cccccc/666666?text=?',
                }}
-               style={[styles.playerImage, getImageSize()]}
+               className="rounded-lg border-2"
+               style={[getImageSize(), { borderColor: colors.border }]}
                contentFit="cover"
                onError={(error) => {
                   captureException(new Error('Player image loading failed'), {
@@ -129,11 +130,17 @@ export function PlayerCard({
          </View>
 
          {/* Player Info */}
-         <View style={variant === 'list' ? styles.listInfo : styles.gridInfo}>
+         <View
+            className={
+               variant === 'list' ? 'flex-1 justify-center' : 'items-center'
+            }
+         >
             <Text
                variant={variant === 'compact' ? 'captionSmall' : 'caption'}
                color={isSelected ? colors.primary : theme.text}
-               style={styles.playerName}
+               className="text-center tracking-wide mt-2 mb-1 leading-4 px-1 font-semibold"
+               numberOfLines={2}
+               ellipsizeMode="tail"
             >
                {player.fullName}
             </Text>
@@ -142,7 +149,7 @@ export function PlayerCard({
                <Text
                   variant="captionSmall"
                   color={theme.textMuted}
-                  style={styles.playerRole}
+                  className="mt-0.5 font-medium"
                >
                   {player.role === 'admin' ? '👑 Admin' : 'Member'}
                </Text>
@@ -151,7 +158,7 @@ export function PlayerCard({
 
          {/* List Selection Indicator */}
          {showSelectionIndicator && variant === 'list' && isSelected && (
-            <View style={styles.listSelectionIndicator}>
+            <View className="ml-2">
                <Ionicons
                   name="checkmark-circle"
                   size={24}
@@ -162,100 +169,3 @@ export function PlayerCard({
       </TouchableOpacity>
    );
 }
-
-const styles = StyleSheet.create({
-   playerCard: {
-      borderRadius: 12,
-      borderWidth: 2,
-      padding: 8,
-      position: 'relative',
-      shadowColor: colors.shadow,
-      shadowOffset: { width: 2, height: 2 },
-      shadowOpacity: 0.3,
-      shadowRadius: 0,
-      elevation: 4,
-   },
-
-   gridCard: {
-      flex: 1,
-      aspectRatio: 1,
-      margin: 4,
-      alignItems: 'center',
-      justifyContent: 'center',
-   },
-
-   listCard: {
-      flexDirection: 'row',
-      alignItems: 'center',
-      marginVertical: 4,
-      marginHorizontal: 8,
-      paddingHorizontal: 12,
-      paddingVertical: 12,
-      minHeight: 72,
-   },
-
-   compactCard: {
-      flexDirection: 'row',
-      alignItems: 'center',
-      paddingHorizontal: 8,
-      paddingVertical: 6,
-      marginVertical: 2,
-      minHeight: 48,
-   },
-
-   selectionIndicator: {
-      position: 'absolute',
-      top: 8,
-      right: 8,
-      width: 24,
-      height: 24,
-      borderRadius: 12,
-      borderWidth: 2,
-      alignItems: 'center',
-      justifyContent: 'center',
-      zIndex: 1,
-   },
-
-   gridImageContainer: {
-      marginTop: 8,
-      marginBottom: 8,
-   },
-
-   imageContainer: {
-      marginRight: 12,
-   },
-
-   playerImage: {
-      borderRadius: 8,
-      borderWidth: 2,
-      borderColor: colors.border,
-   },
-
-   gridInfo: {
-      alignItems: 'center',
-   },
-
-   listInfo: {
-      flex: 1,
-      justifyContent: 'center',
-   },
-
-   playerName: {
-      textAlign: 'center',
-      letterSpacing: 0.3,
-      marginTop: 3,
-      marginBottom: 3,
-      lineHeight: 16,
-      paddingHorizontal: 4,
-      fontWeight: '600',
-   },
-
-   playerRole: {
-      marginTop: 2,
-      fontWeight: '500',
-   },
-
-   listSelectionIndicator: {
-      marginLeft: 8,
-   },
-});
