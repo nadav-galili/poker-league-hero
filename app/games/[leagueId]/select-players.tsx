@@ -5,6 +5,7 @@
 
 import { colors, getTheme } from '@/colors';
 import Button from '@/components/Button';
+import { LoadingState } from '@/components/LoadingState';
 import { Text } from '@/components/Text';
 import { GameSetupModal } from '@/components/modals';
 import { PlayerGrid } from '@/components/ui';
@@ -13,7 +14,7 @@ import { useGameCreation, useLeagueMembers, usePlayerSelection } from '@/hooks';
 import { Ionicons } from '@expo/vector-icons';
 import { router, useLocalSearchParams } from 'expo-router';
 import React from 'react';
-import { ActivityIndicator, TouchableOpacity, View } from 'react-native';
+import { TouchableOpacity, View } from 'react-native';
 
 export default function SelectPlayers() {
    const theme = getTheme('light');
@@ -61,44 +62,7 @@ export default function SelectPlayers() {
 
    // Loading state
    if (isLoading) {
-      return (
-         <View className="flex-1" style={{ backgroundColor: theme.background }}>
-            <View
-               className="flex-row items-center justify-between px-5 pt-15 pb-4 border-b-[6px]"
-               style={{
-                  backgroundColor: colors.primary,
-                  borderBottomColor: colors.text,
-               }}
-            >
-               <TouchableOpacity onPress={handleBack} className="p-2">
-                  <Ionicons
-                     name="arrow-back"
-                     size={24}
-                     color={colors.textInverse}
-                  />
-               </TouchableOpacity>
-               <Text
-                  variant="h3"
-                  color={colors.textInverse}
-                  className="tracking-wider uppercase"
-               >
-                  {t('selectPlayers')}
-               </Text>
-               <View className="w-10" />
-            </View>
-
-            <View className="flex-1 justify-center items-center py-15">
-               <ActivityIndicator size="large" color={theme.primary} />
-               <Text
-                  variant="body"
-                  color={theme.textMuted}
-                  className="mt-4 text-center"
-               >
-                  {t('loadingLeagueMembers')}
-               </Text>
-            </View>
-         </View>
-      );
+      return <LoadingState />;
    }
 
    // Error state

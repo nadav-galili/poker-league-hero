@@ -5,6 +5,7 @@ import {
    PlayerCard,
    StatCard,
 } from '@/components/LeagueStats';
+import { LoadingState } from '@/components/LoadingState';
 import { Text } from '@/components/Text';
 import { useLocalization } from '@/context/localization';
 import { useLeagueStats } from '@/hooks/useLeagueStats';
@@ -13,7 +14,6 @@ import { Ionicons } from '@expo/vector-icons';
 import { router, useLocalSearchParams } from 'expo-router';
 import React from 'react';
 import {
-   ActivityIndicator,
    RefreshControl,
    Text as RNText,
    ScrollView,
@@ -42,31 +42,7 @@ export default function LeagueStatsScreen() {
    };
 
    if (isLoading) {
-      return (
-         <View
-            style={[styles.container, { backgroundColor: theme.background }]}
-         >
-            <View style={[styles.header, { backgroundColor: colors.primary }]}>
-               <TouchableOpacity onPress={handleBack} style={styles.backButton}>
-                  <Ionicons
-                     name={isRTL ? 'arrow-forward' : 'arrow-back'}
-                     size={24}
-                     color={colors.textInverse}
-                  />
-               </TouchableOpacity>
-            </View>
-            <View style={styles.loadingContainer}>
-               <ActivityIndicator size="large" color={theme.primary} />
-               <Text
-                  variant="body"
-                  color={theme.textMuted}
-                  style={styles.loadingText}
-               >
-                  {t('loadingStats')}
-               </Text>
-            </View>
-         </View>
-      );
+      return <LoadingState />;
    }
 
    if (error || !league || !stats) {

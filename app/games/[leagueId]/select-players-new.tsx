@@ -3,22 +3,18 @@
  * Reduced from 873 lines to ~120 lines using extracted components and hooks
  */
 
-import { useGameCreation, useLeagueMembers, usePlayerSelection } from '@/hooks';
 import { colors, getTheme } from '@/colors';
 import Button from '@/components/Button';
+import { LoadingState } from '@/components/LoadingState';
 import { Text } from '@/components/Text';
 import { GameSetupModal } from '@/components/modals';
 import { PlayerGrid } from '@/components/ui';
 import { useLocalization } from '@/context/localization';
+import { useGameCreation, useLeagueMembers, usePlayerSelection } from '@/hooks';
 import { Ionicons } from '@expo/vector-icons';
 import { router, useLocalSearchParams } from 'expo-router';
 import React from 'react';
-import {
-   ActivityIndicator,
-   StyleSheet,
-   TouchableOpacity,
-   View,
-} from 'react-native';
+import { StyleSheet, TouchableOpacity, View } from 'react-native';
 
 export default function SelectPlayers() {
    const theme = getTheme('light');
@@ -66,40 +62,7 @@ export default function SelectPlayers() {
 
    // Loading state
    if (isLoading) {
-      return (
-         <View
-            style={[styles.container, { backgroundColor: theme.background }]}
-         >
-            <View style={[styles.header, { backgroundColor: colors.primary }]}>
-               <TouchableOpacity onPress={handleBack} style={styles.backButton}>
-                  <Ionicons
-                     name="arrow-back"
-                     size={24}
-                     color={colors.textInverse}
-                  />
-               </TouchableOpacity>
-               <Text
-                  variant="h3"
-                  color={colors.textInverse}
-                  style={styles.headerTitle}
-               >
-                  {t('selectPlayers')}
-               </Text>
-               <View style={styles.placeholder} />
-            </View>
-
-            <View style={styles.loadingContainer}>
-               <ActivityIndicator size="large" color={theme.primary} />
-               <Text
-                  variant="body"
-                  color={theme.textMuted}
-                  style={styles.loadingText}
-               >
-                  {t('loadingLeagueMembers')}
-               </Text>
-            </View>
-         </View>
-      );
+      return <LoadingState />;
    }
 
    // Error state
@@ -199,7 +162,8 @@ export default function SelectPlayers() {
                   color={colors.primary}
                   style={styles.summaryText}
                >
-                  {t('playersSelected', { count: selectedCount })}
+                  {t('playersSelected')}
+                  {selectedCount}
                </Text>
             </View>
          )}
@@ -228,7 +192,7 @@ export default function SelectPlayers() {
                   onPress={handleStartGame}
                   variant="primary"
                   size="large"
-                  backgroundColor={colors.secondary}
+                  className="bg-secondary"
                   fullWidth
                />
             </View>

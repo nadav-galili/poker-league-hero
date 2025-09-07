@@ -1,5 +1,6 @@
 import { colors, getTheme } from '@/colors';
 import Button from '@/components/Button';
+import { LoadingState } from '@/components/LoadingState';
 import { Text } from '@/components/Text';
 import { BASE_URL } from '@/constants';
 import { useLocalization } from '@/context/localization';
@@ -9,13 +10,7 @@ import { Ionicons } from '@expo/vector-icons';
 import { Image } from 'expo-image';
 import { router, useLocalSearchParams } from 'expo-router';
 import React from 'react';
-import {
-   ActivityIndicator,
-   ScrollView,
-   StyleSheet,
-   TouchableOpacity,
-   View,
-} from 'react-native';
+import { ScrollView, StyleSheet, TouchableOpacity, View } from 'react-native';
 
 interface LeagueData {
    id: string;
@@ -94,38 +89,7 @@ export default function LeagueStats() {
    };
 
    if (isLoading) {
-      return (
-         <View
-            style={[styles.container, { backgroundColor: theme.background }]}
-         >
-            <View style={[styles.header, { backgroundColor: colors.primary }]}>
-               <TouchableOpacity onPress={handleBack} style={styles.backButton}>
-                  <Ionicons
-                     name={isRTL ? 'arrow-forward' : 'arrow-back'}
-                     size={24}
-                     color={colors.textInverse}
-                  />
-               </TouchableOpacity>
-               <Text
-                  style={[styles.headerTitle, { color: colors.textInverse }]}
-               >
-                  {t('leagueStats')}
-               </Text>
-               <View style={styles.placeholder} />
-            </View>
-
-            <View style={styles.loadingContainer}>
-               <ActivityIndicator size="large" color={theme.primary} />
-               <Text
-                  variant="body"
-                  color={theme.textMuted}
-                  style={styles.loadingText}
-               >
-                  {t('loadingLeagueDetails')}
-               </Text>
-            </View>
-         </View>
-      );
+      return <LoadingState />;
    }
 
    if (error || !league) {

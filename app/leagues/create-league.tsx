@@ -1,5 +1,6 @@
 import { colors, getTheme } from '@/colors';
 import Button from '@/components/Button';
+import { LoadingState } from '@/components/LoadingState';
 import { Text } from '@/components/Text';
 import { BASE_URL } from '@/constants';
 import { useAuth } from '@/context/auth';
@@ -10,7 +11,6 @@ import * as ImagePicker from 'expo-image-picker';
 import { router } from 'expo-router';
 import React, { useState } from 'react';
 import {
-   ActivityIndicator,
    ScrollView,
    StyleSheet,
    TextInput,
@@ -120,11 +120,7 @@ export default function CreateLeague() {
       setFormData({ ...formData, image: null });
    };
    if (isLoading) {
-      return (
-         <View style={styles.loadingContainer}>
-            <ActivityIndicator size="large" color={colors.primary} />
-         </View>
-      );
+      return <LoadingState />;
    }
 
    return (
