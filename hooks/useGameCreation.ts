@@ -2,10 +2,10 @@
  * Hook for managing game creation flow
  */
 
-import { createGameService } from '@/services';
-import { CreateGameRequest } from '@/types';
 import { useAuth } from '@/context/auth';
 import { useLocalization } from '@/context/localization';
+import { createGameService } from '@/services';
+import { CreateGameRequest } from '@/types';
 import { addBreadcrumb, captureException } from '@/utils/sentry';
 import { router } from 'expo-router';
 import React from 'react';
@@ -97,7 +97,13 @@ export function useGameCreation({
          const errorMessage =
             err instanceof Error ? err.message : 'Unknown error occurred';
 
-         Alert.alert(t('error'), errorMessage, [{ text: t('ok') }]);
+         Alert.alert(
+            t('error'),
+            errorMessage === 'Unknown error occurred'
+               ? t('failedToCreateGame')
+               : errorMessage,
+            [{ text: t('ok') }]
+         );
 
          captureException(
             err instanceof Error ? err : new Error(errorMessage),

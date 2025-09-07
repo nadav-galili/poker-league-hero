@@ -2,13 +2,13 @@
  * Game Service - Handles all game-related API operations
  */
 
+import { BASE_URL } from '@/constants';
 import {
    CreateGameRequest,
    CreateGameResponse,
    Game,
    GameStats,
 } from '@/types';
-import { BASE_URL } from '@/constants';
 
 export class GameService {
    constructor(
@@ -35,13 +35,15 @@ export class GameService {
 
       if (!response.ok) {
          const errorData = await response.json();
-         throw new Error(errorData.message || 'Failed to create game');
+         throw new Error(
+            errorData.message || errorData.error || 'Failed to create game'
+         );
       }
 
       const data = await response.json();
 
       if (!data.success) {
-         throw new Error(data.message || 'Failed to create game');
+         throw new Error(data.message || data.error || 'Failed to create game');
       }
 
       return {
