@@ -2,10 +2,10 @@
  * Hook for managing league members data
  */
 
+import { useAuth } from '@/context/auth';
 import { createLeagueService } from '@/services';
 import { LeagueData } from '@/types';
-import { useAuth } from '@/context/auth';
-import { addBreadcrumb, captureException, setTag } from '@/utils/sentry';
+import { addBreadcrumb, captureException } from '@/utils/sentry';
 import React from 'react';
 
 interface UseLeagueMembersResult {
@@ -31,21 +31,9 @@ export function useLeagueMembers(leagueId: string): UseLeagueMembersResult {
          setIsLoading(true);
          setError(null);
 
-         addBreadcrumb('Loading league members', 'info', {
-            leagueId,
-            screen: 'SelectPlayers',
-         });
-
          const leagueData = await leagueService.getLeagueWithMembers(leagueId);
 
          setLeague(leagueData);
-         setTag('league_id', leagueId);
-         setTag('league_member_count', leagueData.members.length.toString());
-
-         addBreadcrumb('League members loaded successfully', 'info', {
-            leagueId,
-            memberCount: leagueData.members.length,
-         });
       } catch (err) {
          const errorMessage =
             err instanceof Error ? err.message : 'Unknown error occurred';

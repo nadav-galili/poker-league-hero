@@ -3,11 +3,7 @@
  */
 
 import { BASE_URL } from '@/constants';
-import {
-   addBreadcrumb,
-   captureException,
-   captureMessage,
-} from '@/utils/sentry';
+import { captureException, captureMessage } from '@/utils/sentry';
 import { validateInviteCode } from './leagueValidationService';
 
 export interface JoinLeagueResult {
@@ -31,12 +27,6 @@ export async function joinLeagueWithCode(
       if (!code) {
          return { success: false, error: 'Please enter a league code' };
       }
-
-      addBreadcrumb('User entered league code', 'user_input', {
-         screen: 'MyLeagues',
-         action: 'join_league_code_entered',
-         codeLength: code.length,
-      });
 
       // Validate invite code format first
       const validation = validateInviteCode(code);

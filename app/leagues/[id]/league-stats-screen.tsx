@@ -1,4 +1,3 @@
-import { useLeagueStats } from '@/hooks/useLeagueStats';
 import { colors, getTheme } from '@/colors';
 import {
    AdditionalStatsCard,
@@ -8,8 +7,8 @@ import {
 } from '@/components/LeagueStats';
 import { Text } from '@/components/Text';
 import { useLocalization } from '@/context/localization';
+import { useLeagueStats } from '@/hooks/useLeagueStats';
 import { createStatCards, createTopPlayers } from '@/utils/leagueStatsHelpers';
-import { addBreadcrumb } from '@/utils/sentry';
 import { Ionicons } from '@expo/vector-icons';
 import { router, useLocalSearchParams } from 'expo-router';
 import React from 'react';
@@ -37,14 +36,6 @@ export default function LeagueStatsScreen() {
       loadLeagueData,
       handleRefresh,
    } = useLeagueStats(leagueId);
-
-   React.useEffect(() => {
-      addBreadcrumb('User visited League Stats screen', 'navigation', {
-         screen: 'LeagueStatsScreen',
-         leagueId,
-         timestamp: new Date().toISOString(),
-      });
-   }, [leagueId]);
 
    const handleBack = () => {
       router.back();
