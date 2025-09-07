@@ -14,11 +14,11 @@ Comprehensive error tracking and user behavior monitoring has been implemented i
 
 ```typescript
 React.useEffect(() => {
-  addBreadcrumb("User visited My Leagues screen", "navigation", {
-    screen: "MyLeagues",
-    timestamp: new Date().toISOString(),
-  });
-  setTag("current_screen", "my_leagues");
+   addBreadcrumb('User visited My Leagues screen', 'navigation', {
+      screen: 'MyLeagues',
+      timestamp: new Date().toISOString(),
+   });
+   setTag('current_screen', 'my_leagues');
 }, []);
 ```
 

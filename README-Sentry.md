@@ -25,19 +25,19 @@ Sentry has been successfully integrated into the Poker League Hero app for compr
 ### 3. Reusable Utilities
 
 - ✅ Created `utils/sentry.ts` with helper functions:
-  - `captureException()` - Enhanced error capturing with context
-  - `captureMessage()` - Message logging with severity levels
-  - `setUser()` - User context for better debugging
-  - `addBreadcrumb()` - Navigation and action tracking
-  - `setTag()` / `setTags()` - Filtering and categorization
-  - `profileFunction()` - Function-level error tracking
+   - `captureException()` - Enhanced error capturing with context
+   - `captureMessage()` - Message logging with severity levels
+   - `setUser()` - User context for better debugging
+   - `addBreadcrumb()` - Navigation and action tracking
+   - `setTag()` / `setTags()` - Filtering and categorization
+   - `profileFunction()` - Function-level error tracking
 
 ### 4. API Error Handling
 
 - ✅ Created `utils/apiErrorHandler.ts` with:
-  - `handleApiError()` - Structured API error reporting
-  - `sentryFetch()` - Enhanced fetch wrapper with automatic error tracking
-  - `withApiErrorHandling()` - HOC for async function error tracking
+   - `handleApiError()` - Structured API error reporting
+   - `sentryFetch()` - Enhanced fetch wrapper with automatic error tracking
+   - `withApiErrorHandling()` - HOC for async function error tracking
 
 ### 5. Development Tools
 
@@ -51,24 +51,24 @@ Sentry has been successfully integrated into the Poker League Hero app for compr
 
 ```json
 {
-  "plugins": [
-    // ... other plugins
-    [
-      "@sentry/react-native/expo",
-      {
-        "url": "https://sentry.io/",
-        "project": "poker-league-hero",
-        "organization": "nadav-g"
-      }
-    ]
-  ]
+   "plugins": [
+      // ... other plugins
+      [
+         "@sentry/react-native/expo",
+         {
+            "url": "https://sentry.io/",
+            "project": "poker-league-hero",
+            "organization": "nadav-g"
+         }
+      ]
+   ]
 }
 ```
 
 ### `metro.config.js`
 
 ```javascript
-const { getSentryExpoConfig } = require("@sentry/react-native/metro");
+const { getSentryExpoConfig } = require('@sentry/react-native/metro');
 const config = getSentryExpoConfig(__dirname);
 module.exports = config;
 ```
@@ -83,61 +83,61 @@ module.exports = config;
 ### Basic Error Capturing
 
 ```typescript
-import { captureException, captureMessage } from "@/utils/sentry";
+import { captureException, captureMessage } from '@/utils/sentry';
 
 try {
-  // risky operation
+   // risky operation
 } catch (error) {
-  captureException(error, {
-    component: "LoginForm",
-    action: "submitLogin",
-  });
+   captureException(error, {
+      component: 'LoginForm',
+      action: 'submitLogin',
+   });
 }
 
-captureMessage("User login attempt", "info", { userId: "123" });
+captureMessage('User login attempt', 'info', { userId: '123' });
 ```
 
 ### User Context
 
 ```typescript
-import { setUser } from "@/utils/sentry";
+import { setUser } from '@/utils/sentry';
 
 setUser({
-  id: user.id,
-  email: user.email,
-  username: user.username,
+   id: user.id,
+   email: user.email,
+   username: user.username,
 });
 ```
 
 ### Breadcrumbs for Navigation
 
 ```typescript
-import { addBreadcrumb } from "@/utils/sentry";
+import { addBreadcrumb } from '@/utils/sentry';
 
-addBreadcrumb("User navigated to leagues", "navigation", {
-  from: "home",
-  to: "leagues",
+addBreadcrumb('User navigated to leagues', 'navigation', {
+   from: 'home',
+   to: 'leagues',
 });
 ```
 
 ### Function Profiling
 
 ```typescript
-import { profileFunction } from "@/utils/sentry";
+import { profileFunction } from '@/utils/sentry';
 
-const safeApiCall = profileFunction(apiCall, "fetchUserData");
+const safeApiCall = profileFunction(apiCall, 'fetchUserData');
 ```
 
 ### API Error Handling
 
 ```typescript
-import { sentryFetch, withApiErrorHandling } from "@/utils/apiErrorHandler";
+import { sentryFetch, withApiErrorHandling } from '@/utils/apiErrorHandler';
 
 // Enhanced fetch with automatic error tracking
-const response = await sentryFetch("/api/user", { method: "GET" });
+const response = await sentryFetch('/api/user', { method: 'GET' });
 
 // Function wrapper with error handling
-const safeFunction = withApiErrorHandling(riskyFunction, "processPayment");
+const safeFunction = withApiErrorHandling(riskyFunction, 'processPayment');
 ```
 
 ## Localization Support
@@ -152,9 +152,9 @@ Translations are in `context/localization.tsx`:
 
 ```typescript
 // Error Boundary
-errorOccurred: "Oops! Something went wrong" | "אופס! משהו השתבש";
-errorMessage: "An unexpected error occurred..." | "אירעה שגיאה בלתי צפויה...";
-tryAgain: "Try Again" | "נסה שוב";
+errorOccurred: 'Oops! Something went wrong' | 'אופס! משהו השתבש';
+errorMessage: 'An unexpected error occurred...' | 'אירעה שגיאה בלתי צפויה...';
+tryAgain: 'Try Again' | 'נסה שוב';
 ```
 
 ## Development Testing
@@ -179,8 +179,8 @@ The `SentryDebug` component (visible only in development) provides test buttons 
 ### Performance
 
 - Session Replay enabled with conservative sampling:
-  - 10% of normal sessions recorded
-  - 100% of error sessions recorded
+   - 10% of normal sessions recorded
+   - 100% of error sessions recorded
 - All text content, images, and webviews are masked by default for privacy
 
 ### Build Requirements

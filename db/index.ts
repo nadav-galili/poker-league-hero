@@ -1,2 +1,2 @@
-export { getDb } from "./connection";
-export * from "./schema";
+export { getDb } from './connection';
+export * from './schema';

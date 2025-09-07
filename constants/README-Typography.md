@@ -65,26 +65,26 @@ import { Text } from '@/components/Text';
 ### Direct Typography Access
 
 ```tsx
-import { Typography } from "@/constants/typography";
+import { Typography } from '@/constants/typography';
 
 const styles = StyleSheet.create({
-  myText: {
-    ...Typography.h2,
-    color: "blue",
-  },
+   myText: {
+      ...Typography.h2,
+      color: 'blue',
+   },
 });
 ```
 
 ### Font Family Access
 
 ```tsx
-import { FontFamily } from "@/constants/typography";
+import { FontFamily } from '@/constants/typography';
 
 const styles = StyleSheet.create({
-  customText: {
-    fontFamily: FontFamily.SemiBold,
-    fontSize: 16,
-  },
+   customText: {
+      fontFamily: FontFamily.SemiBold,
+      fontSize: 16,
+   },
 });
 ```
 
@@ -110,7 +110,7 @@ Fonts are automatically loaded in `app/_layout.tsx` before the app renders. The 
 Use `TypographyDemo` component to see all variants:
 
 ```tsx
-import TypographyDemo from "@/components/TypographyDemo";
+import TypographyDemo from '@/components/TypographyDemo';
 
 <TypographyDemo />;
 ```

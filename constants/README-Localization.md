@@ -16,30 +16,32 @@ This project includes a comprehensive localization system supporting English and
 ### Using Translations
 
 ```tsx
-import { useLocalization } from "@/context/localization";
+import { useLocalization } from '@/context/localization';
 
 function MyComponent() {
-  const { t, language, isRTL } = useLocalization();
+   const { t, language, isRTL } = useLocalization();
 
-  return (
-    <Text style={[styles.text, isRTL && styles.rtlText]}>{t("myLeagues")}</Text>
-  );
+   return (
+      <Text style={[styles.text, isRTL && styles.rtlText]}>
+         {t('myLeagues')}
+      </Text>
+   );
 }
 ```
 
 ### Changing Language
 
 ```tsx
-import { useLocalization } from "@/context/localization";
+import { useLocalization } from '@/context/localization';
 
 function LanguageButton() {
-  const { setLanguage } = useLocalization();
+   const { setLanguage } = useLocalization();
 
-  const switchToHebrew = async () => {
-    await setLanguage("he");
-  };
+   const switchToHebrew = async () => {
+      await setLanguage('he');
+   };
 
-  return <Button onPress={switchToHebrew} title="עברית" />;
+   return <Button onPress={switchToHebrew} title="עברית" />;
 }
 ```
 
@@ -86,14 +88,14 @@ function LanguageButton() {
 The `LanguageSelector` component provides a neo-brutalist styled language picker:
 
 ```tsx
-import { LanguageSelector } from "@/components/LanguageSelector";
+import { LanguageSelector } from '@/components/LanguageSelector';
 
 function MyScreen() {
-  return (
-    <View>
-      <LanguageSelector size="medium" />
-    </View>
-  );
+   return (
+      <View>
+         <LanguageSelector size="medium" />
+      </View>
+   );
 }
 ```
 
@@ -110,22 +112,22 @@ const { isRTL } = useLocalization();
 
 // Apply RTL styles conditionally
 <View style={[styles.container, isRTL && styles.rtlContainer]}>
-  <Text style={[styles.text, isRTL && styles.rtlText]}>{t("welcome")}</Text>
+   <Text style={[styles.text, isRTL && styles.rtlText]}>{t('welcome')}</Text>
 </View>;
 
 const styles = StyleSheet.create({
-  container: {
-    flexDirection: "row",
-  },
-  rtlContainer: {
-    flexDirection: "row-reverse",
-  },
-  text: {
-    textAlign: "left",
-  },
-  rtlText: {
-    textAlign: "right",
-  },
+   container: {
+      flexDirection: 'row',
+   },
+   rtlContainer: {
+      flexDirection: 'row-reverse',
+   },
+   text: {
+      textAlign: 'left',
+   },
+   rtlText: {
+      textAlign: 'right',
+   },
 });
 ```
 
@@ -135,8 +137,8 @@ const styles = StyleSheet.create({
 
 ```tsx
 export interface Translations {
-  // ... existing keys
-  newKey: string;
+   // ... existing keys
+   newKey: string;
 }
 ```
 
@@ -144,8 +146,8 @@ export interface Translations {
 
 ```tsx
 const enTranslations: Translations = {
-  // ... existing translations
-  newKey: "New Text",
+   // ... existing translations
+   newKey: 'New Text',
 };
 ```
 
@@ -153,15 +155,15 @@ const enTranslations: Translations = {
 
 ```tsx
 const heTranslations: Translations = {
-  // ... existing translations
-  newKey: "טקסט חדש",
+   // ... existing translations
+   newKey: 'טקסט חדש',
 };
 ```
 
 4. **Use in components**:
 
 ```tsx
-<Text>{t("newKey")}</Text>
+<Text>{t('newKey')}</Text>
 ```
 
 ## Storage
@@ -172,10 +174,10 @@ Language preferences are automatically saved to AsyncStorage using the key `@pok
 
 ```tsx
 interface LocalizationContextType {
-  language: Language; // Current language ('en' | 'he')
-  setLanguage: (lang: Language) => Promise<void>; // Change language
-  t: (key: string) => string; // Translate function
-  isRTL: boolean; // RTL layout flag
+   language: Language; // Current language ('en' | 'he')
+   setLanguage: (lang: Language) => Promise<void>; // Change language
+   t: (key: string) => string; // Translate function
+   isRTL: boolean; // RTL layout flag
 }
 ```
 

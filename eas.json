@@ -1,31 +1,31 @@
 {
-  "cli": {
-    "version": ">= 16.17.4",
-    "appVersionSource": "remote"
-  },
-  "build": {
-    "development": {
-      "developmentClient": true,
-      "distribution": "internal",
-      "android": {
-        "buildType": "apk"
+   "cli": {
+      "version": ">= 16.17.4",
+      "appVersionSource": "remote"
+   },
+   "build": {
+      "development": {
+         "developmentClient": true,
+         "distribution": "internal",
+         "android": {
+            "buildType": "apk"
+         },
+         "env": {
+            "SENTRY_DISABLE_AUTO_UPLOAD": "true"
+         }
       },
-      "env": {
-        "SENTRY_DISABLE_AUTO_UPLOAD": "true"
+      "preview": {
+         "distribution": "internal",
+         "android": {
+            "buildType": "apk"
+         },
+         "env": {}
+      },
+      "production": {
+         "autoIncrement": true
       }
-    },
-    "preview": {
-      "distribution": "internal",
-      "android": {
-        "buildType": "apk"
-      },
-      "env": {}
-    },
-    "production": {
-      "autoIncrement": true
-    }
-  },
-  "submit": {
-    "production": {}
-  }
+   },
+   "submit": {
+      "production": {}
+   }
 }
