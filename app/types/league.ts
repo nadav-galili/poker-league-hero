@@ -46,3 +46,16 @@ export interface LeagueStats {
 
 export type LeagueStatus = "active" | "inactive" | "archived";
 export type LeagueVisibility = "public" | "private" | "invite-only";
+
+// Theme-related types for league display
+export interface LeagueTheme {
+  themeColor: string;
+  accentColor: string;
+  variant: "primary" | "secondary" | "highlight" | "accent";
+}
+
+export type LeagueWithTheme = League & LeagueTheme & {
+  code: string;
+  image: string;
+  memberCount: number;
+};
