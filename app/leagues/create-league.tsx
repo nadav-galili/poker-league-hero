@@ -30,7 +30,6 @@ export default function CreateLeague() {
    });
    //get user data from auth context
    const { user } = useAuth();
-   console.log('🚀 ~ CreateLeague ~ user:', user);
    const handleCreateLeague = async () => {
       try {
          setIsLoading(true);
