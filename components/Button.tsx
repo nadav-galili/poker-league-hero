@@ -1,6 +1,6 @@
 import { colors, getTheme } from "@/colors";
 import { Ionicons } from "@expo/vector-icons";
-import { Pressable, StyleSheet, View } from "react-native";
+import { Pressable, View } from "react-native";
 import { Text } from "./Text";
 
 export type ButtonVariant = "primary" | "secondary" | "outline" | "warning";
@@ -17,6 +17,7 @@ interface ButtonProps {
   backgroundColor?: string;
   textColor?: string;
   style?: any;
+  className?: string;
 }
 
 export default function Button({
@@ -30,6 +31,7 @@ export default function Button({
   backgroundColor,
   textColor,
   style,
+  className,
 }: ButtonProps) {
   const theme = getTheme("light");
 
@@ -70,36 +72,16 @@ export default function Button({
     }
   };
 
-  const getSizeStyles = () => {
+  const getSizeClasses = () => {
     switch (size) {
       case "small":
-        return {
-          paddingVertical: 12,
-          paddingHorizontal: 16,
-          borderRadius: 12,
-          borderWidth: 2,
-        };
+        return "py-3 px-4 rounded-xl border-2";
       case "medium":
-        return {
-          paddingVertical: 16,
-          paddingHorizontal: 20,
-          borderRadius: 14,
-          borderWidth: 3,
-        };
+        return "py-4 px-5 rounded-[14px] border-[3px]";
       case "large":
-        return {
-          paddingVertical: 20,
-          paddingHorizontal: 24,
-          borderRadius: 16,
-          borderWidth: 4,
-        };
+        return "py-5 px-6 rounded-2xl border-4";
       default:
-        return {
-          paddingVertical: 16,
-          paddingHorizontal: 20,
-          borderRadius: 14,
-          borderWidth: 3,
-        };
+        return "py-4 px-5 rounded-[14px] border-[3px]";
     }
   };
 
@@ -136,107 +118,40 @@ export default function Button({
   };
 
   const variantStyles = getVariantStyles();
-  const sizeStyles = getSizeStyles();
+  const sizeClasses = getSizeClasses();
 
   return (
     <Pressable
-      style={({ pressed }) => [
-        styles.button,
-        sizeStyles,
-        variantStyles,
-        styles.brutalistShadow,
-        fullWidth && styles.fullWidth,
-        disabled && styles.disabled,
-        pressed && styles.pressed,
-        style,
-      ]}
+      className={`relative items-center justify-center overflow-hidden elevation-3 active:scale-[0.97] active:translate-x-0.5 active:translate-y-0.5 ${sizeClasses} ${fullWidth ? "w-full" : ""} ${disabled ? "opacity-50" : ""} ${className || ""}`}
+      style={({ pressed }) => ({
+        ...variantStyles,
+        shadowColor: colors.text,
+        shadowOffset: { width: pressed ? 3 : 6, height: pressed ? 3 : 6 },
+        shadowOpacity: 0.3,
+        shadowRadius: 0,
+        ...style,
+      })}
       onPress={onPress}
       disabled={disabled}>
-      <View style={styles.content}>
+      <View className="flex-row items-center gap-3">
         {icon && (
-          <View
-            style={[
-              styles.iconContainer,
-              { backgroundColor: "rgba(255,255,255,0.2)" },
-            ]}>
+          <View className="w-8 h-8 rounded-lg items-center justify-center border-2 border-white/30 bg-white/20">
             <Ionicons name={icon} size={getIconSize()} color={getTextColor()} />
           </View>
         )}
         <Text
           variant={getTypographyVariant()}
           color={getTextColor()}
-          style={styles.text}>
+          className="tracking-widest text-center">
           {title.toUpperCase()}
         </Text>
       </View>
 
       {/* Neo-brutalist border overlay */}
       <View
-        style={[styles.border, { borderColor: variantStyles.borderColor }]}
+        className="absolute top-0 left-0 right-0 bottom-0 border-[3px] rounded-[14px] opacity-80 pointer-events-none"
+        style={{ borderColor: variantStyles.borderColor }}
       />
     </Pressable>
   );
 }
-
-const styles = StyleSheet.create({
-  button: {
-    position: "relative",
-    alignItems: "center",
-    justifyContent: "center",
-    overflow: "hidden",
-  },
-
-  content: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 12,
-  },
-
-  iconContainer: {
-    width: 32,
-    height: 32,
-    borderRadius: 8,
-    alignItems: "center",
-    justifyContent: "center",
-    borderWidth: 2,
-    borderColor: "rgba(255,255,255,0.3)",
-  },
-
-  text: {
-    letterSpacing: 1.2,
-    textAlign: "center",
-  },
-
-  border: {
-    position: "absolute",
-    top: 0,
-    left: 0,
-    right: 0,
-    bottom: 0,
-    borderWidth: 3,
-    borderRadius: 14,
-    opacity: 0.8,
-    pointerEvents: "none",
-  },
-
-  brutalistShadow: {
-    shadowColor: colors.text,
-    shadowOffset: { width: 6, height: 6 },
-    shadowOpacity: 0.3,
-    shadowRadius: 0,
-    elevation: 12,
-  },
-
-  fullWidth: {
-    width: "100%",
-  },
-
-  disabled: {
-    opacity: 0.5,
-  },
-
-  pressed: {
-    transform: [{ scale: 0.97 }, { translateX: 2 }, { translateY: 2 }],
-    shadowOffset: { width: 3, height: 3 },
-  },
-});
