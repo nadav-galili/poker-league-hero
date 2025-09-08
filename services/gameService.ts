@@ -22,6 +22,10 @@ export class GameService {
     * Create a new game with selected players
     */
    async createGame(request: CreateGameRequest): Promise<CreateGameResponse> {
+      console.log('🚀 GameService.createGame called with:', request);
+      console.log('🌐 BASE_URL:', BASE_URL);
+      console.log('🌐 API URL:', `${BASE_URL}/api/games/create`);
+
       const response = await this.fetchWithAuth(
          `${BASE_URL}/api/games/create`,
          {
@@ -32,6 +36,8 @@ export class GameService {
             body: JSON.stringify(request),
          }
       );
+
+      console.log('📡 API Response status:', response.status);
 
       if (!response.ok) {
          const errorData = await response.json();

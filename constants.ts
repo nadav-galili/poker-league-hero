@@ -18,7 +18,12 @@ export const GOOGLE_REDIRECT_URI = `${process.env.EXPO_PUBLIC_BASE_URL}/api/auth
 export const GOOGLE_AUTH_URL = 'https://accounts.google.com/o/oauth2/v2/auth';
 
 ///env constants
-export const BASE_URL = process.env.EXPO_PUBLIC_BASE_URL;
+// Default to localhost:8081 for development (Expo's default port)
+export const BASE_URL =
+   process.env.EXPO_PUBLIC_BASE_URL ||
+   (typeof window !== 'undefined'
+      ? window.location.origin
+      : 'http://localhost:8081');
 export const APP_SCHEME = process.env.EXPO_PUBLIC_SCHEME;
 export const JWT_TOKEN = process.env.JWT_SECRET;
 export const JWT_SECRET = process.env.JWT_SECRET;

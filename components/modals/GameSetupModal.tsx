@@ -233,7 +233,14 @@ export function GameSetupModal({
             >
                <Button
                   title={isCreatingGame ? t('creatingGame') : t('createGame')}
-                  onPress={onCreateGame}
+                  onPress={() => {
+                     console.log('🔘 Create Game button pressed');
+                     try {
+                        onCreateGame();
+                     } catch (error) {
+                        console.error('❌ Error calling onCreateGame:', error);
+                     }
+                  }}
                   variant="primary"
                   size="large"
                   className="bg-secondary"

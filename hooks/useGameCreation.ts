@@ -67,6 +67,13 @@ export function useGameCreation({
    }, [selectedCount, leagueId, minPlayers, t]);
 
    const handleCreateGame = React.useCallback(async () => {
+      console.log('🎮 handleCreateGame called with:', {
+         leagueId,
+         selectedPlayerIds,
+         buyIn,
+         selectedCount,
+      });
+
       try {
          setIsCreatingGame(true);
 
@@ -92,8 +99,36 @@ export function useGameCreation({
          });
 
          // Navigate to the game screen
-         router.push(`/games/${result.gameId}` as any);
+         console.log(
+            '✅ Game created successfully, navigating to:',
+            `/games/${result.gameId}`
+         );
+         console.log('🧭 Router object:', router);
+         console.log('🧭 Attempting navigation...');
+
+         // Close the modal first and wait a bit for it to close
+         setShowGameSetup(false);
+         console.log('🔄 Modal closed, waiting before navigation...');
+
+         // Small delay to ensure modal is fully closed
+         setTimeout(() => {
+            console.log('🧭 Starting navigation after delay...');
+            try {
+               router.push(`/games/${result.gameId}` as any);
+               console.log('🧭 Navigation initiated successfully');
+            } catch (navError) {
+               console.error('❌ Navigation failed:', navError);
+               // Try alternative navigation methods
+               console.log('🔄 Trying router.replace...');
+               try {
+                  router.replace(`/games/${result.gameId}` as any);
+               } catch (replaceError) {
+                  console.error('❌ Replace navigation failed:', replaceError);
+               }
+            }
+         }, 100);
       } catch (err) {
+         console.error('❌ Error in handleCreateGame:', err);
          const errorMessage =
             err instanceof Error ? err.message : 'Unknown error occurred';
 
