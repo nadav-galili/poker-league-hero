@@ -236,9 +236,11 @@ export default function CreateLeague() {
                   title={t('createLeagueButton')}
                   onPress={handleCreateLeague}
                   variant="primary"
-                  style={styles.createButton}
-                  backgroundColor={colors.accent}
-                  textColor={colors.text}
+                  className="bg-primary"
+                  textColor={colors.textInverse}
+                  size="large"
+                  fullWidth
+                  icon="add-circle"
                />
             </View>
          </ScrollView>

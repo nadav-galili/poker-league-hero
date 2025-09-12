@@ -2,7 +2,6 @@
  * Empty State Component for My Leagues
  */
 
-import { getTheme } from '@/colors';
 import Button from '@/components/Button';
 import { Text } from '@/components/Text';
 import { useLocalization } from '@/context/localization';
@@ -15,40 +14,38 @@ interface EmptyStateProps {
 }
 
 export function EmptyState({ onCreateLeague, onJoinLeague }: EmptyStateProps) {
-   const theme = getTheme('light');
-   const { t, isRTL } = useLocalization();
+   const { t } = useLocalization();
 
    return (
-      <View style={styles.emptyState}>
-         <Text
-            variant="h2"
-            color={theme.text}
-            style={[styles.emptyTitle, isRTL && styles.rtlText]}
-         >
+      <View className="items-center justify-center gap-3 flex-col px-4 py-6">
+         <Text className="text-4xl font-extrabold  tracking-wide">
             {t('noLeaguesYet')}
          </Text>
          <Text
             variant="body"
-            color={theme.textMuted}
-            style={[styles.emptySubtitle, isRTL && styles.rtlText]}
+            className="text-base font-medium tracking-wide 
+         text-center
+         "
          >
             {t('createFirstLeague')}
          </Text>
 
-         <View className=" gap-3 flex-col">
+         <View className="gap-3 flex-col w-full">
             <Button
                title={t('createLeague')}
                onPress={onCreateLeague}
                variant="primary"
                size="large"
+               className="bg-secondary w-full text-center"
                icon="add-circle"
                fullWidth
             />
             <Button
                title={t('joinLeague')}
                onPress={onJoinLeague}
-               variant="outline"
+               variant="secondary"
                size="large"
+               className="bg-primary w-full text-center"
                icon="enter"
                fullWidth
             />
