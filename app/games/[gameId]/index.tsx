@@ -15,7 +15,7 @@ import CashOutModal from '@/app/components/game/CashOutModal';
 import GameSummary from '@/app/components/game/GameSummary';
 import PlayerCard from '@/app/components/game/PlayerCard';
 import { GamePlayer, LeagueMember, useGameData } from '@/hooks/useGameData';
-import { GameService } from '@/services/gameService';
+import { createGameService } from '@/services/gameService';
 
 export default function GameScreen() {
    const theme = getTheme('light');
@@ -45,7 +45,7 @@ export default function GameScreen() {
    // Initialize game service
    const gameService = React.useMemo(() => {
       if (!gameId) return null;
-      return new GameService({ fetchWithAuth, gameId, t });
+      return createGameService(fetchWithAuth, t, gameId);
    }, [fetchWithAuth, gameId, t]);
 
    const handleBack = () => {

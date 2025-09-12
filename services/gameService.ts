@@ -1,15 +1,55 @@
 import { BASE_URL } from '@/constants';
-import { captureException } from '@/utils/sentry';
 import { GamePlayer, LeagueMember } from '@/hooks/useGameData';
+import { captureException } from '@/utils/sentry';
 
 export interface GameServiceDependencies {
    fetchWithAuth: (url: string, options: any) => Promise<Response>;
-   gameId: string;
+   gameId?: string; // Optional for game creation
    t: (key: string) => string;
 }
 
 export class GameService {
    constructor(private deps: GameServiceDependencies) {}
+
+   async createGame(data: {
+      leagueId: string;
+      selectedPlayerIds: number[];
+      buyIn: string;
+      gameName?: string;
+   }): Promise<{ gameId: string }> {
+      try {
+         const response = await this.deps.fetchWithAuth(
+            `${BASE_URL}/api/games/create`,
+            {
+               method: 'POST',
+               headers: { 'Content-Type': 'application/json' },
+               body: JSON.stringify({
+                  leagueId: data.leagueId,
+                  selectedPlayerIds: data.selectedPlayerIds,
+                  buyIn: data.buyIn,
+               }),
+            }
+         );
+
+         if (!response.ok) {
+            const errorData = await response.json();
+            throw new Error(
+               errorData.message || errorData.error || 'Failed to create game'
+            );
+         }
+
+         const result = await response.json();
+         return { gameId: result.gameId };
+      } catch (error) {
+         captureException(error as Error, {
+            function: 'createGame',
+            screen: 'GameCreation',
+            leagueId: data.leagueId,
+            selectedPlayerIds: data.selectedPlayerIds,
+         });
+         throw error;
+      }
+   }
 
    async buyIn(player: GamePlayer, buyInAmount: string): Promise<void> {
       try {
@@ -154,4 +194,13 @@ export class GameService {
          throw error;
       }
    }
+}
+
+// Factory function to create GameService instance
+export function createGameService(
+   fetchWithAuth: (url: string, options: any) => Promise<Response>,
+   t: (key: string) => string,
+   gameId?: string
+): GameService {
+   return new GameService({ fetchWithAuth, t, gameId });
 }

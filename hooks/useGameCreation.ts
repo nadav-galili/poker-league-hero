@@ -45,8 +45,8 @@ export function useGameCreation({
    const availableBuyIns = ['50', '100'];
 
    const gameService = React.useMemo(
-      () => createGameService(fetchWithAuth),
-      [fetchWithAuth]
+      () => createGameService(fetchWithAuth, t),
+      [fetchWithAuth, t]
    );
 
    const handleStartGame = React.useCallback(() => {
