@@ -15,20 +15,15 @@ const GameSummary: React.FC<GameSummaryProps> = ({ game }) => {
 
    return (
       <View
-         className="mx-4 p-4 rounded-xl border-3 border-black shadow-lg elevation-8"
+         className="m-4 p-4 rounded-xl border-3 border-primary shadow-lg elevation-8"
          style={{ backgroundColor: theme.surfaceElevated }}
       >
          <View className="flex-row items-center justify-between mb-4">
             <Text variant="h3" color={theme.text} className="tracking-wide">
                {t('gameInProgress')}
             </Text>
-            <View
-               className="px-2 py-1 rounded-xl border-2 border-primary"
-               style={{ backgroundColor: colors.success }}
-            >
-               <Text variant="captionSmall" color={colors.textSecondary}>
-                  {game.status.toUpperCase()}
-               </Text>
+            <View className="px-2 py-1 rounded-xl border-2 border-primary bg-success">
+               <Text variant="captionSmall">{game.status.toUpperCase()}</Text>
             </View>
          </View>
 

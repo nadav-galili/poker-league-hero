@@ -25,14 +25,12 @@ const PlayerCard: React.FC<PlayerCardProps> = ({
    onCashOut,
    onRemovePlayer,
 }) => {
+   console.log('🚀 ~ PlayerCard ~ player:', player);
    const theme = getTheme('light');
    const { t } = useLocalization();
 
    return (
-      <View
-         className="p-4 rounded-xl border-3 border-black shadow-sm elevation-4"
-         style={{ backgroundColor: theme.surfaceElevated }}
-      >
+      <View className="p-4 rounded-xl  shadow-sm elevation-4 bg-surfaceElevated">
          {/* Player Info */}
          <View className="flex-row items-center mb-3">
             <Image
@@ -41,26 +39,26 @@ const PlayerCard: React.FC<PlayerCardProps> = ({
                      player.profileImageUrl ||
                      'https://via.placeholder.com/50x50/cccccc/666666?text=?',
                }}
-               className="w-12.5 h-12.5 rounded-lg border-2 border-black mr-3"
                contentFit="cover"
+               style={{
+                  width: 48,
+                  height: 48,
+                  borderColor: colors.primary,
+                  borderWidth: 2,
+                  borderRadius: 12,
+                  marginRight: 12,
+               }}
             />
             <View className="flex-1">
-               <Text
-                  variant="h4"
-                  color={theme.text}
-                  className="tracking-wider mb-0.5"
-               >
+               <Text variant="h4" className="tracking-wider mb-0.5">
                   {player.fullName}
                </Text>
-               <Text variant="body" color={theme.textMuted} className="text-xs">
+               <Text variant="body" className="text-xs text-textMuted">
                   {player.isActive ? t('gameInProgress') : 'Inactive'}
                </Text>
             </View>
             {!player.isActive && (
-               <View
-                  className="px-1.5 py-0.5 rounded-lg border border-black"
-                  style={{ backgroundColor: theme.textMuted }}
-               >
+               <View className="px-1.5 py-0.5 rounded-lg border border-primary bg-textMuted">
                   <Text variant="captionSmall" color={colors.textInverse}>
                      OUT
                   </Text>
