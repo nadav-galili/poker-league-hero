@@ -49,7 +49,7 @@ export async function POST(request: Request) {
       const userInfo = jose.decodeJwt(data.id_token) as any;
 
       // Insert/update user in database
-      let dbUserId: string | null = null;
+      let dbUserId: number | null = null;
       try {
          // Import database functions directly
          const { getDb, users } = await import('../../../db');

@@ -2,12 +2,12 @@
  * Empty State Component for My Leagues
  */
 
-import React from 'react';
-import { View, StyleSheet } from 'react-native';
 import { getTheme } from '@/colors';
-import { Text } from '@/components/Text';
 import Button from '@/components/Button';
+import { Text } from '@/components/Text';
 import { useLocalization } from '@/context/localization';
+import React from 'react';
+import { StyleSheet, View } from 'react-native';
 
 interface EmptyStateProps {
    onCreateLeague: () => void;
@@ -35,7 +35,7 @@ export function EmptyState({ onCreateLeague, onJoinLeague }: EmptyStateProps) {
             {t('createFirstLeague')}
          </Text>
 
-         <View style={styles.emptyButtons}>
+         <View className=" gap-3 flex-col">
             <Button
                title={t('createLeague')}
                onPress={onCreateLeague}

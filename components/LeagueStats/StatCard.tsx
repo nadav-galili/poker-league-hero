@@ -10,7 +10,6 @@ interface StatCardProps {
 }
 
 export default function StatCard({ card }: StatCardProps) {
-   console.log('🚀 ~ StatCard ~ card:', card);
    const theme = getTheme('light');
 
    return (

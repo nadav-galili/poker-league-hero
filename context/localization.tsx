@@ -165,6 +165,22 @@ export interface Translations {
    gameEnded: string;
    loadingGame: string;
    gameNotFound: string;
+
+   // Top Profit Player Card
+   topProfitPlayer: string;
+   loadingTopPlayer: string;
+   noTopPlayerData: string;
+   noCompletedGames: string;
+   gamesPlayed: string;
+
+   // Generic Player Stats
+   loadingPlayerStat: string;
+   mostActivePlayer: string;
+   highestSingleGameProfit: string;
+   mostConsistentPlayer: string;
+   biggestLoser: string;
+   totalProfit: string;
+   avgProfit: string;
 }
 
 // English translations
@@ -320,6 +336,22 @@ const enTranslations: Translations = {
    gameEnded: 'Game ended successfully',
    loadingGame: 'Loading game details...',
    gameNotFound: 'Game not found',
+
+   // Top Profit Player Card
+   topProfitPlayer: 'TOP PROFIT PLAYER',
+   loadingTopPlayer: 'Loading top player...',
+   noTopPlayerData: 'No profit data available',
+   noCompletedGames: 'No completed games yet',
+   gamesPlayed: 'games played',
+
+   // Generic Player Stats
+   loadingPlayerStat: 'Loading player stat...',
+   mostActivePlayer: 'MOST ACTIVE PLAYER',
+   highestSingleGameProfit: 'HIGHEST SINGLE GAME',
+   mostConsistentPlayer: 'MOST CONSISTENT PLAYER',
+   biggestLoser: 'BIGGEST LOSER',
+   totalProfit: 'Total Profit',
+   avgProfit: 'Avg Profit',
 };
 
 // Hebrew translations
@@ -473,6 +505,22 @@ const heTranslations: Translations = {
    gameEnded: 'המשחק הסתיים בהצלחה',
    loadingGame: 'טוען פרטי משחק...',
    gameNotFound: 'המשחק לא נמצא',
+
+   // Top Profit Player Card
+   topProfitPlayer: 'שחקן עם הרווח הגבוה ביותר',
+   loadingTopPlayer: 'טוען שחקן מוביל...',
+   noTopPlayerData: 'אין נתוני רווח זמינים',
+   noCompletedGames: 'עדיין אין משחקים שהסתיימו',
+   gamesPlayed: 'משחקים ששיחק',
+
+   // Generic Player Stats
+   loadingPlayerStat: 'טוען סטטיסטיקת שחקן...',
+   mostActivePlayer: 'השחקן הכי פעיל',
+   highestSingleGameProfit: 'הרווח הגבוה במשחק בודד',
+   mostConsistentPlayer: 'השחקן הכי עקבי',
+   biggestLoser: 'המפסיד הכי גדול',
+   totalProfit: 'סך הרווח',
+   avgProfit: 'ממוצע רווח',
 };
 
 const translations = {

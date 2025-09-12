@@ -3,7 +3,9 @@ import {
    AdditionalStatsCard,
    LeagueHeader,
    PlayerCard,
+   PlayerStatCard,
    StatCard,
+   TopProfitPlayerCard,
 } from '@/components/LeagueStats';
 import { LoadingState } from '@/components/LoadingState';
 import { Text } from '@/components/Text';
@@ -103,6 +105,20 @@ export default function LeagueStatsScreen() {
                />
             }
          >
+            {/* Dynamic Player Stats Cards */}
+            <View style={styles.section}>
+               <TopProfitPlayerCard leagueId={leagueId!} t={t} />
+            </View>
+
+            {/* Example: Most Active Player using the new generic component */}
+            <View style={styles.section}>
+               <PlayerStatCard
+                  leagueId={leagueId!}
+                  statType="most-active-player"
+                  t={t}
+               />
+            </View>
+
             {/* Main Stats Grid */}
             <View style={styles.section}>
                <RNText className="text-primary text-center mb-4 text-2xl font-bold uppercase tracking-widest">

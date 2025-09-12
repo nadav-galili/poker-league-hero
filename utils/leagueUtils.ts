@@ -174,7 +174,7 @@ export async function createLeague(data: {
  */
 export async function joinLeagueByInviteCode(
    inviteCode: string,
-   userId: string
+   userId: number
 ): Promise<any> {
    const { getDb, leagues, leagueMembers } = await import('../db');
    const { eq, and } = await import('drizzle-orm');
@@ -227,7 +227,7 @@ export async function joinLeagueByInviteCode(
 /**
  * Get all leagues for a user
  */
-export async function getUserLeagues(userId: string): Promise<any[]> {
+export async function getUserLeagues(userId: number): Promise<any[]> {
    const { getDb, leagueMembers, leagues } = await import('../db');
    const { eq, count } = await import('drizzle-orm');
    const db = getDb();

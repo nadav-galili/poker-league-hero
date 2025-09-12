@@ -1,3 +1,10 @@
+import { colors, getTheme } from '@/colors';
+import Button from '@/components/Button';
+import { Text } from '@/components/Text';
+import { useLocalization } from '@/context/localization';
+import { GamePlayer } from '@/hooks/useGameData';
+import { Ionicons } from '@expo/vector-icons';
+import { Image } from 'expo-image';
 import React from 'react';
 import {
    Modal,
@@ -6,13 +13,6 @@ import {
    TouchableOpacity,
    View,
 } from 'react-native';
-import { colors, getTheme } from '@/colors';
-import Button from '@/components/Button';
-import { Text } from '@/components/Text';
-import { useLocalization } from '@/context/localization';
-import { Ionicons } from '@expo/vector-icons';
-import { Image } from 'expo-image';
-import { GamePlayer } from '@/hooks/useGameData';
 
 interface CashOutModalProps {
    visible: boolean;
@@ -24,7 +24,7 @@ interface CashOutModalProps {
    onConfirm: () => void;
 }
 
-export const CashOutModal: React.FC<CashOutModalProps> = ({
+const CashOutModal: React.FC<CashOutModalProps> = ({
    visible,
    selectedPlayer,
    cashOutAmount,
@@ -50,11 +50,7 @@ export const CashOutModal: React.FC<CashOutModalProps> = ({
                style={{ backgroundColor: colors.primary }}
             >
                <TouchableOpacity onPress={onClose} className="p-2">
-                  <Ionicons
-                     name="close"
-                     size={24}
-                     color={colors.textInverse}
-                  />
+                  <Ionicons name="close" size={24} color={colors.textInverse} />
                </TouchableOpacity>
                <Text
                   className="text-xl font-bold uppercase tracking-wide"
@@ -139,9 +135,7 @@ export const CashOutModal: React.FC<CashOutModalProps> = ({
                style={{ backgroundColor: theme.background }}
             >
                <Button
-                  title={
-                     isProcessing ? 'Processing...' : t('confirmCashOut')
-                  }
+                  title={isProcessing ? 'Processing...' : t('confirmCashOut')}
                   onPress={onConfirm}
                   variant="primary"
                   size="large"
@@ -154,3 +148,5 @@ export const CashOutModal: React.FC<CashOutModalProps> = ({
       </Modal>
    );
 };
+
+export default CashOutModal;

@@ -1,15 +1,15 @@
-import React from 'react';
-import { View } from 'react-native';
 import { colors, getTheme } from '@/colors';
 import { Text } from '@/components/Text';
 import { useLocalization } from '@/context/localization';
 import { GameData } from '@/hooks/useGameData';
+import React from 'react';
+import { View } from 'react-native';
 
 interface GameSummaryProps {
    game: GameData;
 }
 
-export const GameSummary: React.FC<GameSummaryProps> = ({ game }) => {
+const GameSummary: React.FC<GameSummaryProps> = ({ game }) => {
    const theme = getTheme('light');
    const { t } = useLocalization();
 
@@ -19,11 +19,7 @@ export const GameSummary: React.FC<GameSummaryProps> = ({ game }) => {
          style={{ backgroundColor: theme.surfaceElevated }}
       >
          <View className="flex-row items-center justify-between mb-4">
-            <Text
-               variant="h3"
-               color={theme.text}
-               className="tracking-wide"
-            >
+            <Text variant="h3" color={theme.text} className="tracking-wide">
                {t('gameInProgress')}
             </Text>
             <View
@@ -65,3 +61,5 @@ export const GameSummary: React.FC<GameSummaryProps> = ({ game }) => {
       </View>
    );
 };
+
+export default GameSummary;

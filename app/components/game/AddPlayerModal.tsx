@@ -1,16 +1,11 @@
-import React from 'react';
-import {
-   FlatList,
-   Modal,
-   TouchableOpacity,
-   View,
-} from 'react-native';
 import { colors, getTheme } from '@/colors';
 import { Text } from '@/components/Text';
 import { useLocalization } from '@/context/localization';
+import { LeagueMember } from '@/hooks/useGameData';
 import { Ionicons } from '@expo/vector-icons';
 import { Image } from 'expo-image';
-import { LeagueMember } from '@/hooks/useGameData';
+import React from 'react';
+import { FlatList, Modal, TouchableOpacity, View } from 'react-native';
 
 interface AddPlayerModalProps {
    visible: boolean;
@@ -20,7 +15,7 @@ interface AddPlayerModalProps {
    onAddPlayer: (member: LeagueMember) => void;
 }
 
-export const AddPlayerModal: React.FC<AddPlayerModalProps> = ({
+const AddPlayerModal: React.FC<AddPlayerModalProps> = ({
    visible,
    availableMembers,
    isProcessing,
@@ -84,11 +79,7 @@ export const AddPlayerModal: React.FC<AddPlayerModalProps> = ({
                style={{ backgroundColor: colors.primary }}
             >
                <TouchableOpacity onPress={onClose} className="p-2">
-                  <Ionicons
-                     name="close"
-                     size={24}
-                     color={colors.textInverse}
-                  />
+                  <Ionicons name="close" size={24} color={colors.textInverse} />
                </TouchableOpacity>
                <Text
                   className="text-xl font-bold uppercase tracking-wide"
@@ -129,3 +120,5 @@ export const AddPlayerModal: React.FC<AddPlayerModalProps> = ({
       </Modal>
    );
 };
+
+export default AddPlayerModal;

@@ -5,15 +5,8 @@
       {
          "idx": 0,
          "version": "7",
-         "when": 1756499365065,
-         "tag": "0000_strong_mysterio",
-         "breakpoints": true
-      },
-      {
-         "idx": 1,
-         "version": "7",
-         "when": 1756623342716,
-         "tag": "0001_mysterious_valkyrie",
+         "when": 1757684693769,
+         "tag": "0000_numerous_chat",
          "breakpoints": true
       }
    ]

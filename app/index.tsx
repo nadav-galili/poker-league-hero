@@ -1,26 +1,16 @@
 import { getTheme } from '@/colors';
+import { LoadingState } from '@/components/LoadingState';
 import LoginForm from '@/components/LoginForm';
 import { useAuth } from '@/context/auth';
 import { Redirect } from 'expo-router';
-import { ActivityIndicator, ScrollView, View } from 'react-native';
+import { ScrollView } from 'react-native';
 
 export default function Index() {
    const { user, isLoading } = useAuth();
    const theme = getTheme('light');
 
    if (isLoading) {
-      return (
-         <View
-            style={{
-               flex: 1,
-               justifyContent: 'center',
-               alignItems: 'center',
-               backgroundColor: theme.background,
-            }}
-         >
-            <ActivityIndicator size="large" color={theme.primary} />
-         </View>
-      );
+      return <LoadingState />;
    }
 
    if (!user) {

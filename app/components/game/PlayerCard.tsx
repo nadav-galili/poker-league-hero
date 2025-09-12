@@ -1,12 +1,12 @@
-import React from 'react';
-import { TouchableOpacity, View } from 'react-native';
 import { colors, getTheme } from '@/colors';
 import Button from '@/components/Button';
 import { Text } from '@/components/Text';
 import { useLocalization } from '@/context/localization';
+import { GamePlayer } from '@/hooks/useGameData';
 import { Ionicons } from '@expo/vector-icons';
 import { Image } from 'expo-image';
-import { GamePlayer } from '@/hooks/useGameData';
+import React from 'react';
+import { TouchableOpacity, View } from 'react-native';
 
 interface PlayerCardProps {
    player: GamePlayer;
@@ -17,7 +17,7 @@ interface PlayerCardProps {
    onRemovePlayer: (player: GamePlayer) => void;
 }
 
-export const PlayerCard: React.FC<PlayerCardProps> = ({
+const PlayerCard: React.FC<PlayerCardProps> = ({
    player,
    gameBaseAmount,
    isProcessing,
@@ -52,11 +52,7 @@ export const PlayerCard: React.FC<PlayerCardProps> = ({
                >
                   {player.fullName}
                </Text>
-               <Text
-                  variant="body"
-                  color={theme.textMuted}
-                  className="text-xs"
-               >
+               <Text variant="body" color={theme.textMuted} className="text-xs">
                   {player.isActive ? t('gameInProgress') : 'Inactive'}
                </Text>
             </View>
@@ -151,3 +147,5 @@ export const PlayerCard: React.FC<PlayerCardProps> = ({
       </View>
    );
 };
+
+export default PlayerCard;

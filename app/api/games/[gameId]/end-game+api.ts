@@ -1,4 +1,6 @@
 import { withAuth } from '@/utils/middleware';
+const { getDb, games, gamePlayers } = await import('../../../../db');
+const { eq, and } = await import('drizzle-orm');
 
 export const POST = withAuth(async (request: Request, user) => {
    try {
@@ -20,8 +22,7 @@ export const POST = withAuth(async (request: Request, user) => {
       }
 
       // Import database modules
-      const { getDb, games, gamePlayers } = await import('../../../../db');
-      const { eq, and } = await import('drizzle-orm');
+
       const db = getDb();
 
       // Verify game exists and is active
@@ -75,7 +76,7 @@ export const POST = withAuth(async (request: Request, user) => {
       const updatedGame = await db
          .update(games)
          .set({
-            status: 'finished',
+            status: 'completed',
             endedAt: new Date(),
          })
          .where(eq(games.id, gameId))

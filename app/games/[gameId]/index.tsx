@@ -10,12 +10,12 @@ import React from 'react';
 import { FlatList, TouchableOpacity, View } from 'react-native';
 import Toast from 'react-native-toast-message';
 
-import { AddPlayerModal } from '@/app/components/game/AddPlayerModal';
-import { CashOutModal } from '@/app/components/game/CashOutModal';
-import { GameSummary } from '@/app/components/game/GameSummary';
-import { PlayerCard } from '@/app/components/game/PlayerCard';
-import { GameService } from '@/app/services/gameService';
+import AddPlayerModal from '@/app/components/game/AddPlayerModal';
+import CashOutModal from '@/app/components/game/CashOutModal';
+import GameSummary from '@/app/components/game/GameSummary';
+import PlayerCard from '@/app/components/game/PlayerCard';
 import { GamePlayer, LeagueMember, useGameData } from '@/hooks/useGameData';
+import { GameService } from '@/services/gameService';
 
 export default function GameScreen() {
    const theme = getTheme('light');
