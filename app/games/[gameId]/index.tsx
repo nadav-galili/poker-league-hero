@@ -62,7 +62,7 @@ export default function GameScreen() {
          Toast.show({
             type: 'success',
             text1: t('success'),
-            text2: t('buyInSuccessful'),
+            text2: `${t('buyInSuccessful')} for ${player.fullName} - ${t('currency')}${game.buyIn}`,
          });
          loadGameData();
       } catch (error) {

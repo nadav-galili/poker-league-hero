@@ -54,6 +54,7 @@ export interface Translations {
    hebrew: string;
    success: string;
    ok: string;
+   currency: string;
 
    // League Creation
    createLeaguePrompt: string;
@@ -222,6 +223,7 @@ const enTranslations: Translations = {
    hebrew: 'עברית',
    success: 'Success',
    ok: 'OK',
+   currency: '$',
 
    // League Creation
    createLeaguePrompt: 'Navigation to create league form coming soon!',
@@ -393,6 +395,7 @@ const heTranslations: Translations = {
    hebrew: 'עברית',
    success: 'הצלחה',
    ok: 'אישור',
+   currency: '₪',
 
    // League Creation
    createLeaguePrompt: 'ניווט לטופס יצירת ליגה יגיע בקרוב!',

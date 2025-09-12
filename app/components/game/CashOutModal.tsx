@@ -4,9 +4,9 @@ import { Text } from '@/components/Text';
 import { useLocalization } from '@/context/localization';
 import { GamePlayer } from '@/hooks/useGameData';
 import { Ionicons } from '@expo/vector-icons';
-import { Image } from 'expo-image';
 import React from 'react';
 import {
+   Image,
    Modal,
    ScrollView,
    TextInput,
@@ -74,8 +74,7 @@ const CashOutModal: React.FC<CashOutModalProps> = ({
                                  selectedPlayer.profileImageUrl ||
                                  'https://via.placeholder.com/50x50/cccccc/666666?text=?',
                            }}
-                           className="w-15 h-15 rounded-lg border-2 border-black mb-2"
-                           contentFit="cover"
+                           className="rounded-lg border-2 border-primary mb-2 w-24 h-24"
                         />
                         <Text
                            variant="h3"
@@ -94,10 +93,7 @@ const CashOutModal: React.FC<CashOutModalProps> = ({
                         {t('enterCashOutAmount')}
                      </Text>
 
-                     <View
-                        className="p-4 rounded-xl border-3 border-black mb-4"
-                        style={{ backgroundColor: theme.surface }}
-                     >
+                     <View className="p-4 rounded-xl border-3 border-primary mb-4 bg-primaryTint">
                         <Text
                            variant="h4"
                            color={theme.text}
@@ -123,25 +119,25 @@ const CashOutModal: React.FC<CashOutModalProps> = ({
                            color={theme.textMuted}
                            className="text-center"
                         >
-                           Current Buy-ins: ₪{selectedPlayer.totalBuyIns}
+                           Current Buy-ins: {t('currency')}
+                           {selectedPlayer.totalBuyIns}
                         </Text>
                      </View>
                   </>
                )}
             </ScrollView>
 
-            <View
-               className="p-4 pb-8 shadow-lg elevation-16"
-               style={{ backgroundColor: theme.background }}
-            >
+            <View className="p-4 my-4 pb-8 shadow-lg elevation-16 bg-background">
                <Button
                   title={isProcessing ? 'Processing...' : t('confirmCashOut')}
                   onPress={onConfirm}
-                  variant="primary"
+                  variant="secondary"
                   size="large"
-                  backgroundColor={colors.secondary}
+                  icon="cash-outline"
                   disabled={isProcessing || !cashOutAmount.trim()}
                   fullWidth
+                  className="bg-primary"
+                  textColor={colors.textInverse}
                />
             </View>
          </View>

@@ -25,12 +25,11 @@ const PlayerCard: React.FC<PlayerCardProps> = ({
    onCashOut,
    onRemovePlayer,
 }) => {
-   console.log('🚀 ~ PlayerCard ~ player:', player);
    const theme = getTheme('light');
    const { t } = useLocalization();
 
    return (
-      <View className="p-4 rounded-xl  shadow-sm elevation-4 bg-surfaceElevated">
+      <View className="p-4 rounded-xl  shadow-sm elevation-4 bg-primaryTint">
          {/* Player Info */}
          <View className="flex-row items-center mb-3">
             <Image
@@ -69,19 +68,21 @@ const PlayerCard: React.FC<PlayerCardProps> = ({
          {/* Player Stats */}
          <View className="flex-row justify-between mb-3">
             <View className="items-center flex-1">
-               <Text variant="captionSmall" color={theme.textMuted}>
+               <Text variant="captionSmall" className="text-textMuted">
                   {t('initialBuyIn')}
                </Text>
-               <Text variant="h4" color={colors.primary}>
-                  ₪{gameBaseAmount}
+               <Text variant="h4" className="text-primary">
+                  {t('currency')}
+                  {gameBaseAmount}
                </Text>
             </View>
             <View className="items-center flex-1">
-               <Text variant="captionSmall" color={theme.textMuted}>
+               <Text variant="captionSmall" className="text-textMuted">
                   {t('totalBuyIns')}
                </Text>
-               <Text variant="h4" color={theme.text}>
-                  ₪{player.totalBuyIns}
+               <Text variant="h4" className="text-text">
+                  {t('currency')}
+                  {player.totalBuyIns}
                </Text>
             </View>
             <View className="items-center flex-1">
@@ -89,7 +90,8 @@ const PlayerCard: React.FC<PlayerCardProps> = ({
                   {t('totalBuyOuts')}
                </Text>
                <Text variant="h4" color={theme.text}>
-                  ₪{player.totalBuyOuts}
+                  {t('currency')}
+                  {player.totalBuyOuts}
                </Text>
             </View>
             <View className="items-center flex-1">
@@ -103,7 +105,8 @@ const PlayerCard: React.FC<PlayerCardProps> = ({
                   }
                   className="font-bold"
                >
-                  ₪{player.currentProfit.toFixed(2)}
+                  {t('currency')}
+                  {player.currentProfit.toFixed(2)}
                </Text>
             </View>
          </View>
@@ -116,6 +119,7 @@ const PlayerCard: React.FC<PlayerCardProps> = ({
                   onPress={() => onBuyIn(player)}
                   variant="outline"
                   size="small"
+                  icon="add-circle"
                   disabled={isProcessing}
                   className="bg-primary"
                   textColor={colors.textInverse}
@@ -124,6 +128,7 @@ const PlayerCard: React.FC<PlayerCardProps> = ({
                   title={t('cashOut')}
                   onPress={() => onCashOut(player)}
                   variant="primary"
+                  icon="cash-outline"
                   size="small"
                   className="bg-secondary flex-1"
                   disabled={isProcessing}
