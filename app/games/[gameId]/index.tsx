@@ -40,6 +40,7 @@ export default function GameScreen() {
    const [selectedPlayer, setSelectedPlayer] =
       React.useState<GamePlayer | null>(null);
    const [cashOutAmount, setCashOutAmount] = React.useState('');
+   const [cashOutError, setCashOutError] = React.useState<string>('');
    const [isProcessing, setIsProcessing] = React.useState(false);
 
    // Initialize game service
@@ -81,26 +82,30 @@ export default function GameScreen() {
    const handleCashOut = (player: GamePlayer) => {
       setSelectedPlayer(player);
       setCashOutAmount('');
+      setCashOutError('');
       setShowCashOutModal(true);
    };
 
+   const handleCashOutAmountChange = (amount: string) => {
+      setCashOutAmount(amount);
+      // Clear error when user starts typing
+      if (cashOutError) {
+         setCashOutError('');
+      }
+   };
+
    const processCashOut = async () => {
+      // Clear any previous error
+      setCashOutError('');
+
       if (!selectedPlayer || !cashOutAmount.trim() || !gameService) {
-         Toast.show({
-            type: 'error',
-            text1: t('error'),
-            text2: t('invalidAmount'),
-         });
+         setCashOutError(t('invalidAmount'));
          return;
       }
 
       const amount = parseFloat(cashOutAmount);
       if (isNaN(amount) || amount < 0) {
-         Toast.show({
-            type: 'error',
-            text1: t('error'),
-            text2: t('invalidAmount'),
-         });
+         setCashOutError(t('invalidAmount'));
          return;
       }
 
@@ -390,8 +395,9 @@ export default function GameScreen() {
             selectedPlayer={selectedPlayer}
             cashOutAmount={cashOutAmount}
             isProcessing={isProcessing}
+            errorMessage={cashOutError}
             onClose={() => setShowCashOutModal(false)}
-            onCashOutAmountChange={setCashOutAmount}
+            onCashOutAmountChange={handleCashOutAmountChange}
             onConfirm={processCashOut}
          />
 

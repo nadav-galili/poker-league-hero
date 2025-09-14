@@ -19,6 +19,7 @@ interface CashOutModalProps {
    selectedPlayer: GamePlayer | null;
    cashOutAmount: string;
    isProcessing: boolean;
+   errorMessage?: string;
    onClose: () => void;
    onCashOutAmountChange: (amount: string) => void;
    onConfirm: () => void;
@@ -29,6 +30,7 @@ const CashOutModal: React.FC<CashOutModalProps> = ({
    selectedPlayer,
    cashOutAmount,
    isProcessing,
+   errorMessage,
    onClose,
    onCashOutAmountChange,
    onConfirm,
@@ -105,7 +107,9 @@ const CashOutModal: React.FC<CashOutModalProps> = ({
                            className="border-2 border-gray-400 rounded-lg px-3 py-4 text-lg font-semibold text-center mb-2"
                            style={{
                               color: theme.text,
-                              borderColor: theme.border,
+                              borderColor: errorMessage
+                                 ? theme.error
+                                 : theme.border,
                            }}
                            value={cashOutAmount}
                            onChangeText={onCashOutAmountChange}
@@ -114,6 +118,17 @@ const CashOutModal: React.FC<CashOutModalProps> = ({
                            keyboardType="numeric"
                            autoFocus
                         />
+                        {errorMessage && (
+                           <View className="mb-2 p-2 rounded-lg border-2 border-red-500 bg-red-50">
+                              <Text
+                                 variant="captionSmall"
+                                 color={theme.error}
+                                 className="text-center font-semibold"
+                              >
+                                 {errorMessage}
+                              </Text>
+                           </View>
+                        )}
                         <Text
                            variant="captionSmall"
                            color={theme.textMuted}
