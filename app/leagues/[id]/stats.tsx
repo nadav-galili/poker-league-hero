@@ -1,7 +1,6 @@
-import { colors, getTheme } from '@/colors';
+import { colors } from '@/colors';
 import Button from '@/components/Button';
 import { LoadingState } from '@/components/LoadingState';
-import { Text } from '@/components/Text';
 import { BASE_URL } from '@/constants';
 import { useLocalization } from '@/context/localization';
 
@@ -10,7 +9,7 @@ import { Ionicons } from '@expo/vector-icons';
 
 import { router, useLocalSearchParams } from 'expo-router';
 import React from 'react';
-import { Image, ScrollView, TouchableOpacity, View } from 'react-native';
+import { Image, ScrollView, Text, TouchableOpacity, View } from 'react-native';
 
 interface LeagueData {
    id: string;
@@ -23,7 +22,6 @@ interface LeagueData {
 }
 
 export default function LeagueStats() {
-   const theme = getTheme('light');
    const { t, isRTL } = useLocalization();
    const { id } = useLocalSearchParams<{ id: string }>();
 
@@ -85,39 +83,39 @@ export default function LeagueStats() {
    if (error || !league) {
       return (
          <View className="flex-1 bg-background">
-            <View className="flex-row items-center justify-between p-5 bg-primary">
-               <TouchableOpacity onPress={handleBack} className="p-8">
+            {/* Header with thick border and shadow */}
+            <View className="flex-row items-center justify-between px-6 py-8 bg-primary border-b-8 border-border shadow-[6px_6px_0px_0px_rgba(0,0,0,1)]">
+               <TouchableOpacity
+                  onPress={handleBack}
+                  className="p-3 bg-background border-4 border-border rounded-lg shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] active:shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] active:translate-x-1 active:translate-y-1"
+               >
                   <Ionicons
                      name={isRTL ? 'arrow-forward' : 'arrow-back'}
                      size={24}
-                     color={colors.textInverse}
+                     color={colors.text}
                   />
                </TouchableOpacity>
-               <Text className="text-textInverse">{t('leagueStats')}</Text>
-               <View className="w-10" />
+               <Text className="text-textInverse text-xl font-black tracking-widest uppercase">
+                  {t('leagueStats')}
+               </Text>
+               <View className="w-16" />
             </View>
 
-            <View className="flex-1 items-center justify-center p-5">
-               <Text
-                  variant="h3"
-                  color={theme.error}
-                  className="text-center mb-4"
-               >
-                  {t('error')}
-               </Text>
-               <Text
-                  variant="body"
-                  color={theme.textMuted}
-                  className="text-center mb-4"
-               >
-                  {error || t('leagueNotFound')}
-               </Text>
-               <Button
-                  title={t('retry')}
-                  onPress={loadLeagueDetails}
-                  variant="outline"
-                  size="small"
-               />
+            <View className="flex-1 items-center justify-center p-8">
+               <View className="bg-error border-8 border-border rounded-2xl p-8 shadow-[8px_8px_0px_0px_rgba(0,0,0,1)]">
+                  <Text className="text-center mb-6 font-black tracking-wider uppercase">
+                     {t('error')}
+                  </Text>
+                  <Text className="text-center mb-8 font-bold">
+                     {error || t('leagueNotFound')}
+                  </Text>
+                  <Button
+                     title={t('retry')}
+                     onPress={loadLeagueDetails}
+                     variant="outline"
+                     size="small"
+                  />
+               </View>
             </View>
          </View>
       );
@@ -125,32 +123,37 @@ export default function LeagueStats() {
 
    return (
       <View className="flex-1 bg-background">
-         {/* Header */}
-         <View className="flex-row items-center justify-between p-5 bg-primary">
-            <TouchableOpacity onPress={handleBack} className="p-8">
+         {/* Header with thick border and shadow */}
+         <View className="flex-row items-center justify-between px-6 py-8 bg-primary border-b-8 border-border shadow-[6px_6px_0px_0px_rgba(0,0,0,1)]">
+            <TouchableOpacity
+               onPress={handleBack}
+               className="p-3 bg-background border-4 border-border rounded-lg shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] active:shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] active:translate-x-1 active:translate-y-1"
+            >
                <Ionicons
                   name={isRTL ? 'arrow-forward' : 'arrow-back'}
                   size={24}
-                  color={colors.textInverse}
+                  color={colors.text}
                />
             </TouchableOpacity>
-            <Text className="text-textInverse">{t('leagueStats')}</Text>
-            <View className="w-10" />
+            <Text className="text-textInverse text-xl font-black tracking-widest uppercase">
+               {t('leagueStats')}
+            </Text>
+            <View className="w-16" />
          </View>
 
          <ScrollView
             className="flex-1"
-            contentContainerClassName="p-5 pb-20"
+            contentContainerClassName="p-6 pb-24"
             showsVerticalScrollIndicator={false}
          >
-            {/* League Header */}
-            <View className="flex-row p-5 rounded-xl mb-5 bg-primaryTint border-[3px] border-primary  shadow-border">
-               <View className="mr-5">
+            {/* League Header with neo brutalism styling */}
+            <View className="flex-row p-6 rounded-2xl mb-8 bg-primaryTint border-8 border-primary">
+               <View className="mr-6">
                   <Image
                      source={{ uri: league.imageUrl }}
-                     width={100}
-                     height={100}
-                     className="w-25 h-25 rounded-xl border-6 border-primary object-cover"
+                     width={120}
+                     height={120}
+                     className="w-30 h-30 rounded-2xl border-8 border-primary object-cover shadow-[6px_6px_0px_0px_rgba(0,0,0,1)]"
                      onError={(error) => {
                         captureException(
                            new Error('League image loading failed'),
@@ -167,30 +170,18 @@ export default function LeagueStats() {
                </View>
 
                <View className="flex-1 justify-center">
-                  <Text
-                     variant="h2"
-                     color={theme.text}
-                     className="tracking-wider mb-3"
-                  >
+                  <Text className="text-black mb-4 font-bold text-xl">
                      {league.name}
                   </Text>
 
-                  <View className="gap-2">
-                     <View className="self-start px-3 py-1.5 rounded-md border-3 bg-primaryTint  border-3  border-primary">
-                        <Text
-                           variant="labelSmall"
-                           color={colors.primary}
-                           className="tracking-wide font-bold"
-                        >
+                  <View className="gap-4">
+                     <View className="self-start px-4 py-3 rounded-lg border-4 border-border bg-primary shadow-[4px_4px_0px_0px_rgba(0,0,0,1)]">
+                        <Text className="tracking-wider font-black uppercase">
                            {league.inviteCode}
                         </Text>
                      </View>
 
-                     <Text
-                        variant="captionSmall"
-                        color={theme.textMuted}
-                        className="tracking-wide uppercase"
-                     >
+                     <Text className="tracking-widest uppercase font-bold">
                         {league.memberCount} {t('members')}
                      </Text>
                   </View>
@@ -198,57 +189,37 @@ export default function LeagueStats() {
             </View>
 
             {/* Main Action Cards */}
-            <View className="gap-8">
+            <View className="gap-10">
                {/* View Detailed Stats Card */}
                <TouchableOpacity
-                  className="relative border-6 border-4 bg-white border-primary  rounded-xl p-6  shadow-border 
-                  
-                  active:scale-[0.97] active:translate-x-0.5 active:translate-y-0.5
-                  "
+                  className="relative border-8 border-border bg-secondary rounded-2xl p-8 shadow-[12px_12px_0px_0px_rgba(0,0,0,1)] active:shadow-[6px_6px_0px_0px_rgba(0,0,0,1)] active:translate-x-3 active:translate-y-3 transition-all duration-100"
                   onPress={() => {
                      // Navigate to detailed stats screen
                      router.push(`/leagues/${league.id}/league-stats-screen`);
                   }}
-                  style={{
-                     shadowColor: colors.border,
-                     shadowOffset: { width: -6, height: -6 },
-                     shadowOpacity: 1,
-                     shadowRadius: 0,
-                     elevation: 0,
-                  }}
                >
-                  <View className="absolute inset-0 bg-secondary rounded-xl -z-10" />
-
                   <View className="flex-row items-center">
-                     <View className="w-18 h-18 bg-primary border-6 border-border rounded-xl items-center justify-center mr-5 transform rotate-6">
+                     <View className="w-20 h-20 bg-primary border-8 border-border rounded-2xl items-center justify-center mr-6 transform rotate-6 shadow-[6px_6px_0px_0px_rgba(0,0,0,1)]">
                         <Ionicons
                            name="stats-chart"
-                           size={34}
+                           size={40}
                            color={colors.textInverse}
                         />
                      </View>
 
                      <View className="flex-1">
-                        <Text
-                           variant="h3"
-                           color={colors.textInverse}
-                           className="tracking-widest mb-2  uppercase transform -rotate-1"
-                        >
+                        <Text className="tracking-widest mb-3 font-black uppercase transform -rotate-1">
                            {t('viewDetailedStats')}
                         </Text>
-                        <Text
-                           variant="body"
-                           color={colors.textInverse}
-                           className="leading-5 font-bold opacity-90"
-                        >
+                        <Text className="leading-6 font-bold opacity-95">
                            {t('viewStatsDescription')}
                         </Text>
                      </View>
 
-                     <View className="ml-3 transform rotate-12">
+                     <View className="ml-4 transform rotate-12">
                         <Ionicons
                            name="chevron-back"
-                           size={28}
+                           size={32}
                            color={colors.textInverse}
                         />
                      </View>
@@ -257,51 +228,34 @@ export default function LeagueStats() {
 
                {/* Start New Game Card */}
                <TouchableOpacity
-                  className="relative  border-6 border-border rounded-xl p-6"
+                  className="relative border-8 border-border bg-success rounded-2xl p-8 shadow-[12px_12px_0px_0px_rgba(0,0,0,1)] active:shadow-[6px_6px_0px_0px_rgba(0,0,0,1)] active:translate-x-3 active:translate-y-3 transition-all duration-100"
                   onPress={() => {
                      // Navigate to select players screen
                      router.push(`/games/${league.id}/select-players`);
                   }}
-                  style={{
-                     shadowColor: colors.border,
-                     shadowOffset: { width: -6, height: -6 },
-                     shadowOpacity: 1,
-                     shadowRadius: 0,
-                     elevation: 0,
-                  }}
                >
-                  <View className="absolute inset-0 bg-success rounded-xl -z-10" />
-
                   <View className="flex-row items-center">
-                     <View className="w-18 h-18 bg-textInverse border-6 border-border rounded-xl items-center justify-center mr-5 transform -rotate-6">
+                     <View className="w-20 h-20 bg-textInverse border-8 border-border rounded-2xl items-center justify-center mr-6 transform -rotate-6 shadow-[6px_6px_0px_0px_rgba(0,0,0,1)]">
                         <Ionicons
                            name="play-circle"
-                           size={34}
-                           color={colors.secondary}
+                           size={40}
+                           color={colors.success}
                         />
                      </View>
 
                      <View className="flex-1">
-                        <Text
-                           variant="h3"
-                           color={colors.textInverse}
-                           className="tracking-widest mb-2 font-black uppercase transform rotate-1"
-                        >
+                        <Text className="tracking-widest mb-3 font-black uppercase transform rotate-1">
                            {t('startNewGame')}
                         </Text>
-                        <Text
-                           variant="body"
-                           color={colors.textInverse}
-                           className="leading-5 font-bold opacity-90"
-                        >
+                        <Text className="leading-6 font-bold opacity-95">
                            {t('startGameDescription')}
                         </Text>
                      </View>
 
-                     <View className="ml-3 transform -rotate-12">
+                     <View className="ml-4 transform -rotate-12">
                         <Ionicons
                            name="chevron-back"
-                           size={28}
+                           size={32}
                            color={colors.textInverse}
                         />
                      </View>
@@ -312,61 +266,3 @@ export default function LeagueStats() {
       </View>
    );
 }
-
-// const styles = StyleSheet.create({
-//    container: {
-//       flex: 1,
-//    },
-//    header: {
-//       flexDirection: 'row',
-//       alignItems: 'center',
-//       justifyContent: 'space-between',
-//       paddingHorizontal: 20,
-//       paddingTop: 60,
-//       paddingBottom: 16,
-//       borderBottomWidth: 6,
-//       borderBottomColor: colors.text,
-//       shadowColor: colors.text,
-//       shadowOffset: { width: 0, height: 8 },
-//       shadowOpacity: 1,
-//       shadowRadius: 0,
-//       elevation: 12,
-//    },
-//    backButton: {
-//       padding: 8,
-//    },
-//    headerTitle: {
-//       fontSize: 20,
-//       fontWeight: '700',
-//       textTransform: 'uppercase',
-//       letterSpacing: 1,
-//    },
-//    placeholder: {
-//       width: 40,
-//    },
-//    loadingContainer: {
-//       flex: 1,
-//       justifyContent: 'center',
-//       alignItems: 'center',
-//       paddingVertical: 60,
-//    },
-//    loadingText: {
-//       marginTop: 16,
-//       textAlign: 'center',
-//    },
-//    errorContainer: {
-//       flex: 1,
-//       justifyContent: 'center',
-//       alignItems: 'center',
-//       paddingHorizontal: 40,
-//       paddingVertical: 60,
-//    },
-//    errorTitle: {
-//       textAlign: 'center',
-//       marginBottom: 12,
-//    },
-//    errorMessage: {
-//       textAlign: 'center',
-//       marginBottom: 24,
-//    },
-// });
