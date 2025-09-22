@@ -2,6 +2,7 @@ import { colors } from '@/colors';
 import Button from '@/components/Button';
 import { LoadingState } from '@/components/LoadingState';
 import { BASE_URL } from '@/constants';
+import { useAuth } from '@/context/auth';
 import { useLocalization } from '@/context/localization';
 
 import { addBreadcrumb, captureException } from '@/utils/sentry';
@@ -23,6 +24,7 @@ interface LeagueData {
 
 export default function LeagueStats() {
    const { t, isRTL } = useLocalization();
+   const { fetchWithAuth } = useAuth();
    const { id } = useLocalSearchParams<{ id: string }>();
 
    const [league, setLeague] = React.useState<LeagueData | null>(null);
@@ -37,7 +39,7 @@ export default function LeagueStats() {
          setIsLoading(true);
          setError(null);
 
-         const response = await fetch(`${BASE_URL}/api/leagues/${id}`);
+         const response = await fetchWithAuth(`${BASE_URL}/api/leagues/${id}`);
 
          if (!response.ok) {
             throw new Error('Failed to fetch league details');
@@ -65,7 +67,7 @@ export default function LeagueStats() {
       } finally {
          setIsLoading(false);
       }
-   }, [id]);
+   }, [id, fetchWithAuth]);
 
    // Load league details on mount
    React.useEffect(() => {
@@ -74,6 +76,54 @@ export default function LeagueStats() {
 
    const handleBack = () => {
       router.back();
+   };
+
+   const handleStartGame = async () => {
+      if (!league) return;
+
+      try {
+         // Check for active game first
+         console.log('🔍 Checking for active game for league:', league.id);
+         const activeGameResponse = await fetchWithAuth(
+            `${BASE_URL}/api/games/active/${league.id}`
+         );
+         console.log(
+            '🚀 ~ handleStartGame ~ activeGameResponse status:',
+            activeGameResponse.status,
+            'ok:',
+            activeGameResponse.ok
+         );
+
+         if (activeGameResponse.ok) {
+            const activeGameData = await activeGameResponse.json();
+            console.log('🚀 ~ activeGameData:', activeGameData);
+
+            if (activeGameData.success && activeGameData.game) {
+               console.log(
+                  '✅ Active game found, navigating to game:',
+                  activeGameData.game.id
+               );
+               // Navigate to the active game screen
+               router.push(`/games/${activeGameData.game.id}`);
+               return;
+            } else {
+               console.log(
+                  'ℹ️ No active game found, proceeding to select players'
+               );
+            }
+         } else {
+            const errorData = await activeGameResponse.json();
+            console.error('❌ API Error:', errorData);
+         }
+
+         // No active game found, proceed to select players
+         console.log('🎮 Navigating to select players screen');
+         router.push(`/games/${league.id}/select-players`);
+      } catch (error) {
+         // If there's an error checking for active game, still proceed to select players
+         console.error('❌ Error checking for active game:', error);
+         router.push(`/games/${league.id}/select-players`);
+      }
    };
 
    if (isLoading) {
@@ -229,10 +279,7 @@ export default function LeagueStats() {
                {/* Start New Game Card */}
                <TouchableOpacity
                   className="relative border-8 border-border bg-success rounded-2xl p-8 shadow-[12px_12px_0px_0px_rgba(0,0,0,1)] active:shadow-[6px_6px_0px_0px_rgba(0,0,0,1)] active:translate-x-3 active:translate-y-3 transition-all duration-100"
-                  onPress={() => {
-                     // Navigate to select players screen
-                     router.push(`/games/${league.id}/select-players`);
-                  }}
+                  onPress={handleStartGame}
                >
                   <View className="flex-row items-center">
                      <View className="w-20 h-20 bg-textInverse border-8 border-border rounded-2xl items-center justify-center mr-6 transform -rotate-6 shadow-[6px_6px_0px_0px_rgba(0,0,0,1)]">
