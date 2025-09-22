@@ -4,13 +4,13 @@ import { LoadingState } from '@/components/LoadingState';
 import { Text } from '@/components/Text';
 import { BASE_URL } from '@/constants';
 import { useLocalization } from '@/context/localization';
-import { tw, twMerge } from '@/styles/tw';
-import { addBreadcrumb, captureException, setTag } from '@/utils/sentry';
+
+import { addBreadcrumb, captureException } from '@/utils/sentry';
 import { Ionicons } from '@expo/vector-icons';
-import { Image } from 'expo-image';
+
 import { router, useLocalSearchParams } from 'expo-router';
 import React from 'react';
-import { ScrollView, StyleSheet, TouchableOpacity, View } from 'react-native';
+import { Image, ScrollView, TouchableOpacity, View } from 'react-native';
 
 interface LeagueData {
    id: string;
@@ -74,16 +74,6 @@ export default function LeagueStats() {
       loadLeagueDetails();
    }, [loadLeagueDetails]);
 
-   // Track screen visit
-   React.useEffect(() => {
-      addBreadcrumb('User visited League Stats screen', 'navigation', {
-         screen: 'LeagueStats',
-         leagueId: id,
-         timestamp: new Date().toISOString(),
-      });
-      setTag('current_screen', 'league_stats');
-   }, [id]);
-
    const handleBack = () => {
       router.back();
    };
@@ -94,33 +84,31 @@ export default function LeagueStats() {
 
    if (error || !league) {
       return (
-         <View
-            style={[styles.container, { backgroundColor: theme.background }]}
-         >
-            <View style={[styles.header, { backgroundColor: colors.primary }]}>
-               <TouchableOpacity onPress={handleBack} style={styles.backButton}>
+         <View className="flex-1 bg-background">
+            <View className="flex-row items-center justify-between p-5 bg-primary">
+               <TouchableOpacity onPress={handleBack} className="p-8">
                   <Ionicons
                      name={isRTL ? 'arrow-forward' : 'arrow-back'}
                      size={24}
                      color={colors.textInverse}
                   />
                </TouchableOpacity>
-               <Text
-                  style={[styles.headerTitle, { color: colors.textInverse }]}
-               >
-                  {t('leagueStats')}
-               </Text>
-               <View style={styles.placeholder} />
+               <Text className="text-textInverse">{t('leagueStats')}</Text>
+               <View className="w-10" />
             </View>
 
-            <View style={styles.errorContainer}>
-               <Text variant="h3" color={theme.error} style={styles.errorTitle}>
+            <View className="flex-1 items-center justify-center p-5">
+               <Text
+                  variant="h3"
+                  color={theme.error}
+                  className="text-center mb-4"
+               >
                   {t('error')}
                </Text>
                <Text
                   variant="body"
                   color={theme.textMuted}
-                  style={styles.errorMessage}
+                  className="text-center mb-4"
                >
                   {error || t('leagueNotFound')}
                </Text>
@@ -136,51 +124,33 @@ export default function LeagueStats() {
    }
 
    return (
-      <View style={[styles.container, { backgroundColor: theme.background }]}>
+      <View className="flex-1 bg-background">
          {/* Header */}
-         <View style={[styles.header, { backgroundColor: colors.primary }]}>
-            <TouchableOpacity onPress={handleBack} style={styles.backButton}>
+         <View className="flex-row items-center justify-between p-5 bg-primary">
+            <TouchableOpacity onPress={handleBack} className="p-8">
                <Ionicons
                   name={isRTL ? 'arrow-forward' : 'arrow-back'}
                   size={24}
                   color={colors.textInverse}
                />
             </TouchableOpacity>
-            <Text style={[styles.headerTitle, { color: colors.textInverse }]}>
-               {t('leagueStats')}
-            </Text>
-            <View style={styles.placeholder} />
+            <Text className="text-textInverse">{t('leagueStats')}</Text>
+            <View className="w-10" />
          </View>
 
          <ScrollView
-            style={tw['flex-1']}
-            contentContainerStyle={{ padding: 20, paddingBottom: 40 }}
+            className="flex-1"
+            contentContainerClassName="p-5 pb-20"
             showsVerticalScrollIndicator={false}
          >
             {/* League Header */}
-            <View
-               style={twMerge(
-                  'flex-row',
-                  'p-5',
-                  'rounded-xl',
-                  'border-6',
-                  'border-border',
-                  'bg-surfaceElevated',
-                  'mb-5',
-                  'shadow-lg'
-               )}
-            >
-               <View style={tw['mr-5']}>
+            <View className="flex-row p-5 rounded-xl mb-5 bg-primaryTint border-[3px] border-primary  shadow-border">
+               <View className="mr-5">
                   <Image
                      source={{ uri: league.imageUrl }}
-                     style={twMerge(
-                        'w-25',
-                        'h-25',
-                        'rounded-xl',
-                        'border-6',
-                        'border-primary'
-                     )}
-                     contentFit="cover"
+                     width={100}
+                     height={100}
+                     className="w-25 h-25 rounded-xl border-6 border-primary object-cover"
                      onError={(error) => {
                         captureException(
                            new Error('League image loading failed'),
@@ -196,31 +166,21 @@ export default function LeagueStats() {
                   />
                </View>
 
-               <View style={twMerge('flex-1', 'justify-center')}>
+               <View className="flex-1 justify-center">
                   <Text
                      variant="h2"
                      color={theme.text}
-                     style={twMerge('tracking-wider', 'mb-3')}
+                     className="tracking-wider mb-3"
                   >
                      {league.name}
                   </Text>
 
-                  <View style={tw['gap-2']}>
-                     <View
-                        style={twMerge(
-                           'self-start',
-                           'px-3',
-                           'py-1.5',
-                           'rounded-md',
-                           'border-3',
-                           'bg-primaryTint',
-                           'border-primary'
-                        )}
-                     >
+                  <View className="gap-2">
+                     <View className="self-start px-3 py-1.5 rounded-md border-3 bg-primaryTint  border-3  border-primary">
                         <Text
                            variant="labelSmall"
                            color={colors.primary}
-                           style={twMerge('tracking-wide', 'font-bold')}
+                           className="tracking-wide font-bold"
                         >
                            {league.inviteCode}
                         </Text>
@@ -229,7 +189,7 @@ export default function LeagueStats() {
                      <Text
                         variant="captionSmall"
                         color={theme.textMuted}
-                        style={twMerge('tracking-wide', 'uppercase')}
+                        className="tracking-wide uppercase"
                      >
                         {league.memberCount} {t('members')}
                      </Text>
@@ -238,130 +198,113 @@ export default function LeagueStats() {
             </View>
 
             {/* Main Action Cards */}
-            <View style={tw['gap-4']}>
+            <View className="gap-8">
                {/* View Detailed Stats Card */}
                <TouchableOpacity
-                  style={twMerge(
-                     'flex-row',
-                     'items-center',
-                     'p-5',
-                     'bg-success',
-                     'rounded-xl',
-                     'border-6',
-                     'border-border',
-                     'shadow-lg'
-                  )}
+                  className="relative border-6 border-4 bg-white border-primary  rounded-xl p-6  shadow-border 
+                  
+                  active:scale-[0.97] active:translate-x-0.5 active:translate-y-0.5
+                  "
                   onPress={() => {
                      // Navigate to detailed stats screen
                      router.push(`/leagues/${league.id}/league-stats-screen`);
                   }}
+                  style={{
+                     shadowColor: colors.border,
+                     shadowOffset: { width: -6, height: -6 },
+                     shadowOpacity: 1,
+                     shadowRadius: 0,
+                     elevation: 0,
+                  }}
                >
-                  <View
-                     style={twMerge(
-                        'w-15',
-                        'h-15',
-                        'rounded-xl',
-                        'items-center',
-                        'justify-center',
-                        'mr-4',
-                        'border-3',
-                        'border-border',
-                        'bg-primary'
-                     )}
-                  >
-                     <Ionicons
-                        name="stats-chart"
-                        size={32}
-                        color={colors.textInverse}
-                     />
-                  </View>
+                  <View className="absolute inset-0 bg-secondary rounded-xl -z-10" />
 
-                  <View style={tw['flex-1']}>
-                     <Text
-                        variant="h3"
-                        color={theme.text}
-                        style={twMerge('tracking-wider', 'mb-1', 'font-bold')}
-                     >
-                        {t('viewDetailedStats')}
-                     </Text>
-                     <Text
-                        variant="body"
-                        color={theme.textMuted}
-                        style={tw['leading-5']}
-                     >
-                        {t('viewStatsDescription')}
-                     </Text>
-                  </View>
+                  <View className="flex-row items-center">
+                     <View className="w-18 h-18 bg-primary border-6 border-border rounded-xl items-center justify-center mr-5 transform rotate-6">
+                        <Ionicons
+                           name="stats-chart"
+                           size={34}
+                           color={colors.textInverse}
+                        />
+                     </View>
 
-                  <View style={tw['ml-3']}>
-                     <Ionicons
-                        name="chevron-back"
-                        size={24}
-                        color={colors.primary}
-                     />
+                     <View className="flex-1">
+                        <Text
+                           variant="h3"
+                           color={colors.textInverse}
+                           className="tracking-widest mb-2  uppercase transform -rotate-1"
+                        >
+                           {t('viewDetailedStats')}
+                        </Text>
+                        <Text
+                           variant="body"
+                           color={colors.textInverse}
+                           className="leading-5 font-bold opacity-90"
+                        >
+                           {t('viewStatsDescription')}
+                        </Text>
+                     </View>
+
+                     <View className="ml-3 transform rotate-12">
+                        <Ionicons
+                           name="chevron-back"
+                           size={28}
+                           color={colors.textInverse}
+                        />
+                     </View>
                   </View>
                </TouchableOpacity>
 
                {/* Start New Game Card */}
                <TouchableOpacity
-                  style={twMerge(
-                     'flex-row',
-                     'items-center',
-                     'p-5',
-                     'rounded-xl',
-                     'border-6',
-                     'bg-secondary',
-                     'border-border',
-                     'shadow-lg'
-                  )}
+                  className="relative  border-6 border-border rounded-xl p-6"
                   onPress={() => {
                      // Navigate to select players screen
                      router.push(`/games/${league.id}/select-players`);
                   }}
+                  style={{
+                     shadowColor: colors.border,
+                     shadowOffset: { width: -6, height: -6 },
+                     shadowOpacity: 1,
+                     shadowRadius: 0,
+                     elevation: 0,
+                  }}
                >
-                  <View
-                     style={twMerge(
-                        'w-15',
-                        'h-15',
-                        'rounded-xl',
-                        'items-center',
-                        'justify-center',
-                        'mr-4',
-                        'border-3',
-                        'border-border',
-                        'bg-textInverse'
-                     )}
-                  >
-                     <Ionicons
-                        name="play-circle"
-                        size={32}
-                        color={colors.secondary}
-                     />
-                  </View>
+                  <View className="absolute inset-0 bg-success rounded-xl -z-10" />
 
-                  <View style={tw['flex-1']}>
-                     <Text
-                        variant="h3"
-                        color={colors.textInverse}
-                        style={twMerge('tracking-wider', 'mb-1', 'font-bold')}
-                     >
-                        {t('startNewGame')}
-                     </Text>
-                     <Text
-                        variant="body"
-                        color={colors.textInverse}
-                        style={twMerge('leading-5', 'opacity-90')}
-                     >
-                        {t('startGameDescription')}
-                     </Text>
-                  </View>
+                  <View className="flex-row items-center">
+                     <View className="w-18 h-18 bg-textInverse border-6 border-border rounded-xl items-center justify-center mr-5 transform -rotate-6">
+                        <Ionicons
+                           name="play-circle"
+                           size={34}
+                           color={colors.secondary}
+                        />
+                     </View>
 
-                  <View style={tw['ml-3']}>
-                     <Ionicons
-                        name="chevron-back"
-                        size={24}
-                        color={colors.textInverse}
-                     />
+                     <View className="flex-1">
+                        <Text
+                           variant="h3"
+                           color={colors.textInverse}
+                           className="tracking-widest mb-2 font-black uppercase transform rotate-1"
+                        >
+                           {t('startNewGame')}
+                        </Text>
+                        <Text
+                           variant="body"
+                           color={colors.textInverse}
+                           className="leading-5 font-bold opacity-90"
+                        >
+                           {t('startGameDescription')}
+                        </Text>
+                     </View>
+
+                     <View className="ml-3 transform -rotate-12">
+                        <Ionicons
+                           name="chevron-back"
+                           size={28}
+                           color={colors.textInverse}
+                        />
+                     </View>
                   </View>
                </TouchableOpacity>
             </View>
@@ -370,60 +313,60 @@ export default function LeagueStats() {
    );
 }
 
-const styles = StyleSheet.create({
-   container: {
-      flex: 1,
-   },
-   header: {
-      flexDirection: 'row',
-      alignItems: 'center',
-      justifyContent: 'space-between',
-      paddingHorizontal: 20,
-      paddingTop: 60,
-      paddingBottom: 16,
-      borderBottomWidth: 6,
-      borderBottomColor: colors.text,
-      shadowColor: colors.text,
-      shadowOffset: { width: 0, height: 8 },
-      shadowOpacity: 1,
-      shadowRadius: 0,
-      elevation: 12,
-   },
-   backButton: {
-      padding: 8,
-   },
-   headerTitle: {
-      fontSize: 20,
-      fontWeight: '700',
-      textTransform: 'uppercase',
-      letterSpacing: 1,
-   },
-   placeholder: {
-      width: 40,
-   },
-   loadingContainer: {
-      flex: 1,
-      justifyContent: 'center',
-      alignItems: 'center',
-      paddingVertical: 60,
-   },
-   loadingText: {
-      marginTop: 16,
-      textAlign: 'center',
-   },
-   errorContainer: {
-      flex: 1,
-      justifyContent: 'center',
-      alignItems: 'center',
-      paddingHorizontal: 40,
-      paddingVertical: 60,
-   },
-   errorTitle: {
-      textAlign: 'center',
-      marginBottom: 12,
-   },
-   errorMessage: {
-      textAlign: 'center',
-      marginBottom: 24,
-   },
-});
+// const styles = StyleSheet.create({
+//    container: {
+//       flex: 1,
+//    },
+//    header: {
+//       flexDirection: 'row',
+//       alignItems: 'center',
+//       justifyContent: 'space-between',
+//       paddingHorizontal: 20,
+//       paddingTop: 60,
+//       paddingBottom: 16,
+//       borderBottomWidth: 6,
+//       borderBottomColor: colors.text,
+//       shadowColor: colors.text,
+//       shadowOffset: { width: 0, height: 8 },
+//       shadowOpacity: 1,
+//       shadowRadius: 0,
+//       elevation: 12,
+//    },
+//    backButton: {
+//       padding: 8,
+//    },
+//    headerTitle: {
+//       fontSize: 20,
+//       fontWeight: '700',
+//       textTransform: 'uppercase',
+//       letterSpacing: 1,
+//    },
+//    placeholder: {
+//       width: 40,
+//    },
+//    loadingContainer: {
+//       flex: 1,
+//       justifyContent: 'center',
+//       alignItems: 'center',
+//       paddingVertical: 60,
+//    },
+//    loadingText: {
+//       marginTop: 16,
+//       textAlign: 'center',
+//    },
+//    errorContainer: {
+//       flex: 1,
+//       justifyContent: 'center',
+//       alignItems: 'center',
+//       paddingHorizontal: 40,
+//       paddingVertical: 60,
+//    },
+//    errorTitle: {
+//       textAlign: 'center',
+//       marginBottom: 12,
+//    },
+//    errorMessage: {
+//       textAlign: 'center',
+//       marginBottom: 24,
+//    },
+// });
