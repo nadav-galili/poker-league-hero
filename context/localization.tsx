@@ -109,6 +109,10 @@ export interface Translations {
    viewStatsDescription: string;
    startNewGame: string;
    startGameDescription: string;
+   checkingGames: string;
+   checkingGamesDescription: string;
+   continueGame: string;
+   continueGameDescription: string;
 
    // Select Players Screen
    selectPlayers: string;
@@ -279,6 +283,10 @@ const enTranslations: Translations = {
       'See player rankings, game history, and performance analytics',
    startNewGame: 'START NEW GAME',
    startGameDescription: 'Create a new poker game for this league',
+   checkingGames: 'CHECKING GAMES',
+   checkingGamesDescription: 'Looking for active games in this league',
+   continueGame: 'CONTINUE GAME',
+   continueGameDescription: 'Resume the currently active game',
 
    // Select Players Screen
    selectPlayers: 'SELECT PLAYERS',
@@ -450,6 +458,10 @@ const heTranslations: Translations = {
    viewStatsDescription: 'ראה דירוגי שחקנים, היסטוריית משחקים וניתוח ביצועים',
    startNewGame: 'התחל משחק חדש',
    startGameDescription: 'צור משחק פוקר חדש עבור הליגה הזו',
+   checkingGames: 'בודק משחקים',
+   checkingGamesDescription: 'מחפש משחקים פעילים בליגה הזו',
+   continueGame: 'המשך משחק',
+   continueGameDescription: 'חזור למשחק הפעיל הנוכחי',
 
    // Select Players Screen
    selectPlayers: 'בחר שחקנים',

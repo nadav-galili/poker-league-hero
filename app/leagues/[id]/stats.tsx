@@ -30,6 +30,9 @@ export default function LeagueStats() {
    const [league, setLeague] = React.useState<LeagueData | null>(null);
    const [isLoading, setIsLoading] = React.useState(true);
    const [error, setError] = React.useState<string | null>(null);
+   const [activeGame, setActiveGame] = React.useState<any | null>(null);
+   const [isCheckingActiveGame, setIsCheckingActiveGame] =
+      React.useState(false);
 
    // Function to load league details
    const loadLeagueDetails = React.useCallback(async () => {
@@ -69,60 +72,58 @@ export default function LeagueStats() {
       }
    }, [id, fetchWithAuth]);
 
+   // Function to check for active game
+   const checkActiveGame = React.useCallback(async () => {
+      if (!league) return;
+
+      try {
+         setIsCheckingActiveGame(true);
+         const activeGameResponse = await fetchWithAuth(
+            `${BASE_URL}/api/games/active/${league.id}`
+         );
+
+         if (activeGameResponse.ok) {
+            const activeGameData = await activeGameResponse.json();
+            if (activeGameData.success && activeGameData.game) {
+               setActiveGame(activeGameData.game);
+            } else {
+               setActiveGame(null);
+            }
+         } else {
+            setActiveGame(null);
+         }
+      } catch (error) {
+         console.error('Error checking for active game:', error);
+         setActiveGame(null);
+      } finally {
+         setIsCheckingActiveGame(false);
+      }
+   }, [league, fetchWithAuth]);
+
    // Load league details on mount
    React.useEffect(() => {
       loadLeagueDetails();
    }, [loadLeagueDetails]);
 
+   // Check for active game when league is loaded
+   React.useEffect(() => {
+      if (league) {
+         checkActiveGame();
+      }
+   }, [league, checkActiveGame]);
+
    const handleBack = () => {
       router.back();
    };
 
-   const handleStartGame = async () => {
+   const handleStartGame = () => {
       if (!league) return;
+      router.push(`/games/${league.id}/select-players`);
+   };
 
-      try {
-         // Check for active game first
-         console.log('🔍 Checking for active game for league:', league.id);
-         const activeGameResponse = await fetchWithAuth(
-            `${BASE_URL}/api/games/active/${league.id}`
-         );
-         console.log(
-            '🚀 ~ handleStartGame ~ activeGameResponse status:',
-            activeGameResponse.status,
-            'ok:',
-            activeGameResponse.ok
-         );
-
-         if (activeGameResponse.ok) {
-            const activeGameData = await activeGameResponse.json();
-            console.log('🚀 ~ activeGameData:', activeGameData);
-
-            if (activeGameData.success && activeGameData.game) {
-               console.log(
-                  '✅ Active game found, navigating to game:',
-                  activeGameData.game.id
-               );
-               // Navigate to the active game screen
-               router.push(`/games/${activeGameData.game.id}`);
-               return;
-            } else {
-               console.log(
-                  'ℹ️ No active game found, proceeding to select players'
-               );
-            }
-         } else {
-            const errorData = await activeGameResponse.json();
-            console.error('❌ API Error:', errorData);
-         }
-
-         // No active game found, proceed to select players
-         console.log('🎮 Navigating to select players screen');
-         router.push(`/games/${league.id}/select-players`);
-      } catch (error) {
-         // If there's an error checking for active game, still proceed to select players
-         console.error('❌ Error checking for active game:', error);
-         router.push(`/games/${league.id}/select-players`);
+   const handleContinueGame = () => {
+      if (activeGame) {
+         router.push(`/games/${activeGame.id}`);
       }
    };
 
@@ -276,38 +277,95 @@ export default function LeagueStats() {
                   </View>
                </TouchableOpacity>
 
-               {/* Start New Game Card */}
-               <TouchableOpacity
-                  className="relative border-8 border-border bg-success rounded-2xl p-8 shadow-[12px_12px_0px_0px_rgba(0,0,0,1)] active:shadow-[6px_6px_0px_0px_rgba(0,0,0,1)] active:translate-x-3 active:translate-y-3 transition-all duration-100"
-                  onPress={handleStartGame}
-               >
-                  <View className="flex-row items-center">
-                     <View className="w-20 h-20 bg-textInverse border-8 border-border rounded-2xl items-center justify-center mr-6 transform -rotate-6 shadow-[6px_6px_0px_0px_rgba(0,0,0,1)]">
-                        <Ionicons
-                           name="play-circle"
-                           size={40}
-                           color={colors.success}
-                        />
-                     </View>
+               {/* Conditional Game Action Card */}
+               {isCheckingActiveGame ? (
+                  <View className="relative border-8 border-border bg-surface rounded-2xl p-8 shadow-[12px_12px_0px_0px_rgba(0,0,0,1)]">
+                     <View className="flex-row items-center">
+                        <View className="w-20 h-20 bg-surfaceElevated border-8 border-border rounded-2xl items-center justify-center mr-6 transform -rotate-6 shadow-[6px_6px_0px_0px_rgba(0,0,0,1)]">
+                           <Ionicons
+                              name="hourglass"
+                              size={40}
+                              color={colors.text}
+                           />
+                        </View>
 
-                     <View className="flex-1">
-                        <Text className="tracking-widest mb-3 font-black uppercase transform rotate-1">
-                           {t('startNewGame')}
-                        </Text>
-                        <Text className="leading-6 font-bold opacity-95">
-                           {t('startGameDescription')}
-                        </Text>
-                     </View>
-
-                     <View className="ml-4 transform -rotate-12">
-                        <Ionicons
-                           name="chevron-back"
-                           size={32}
-                           color={colors.textInverse}
-                        />
+                        <View className="flex-1">
+                           <Text className="tracking-widest mb-3 font-black uppercase transform rotate-1">
+                              {t('checkingGames')}
+                           </Text>
+                           <Text className="leading-6 font-bold opacity-95">
+                              {t('checkingGamesDescription')}
+                           </Text>
+                        </View>
                      </View>
                   </View>
-               </TouchableOpacity>
+               ) : activeGame ? (
+                  /* Continue Active Game Card */
+                  <TouchableOpacity
+                     className="relative border-8 border-border bg-warning rounded-2xl p-8 shadow-[12px_12px_0px_0px_rgba(0,0,0,1)] active:shadow-[6px_6px_0px_0px_rgba(0,0,0,1)] active:translate-x-3 active:translate-y-3 transition-all duration-100"
+                     onPress={handleContinueGame}
+                  >
+                     <View className="flex-row items-center">
+                        <View className="w-20 h-20 bg-textInverse border-8 border-border rounded-2xl items-center justify-center mr-6 transform -rotate-6 shadow-[6px_6px_0px_0px_rgba(0,0,0,1)]">
+                           <Ionicons
+                              name="play-circle"
+                              size={40}
+                              color={colors.warning}
+                           />
+                        </View>
+
+                        <View className="flex-1">
+                           <Text className="tracking-widest mb-3 font-black uppercase transform rotate-1">
+                              {t('continueGame')}
+                           </Text>
+                           <Text className="leading-6 font-bold opacity-95">
+                              {t('continueGameDescription')}
+                           </Text>
+                        </View>
+
+                        <View className="ml-4 transform -rotate-12">
+                           <Ionicons
+                              name="chevron-back"
+                              size={32}
+                              color={colors.textInverse}
+                           />
+                        </View>
+                     </View>
+                  </TouchableOpacity>
+               ) : (
+                  /* Start New Game Card */
+                  <TouchableOpacity
+                     className="relative border-8 border-border bg-success rounded-2xl p-8 shadow-[12px_12px_0px_0px_rgba(0,0,0,1)] active:shadow-[6px_6px_0px_0px_rgba(0,0,0,1)] active:translate-x-3 active:translate-y-3 transition-all duration-100"
+                     onPress={handleStartGame}
+                  >
+                     <View className="flex-row items-center">
+                        <View className="w-20 h-20 bg-textInverse border-8 border-border rounded-2xl items-center justify-center mr-6 transform -rotate-6 shadow-[6px_6px_0px_0px_rgba(0,0,0,1)]">
+                           <Ionicons
+                              name="play-circle"
+                              size={40}
+                              color={colors.success}
+                           />
+                        </View>
+
+                        <View className="flex-1">
+                           <Text className="tracking-widest mb-3 font-black uppercase transform rotate-1">
+                              {t('startNewGame')}
+                           </Text>
+                           <Text className="leading-6 font-bold opacity-95">
+                              {t('startGameDescription')}
+                           </Text>
+                        </View>
+
+                        <View className="ml-4 transform -rotate-12">
+                           <Ionicons
+                              name="chevron-back"
+                              size={32}
+                              color={colors.textInverse}
+                           />
+                        </View>
+                     </View>
+                  </TouchableOpacity>
+               )}
             </View>
          </ScrollView>
       </View>
