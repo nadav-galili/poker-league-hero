@@ -29,6 +29,7 @@ export function usePlayerStat(
             statType,
             year
          );
+         console.log('🚀 ~ usePlayerStat ~ response:', response.data);
          setData(response.data);
       } catch (err) {
          console.error(`Error fetching ${statType} stat:`, err);

@@ -1,7 +1,7 @@
 import { colors, getTheme } from '@/colors';
 import { Text } from '@/components/Text';
-import { TopPlayer } from '@/utils/leagueStatsHelpers';
 import { formatCurrency } from '@/utils/leagueStatsFormatters';
+import { TopPlayer } from '@/utils/leagueStatsHelpers';
 import { Ionicons } from '@expo/vector-icons';
 import React from 'react';
 import { StyleSheet, View } from 'react-native';
@@ -13,6 +13,10 @@ interface PlayerCardProps {
 
 export default function PlayerCard({ item, t }: PlayerCardProps) {
    const theme = getTheme('light');
+
+   if (!item || !item.player) {
+      return null;
+   }
 
    return (
       <View

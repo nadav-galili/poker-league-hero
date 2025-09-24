@@ -3,7 +3,7 @@ export interface PlayerStat {
    userId: number;
    fullName: string;
    profileImageUrl: string | null;
-   value: number;
+   value: number | string;
    additionalData?: Record<string, any>;
 }
 
@@ -27,7 +27,7 @@ export interface TopProfitPlayer {
    userId: number;
    fullName: string;
    profileImageUrl: string | null;
-   totalProfit: number;
+   totalProfit: number | string;
    gamesPlayed: number;
    year: number;
 }
@@ -51,14 +51,20 @@ export class LeagueStatsService {
       statType: StatType,
       year?: number
    ): Promise<StatResponse> {
+      console.log('🚀 ~ getPlayerStat called with:', {
+         leagueId,
+         statType,
+         year,
+      });
       try {
-         const params = new URLSearchParams({ type: statType });
+         const params = new URLSearchParams([['type', statType]]);
+
          if (year) params.append('year', year.toString());
 
-         const response = await this.fetchWithAuth(
-            `/api/leagues/${leagueId}/stats?${params}`,
-            {}
-         );
+         const url = `/api/leagues/${leagueId}/stats?${params.toString()}`;
+         console.log('🚀 ~ Calling API:', url);
+
+         const response = await this.fetchWithAuth(url, {});
 
          if (!response.ok) {
             throw new Error(`HTTP error! status: ${response.status}`);
@@ -84,6 +90,8 @@ export class LeagueStatsService {
             'top-profit-player',
             year
          );
+
+         console.log('🚀 ~ getTopProfitPlayer response:', response);
 
          // Transform to legacy format for backward compatibility
          if (response.data) {

@@ -106,7 +106,7 @@ const PlayerCard: React.FC<PlayerCardProps> = ({
                   className="font-bold"
                >
                   {t('currency')}
-                  {player.currentProfit.toFixed(2)}
+                  {(player.currentProfit || 0).toFixed(2)}
                </Text>
             </View>
          </View>

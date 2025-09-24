@@ -18,6 +18,7 @@ export default function TopProfitPlayerCard({
 }: TopProfitPlayerCardProps) {
    const theme = getTheme('light');
    const { data, isLoading, error } = useTopProfitPlayer(leagueId);
+   console.log('🚀 ~ TopProfitPlayerCard ~ data:', data);
 
    if (isLoading) {
       return <LoadingState />;

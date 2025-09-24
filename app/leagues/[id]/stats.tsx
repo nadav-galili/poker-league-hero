@@ -5,7 +5,7 @@ import { BASE_URL } from '@/constants';
 import { useAuth } from '@/context/auth';
 import { useLocalization } from '@/context/localization';
 
-import { addBreadcrumb, captureException } from '@/utils/sentry';
+import { captureException } from '@/utils/sentry';
 import { Ionicons } from '@expo/vector-icons';
 
 import { router, useLocalSearchParams } from 'expo-router';
@@ -50,12 +50,6 @@ export default function LeagueStats() {
 
          const data = await response.json();
          setLeague(data.league);
-
-         addBreadcrumb('League details loaded', 'data', {
-            screen: 'LeagueStats',
-            leagueId: id,
-            leagueName: data.league?.name,
-         });
       } catch (err) {
          const errorMessage =
             err instanceof Error

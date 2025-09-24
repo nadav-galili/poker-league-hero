@@ -34,22 +34,24 @@ export const createStatCards = (
    },
    {
       title: t('totalProfit'),
-      value: formatCurrency(stats.totalProfit),
+      value: formatCurrency(stats.totalProfit || 0),
       icon: 'trending-up',
-      color: stats.totalProfit >= 0 ? colors.success : colors.error,
+      color: (stats.totalProfit || 0) >= 0 ? colors.success : colors.error,
       subtitle:
-         stats.totalProfit >= 0 ? t('positiveProfit') : t('negativeProfit'),
+         (stats.totalProfit || 0) >= 0
+            ? t('positiveProfit')
+            : t('negativeProfit'),
    },
    {
       title: t('totalBuyIns'),
-      value: formatCurrency(stats.totalBuyIns),
+      value: formatCurrency(stats.totalBuyIns || 0),
       icon: 'arrow-down-circle',
       color: colors.secondary,
       subtitle: t('totalMoneyIn'),
    },
    {
       title: t('totalBuyOuts'),
-      value: formatCurrency(stats.totalBuyOuts),
+      value: formatCurrency(stats.totalBuyOuts || 0),
       icon: 'arrow-up-circle',
       color: colors.accent,
       subtitle: t('totalMoneyOut'),
@@ -73,17 +75,27 @@ export const createStatCards = (
 export const createTopPlayers = (
    stats: LeagueStats,
    t: (key: string) => string
-): TopPlayer[] => [
-   {
-      title: t('mostProfitablePlayer'),
-      player: stats.mostProfitablePlayer,
-      icon: 'trophy',
-      color: colors.success,
-   },
-   {
-      title: t('mostActivePlayer'),
-      player: stats.mostActivePlayer,
-      icon: 'star',
-      color: colors.primary,
-   },
-];
+): TopPlayer[] => {
+   const topPlayers: TopPlayer[] = [];
+
+   // Only add players if they exist
+   if (stats.mostProfitablePlayer) {
+      topPlayers.push({
+         title: t('mostProfitablePlayer'),
+         player: stats.mostProfitablePlayer,
+         icon: 'trophy',
+         color: colors.success,
+      });
+   }
+
+   if (stats.mostActivePlayer) {
+      topPlayers.push({
+         title: t('mostActivePlayer'),
+         player: stats.mostActivePlayer,
+         icon: 'star',
+         color: colors.primary,
+      });
+   }
+
+   return topPlayers;
+};

@@ -5,7 +5,8 @@ import { StatType } from '@/services/leagueStatsService';
 import { formatCurrency } from '@/utils/leagueStatsFormatters';
 import { Ionicons } from '@expo/vector-icons';
 import React from 'react';
-import { ActivityIndicator, Image, StyleSheet, View } from 'react-native';
+import { Image, StyleSheet, View } from 'react-native';
+import { LoadingState } from '../LoadingState';
 
 interface PlayerStatCardProps {
    leagueId: string;
@@ -20,31 +21,48 @@ const STAT_CONFIGS = {
       title: 'topProfitPlayer',
       icon: 'trophy',
       color: colors.success,
-      formatValue: (value: number) => formatCurrency(value),
+      formatValue: (value: number | string | undefined | null) =>
+         formatCurrency(value),
    },
    'most-active-player': {
       title: 'mostActivePlayer',
       icon: 'star',
       color: colors.primary,
-      formatValue: (value: number) => value.toString(),
+      formatValue: (value: number | string | undefined | null) => {
+         if (value === null || value === undefined) {
+            return 'N/A';
+         }
+         return value.toString();
+      },
    },
    'highest-single-game-profit': {
       title: 'highestSingleGameProfit',
       icon: 'trending-up',
       color: colors.accent,
-      formatValue: (value: number) => formatCurrency(value),
+      formatValue: (value: number | string | undefined | null) =>
+         formatCurrency(value),
    },
    'most-consistent-player': {
       title: 'mostConsistentPlayer',
       icon: 'checkmark-circle',
       color: colors.info,
-      formatValue: (value: number) => value.toFixed(2),
+      formatValue: (value: number | string | undefined | null) => {
+         if (value === null || value === undefined) {
+            return 'N/A';
+         }
+         const numValue = typeof value === 'string' ? parseFloat(value) : value;
+         if (isNaN(numValue)) {
+            return 'N/A';
+         }
+         return numValue.toFixed(2);
+      },
    },
    'biggest-loser': {
       title: 'biggestLoser',
       icon: 'sad',
       color: colors.error,
-      formatValue: (value: number) => formatCurrency(value),
+      formatValue: (value: number | string | undefined | null) =>
+         formatCurrency(value),
    },
 } as const;
 
@@ -59,22 +77,7 @@ export default function PlayerStatCard({
    const config = STAT_CONFIGS[statType];
 
    if (isLoading) {
-      return (
-         <View
-            style={[styles.card, { backgroundColor: theme.surfaceElevated }]}
-         >
-            <View style={styles.loadingContainer}>
-               <ActivityIndicator size="large" color={colors.primary} />
-               <Text
-                  variant="captionSmall"
-                  color={theme.textMuted}
-                  style={styles.loadingText}
-               >
-                  {t('loadingPlayerStat')}
-               </Text>
-            </View>
-         </View>
-      );
+      return <LoadingState />;
    }
 
    if (error || !data) {

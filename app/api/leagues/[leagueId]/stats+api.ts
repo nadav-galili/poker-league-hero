@@ -1,5 +1,14 @@
 import { withAuth } from '@/utils/middleware';
-
+import dayjs from 'dayjs';
+import { and, avg, desc, eq, gte, lte, max, sql, sum } from 'drizzle-orm';
+import {
+   cashIns,
+   gamePlayers,
+   games,
+   getDb,
+   leagueMembers,
+   users,
+} from '../../../../db';
 // Types for different stat calculations
 interface PlayerStat {
    userId: number;
@@ -21,10 +30,16 @@ type StatType =
 
 export const GET = withAuth(async (request: Request, user) => {
    const url = new URL(request.url);
-   console.log('aaa🚀 ~ url:', url);
    const leagueId = url.pathname.split('/')[3]; // Extract leagueId from path
    const statType = url.searchParams.get('type') as StatType;
    const year = url.searchParams.get('year');
+
+   console.log('🚀 ~ API called with:', {
+      leagueId,
+      statType,
+      year,
+      url: url.pathname,
+   });
 
    try {
       if (!user.userId) {
@@ -41,27 +56,16 @@ export const GET = withAuth(async (request: Request, user) => {
          );
       }
 
-      if (!statType) {
-         return Response.json(
-            {
-               error: 'Stat type is required. Available types: top-profit-player, most-active-player, highest-single-game-profit, most-consistent-player, biggest-loser',
-            },
-            { status: 400 }
-         );
-      }
-
       // Get year boundaries (default to current year)
       const targetYear = year ? parseInt(year) : new Date().getFullYear();
+
+      // If no statType is provided, return general league stats
+      if (!statType) {
+         return getGeneralLeagueStats(leagueId, targetYear);
+      }
       const yearStart = new Date(targetYear, 0, 1); // January 1st
       const yearEnd = new Date(targetYear, 11, 31, 23, 59, 59); // December 31st
 
-      // Import database modules dynamically
-      const { getDb, gamePlayers, games, leagueMembers, users } = await import(
-         '../../../../db'
-      );
-      const { and, desc, eq, gte, lte, sql, sum, avg, max } = await import(
-         'drizzle-orm'
-      );
       const db = getDb();
 
       // First check if there are any completed games in this league for the target year
@@ -162,28 +166,9 @@ async function calculateStat(
       eq(leagueMembers.isActive, true)
    );
 
-   const baseQuery = db
-      .select({
-         userId: users.id,
-         fullName: users.fullName,
-         profileImageUrl: users.profileImageUrl,
-      })
-      .from(gamePlayers)
-      .innerJoin(games, eq(gamePlayers.gameId, games.id))
-      .innerJoin(users, eq(gamePlayers.userId, users.id))
-      .innerJoin(
-         leagueMembers,
-         and(
-            eq(leagueMembers.userId, users.id),
-            eq(leagueMembers.leagueId, leagueId)
-         )
-      )
-      .where(baseWhere)
-      .groupBy(users.id, users.fullName, users.profileImageUrl);
-
    switch (statType) {
       case 'top-profit-player': {
-         const result = await baseQuery
+         const result = await db
             .select({
                userId: users.id,
                fullName: users.fullName,
@@ -194,6 +179,18 @@ async function calculateStat(
                      'games_played'
                   ),
             })
+            .from(gamePlayers)
+            .innerJoin(games, eq(gamePlayers.gameId, games.id))
+            .innerJoin(users, eq(gamePlayers.userId, users.id))
+            .innerJoin(
+               leagueMembers,
+               and(
+                  eq(leagueMembers.userId, users.id),
+                  eq(leagueMembers.leagueId, leagueId)
+               )
+            )
+            .where(baseWhere)
+            .groupBy(users.id, users.fullName, users.profileImageUrl)
             .having(sql`sum(${gamePlayers.profit}) IS NOT NULL`)
             .orderBy(desc(sum(gamePlayers.profit)))
             .limit(1);
@@ -213,7 +210,7 @@ async function calculateStat(
       }
 
       case 'most-active-player': {
-         const result = await baseQuery
+         const result = await db
             .select({
                userId: users.id,
                fullName: users.fullName,
@@ -223,6 +220,18 @@ async function calculateStat(
                ),
                totalProfit: sum(gamePlayers.profit).as('total_profit'),
             })
+            .from(gamePlayers)
+            .innerJoin(games, eq(gamePlayers.gameId, games.id))
+            .innerJoin(users, eq(gamePlayers.userId, users.id))
+            .innerJoin(
+               leagueMembers,
+               and(
+                  eq(leagueMembers.userId, users.id),
+                  eq(leagueMembers.leagueId, leagueId)
+               )
+            )
+            .where(baseWhere)
+            .groupBy(users.id, users.fullName, users.profileImageUrl)
             .orderBy(desc(sql<number>`count(distinct ${gamePlayers.gameId})`))
             .limit(1);
 
@@ -330,7 +339,7 @@ async function calculateStat(
       }
 
       case 'biggest-loser': {
-         const result = await baseQuery
+         const result = await db
             .select({
                userId: users.id,
                fullName: users.fullName,
@@ -362,5 +371,142 @@ async function calculateStat(
 
       default:
          throw new Error(`Unsupported stat type: ${statType}`);
+   }
+}
+
+// Function to get general league statistics (when no statType is provided)
+async function getGeneralLeagueStats(leagueId: string, year: number) {
+   const db = getDb();
+
+   // Get year boundaries
+   const yearStart = dayjs().year(year).startOf('year').toDate(); // January 1st
+   const yearEnd = dayjs().year(year).endOf('year').toDate(); // December 31st
+
+   try {
+      // Get total games for the year
+      const totalGamesResult = await db
+         .select({ count: sql<number>`count(*)` })
+         .from(games)
+         .where(
+            and(
+               eq(games.leagueId, parseInt(leagueId)),
+               gte(games.startedAt, yearStart),
+               lte(games.startedAt, yearEnd)
+            )
+         );
+      console.log(
+         '🚀 ~ getGeneralLeagueStats ~ totalGamesResult:',
+         totalGamesResult
+      );
+
+      // Get active games
+      const activeGamesResult = await db
+         .select({ count: sql<number>`count(*)` })
+         .from(games)
+         .where(
+            and(
+               eq(games.leagueId, parseInt(leagueId)),
+               eq(games.status, 'active'),
+               gte(games.startedAt, yearStart),
+               lte(games.startedAt, yearEnd)
+            )
+         );
+
+      // Get completed games
+      const completedGamesResult = await db
+         .select({ count: sql<number>`count(*)` })
+         .from(games)
+         .where(
+            and(
+               eq(games.leagueId, parseInt(leagueId)),
+               eq(games.status, 'completed'),
+               gte(games.startedAt, yearStart),
+               lte(games.startedAt, yearEnd)
+            )
+         );
+
+      // Get total players in the league
+      const totalPlayersResult = await db
+         .select({ count: sql<number>`count(*)` })
+         .from(leagueMembers)
+         .where(
+            and(
+               eq(leagueMembers.leagueId, parseInt(leagueId)),
+               eq(leagueMembers.isActive, true)
+            )
+         );
+
+      // Get total profit/loss from completed games
+      const profitResult = await db
+         .select({
+            totalBuyIns: sum(cashIns.amount).as('total_buy_ins'),
+            totalBuyOuts:
+               sql<number>`sum(case when ${cashIns.type} = 'buy_out' then ${cashIns.amount} else 0 end)`.as(
+                  'total_buy_outs'
+               ),
+         })
+         .from(cashIns)
+         .innerJoin(gamePlayers, eq(cashIns.gamePlayerId, gamePlayers.id))
+         .innerJoin(games, eq(gamePlayers.gameId, games.id))
+         .where(
+            and(
+               eq(games.leagueId, parseInt(leagueId)),
+               eq(games.status, 'completed'),
+               gte(games.endedAt, yearStart),
+               lte(games.endedAt, yearEnd)
+            )
+         );
+
+      // Calculate average game duration for completed games
+      let averageGameDuration = 0;
+      if (completedGamesResult[0]?.count > 0) {
+         const durationResult = await db
+            .select({
+               avgDuration:
+                  sql<number>`avg(extract(epoch from (${games.endedAt} - ${games.startedAt})) / 60)`.as(
+                     'avg_duration_minutes'
+                  ),
+            })
+            .from(games)
+            .where(
+               and(
+                  eq(games.leagueId, parseInt(leagueId)),
+                  eq(games.status, 'completed'),
+                  gte(games.startedAt, yearStart),
+                  lte(games.startedAt, yearEnd)
+               )
+            );
+
+         averageGameDuration = Math.round(durationResult[0]?.avgDuration || 0);
+      }
+
+      const stats = {
+         totalGames: totalGamesResult[0]?.count || 0,
+         activeGames: activeGamesResult[0]?.count || 0,
+         completedGames: completedGamesResult[0]?.count || 0,
+         totalPlayers: totalPlayersResult[0]?.count || 0,
+         totalProfit:
+            (profitResult[0]?.totalBuyOuts || 0) -
+            (profitResult[0]?.totalBuyIns || 0),
+         totalBuyIns: profitResult[0]?.totalBuyIns || 0,
+         totalBuyOuts: profitResult[0]?.totalBuyOuts || 0,
+         averageGameDuration: averageGameDuration,
+      };
+
+      console.log('🚀 ~ getGeneralLeagueStats ~ stats:', stats);
+
+      return Response.json({
+         stats: stats,
+         year: year,
+      });
+   } catch (error) {
+      console.error('Error fetching general league stats:', error);
+      return Response.json(
+         {
+            error: 'Failed to fetch league statistics',
+            details: error instanceof Error ? error.message : 'Unknown error',
+         },
+         { status: 500 }
+      );
    }
 }

@@ -26,6 +26,7 @@
       "@sentry/react-native": "^6.19.0",
       "aws-sdk": "^2.1692.0",
       "bun": "^1.2.19",
+      "dayjs": "^1.11.18",
       "drizzle-orm": "^0.44.4",
       "expo": "53.0.20",
       "expo-auth-session": "~6.2.1",
