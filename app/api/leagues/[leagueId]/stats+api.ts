@@ -21,6 +21,7 @@ type StatType =
 
 export const GET = withAuth(async (request: Request, user) => {
    const url = new URL(request.url);
+   console.log('aaa🚀 ~ url:', url);
    const leagueId = url.pathname.split('/')[3]; // Extract leagueId from path
    const statType = url.searchParams.get('type') as StatType;
    const year = url.searchParams.get('year');

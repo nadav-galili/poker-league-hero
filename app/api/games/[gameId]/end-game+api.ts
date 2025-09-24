@@ -74,7 +74,7 @@ export const POST = withAuth(async (request: Request, user) => {
          );
       }
 
-      // Update game status to 'finished' and set endedAt timestamp
+      // Update game status to 'completed' and set endedAt timestamp
       const updatedGame = await db
          .update(games)
          .set({

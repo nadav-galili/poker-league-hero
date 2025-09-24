@@ -74,12 +74,7 @@ export interface GameStats {
    averageChipStack: number;
 }
 
-export type GameStatus =
-   | 'setup'
-   | 'active'
-   | 'paused'
-   | 'completed'
-   | 'cancelled';
+export type GameStatus = 'active' | 'completed';
 export type GameType = 'tournament' | 'cash' | 'sit-n-go';
 export type PlayerAction =
    | 'fold'

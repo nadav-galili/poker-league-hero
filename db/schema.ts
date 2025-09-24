@@ -3,11 +3,15 @@ import {
    boolean,
    decimal,
    integer,
+   pgEnum,
    pgTable,
    text,
    timestamp,
    varchar,
 } from 'drizzle-orm/pg-core';
+
+// Enums
+export const gameStatusEnum = pgEnum('game_status', ['active', 'completed']);
 
 export const users = pgTable('users', {
    id: integer('id').generatedAlwaysAsIdentity().primaryKey(),
@@ -59,7 +63,7 @@ export const games = pgTable('games', {
       .notNull()
       .references(() => users.id, { onDelete: 'cascade' }),
    buyIn: decimal('buy_in', { precision: 10, scale: 2 }).notNull(), // Buy-in amount
-   status: varchar('status', { length: 20 }).notNull().default('active'), // "active", "completed", "cancelled"
+   status: gameStatusEnum('status').notNull().default('active'), // "active", "completed"
    startedAt: timestamp('started_at').defaultNow().notNull(),
    endedAt: timestamp('ended_at'),
    createdAt: timestamp('created_at').defaultNow().notNull(),
