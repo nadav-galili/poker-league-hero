@@ -1,6 +1,4 @@
 import { withAuth } from '@/utils/middleware';
-const { getDb, games, gamePlayers } = await import('../../../../db');
-const { eq, and } = await import('drizzle-orm');
 
 export const POST = withAuth(async (request: Request, user) => {
    try {
@@ -22,7 +20,8 @@ export const POST = withAuth(async (request: Request, user) => {
       }
 
       // Import database modules
-
+      const { getDb, games, gamePlayers } = await import('../../../../db');
+      const { eq, and } = await import('drizzle-orm');
       const db = getDb();
 
       // Verify game exists and is active
@@ -33,7 +32,7 @@ export const POST = withAuth(async (request: Request, user) => {
             createdBy: games.createdBy,
          })
          .from(games)
-         .where(eq(games.id, gameId))
+         .where(eq(games.id, parseInt(gameId)))
          .limit(1);
 
       if (gameResult.length === 0) {
@@ -59,7 +58,10 @@ export const POST = withAuth(async (request: Request, user) => {
          .select({ id: gamePlayers.id, userId: gamePlayers.userId })
          .from(gamePlayers)
          .where(
-            and(eq(gamePlayers.gameId, gameId), eq(gamePlayers.isActive, true))
+            and(
+               eq(gamePlayers.gameId, parseInt(gameId)),
+               eq(gamePlayers.isActive, true)
+            )
          );
 
       if (activePlayers.length > 0) {
@@ -79,7 +81,7 @@ export const POST = withAuth(async (request: Request, user) => {
             status: 'completed',
             endedAt: new Date(),
          })
-         .where(eq(games.id, gameId))
+         .where(eq(games.id, parseInt(gameId)))
          .returning();
 
       return Response.json({

@@ -235,7 +235,11 @@ export default function GameScreen() {
             text2: t('gameEndedSuccessfully'),
          });
 
-         loadGameData();
+         await loadGameData();
+         router.replace({
+            pathname: '/leagues/[id]/stats',
+            params: { id: game.leagueId },
+         });
       } catch (error) {
          const errorMessage =
             error instanceof Error ? error.message : 'Failed to end game';
