@@ -360,6 +360,34 @@ export default function GameScreen() {
          {/* Game Summary */}
          <GameSummary game={game} />
 
+         {/* Add Player Button */}
+         <View className="px-4 pb-2">
+            <TouchableOpacity
+               className="flex-row items-center justify-center px-4 py-3 rounded-2xl border-3 border-black shadow-lg"
+               style={{ backgroundColor: colors.primary }}
+               onPress={openAddPlayerModal}
+               disabled={isProcessing}
+            >
+               <Ionicons
+                  name="person-add"
+                  size={20}
+                  color={colors.textInverse}
+               />
+               <Text className="ml-2 font-bold tracking-wide text-white">
+                  {t('addPlayer')}
+               </Text>
+            </TouchableOpacity>
+         </View>
+
+         {/* Add Player Modal */}
+         <AddPlayerModal
+            visible={showAddPlayerModal}
+            availableMembers={availableMembers}
+            isProcessing={isProcessing}
+            onClose={() => setShowAddPlayerModal(false)}
+            onAddPlayer={handleAddPlayer}
+         />
+
          {/* Players List */}
          <FlatList
             data={game.players}
@@ -372,23 +400,6 @@ export default function GameScreen() {
             ItemSeparatorComponent={() => <View className="h-3" />}
          />
 
-         {/* Add Player Button */}
-         <TouchableOpacity
-            className="absolute bottom-5 right-5 flex-row items-center px-4 py-3 rounded-3xl border-3 border-black shadow-lg elevation-8"
-            style={{ backgroundColor: colors.primary }}
-            onPress={openAddPlayerModal}
-            disabled={isProcessing}
-         >
-            <Ionicons name="person-add" size={24} color={colors.textInverse} />
-            <Text
-               variant="labelSmall"
-               color={colors.textInverse}
-               className="ml-2 font-bold tracking-wide"
-            >
-               {t('addPlayer')}
-            </Text>
-         </TouchableOpacity>
-
          {/* Cash Out Modal */}
          <CashOutModal
             visible={showCashOutModal}
@@ -399,15 +410,6 @@ export default function GameScreen() {
             onClose={() => setShowCashOutModal(false)}
             onCashOutAmountChange={handleCashOutAmountChange}
             onConfirm={processCashOut}
-         />
-
-         {/* Add Player Modal */}
-         <AddPlayerModal
-            visible={showAddPlayerModal}
-            availableMembers={availableMembers}
-            isProcessing={isProcessing}
-            onClose={() => setShowAddPlayerModal(false)}
-            onAddPlayer={handleAddPlayer}
          />
       </View>
    );
