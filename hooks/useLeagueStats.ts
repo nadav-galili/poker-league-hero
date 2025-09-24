@@ -9,7 +9,7 @@ export interface LeagueStats {
    totalBuyIns: number;
    totalBuyOuts: number;
    activeGames: number;
-   finishedGames: number;
+   completedGames: number;
    totalPlayers: number;
    averageGameDuration: number;
    mostProfitablePlayer: {

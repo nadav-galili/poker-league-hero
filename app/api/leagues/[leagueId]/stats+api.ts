@@ -3,6 +3,7 @@ import dayjs from 'dayjs';
 import { and, avg, desc, eq, gte, lte, max, sql, sum } from 'drizzle-orm';
 import {
    cashIns,
+   Game,
    gamePlayers,
    games,
    getDb,
@@ -18,8 +19,6 @@ interface PlayerStat {
    additionalData?: Record<string, any>;
 }
 
-// StatResult interface removed - not used in this implementation
-
 // Available stat types
 type StatType =
    | 'top-profit-player'
@@ -33,13 +32,6 @@ export const GET = withAuth(async (request: Request, user) => {
    const leagueId = url.pathname.split('/')[3]; // Extract leagueId from path
    const statType = url.searchParams.get('type') as StatType;
    const year = url.searchParams.get('year');
-
-   console.log('🚀 ~ API called with:', {
-      leagueId,
-      statType,
-      year,
-      url: url.pathname,
-   });
 
    try {
       if (!user.userId) {
@@ -57,14 +49,14 @@ export const GET = withAuth(async (request: Request, user) => {
       }
 
       // Get year boundaries (default to current year)
-      const targetYear = year ? parseInt(year) : new Date().getFullYear();
+      const targetYear = year ? parseInt(year) : dayjs().year();
 
       // If no statType is provided, return general league stats
       if (!statType) {
          return getGeneralLeagueStats(leagueId, targetYear);
       }
-      const yearStart = new Date(targetYear, 0, 1); // January 1st
-      const yearEnd = new Date(targetYear, 11, 31, 23, 59, 59); // December 31st
+      const yearStart = dayjs().year(targetYear).startOf('year').toDate(); // January 1st
+      const yearEnd = dayjs().year(targetYear).endOf('year').toDate(); // December 31st
 
       const db = getDb();
 
@@ -460,24 +452,52 @@ async function getGeneralLeagueStats(leagueId: string, year: number) {
       // Calculate average game duration for completed games
       let averageGameDuration = 0;
       if (completedGamesResult[0]?.count > 0) {
-         const durationResult = await db
+         // Get the completed games with their start and end times
+         const completedGames = await db
             .select({
-               avgDuration:
-                  sql<number>`avg(extract(epoch from (${games.endedAt} - ${games.startedAt})) / 60)`.as(
-                     'avg_duration_minutes'
-                  ),
+               id: games.id,
+               startedAt: games.startedAt,
+               endedAt: games.endedAt,
             })
             .from(games)
             .where(
                and(
                   eq(games.leagueId, parseInt(leagueId)),
                   eq(games.status, 'completed'),
-                  gte(games.startedAt, yearStart),
-                  lte(games.startedAt, yearEnd)
+                  gte(games.endedAt, yearStart),
+                  lte(games.endedAt, yearEnd)
                )
             );
 
-         averageGameDuration = Math.round(durationResult[0]?.avgDuration || 0);
+         console.log(
+            '🚀 ~ Completed games found:',
+            completedGames.length,
+            completedGames
+         );
+
+         if (completedGames.length > 0) {
+            // Calculate duration in JavaScript for more control
+            const durations = completedGames
+               .filter((game: Game) => game.endedAt !== null) // Only games with end time
+               .map((game: Game) => {
+                  const startTime = new Date(game.startedAt).getTime();
+                  const endTime = new Date(game.endedAt!).getTime();
+                  const durationMs = endTime - startTime;
+                  const durationMinutes = Math.round(durationMs / (1000 * 60));
+
+                  // Ensure we don't have negative durations due to data issues
+                  return Math.max(0, durationMinutes);
+               });
+
+            if (durations.length > 0) {
+               averageGameDuration = Math.round(
+                  durations.reduce(
+                     (sum: number, duration: number) => sum + duration,
+                     0
+                  ) / durations.length
+               );
+            }
+         }
       }
 
       const stats = {
@@ -492,8 +512,6 @@ async function getGeneralLeagueStats(leagueId: string, year: number) {
          totalBuyOuts: profitResult[0]?.totalBuyOuts || 0,
          averageGameDuration: averageGameDuration,
       };
-
-      console.log('🚀 ~ getGeneralLeagueStats ~ stats:', stats);
 
       return Response.json({
          stats: stats,

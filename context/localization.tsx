@@ -186,6 +186,17 @@ export interface Translations {
    biggestLoser: string;
    totalProfit: string;
    avgProfit: string;
+
+   // League Overview Card Subtitles
+   positiveProfit: string;
+   negativeProfit: string;
+   totalMoneyIn: string;
+   totalMoneyOut: string;
+   active: string;
+   finished: string;
+   uniquePlayers: string;
+   perGame: string;
+   avgGameDuration: string;
 }
 
 // English translations
@@ -362,6 +373,17 @@ const enTranslations: Translations = {
    biggestLoser: 'BIGGEST LOSER',
    totalProfit: 'Total Profit',
    avgProfit: 'Avg Profit',
+
+   // League Overview Card Subtitles
+   positiveProfit: 'Positive Return',
+   negativeProfit: 'Negative Return',
+   totalMoneyIn: 'Money In',
+   totalMoneyOut: 'Money Out',
+   active: 'active',
+   finished: 'finished',
+   uniquePlayers: 'Unique Players',
+   perGame: 'Per Game',
+   avgGameDuration: 'AVG GAME DURATION',
 };
 
 // Hebrew translations
@@ -536,6 +558,17 @@ const heTranslations: Translations = {
    biggestLoser: 'המפסיד הכי גדול',
    totalProfit: 'סך הרווח',
    avgProfit: 'ממוצע רווח',
+
+   // League Overview Card Subtitles
+   positiveProfit: 'תשואה חיובית',
+   negativeProfit: 'תשואה שלילית',
+   totalMoneyIn: 'כסף נכנס',
+   totalMoneyOut: 'כסף יוצא',
+   active: 'פעילים',
+   finished: 'הסתיימו',
+   uniquePlayers: 'שחקנים ייחודיים',
+   perGame: 'למשחק',
+   avgGameDuration: 'משך משחק ממוצע',
 };
 
 const translations = {

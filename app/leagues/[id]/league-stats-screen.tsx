@@ -120,11 +120,11 @@ export default function LeagueStatsScreen() {
             </View>
 
             {/* Main Stats Grid */}
-            <View style={styles.section}>
-               <RNText className="text-primary text-center mb-4 text-2xl font-bold uppercase tracking-widest">
-                  {t('league Overview')}
+            <View className="mb-6 items-center px-6">
+               <RNText className="text-primary text-center mb-6 text-2xl font-black uppercase tracking-[3px]">
+                  LEAGUE OVERVIEW
                </RNText>
-               <View style={styles.statsGrid}>
+               <View className="flex-row flex-wrap justify-center items-start w-full gap-4">
                   {statCards.map((card, index) => (
                      <StatCard key={index} card={card} />
                   ))}

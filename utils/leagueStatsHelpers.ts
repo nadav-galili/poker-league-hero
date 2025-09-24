@@ -30,7 +30,7 @@ export const createStatCards = (
       value: stats.totalGames.toString(),
       icon: 'game-controller',
       color: colors.primary,
-      subtitle: `${stats.activeGames} ${t('active')}, ${stats.finishedGames} ${t('finished')}`,
+      subtitle: `${stats.activeGames} ${t('active')}, ${stats.completedGames} ${t('finished')}`,
    },
    {
       title: t('totalProfit'),

@@ -1,41 +1,49 @@
-import { getTheme } from '@/colors';
+import { colors } from '@/colors';
 import { Text } from '@/components/Text';
 import { StatCard as StatCardType } from '@/utils/leagueStatsHelpers';
 import { Ionicons } from '@expo/vector-icons';
 import React from 'react';
-import { StyleSheet, View } from 'react-native';
+import { View } from 'react-native';
 
 interface StatCardProps {
    card: StatCardType;
 }
 
 export default function StatCard({ card }: StatCardProps) {
-   const theme = getTheme('light');
-
    return (
-      <View
-         style={[styles.statCard, { backgroundColor: theme.surfaceElevated }]}
-      >
-         <View style={styles.statCardContent}>
+      <View className="w-[45%] bg-white p-4 rounded-xl border-4 border-black shadow-[4px_4px_0px_0px_#000000] mb-4">
+         <View className="items-center">
+            {/* Icon with dynamic background color */}
             <View
-               style={[styles.statIcon, { backgroundColor: card.color + '20' }]}
+               className="w-14 h-14 rounded-lg items-center justify-center mb-3 border-2 border-black"
+               style={{ backgroundColor: card.color + '20' }}
             >
-               <Ionicons name={card.icon as any} size={24} color={card.color} />
+               <Ionicons name={card.icon as any} size={28} color={card.color} />
             </View>
-            <Text variant="h4" color={theme.text} style={styles.statValue}>
+
+            {/* Value - large and bold */}
+            <Text
+               variant="h3"
+               color={colors.text}
+               className="text-center font-black mb-1"
+            >
                {card.value}
             </Text>
+
+            {/* Title - uppercase and prominent */}
             <Text
-               variant="captionSmall"
-               color={theme.textSecondary}
-               style={styles.statTitle}
+               variant="labelSmall"
+               color={colors.textSecondary}
+               className="text-center mb-2 uppercase tracking-widest font-bold"
             >
                {card.title}
             </Text>
+
+            {/* Subtitle - smaller and muted */}
             <Text
                variant="captionSmall"
-               color={theme.textMuted}
-               style={styles.statSubtitle}
+               color={colors.textMuted}
+               className="text-center text-xs leading-tight"
             >
                {card.subtitle}
             </Text>
@@ -43,46 +51,3 @@ export default function StatCard({ card }: StatCardProps) {
       </View>
    );
 }
-
-const styles = StyleSheet.create({
-   statCard: {
-      width: '45%',
-      padding: 16,
-      borderRadius: 12,
-      borderWidth: 3,
-      borderColor: '#000000',
-      shadowColor: '#000000',
-      shadowOffset: { width: 4, height: 4 },
-      shadowOpacity: 1,
-      shadowRadius: 0,
-      elevation: 8,
-   },
-   statCardContent: {
-      alignItems: 'center',
-   },
-   statIcon: {
-      width: 48,
-      height: 48,
-      borderRadius: 8,
-      alignItems: 'center',
-      justifyContent: 'center',
-      marginBottom: 12,
-      borderWidth: 2,
-      borderColor: '#000000',
-   },
-   statValue: {
-      textAlign: 'center',
-      fontWeight: '700',
-      marginBottom: 4,
-   },
-   statTitle: {
-      textAlign: 'center',
-      marginBottom: 8,
-      textTransform: 'uppercase',
-      letterSpacing: 0.5,
-   },
-   statSubtitle: {
-      textAlign: 'center',
-      fontSize: 11,
-   },
-});
