@@ -104,13 +104,7 @@ const CashOutModal: React.FC<CashOutModalProps> = ({
                            {t('cashOutAmount')}
                         </Text>
                         <TextInput
-                           className="border-2 border-gray-400 rounded-lg px-3 py-4 text-lg font-semibold text-center mb-2"
-                           style={{
-                              color: theme.text,
-                              borderColor: errorMessage
-                                 ? theme.error
-                                 : theme.border,
-                           }}
+                           className="border-2 border-gray-400 rounded-lg px-3 py-8 text-md font-semibold text-center mb-2"
                            value={cashOutAmount}
                            onChangeText={onCashOutAmountChange}
                            placeholder="0.00"

@@ -153,7 +153,7 @@ export default function Account() {
             </View>
 
             {/* Account Actions */}
-            <View style={styles.actionsContainer}>
+            <View className="gap-4">
                <Text
                   variant="h4"
                   color={theme.text}
@@ -163,15 +163,7 @@ export default function Account() {
                </Text>
 
                <Pressable
-                  style={({ pressed }) => [
-                     styles.actionButton,
-                     styles.brutalistShadow,
-                     {
-                        backgroundColor: colors.warning,
-                        borderColor: theme.border,
-                     },
-                     pressed && styles.pressedButton,
-                  ]}
+                  className="rounded-xl border-3 border-primary shadow-shadow shadow-lg active:scale-95 bg-danger"
                   onPress={signOut}
                >
                   <View style={styles.actionContent}>
@@ -198,7 +190,7 @@ export default function Account() {
             </View>
 
             {/* User Details */}
-            <View style={styles.detailsContainer}>
+            {/* <View style={styles.detailsContainer}>
                <Text
                   variant="h4"
                   color={theme.text}
@@ -290,7 +282,7 @@ export default function Account() {
                      </View>
                   )}
                </View>
-            </View>
+            </View>*/}
          </ScrollView>
       </View>
    );

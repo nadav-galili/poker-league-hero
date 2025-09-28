@@ -1,8 +1,6 @@
 import { colors, getTheme } from '@/colors';
 import {
-   AdditionalStatsCard,
    LeagueHeader,
-   PlayerCard,
    PlayerStatCard,
    StatCard,
    TopProfitPlayerCard,
@@ -11,10 +9,7 @@ import { LoadingState } from '@/components/shared/LoadingState';
 import { Text } from '@/components/Text';
 import { useLocalization } from '@/context/localization';
 import { useLeagueStats } from '@/hooks/useLeagueStats';
-import {
-   createStatCards,
-   createTopPlayers,
-} from '@/services/leagueStatsHelpers';
+import { createStatCards } from '@/services/leagueStatsHelpers';
 import { Ionicons } from '@expo/vector-icons';
 import { router, useLocalSearchParams } from 'expo-router';
 import React from 'react';
@@ -92,7 +87,7 @@ export default function LeagueStatsScreen() {
    }
 
    const statCards = createStatCards(stats, t);
-   const topPlayers = createTopPlayers(stats, t);
+   //   const topPlayers = createTopPlayers(stats, t);
 
    return (
       <View style={[styles.container, { backgroundColor: theme.background }]}>
@@ -134,7 +129,7 @@ export default function LeagueStatsScreen() {
                </View>
             </View>
 
-            {/* Top Players */}
+            {/*
             <View style={styles.section}>
                <Text
                   variant="h3"
@@ -147,8 +142,9 @@ export default function LeagueStatsScreen() {
                   <PlayerCard key={index} item={item} t={t} />
                ))}
             </View>
+             Top Players */}
 
-            {/* Additional Stats */}
+            {/* 
             <View style={[styles.section, { marginBottom: 32 }]}>
                <Text
                   variant="h3"
@@ -159,6 +155,7 @@ export default function LeagueStatsScreen() {
                </Text>
                <AdditionalStatsCard league={league} t={t} />
             </View>
+            Additional Stats */}
          </ScrollView>
       </View>
    );
