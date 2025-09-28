@@ -1,6 +1,6 @@
 import { colors } from '@/colors';
-import ErrorBoundary from '@/components/ErrorBoundary';
-import LocalizedErrorFallback from '@/components/LocalizedErrorFallback';
+import ErrorBoundary from '@/components/shared/ErrorBoundary';
+import LocalizedErrorFallback from '@/components/shared/LocalizedErrorFallback';
 import { AuthProvider } from '@/context/auth';
 import { LocalizationProvider } from '@/context/localization';
 import { loadFonts } from '@/utils/fonts';

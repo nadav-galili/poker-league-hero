@@ -4,7 +4,7 @@
 
 import { colors } from '@/colors';
 import Button from '@/components/Button';
-import { LanguageSelector } from '@/components/LanguageSelector';
+import { LanguageSelector } from '@/components/shared/LanguageSelector';
 import { Text } from '@/components/Text';
 import { useLocalization } from '@/context/localization';
 import React from 'react';

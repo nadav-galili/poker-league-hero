@@ -137,7 +137,7 @@ export async function createLeague(data: {
    let imageUrl = data.image;
    if (imageUrl && imageUrl.startsWith('file://')) {
       // Upload to Cloudflare R2 first using server-side upload
-      const { uploadImageToR2Server } = await import('./serverUpload');
+      const { uploadImageToR2Server } = await import('../utils/serverUpload');
       const uploadedUrl = await uploadImageToR2Server(imageUrl);
       imageUrl = uploadedUrl;
    } else if (!imageUrl) {
@@ -294,7 +294,7 @@ export async function getLeagueDetails(leagueId: string): Promise<any> {
    const league = await db
       .select()
       .from(leagues)
-      .where(eq(leagues.id, leagueId))
+      .where(eq(leagues.id, parseInt(leagueId)))
       .limit(1);
 
    if (league.length === 0) {
@@ -315,7 +315,7 @@ export async function getLeagueDetails(leagueId: string): Promise<any> {
       .innerJoin(users, eq(leagueMembers.userId, users.id))
       .where(
          and(
-            eq(leagueMembers.leagueId, leagueId),
+            eq(leagueMembers.leagueId, parseInt(leagueId)),
             eq(leagueMembers.isActive, true)
          )
       );

@@ -1,4 +1,4 @@
-import { getUserLeagues } from '../../../utils/leagueUtils';
+import { getUserLeagues } from '../../../services/leagueUtils';
 import { withAuth } from '../../../utils/middleware';
 
 export const GET = withAuth(async (request: Request, user) => {

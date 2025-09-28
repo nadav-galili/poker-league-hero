@@ -1,6 +1,6 @@
 import { colors, getTheme } from '@/colors';
 import Button from '@/components/Button';
-import { LoadingState } from '@/components/LoadingState';
+import { LoadingState } from '@/components/shared/LoadingState';
 import { Text } from '@/components/Text';
 import { BASE_URL } from '@/constants';
 import { useAuth } from '@/context/auth';

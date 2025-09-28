@@ -3,7 +3,7 @@ import { Language, useLocalization } from '@/context/localization';
 import { Ionicons } from '@expo/vector-icons';
 import React, { useState } from 'react';
 import { Modal, Pressable, View } from 'react-native';
-import { Text } from './Text';
+import { Text } from '../Text';
 
 interface LanguageSelectorProps {
    size?: 'small' | 'medium' | 'large';

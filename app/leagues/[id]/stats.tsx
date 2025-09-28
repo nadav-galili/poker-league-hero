@@ -1,6 +1,6 @@
 import { colors } from '@/colors';
 import Button from '@/components/Button';
-import { LoadingState } from '@/components/LoadingState';
+import { LoadingState } from '@/components/shared/LoadingState';
 import { BASE_URL } from '@/constants';
 import { useAuth } from '@/context/auth';
 import { useLocalization } from '@/context/localization';

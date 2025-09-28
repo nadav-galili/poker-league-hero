@@ -6,8 +6,8 @@ import { addThemeToLeagues } from '@/constants/leagueThemes';
 import { useAuth } from '@/context/auth';
 import { useLocalization } from '@/context/localization';
 import { joinLeagueWithCode, shareLeague } from '@/services';
+import { fetchUserLeagues } from '@/services/leagueService';
 import { LeagueWithTheme } from '@/types/league';
-import { fetchUserLeagues } from '@/utils/leagueService';
 import {
    addBreadcrumb,
    captureException,

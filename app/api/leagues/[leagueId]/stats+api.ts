@@ -386,10 +386,6 @@ async function getGeneralLeagueStats(leagueId: string, year: number) {
                lte(games.startedAt, yearEnd)
             )
          );
-      console.log(
-         '🚀 ~ getGeneralLeagueStats ~ totalGamesResult:',
-         totalGamesResult
-      );
 
       // Get active games
       const activeGamesResult = await db
@@ -468,12 +464,6 @@ async function getGeneralLeagueStats(leagueId: string, year: number) {
                   lte(games.endedAt, yearEnd)
                )
             );
-
-         console.log(
-            '🚀 ~ Completed games found:',
-            completedGames.length,
-            completedGames
-         );
 
          if (completedGames.length > 0) {
             // Calculate duration in JavaScript for more control

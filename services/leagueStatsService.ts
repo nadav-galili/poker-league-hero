@@ -51,18 +51,12 @@ export class LeagueStatsService {
       statType: StatType,
       year?: number
    ): Promise<StatResponse> {
-      console.log('🚀 ~ getPlayerStat called with:', {
-         leagueId,
-         statType,
-         year,
-      });
       try {
          const params = new URLSearchParams([['type', statType]]);
 
          if (year) params.append('year', year.toString());
 
          const url = `/api/leagues/${leagueId}/stats?${params.toString()}`;
-         console.log('🚀 ~ Calling API:', url);
 
          const response = await this.fetchWithAuth(url, {});
 
@@ -90,8 +84,6 @@ export class LeagueStatsService {
             'top-profit-player',
             year
          );
-
-         console.log('🚀 ~ getTopProfitPlayer response:', response);
 
          // Transform to legacy format for backward compatibility
          if (response.data) {

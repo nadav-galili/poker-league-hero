@@ -1,11 +1,11 @@
 import { colors, getTheme } from '@/colors';
 import { Text } from '@/components/Text';
 import { useTopProfitPlayer } from '@/hooks/useTopProfitPlayer';
-import { formatCurrency } from '@/utils/leagueStatsFormatters';
+import { formatCurrency } from '@/services/leagueStatsFormatters';
 import { Ionicons } from '@expo/vector-icons';
 import React from 'react';
 import { Image, StyleSheet, View } from 'react-native';
-import { LoadingState } from '../LoadingState';
+import { LoadingState } from '../../shared/LoadingState';
 
 interface TopProfitPlayerCardProps {
    leagueId: string;
@@ -18,7 +18,6 @@ export default function TopProfitPlayerCard({
 }: TopProfitPlayerCardProps) {
    const theme = getTheme('light');
    const { data, isLoading, error } = useTopProfitPlayer(leagueId);
-   console.log('🚀 ~ TopProfitPlayerCard ~ data:', data);
 
    if (isLoading) {
       return <LoadingState />;

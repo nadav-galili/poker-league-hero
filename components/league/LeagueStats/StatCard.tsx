@@ -1,6 +1,6 @@
 import { colors } from '@/colors';
 import { Text } from '@/components/Text';
-import { StatCard as StatCardType } from '@/utils/leagueStatsHelpers';
+import { StatCard as StatCardType } from '@/services/leagueStatsHelpers';
 import { Ionicons } from '@expo/vector-icons';
 import React from 'react';
 import { View } from 'react-native';

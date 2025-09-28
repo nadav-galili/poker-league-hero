@@ -5,9 +5,9 @@
 
 import { colors, getTheme } from '@/colors';
 import Button from '@/components/Button';
-import { LoadingState } from '@/components/LoadingState';
-import { Text } from '@/components/Text';
 import { GameSetupModal } from '@/components/modals';
+import { LoadingState } from '@/components/shared/LoadingState';
+import { Text } from '@/components/Text';
 import { PlayerGrid } from '@/components/ui';
 import { useLocalization } from '@/context/localization';
 import { useGameCreation, useLeagueMembers, usePlayerSelection } from '@/hooks';

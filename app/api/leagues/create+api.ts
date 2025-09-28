@@ -1,4 +1,4 @@
-import { createLeague } from '../../../utils/leagueUtils';
+import { createLeague } from '../../../services/leagueUtils';
 
 export async function POST(request: Request) {
    try {

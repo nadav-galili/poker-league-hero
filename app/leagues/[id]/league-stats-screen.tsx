@@ -6,12 +6,15 @@ import {
    PlayerStatCard,
    StatCard,
    TopProfitPlayerCard,
-} from '@/components/LeagueStats';
-import { LoadingState } from '@/components/LoadingState';
+} from '@/components/league/LeagueStats';
+import { LoadingState } from '@/components/shared/LoadingState';
 import { Text } from '@/components/Text';
 import { useLocalization } from '@/context/localization';
 import { useLeagueStats } from '@/hooks/useLeagueStats';
-import { createStatCards, createTopPlayers } from '@/utils/leagueStatsHelpers';
+import {
+   createStatCards,
+   createTopPlayers,
+} from '@/services/leagueStatsHelpers';
 import { Ionicons } from '@expo/vector-icons';
 import { router, useLocalSearchParams } from 'expo-router';
 import React from 'react';

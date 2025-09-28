@@ -1,12 +1,12 @@
 import { colors, getTheme } from '@/colors';
 import { Text } from '@/components/Text';
 import { usePlayerStat } from '@/hooks/usePlayerStat';
+import { formatCurrency } from '@/services/leagueStatsFormatters';
 import { StatType } from '@/services/leagueStatsService';
-import { formatCurrency } from '@/utils/leagueStatsFormatters';
 import { Ionicons } from '@expo/vector-icons';
 import React from 'react';
 import { Image, StyleSheet, View } from 'react-native';
-import { LoadingState } from '../LoadingState';
+import { LoadingState } from '../../shared/LoadingState';
 
 interface PlayerStatCardProps {
    leagueId: string;

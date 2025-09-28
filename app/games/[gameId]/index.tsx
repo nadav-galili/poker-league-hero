@@ -1,6 +1,6 @@
 import { colors, getTheme } from '@/colors';
 import Button from '@/components/Button';
-import { LoadingState } from '@/components/LoadingState';
+import { LoadingState } from '@/components/shared/LoadingState';
 import { Text } from '@/components/Text';
 import { useAuth } from '@/context/auth';
 import { useLocalization } from '@/context/localization';
@@ -10,10 +10,10 @@ import React from 'react';
 import { FlatList, TouchableOpacity, View } from 'react-native';
 import Toast from 'react-native-toast-message';
 
-import AddPlayerModal from '@/app/components/game/AddPlayerModal';
-import CashOutModal from '@/app/components/game/CashOutModal';
-import GameSummary from '@/app/components/game/GameSummary';
-import PlayerCard from '@/app/components/game/PlayerCard';
+import AddPlayerModal from '@/components/game/AddPlayerModal';
+import CashOutModal from '@/components/game/CashOutModal';
+import GameSummary from '@/components/game/GameSummary';
+import PlayerCard from '@/components/game/PlayerCard';
 import { GamePlayer, LeagueMember, useGameData } from '@/hooks/useGameData';
 import { createGameService } from '@/services/gameService';
 

@@ -1,8 +1,8 @@
-import { EmptyState } from '@/components/EmptyState';
-import { ErrorState } from '@/components/ErrorState';
-import { LeagueCard } from '@/components/LeagueCard';
-import { LoadingState } from '@/components/LoadingState';
-import { MyLeaguesHeader } from '@/components/MyLeaguesHeader';
+import { LeagueCard } from '@/components/league/LeagueCard';
+import { MyLeaguesHeader } from '@/components/league/MyLeaguesHeader';
+import { EmptyState } from '@/components/shared/EmptyState';
+import { ErrorState } from '@/components/shared/ErrorState';
+import { LoadingState } from '@/components/shared/LoadingState';
 import { Text } from '@/components/Text';
 import { useMyLeagues } from '@/hooks';
 import { captureException } from '@/utils/sentry';

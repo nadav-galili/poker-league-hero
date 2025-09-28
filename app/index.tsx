@@ -1,6 +1,6 @@
 import { getTheme } from '@/colors';
-import { LoadingState } from '@/components/LoadingState';
-import LoginForm from '@/components/LoginForm';
+import LoginForm from '@/components/auth/LoginForm';
+import { LoadingState } from '@/components/shared/LoadingState';
 import { useAuth } from '@/context/auth';
 import { Redirect } from 'expo-router';
 import { ScrollView } from 'react-native';

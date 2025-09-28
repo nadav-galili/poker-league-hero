@@ -1,7 +1,7 @@
 import { colors, getTheme } from '@/colors';
 import { Text } from '@/components/Text';
-import { formatCurrency } from '@/utils/leagueStatsFormatters';
-import { TopPlayer } from '@/utils/leagueStatsHelpers';
+import { formatCurrency } from '@/services/leagueStatsFormatters';
+import { TopPlayer } from '@/services/leagueStatsHelpers';
 import { Ionicons } from '@expo/vector-icons';
 import React from 'react';
 import { StyleSheet, View } from 'react-native';

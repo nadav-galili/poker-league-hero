@@ -1,4 +1,4 @@
-import { getLeagueDetails } from '../../../utils/leagueUtils';
+import { getLeagueDetails } from '../../../services/leagueUtils';
 
 export async function GET(request: Request) {
    try {

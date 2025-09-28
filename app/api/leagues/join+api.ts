@@ -2,7 +2,7 @@ import {
    findLeagueByInviteCode,
    joinLeagueByInviteCode,
    validateInviteCode,
-} from '../../../utils/leagueUtils';
+} from '../../../services/leagueUtils';
 import { withAuth } from '../../../utils/middleware';
 
 export const POST = withAuth(async (request: Request, user) => {

@@ -3,7 +3,7 @@ import { useAuth } from '@/context/auth';
 import { useLocalization } from '@/context/localization';
 import { Ionicons } from '@expo/vector-icons';
 import { Image, Pressable, StatusBar, View } from 'react-native';
-import { Text } from './Text';
+import { Text } from '../Text';
 
 export default function LoginForm() {
    const { signIn } = useAuth();
