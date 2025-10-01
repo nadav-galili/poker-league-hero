@@ -1,8 +1,9 @@
 /**
- * League Card Component
+ * League Card Component - Enhanced with Neo-Brutalist styling
  */
 
 import { getTheme } from '@/colors';
+import { BrutalistCard } from '@/components/cards/BrutalistCard';
 import { Text } from '@/components/Text';
 import { useLocalization } from '@/context/localization';
 import { LeagueWithTheme } from '@/types/league';
@@ -48,15 +49,17 @@ const LeagueCardComponent = ({ league, onPress, onShare }: LeagueCardProps) => {
    };
 
    return (
-      <Pressable
-         className="flex-row items-center p-5 rounded-xl border-[6px] border-primary bg-surfaceElevated relative overflow-hidden shadow-[32px_32px_0px_0px] shadow-shadow active:scale-95 active:translate-x-4 active:translate-y-4 active:shadow-[16px_16px_0px_0px]"
-         style={{
-            borderColor: theme.primary,
-            backgroundColor: theme.surfaceElevated,
-            shadowColor: theme.shadow,
-         }}
+      <BrutalistCard
+         variant="elevated"
+         size="large"
+         customBorderColor={theme.primary}
+         shadowIntensity="heavy"
+         pressAnimation={true}
+         glowOnPress={true}
          onPress={handlePress}
+         style={{ padding: 0 }} // Remove default padding to use custom layout
       >
+         <View className="flex-row items-center p-5">
          {/* League Image with colored frame */}
          <View className="relative mr-5">
             {league.image && league.image.trim() !== '' ? (
@@ -142,7 +145,8 @@ const LeagueCardComponent = ({ league, onPress, onShare }: LeagueCardProps) => {
                {league.memberCount} {t('members')}
             </Text>
          </View>
-      </Pressable>
+         </View>
+      </BrutalistCard>
    );
 };
 

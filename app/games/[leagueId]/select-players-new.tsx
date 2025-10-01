@@ -190,9 +190,8 @@ export default function SelectPlayers() {
                <Button
                   title={t('startGame')}
                   onPress={handleStartGame}
-                  variant="primary"
+                  variant="secondary"
                   size="large"
-                  className="bg-secondary"
                   fullWidth
                />
             </View>
@@ -302,8 +301,8 @@ const styles = StyleSheet.create({
       bottom: 0,
       left: 0,
       right: 0,
-      padding: 16,
-      paddingBottom: 32,
+      padding: 24,
+      paddingBottom: 40,
       shadowColor: colors.shadow,
       shadowOffset: { width: 0, height: -4 },
       shadowOpacity: 1,

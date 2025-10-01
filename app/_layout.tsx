@@ -3,6 +3,7 @@ import ErrorBoundary from '@/components/shared/ErrorBoundary';
 import LocalizedErrorFallback from '@/components/shared/LocalizedErrorFallback';
 import { AuthProvider } from '@/context/auth';
 import { LocalizationProvider } from '@/context/localization';
+import { NavigationProvider } from '@/context/navigation';
 import { loadFonts } from '@/utils/fonts';
 import * as Sentry from '@sentry/react-native';
 import { Stack } from 'expo-router';
@@ -170,17 +171,19 @@ export default Sentry.wrap(function RootLayout() {
       <SafeAreaView style={{ flex: 1 }}>
          <SafeAreaProvider>
             <LocalizationProvider>
-               <ErrorBoundary
-                  fallback={<LocalizedErrorFallback onRetry={handleRetry} />}
-               >
-                  <AuthProvider>
-                     <Stack
-                        screenOptions={{
-                           headerShown: false,
-                        }}
-                     />
-                  </AuthProvider>
-               </ErrorBoundary>
+               <NavigationProvider>
+                  <ErrorBoundary
+                     fallback={<LocalizedErrorFallback onRetry={handleRetry} />}
+                  >
+                     <AuthProvider>
+                        <Stack
+                           screenOptions={{
+                              headerShown: false,
+                           }}
+                        />
+                     </AuthProvider>
+                  </ErrorBoundary>
+               </NavigationProvider>
             </LocalizationProvider>
          </SafeAreaProvider>
          <Toast config={toastConfig} />

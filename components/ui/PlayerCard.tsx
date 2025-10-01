@@ -1,15 +1,16 @@
 /**
- * Reusable PlayerCard component for displaying player information
+ * Enhanced PlayerCard component with Neo-Brutalist styling
  */
 
 import { colors, getTheme } from '@/colors';
+import { BrutalistCard } from '@/components/cards/BrutalistCard';
 import { Text } from '@/components/Text';
 import { LeagueMember } from '@/types';
 import { captureException } from '@/utils/sentry';
 import { Ionicons } from '@expo/vector-icons';
 import { Image } from 'expo-image';
 import React from 'react';
-import { TouchableOpacity, View } from 'react-native';
+import { View } from 'react-native';
 
 interface PlayerCardProps {
    player: LeagueMember;
@@ -36,35 +37,43 @@ export function PlayerCard({
       }
    };
 
-   const getCardClassName = () => {
-      let baseClasses = 'rounded-xl border-2 p-3 relative shadow-lg';
-
-      if (variant === 'grid') {
-         baseClasses += ' flex-1 h-32 mx-1 my-1 items-center justify-center';
-      } else if (variant === 'list') {
-         baseClasses +=
-            ' flex-row items-center my-1 mx-2 px-3 py-3 min-h-[72px]';
-      } else if (variant === 'compact') {
-         baseClasses +=
-            ' flex-row items-center px-2 py-1.5 my-0.5 min-h-[48px]';
+   const getCardSize = () => {
+      switch (variant) {
+         case 'compact': return 'small';
+         case 'list': return 'medium';
+         default: return 'medium';
       }
-
-      return baseClasses;
    };
 
-   const getCardStyle = () => {
-      return {
-         backgroundColor: isSelected
-            ? colors.primaryTint
-            : theme.surfaceElevated,
-         borderColor: isSelected ? colors.primary : theme.border,
-         opacity: disabled ? 0.6 : 1,
-         shadowColor: colors.shadow,
-         shadowOffset: { width: 2, height: 2 },
-         shadowOpacity: 0.3,
-         shadowRadius: 0,
-         elevation: 4,
-      };
+   const getContainerStyle = () => {
+      if (variant === 'grid') {
+         return {
+            flex: 1,
+            height: 128,
+            margin: 4,
+         };
+      } else if (variant === 'list') {
+         return {
+            marginVertical: 4,
+            marginHorizontal: 8,
+         };
+      } else if (variant === 'compact') {
+         return {
+            marginVertical: 2,
+         };
+      }
+      return {};
+   };
+
+   const getContentContainerClass = () => {
+      if (variant === 'grid') {
+         return 'items-center justify-center flex-1';
+      } else if (variant === 'list') {
+         return 'flex-row items-center min-h-[72px]';
+      } else if (variant === 'compact') {
+         return 'flex-row items-center min-h-[48px]';
+      }
+      return 'flex-row items-center';
    };
 
    const getImageSize = () => {
@@ -81,13 +90,19 @@ export function PlayerCard({
    };
 
    return (
-      <TouchableOpacity
-         className={getCardClassName()}
-         style={getCardStyle()}
+      <BrutalistCard
+         variant={isSelected ? 'elevated' : 'default'}
+         size={getCardSize()}
+         customBorderColor={isSelected ? colors.primary : theme.border}
+         customBackgroundColor={isSelected ? colors.primaryTint : theme.surfaceElevated}
+         shadowIntensity="medium"
+         pressAnimation={!disabled}
+         glowOnPress={isSelected}
          onPress={handlePress}
-         activeOpacity={disabled ? 1 : 0.7}
          disabled={disabled}
+         style={getContainerStyle()}
       >
+         <View className={getContentContainerClass()}>
          {/* Selection Indicator */}
          {showSelectionIndicator && variant === 'grid' && (
             <View
@@ -166,6 +181,7 @@ export function PlayerCard({
                />
             </View>
          )}
-      </TouchableOpacity>
+         </View>
+      </BrutalistCard>
    );
 }

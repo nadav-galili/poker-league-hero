@@ -4,6 +4,7 @@
  */
 
 import { colors, getTheme } from '@/colors';
+
 import Button from '@/components/Button';
 import { GameSetupModal } from '@/components/modals';
 import { LoadingState } from '@/components/shared/LoadingState';
@@ -113,6 +114,7 @@ export default function SelectPlayers() {
                   onPress={refetch}
                   variant="secondary"
                   size="medium"
+                  backgroundColor={theme.background}
                />
             </View>
          </View>
@@ -201,7 +203,7 @@ export default function SelectPlayers() {
          {/* Start Game Button */}
          {selectedCount > 0 && (
             <View
-               className="absolute bottom-0 left-0 right-0 p-4 pb-8 shadow-lg"
+               className="absolute bottom-0 left-0 right-0 p-6 pb-10 shadow-lg"
                style={{
                   backgroundColor: theme.background,
                   shadowColor: colors.shadow,
@@ -214,10 +216,8 @@ export default function SelectPlayers() {
                <Button
                   title={t('startGame')}
                   onPress={handleStartGame}
-                  variant="primary"
+                  variant="secondary"
                   size="large"
-                  className="bg-secondary"
-                  fullWidth
                />
             </View>
          )}
