@@ -14,6 +14,7 @@ import AddPlayerModal from '@/components/game/AddPlayerModal';
 import CashOutModal from '@/components/game/CashOutModal';
 import GameSummary from '@/components/game/GameSummary';
 import PlayerCard from '@/components/game/PlayerCard';
+import { AppButton } from '@/components/ui/AppButton';
 import { GamePlayer, LeagueMember, useGameData } from '@/hooks/useGameData';
 import { createGameService } from '@/services/gameService';
 
@@ -363,24 +364,17 @@ export default function GameScreen() {
 
          {/* Game Summary */}
          <GameSummary game={game} />
-
-         {/* Add Player Button */}
-         <View className="px-4 pb-2">
-            <TouchableOpacity
-               className="flex-row items-center justify-center px-4 py-3 rounded-2xl border-3 border-black shadow-lg"
-               style={{ backgroundColor: colors.primary }}
+         <View className="px-4 pb-2 items-center my-4">
+            <AppButton
+               title={t('addPlayer')}
                onPress={openAddPlayerModal}
+               bgColor={colors.info}
+               textColor={colors.textInverse}
                disabled={isProcessing}
-            >
-               <Ionicons
-                  name="person-add"
-                  size={20}
-                  color={colors.textInverse}
-               />
-               <Text className="ml-2 font-bold tracking-wide text-white">
-                  {t('addPlayer')}
-               </Text>
-            </TouchableOpacity>
+               width="50%"
+               icon="person-add"
+               iconSize={20}
+            />
          </View>
 
          {/* Add Player Modal */}

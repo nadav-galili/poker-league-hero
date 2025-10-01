@@ -28,7 +28,7 @@ export const AppButton: React.FC<AppButtonProps> = ({
       <Pressable
          onPress={onPress}
          disabled={disabled}
-         className="py-4 px-6 items-center rounded-lg justify-center border-[3px] border-black shadow-lg active:translate-y-1 active:opacity-80"
+         className="py-4 px-6 items-center rounded-2xl justify-center border-[3px] border-black shadow-lg active:translate-y-1 active:opacity-80"
          style={{
             width: width as number,
             backgroundColor: disabled ? colors.textMuted : bgColor,

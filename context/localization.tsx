@@ -167,6 +167,7 @@ export interface Translations {
    endGame: string;
    confirmEndGame: string;
    endGameMessage: string;
+   cannotEndGame: string;
    gameEnded: string;
    loadingGame: string;
    gameNotFound: string;
@@ -351,6 +352,7 @@ const enTranslations: Translations = {
       'Are you sure you want to remove this player from the game?',
    playerRemoved: 'Player removed from the game',
    endGame: 'END GAME',
+   cannotEndGame: 'Cannot end game with active players',
    confirmEndGame: 'End Game',
    endGameMessage:
       'Are you sure you want to end this game? This action cannot be undone.',
@@ -512,7 +514,7 @@ const heTranslations: Translations = {
 
    // Game Screen
    gameDetails: 'פרטי המשחק',
-   gameInProgress: 'משחק בעיצומו',
+   gameInProgress: 'משחק פעיל',
    totalBuyIns: 'סך כל הכניסות',
    totalBuyOuts: 'סך כל היציאות',
    currentProfit: 'רווח נוכחי',
@@ -536,6 +538,7 @@ const heTranslations: Translations = {
    removePlayerMessage: 'האם אתה בטוח שברצונך להסיר את השחקן מהמשחק?',
    playerRemoved: 'השחקן הוסר מהמשחק',
    endGame: 'סיים משחק',
+   cannotEndGame: 'יש עדיין שחקנים פעילים',
    confirmEndGame: 'סיים משחק',
    endGameMessage:
       'האם אתה בטוח שברצונך לסיים את המשחק? פעולה זו לא ניתנת לביטול.',

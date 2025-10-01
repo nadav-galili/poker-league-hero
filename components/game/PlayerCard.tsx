@@ -38,16 +38,29 @@ const PlayerCard: React.FC<PlayerCardProps> = ({
                      player.profileImageUrl ||
                      'https://via.placeholder.com/50x50/cccccc/666666?text=?',
                }}
-               contentFit="cover"
                style={{
-                  width: 48,
-                  height: 48,
                   borderColor: colors.primary,
-                  borderWidth: 2,
-                  borderRadius: 12,
+                  backgroundColor: '#cccccc',
+                  borderRadius: 8,
+                  height: 40,
+                  width: 40,
                   marginRight: 12,
+                  borderWidth: 2,
                }}
+               contentFit="cover"
             />
+            <TouchableOpacity
+               onPress={() => onRemovePlayer(player)}
+               className="w-9 h-9 rounded-full items-center justify-center border-2 border-black"
+               style={{ backgroundColor: colors.error }}
+               disabled={isProcessing}
+            >
+               <Ionicons
+                  name="remove-circle"
+                  size={20}
+                  color={colors.textInverse}
+               />
+            </TouchableOpacity>
             <View className="flex-1">
                <Text variant="h4" className="tracking-wider mb-0.5">
                   {player.fullName}
@@ -120,7 +133,7 @@ const PlayerCard: React.FC<PlayerCardProps> = ({
                   bgColor={colors.primary}
                   textColor={colors.textInverse}
                   disabled={isProcessing}
-                  width="35%"
+                  width="50%"
                   icon="add-circle"
                   iconSize={20}
                />
@@ -130,22 +143,10 @@ const PlayerCard: React.FC<PlayerCardProps> = ({
                   bgColor={colors.secondary}
                   textColor={colors.textInverse}
                   disabled={isProcessing}
-                  width="35%"
+                  width="50%"
                   icon="cash-outline"
                   iconSize={20}
                />
-               <TouchableOpacity
-                  onPress={() => onRemovePlayer(player)}
-                  className="w-9 h-9 rounded-full items-center justify-center border-2 border-black"
-                  style={{ backgroundColor: colors.error }}
-                  disabled={isProcessing}
-               >
-                  <Ionicons
-                     name="remove-circle"
-                     size={20}
-                     color={colors.textInverse}
-                  />
-               </TouchableOpacity>
             </View>
          )}
       </View>

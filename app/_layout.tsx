@@ -78,7 +78,7 @@ const toastConfig = {
             borderRightWidth: 3,
             borderTopColor: colors.border,
             borderTopWidth: 3,
-            backgroundColor: colors.background,
+            backgroundColor: colors.danger,
             shadowColor: colors.shadow,
             shadowOffset: { width: 4, height: 4 },
             shadowOpacity: 1,
@@ -91,14 +91,14 @@ const toastConfig = {
          text1Style={{
             fontSize: 16,
             fontWeight: '700',
-            color: colors.text,
+            color: colors.textInverse,
             textTransform: 'uppercase',
             letterSpacing: 0.5,
          }}
          text2Style={{
             fontSize: 14,
             fontWeight: '500',
-            color: colors.textSecondary,
+            color: colors.textInverse,
          }}
       />
    ),

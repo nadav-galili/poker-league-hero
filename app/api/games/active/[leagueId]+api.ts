@@ -1,10 +1,11 @@
 import { withAuth } from '@/utils/middleware';
 import { and, desc, eq } from 'drizzle-orm';
+const { getDb, games, leagueMembers } = await import('../../../../db');
 
 export const GET = withAuth(async (request: Request, user) => {
    try {
       const url = new URL(request.url);
-      const leagueId = url.pathname.split('/').pop();
+      const leagueId = parseInt(url.pathname.split('/').pop() || '', 10);
       if (!leagueId) {
          return Response.json(
             { success: false, message: 'League ID is required' },
@@ -20,7 +21,6 @@ export const GET = withAuth(async (request: Request, user) => {
       }
 
       // Import database modules
-      const { getDb, games, leagueMembers } = await import('../../../../db');
       const db = getDb();
 
       // Check if user is a member of the league
@@ -29,7 +29,7 @@ export const GET = withAuth(async (request: Request, user) => {
          .from(leagueMembers)
          .where(
             and(
-               eq(leagueMembers.leagueId, parseInt(leagueId)),
+               eq(leagueMembers.leagueId, leagueId),
                eq(leagueMembers.userId, user.userId),
                eq(leagueMembers.isActive, true)
             )
@@ -47,12 +47,7 @@ export const GET = withAuth(async (request: Request, user) => {
       const activeGame = await db
          .select()
          .from(games)
-         .where(
-            and(
-               eq(games.leagueId, parseInt(leagueId)),
-               eq(games.status, 'active')
-            )
-         )
+         .where(and(eq(games.leagueId, leagueId), eq(games.status, 'active')))
          .orderBy(desc(games.createdAt))
          .limit(1);
 

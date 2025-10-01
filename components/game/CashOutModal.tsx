@@ -1,5 +1,4 @@
 import { colors, getTheme } from '@/colors';
-import Button from '@/components/Button';
 import { Text } from '@/components/Text';
 import { useLocalization } from '@/context/localization';
 import { GamePlayer } from '@/hooks/useGameData';
@@ -13,6 +12,7 @@ import {
    TouchableOpacity,
    View,
 } from 'react-native';
+import { AppButton } from '../ui/AppButton';
 
 interface CashOutModalProps {
    visible: boolean;
@@ -137,7 +137,7 @@ const CashOutModal: React.FC<CashOutModalProps> = ({
             </ScrollView>
 
             <View className="p-4 my-4 pb-8 shadow-lg elevation-16 bg-background">
-               <Button
+               {/* <Button
                   title={isProcessing ? 'Processing...' : t('confirmCashOut')}
                   onPress={onConfirm}
                   variant="secondary"
@@ -147,6 +147,16 @@ const CashOutModal: React.FC<CashOutModalProps> = ({
                   fullWidth
                   className="bg-primary"
                   textColor={colors.textInverse}
+               /> */}
+               <AppButton
+                  title={isProcessing ? t('processing') : t('confirmCashOut')}
+                  onPress={onConfirm}
+                  bgColor={colors.secondary}
+                  textColor={colors.textInverse}
+                  icon="cash-outline"
+                  disabled={isProcessing || !cashOutAmount.trim()}
+                  width="100%"
+                  iconSize={20}
                />
             </View>
          </View>
