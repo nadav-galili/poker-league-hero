@@ -1,11 +1,11 @@
+import { checkLeagueAccess, extractLeagueId } from '@/utils/authorization';
 import { withAuth } from '@/utils/middleware';
 import {
-   withRateLimit,
-   validateRequestSecurity,
    secureResponse,
+   validateRequestSecurity,
+   withRateLimit,
 } from '@/utils/rateLimiting';
-import { validateDatabaseId, sanitizeString } from '@/utils/validation';
-import { checkLeagueAccess, extractLeagueId } from '@/utils/authorization';
+import { sanitizeString, validateDatabaseId } from '@/utils/validation';
 import dayjs from 'dayjs';
 import { and, avg, desc, eq, gte, lte, max, sql, sum } from 'drizzle-orm';
 import {
@@ -179,7 +179,7 @@ export const GET = withAuth(
          const result = await calculateStat(
             db,
             validatedLeagueId.toString(),
-            statType,
+            statType as StatType,
             yearStart,
             yearEnd,
             {
@@ -445,6 +445,18 @@ async function calculateStat(
                      'games_played'
                   ),
             })
+            .from(gamePlayers)
+            .innerJoin(games, eq(gamePlayers.gameId, games.id))
+            .innerJoin(users, eq(gamePlayers.userId, users.id))
+            .innerJoin(
+               leagueMembers,
+               and(
+                  eq(leagueMembers.userId, users.id),
+                  eq(leagueMembers.leagueId, parsedLeagueId)
+               )
+            )
+            .where(baseWhere)
+            .groupBy(users.id, users.fullName, users.profileImageUrl)
             .having(sql`sum(${gamePlayers.profit}) IS NOT NULL`)
             .orderBy(sum(gamePlayers.profit)) // ASC for biggest loss (most negative)
             .limit(1);

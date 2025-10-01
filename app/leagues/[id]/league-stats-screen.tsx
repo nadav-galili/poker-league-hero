@@ -103,18 +103,35 @@ export default function LeagueStatsScreen() {
                />
             }
          >
-            {/* Dynamic Player Stats Cards */}
-            <View style={styles.section}>
-               <TopProfitPlayerCard leagueId={leagueId!} t={t} />
-            </View>
+            {/* Player Stats Cards Grid */}
+            <View style={styles.cardsSection}>
+               <Text className="text-primary text-center mb-6 text-2xl font-black uppercase tracking-[3px]">
+                  PLAYER STATS
+               </Text>
 
-            {/* Example: Most Active Player using the new generic component */}
-            <View style={styles.section}>
-               <PlayerStatCard
-                  leagueId={leagueId!}
-                  statType="most-active-player"
-                  t={t}
-               />
+               <View style={styles.cardsGrid}>
+                  <TopProfitPlayerCard leagueId={leagueId!} t={t} />
+                  <PlayerStatCard
+                     leagueId={leagueId!}
+                     statType="most-active-player"
+                     t={t}
+                  />
+                  <PlayerStatCard
+                     leagueId={leagueId!}
+                     statType="highest-single-game-profit"
+                     t={t}
+                  />
+                  <PlayerStatCard
+                     leagueId={leagueId!}
+                     statType="most-consistent-player"
+                     t={t}
+                  />
+                  <PlayerStatCard
+                     leagueId={leagueId!}
+                     statType="biggest-loser"
+                     t={t}
+                  />
+               </View>
             </View>
 
             {/* Main Stats Grid */}
@@ -187,6 +204,17 @@ const styles = StyleSheet.create({
       marginBottom: 24,
       alignItems: 'center',
       paddingHorizontal: 24,
+   },
+   cardsSection: {
+      marginBottom: 32,
+      paddingHorizontal: 24,
+   },
+   cardsGrid: {
+      flexDirection: 'row',
+      flexWrap: 'wrap',
+      justifyContent: 'space-between',
+      alignItems: 'flex-start',
+      gap: 16,
    },
    sectionTitle: {
       textAlign: 'center',

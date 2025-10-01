@@ -5,8 +5,9 @@ import { formatCurrency } from '@/services/leagueStatsFormatters';
 import { StatType } from '@/services/leagueStatsService';
 import { Ionicons } from '@expo/vector-icons';
 import React from 'react';
-import { Image, StyleSheet, View } from 'react-native';
-import { LoadingState } from '../../shared/LoadingState';
+import { Dimensions, Image, StyleSheet, View } from 'react-native';
+
+const { width: screenWidth } = Dimensions.get('window');
 
 interface PlayerStatCardProps {
    leagueId: string;
@@ -77,25 +78,36 @@ export default function PlayerStatCard({
    const config = STAT_CONFIGS[statType];
 
    if (isLoading) {
-      return <LoadingState />;
+      return (
+         <View style={styles.card}>
+            <View className="items-center justify-center py-8">
+               <View className="w-12 h-12 bg-concrete border-4 border-ink rounded-lg items-center justify-center mb-3">
+                  <Ionicons
+                     name={config.icon as any}
+                     size={24}
+                     color={colors.textMuted}
+                  />
+               </View>
+               <Text className="text-textMuted text-xs font-bold uppercase tracking-wider">
+                  {t('loading')}...
+               </Text>
+            </View>
+         </View>
+      );
    }
 
    if (error || !data) {
       return (
-         <View
-            style={[styles.card, { backgroundColor: theme.surfaceElevated }]}
-         >
-            <View style={styles.errorContainer}>
-               <Ionicons
-                  name="trophy-outline"
-                  size={32}
-                  color={theme.textMuted}
-               />
-               <Text
-                  variant="captionSmall"
-                  color={theme.textMuted}
-                  style={styles.errorText}
-               >
+         <View style={styles.card}>
+            <View className="items-center justify-center py-8">
+               <View className="w-12 h-12 bg-errorTint border-4 border-ink rounded-lg items-center justify-center mb-3">
+                  <Ionicons
+                     name={config.icon as any}
+                     size={24}
+                     color={colors.error}
+                  />
+               </View>
+               <Text className="text-error text-xs font-bold uppercase tracking-wider text-center">
                   {error || t('noCompletedGames')}
                </Text>
             </View>
@@ -103,209 +115,109 @@ export default function PlayerStatCard({
       );
    }
 
+   const cardBackgroundColor = config.color + '10'; // Very light tint
+   const iconBackgroundColor = config.color + '20'; // Light tint
+
    return (
-      <View style={[styles.card, { backgroundColor: theme.surfaceElevated }]}>
-         <View style={styles.cardContent}>
-            {/* Header */}
-            <View style={styles.header}>
-               <View
-                  style={[
-                     styles.iconContainer,
-                     { backgroundColor: config.color + '20' },
-                  ]}
-               >
-                  <Ionicons
-                     name={config.icon as any}
-                     size={24}
-                     color={config.color}
-                  />
-               </View>
-               <Text
-                  variant="captionSmall"
-                  color={theme.textSecondary}
-                  style={styles.cardTitle}
-               >
-                  {t(config.title)} {year || new Date().getFullYear()}
-               </Text>
+      <View style={[styles.card, { backgroundColor: cardBackgroundColor }]}>
+         {/* Header with Icon */}
+         <View className="flex-row items-center justify-between mb-4">
+            <View
+               className="w-10 h-10 border-3 border-ink rounded-lg items-center justify-center"
+               style={{ backgroundColor: iconBackgroundColor }}
+            >
+               <Ionicons
+                  name={config.icon as any}
+                  size={20}
+                  color={config.color}
+               />
             </View>
+            <Text
+               className="text-textSecondary text-xs font-black uppercase tracking-widest flex-1 text-right"
+               numberOfLines={2}
+            >
+               {t(config.title)}
+            </Text>
+         </View>
 
-            {/* Player Info */}
-            <View style={styles.playerContainer}>
-               {/* Profile Image */}
-               <View style={styles.imageContainer}>
-                  {data.profileImageUrl ? (
-                     <Image
-                        source={{ uri: data.profileImageUrl }}
-                        style={styles.profileImage}
-                        defaultSource={require('@/assets/images/icon.png')}
-                     />
-                  ) : (
+         {/* Player Avatar */}
+         <View className="items-center mb-4">
+            {data.profileImageUrl ? (
+               <Image
+                  source={{ uri: data.profileImageUrl }}
+                  className="w-16 h-16 rounded-full border-4 border-ink"
+                  defaultSource={require('@/assets/images/icon.png')}
+               />
+            ) : (
+               <View className="w-16 h-16 bg-primaryTint border-4 border-ink rounded-full items-center justify-center">
+                  <Ionicons name="person" size={28} color={colors.primary} />
+               </View>
+            )}
+         </View>
+
+         {/* Player Info */}
+         <View className="items-center">
+            <Text
+               className="text-ink text-lg font-black uppercase tracking-wide text-center mb-1"
+               numberOfLines={1}
+            >
+               {data.fullName}
+            </Text>
+            <Text
+               className="text-2xl font-black mb-2"
+               style={{ color: config.color }}
+            >
+               {config.formatValue(data.value)}
+            </Text>
+
+            {/* Additional Data - Compact */}
+            {data.additionalData && (
+               <View className="items-center">
+                  {data.additionalData.gamesPlayed && (
                      <View
-                        style={[
-                           styles.placeholderImage,
-                           { backgroundColor: colors.primary + '20' },
-                        ]}
+                        className="px-3 py-1 border-2 border-ink mb-1"
+                        style={{ backgroundColor: config.color }}
                      >
-                        <Ionicons
-                           name="person"
-                           size={32}
-                           color={colors.primary}
-                        />
+                        <Text className="text-ink text-xs font-black uppercase tracking-wider">
+                           {data.additionalData.gamesPlayed} {t('gamesPlayed')}
+                        </Text>
                      </View>
                   )}
-               </View>
-
-               {/* Player Details */}
-               <View style={styles.playerInfo}>
-                  <Text
-                     variant="h4"
-                     color={theme.text}
-                     style={styles.playerName}
-                  >
-                     {data.fullName}
-                  </Text>
-                  <Text
-                     variant="h3"
-                     color={config.color}
-                     style={styles.statValue}
-                  >
-                     {config.formatValue(data.value)}
-                  </Text>
-
-                  {/* Additional Data */}
-                  {data.additionalData && (
-                     <View style={styles.additionalInfo}>
-                        {data.additionalData.gamesPlayed && (
-                           <Text
-                              variant="captionSmall"
-                              color={theme.textMuted}
-                              style={styles.additionalText}
-                           >
-                              {data.additionalData.gamesPlayed}{' '}
-                              {t('gamesPlayed')}
-                           </Text>
-                        )}
-                        {data.additionalData.totalProfit !== undefined && (
-                           <Text
-                              variant="captionSmall"
-                              color={theme.textMuted}
-                              style={styles.additionalText}
-                           >
-                              {t('totalProfit')}:{' '}
-                              {formatCurrency(data.additionalData.totalProfit)}
-                           </Text>
-                        )}
-                        {data.additionalData.avgProfit !== undefined && (
-                           <Text
-                              variant="captionSmall"
-                              color={theme.textMuted}
-                              style={styles.additionalText}
-                           >
-                              {t('avgProfit')}:{' '}
-                              {formatCurrency(data.additionalData.avgProfit)}
-                           </Text>
-                        )}
-                     </View>
+                  {data.additionalData.totalProfit !== undefined && (
+                     <Text className="text-textMuted text-xs font-bold text-center">
+                        {t('totalProfit')}:{' '}
+                        {formatCurrency(data.additionalData.totalProfit)}
+                     </Text>
                   )}
                </View>
-            </View>
+            )}
          </View>
       </View>
    );
 }
 
+// Responsive card width calculation
+const getCardWidth = () => {
+   const padding = 48; // Total horizontal padding
+   const gap = 16; // Gap between cards
+   const cardsPerRow = screenWidth > 768 ? 3 : 2; // 3 cards on tablets, 2 on phones
+   return (screenWidth - padding - gap * (cardsPerRow - 1)) / cardsPerRow;
+};
+
 const styles = StyleSheet.create({
    card: {
-      width: '100%',
+      width: getCardWidth(),
+      minWidth: 160,
+      maxWidth: 220,
       padding: 16,
-      borderRadius: 12,
-      borderWidth: 3,
-      borderColor: '#000000',
-      shadowColor: '#000000',
-      shadowOffset: { width: 4, height: 4 },
+      borderRadius: 0, // Sharp corners for brutalist style
+      borderWidth: 4,
+      borderColor: colors.ink,
+      shadowColor: colors.ink,
+      shadowOffset: { width: 6, height: 6 },
       shadowOpacity: 1,
       shadowRadius: 0,
-      elevation: 8,
+      elevation: 12,
       marginBottom: 16,
-   },
-   cardContent: {
-      alignItems: 'center',
-   },
-   header: {
-      alignItems: 'center',
-      marginBottom: 16,
-   },
-   iconContainer: {
-      width: 48,
-      height: 48,
-      borderRadius: 8,
-      alignItems: 'center',
-      justifyContent: 'center',
-      marginBottom: 8,
-      borderWidth: 2,
-      borderColor: '#000000',
-   },
-   cardTitle: {
-      textAlign: 'center',
-      textTransform: 'uppercase',
-      letterSpacing: 0.5,
-   },
-   playerContainer: {
-      flexDirection: 'row',
-      alignItems: 'center',
-      width: '100%',
-   },
-   imageContainer: {
-      marginRight: 16,
-   },
-   profileImage: {
-      width: 64,
-      height: 64,
-      borderRadius: 32,
-      borderWidth: 3,
-      borderColor: '#000000',
-   },
-   placeholderImage: {
-      width: 64,
-      height: 64,
-      borderRadius: 32,
-      borderWidth: 3,
-      borderColor: '#000000',
-      alignItems: 'center',
-      justifyContent: 'center',
-   },
-   playerInfo: {
-      flex: 1,
-      alignItems: 'flex-start',
-   },
-   playerName: {
-      fontWeight: '700',
-      marginBottom: 4,
-   },
-   statValue: {
-      fontWeight: '700',
-      marginBottom: 4,
-   },
-   additionalInfo: {
-      gap: 2,
-   },
-   additionalText: {
-      fontSize: 11,
-   },
-   loadingContainer: {
-      alignItems: 'center',
-      paddingVertical: 32,
-   },
-   loadingText: {
-      marginTop: 12,
-      textAlign: 'center',
-   },
-   errorContainer: {
-      alignItems: 'center',
-      paddingVertical: 32,
-   },
-   errorText: {
-      marginTop: 12,
-      textAlign: 'center',
    },
 });
