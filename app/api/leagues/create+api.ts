@@ -1,35 +1,118 @@
 import { createLeague } from '../../../services/leagueUtils';
+import { withAuth } from '../../../utils/middleware';
+import {
+   withRateLimit,
+   validateRequestSecurity,
+   secureResponse,
+} from '../../../utils/rateLimiting';
+import {
+   validateRequest,
+   createLeagueSchema,
+   sanitizeString,
+   validateEmail,
+} from '../../../utils/validation';
 
-export async function POST(request: Request) {
-   try {
-      const body = await request.json();
-      const { name, image, adminUserEmail } = body;
+export const POST = withAuth(
+   withRateLimit(async (request: Request, user) => {
+      try {
+         // Validate request security
+         const securityCheck = validateRequestSecurity(request);
+         if (!securityCheck.valid) {
+            return secureResponse(
+               { error: securityCheck.error },
+               { status: 400 }
+            );
+         }
 
-      if (!name || !adminUserEmail) {
-         return Response.json(
-            { error: 'Missing required fields: name, adminUserEmail' },
-            { status: 400 }
+         // Parse and validate request body
+         let body;
+         try {
+            body = await request.json();
+         } catch (parseError) {
+            return secureResponse(
+               { error: 'Invalid JSON payload' },
+               { status: 400 }
+            );
+         }
+
+         // Validate input schema
+         const validation = validateRequest(createLeagueSchema, body);
+         if (!validation.success) {
+            return secureResponse(
+               {
+                  error: 'Invalid input data',
+                  details: validation.errors || ['Invalid input'],
+               },
+               { status: 400 }
+            );
+         }
+
+         const validatedData = validation.data as {
+            name: string;
+            image?: string;
+            adminUserEmail: string;
+         };
+
+         // Additional email validation for security
+         if (!validateEmail(validatedData.adminUserEmail)) {
+            return secureResponse(
+               { error: 'Invalid email format' },
+               { status: 400 }
+            );
+         }
+
+         // Sanitize inputs
+         const sanitizedData = {
+            name: sanitizeString(validatedData.name),
+            image: validatedData.image
+               ? sanitizeString(validatedData.image)
+               : undefined,
+            adminUserEmail: validatedData.adminUserEmail.toLowerCase().trim(),
+         };
+
+         // Additional validation
+         if (!sanitizedData.name) {
+            return secureResponse(
+               { error: 'League name cannot be empty after sanitization' },
+               { status: 400 }
+            );
+         }
+
+         // Create league with sanitized data
+         const league = await createLeague(sanitizedData);
+
+         return secureResponse(
+            {
+               league: {
+                  id: league.id,
+                  name: league.name,
+                  inviteCode: league.inviteCode,
+                  imageUrl: league.imageUrl,
+                  createdAt: league.createdAt,
+               },
+               message: 'League created successfully',
+            },
+            { status: 201 }
+         );
+      } catch (error) {
+         console.error('Error creating league:', error);
+
+         // Don't expose sensitive error information
+         const errorMessage =
+            error instanceof Error && error.message.includes('User not found')
+               ? 'Admin user not found'
+               : 'Failed to create league';
+
+         return secureResponse(
+            { error: errorMessage },
+            {
+               status:
+                  error instanceof Error &&
+                  error.message.includes('User not found')
+                     ? 404
+                     : 500,
+            }
          );
       }
-
-      const league = await createLeague({
-         name,
-         image,
-         adminUserEmail,
-      });
-
-      return Response.json(
-         {
-            league,
-            message: 'League created successfully',
-         },
-         { status: 201 }
-      );
-   } catch (error) {
-      console.error('Error creating league:', error);
-      return Response.json(
-         { error: 'Failed to create league' },
-         { status: 500 }
-      );
-   }
-}
+   }, 'createLeague')
+);

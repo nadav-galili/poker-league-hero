@@ -18,7 +18,7 @@ interface LeagueCardProps {
    onShare: (league: LeagueWithTheme) => void;
 }
 
-export function LeagueCard({ league, onPress, onShare }: LeagueCardProps) {
+const LeagueCardComponent = ({ league, onPress, onShare }: LeagueCardProps) => {
    const theme = getTheme('light');
    const { t } = useLocalization();
 
@@ -70,6 +70,11 @@ export function LeagueCard({ league, onPress, onShare }: LeagueCardProps) {
                      borderColor: '#E5E7EB',
                   }}
                   contentFit="cover"
+                  cachePolicy="memory-disk"
+                  priority="normal"
+                  placeholder={{ uri: 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNk+M9QDwADhgGAWjR9awAAAABJRU5ErkJggg==' }}
+                  placeholderContentFit="cover"
+                  transition={200}
                   onError={(error) => {
                      captureException(new Error('Image loading failed'), {
                         function: 'LeagueCard.Image.onError',
@@ -139,4 +144,20 @@ export function LeagueCard({ league, onPress, onShare }: LeagueCardProps) {
          </View>
       </Pressable>
    );
-}
+};
+
+// Memoize the component with custom comparison function
+export const LeagueCard = React.memo(LeagueCardComponent, (prevProps, nextProps) => {
+   // Shallow comparison of league object and function references
+   return (
+      prevProps.league.id === nextProps.league.id &&
+      prevProps.league.name === nextProps.league.name &&
+      prevProps.league.code === nextProps.league.code &&
+      prevProps.league.memberCount === nextProps.league.memberCount &&
+      prevProps.league.image === nextProps.league.image &&
+      prevProps.league.themeColor === nextProps.league.themeColor &&
+      prevProps.league.accentColor === nextProps.league.accentColor &&
+      prevProps.onPress === nextProps.onPress &&
+      prevProps.onShare === nextProps.onShare
+   );
+});

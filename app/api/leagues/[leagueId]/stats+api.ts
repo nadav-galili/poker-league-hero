@@ -1,4 +1,11 @@
 import { withAuth } from '@/utils/middleware';
+import {
+   withRateLimit,
+   validateRequestSecurity,
+   secureResponse,
+} from '@/utils/rateLimiting';
+import { validateDatabaseId, sanitizeString } from '@/utils/validation';
+import { checkLeagueAccess, extractLeagueId } from '@/utils/authorization';
 import dayjs from 'dayjs';
 import { and, avg, desc, eq, gte, lte, max, sql, sum } from 'drizzle-orm';
 import {
@@ -27,103 +34,194 @@ type StatType =
    | 'most-consistent-player'
    | 'biggest-loser';
 
-export const GET = withAuth(async (request: Request, user) => {
-   const url = new URL(request.url);
-   const leagueId = url.pathname.split('/')[3]; // Extract leagueId from path
-   const statType = url.searchParams.get('type') as StatType;
-   const year = url.searchParams.get('year');
+export const GET = withAuth(
+   withRateLimit(async (request: Request, user) => {
+      try {
+         // Validate request security
+         const securityCheck = validateRequestSecurity(request);
+         if (!securityCheck.valid) {
+            return secureResponse(
+               { error: securityCheck.error },
+               { status: 400 }
+            );
+         }
 
-   try {
-      if (!user.userId) {
-         return Response.json(
-            { error: 'User not authenticated' },
-            { status: 401 }
+         // Validate user authentication
+         if (!user.userId) {
+            return secureResponse(
+               { error: 'User authentication required' },
+               { status: 401 }
+            );
+         }
+
+         // Extract and validate league ID from URL
+         const { leagueId, error: idError } = extractLeagueId(request.url);
+         if (idError || !leagueId) {
+            return secureResponse(
+               { error: idError || 'League ID is required' },
+               { status: 400 }
+            );
+         }
+
+         // Validate database ID format
+         const validatedLeagueId = validateDatabaseId(leagueId);
+         if (!validatedLeagueId) {
+            return secureResponse(
+               { error: 'Invalid league ID format' },
+               { status: 400 }
+            );
+         }
+
+         // Check league access authorization
+         const authResult = await checkLeagueAccess({
+            user,
+            leagueId: validatedLeagueId,
+            requiredRole: 'member',
+         });
+
+         if (!authResult.authorized) {
+            return secureResponse(
+               { error: authResult.error || 'Access denied' },
+               { status: 403 }
+            );
+         }
+
+         // Validate query parameters
+         const url = new URL(request.url);
+         const typeParam = url.searchParams.get('type');
+         const yearParam = url.searchParams.get('year');
+
+         // Manual validation to avoid Zod issues
+         let statType: string | undefined = undefined;
+         let year: number | undefined = undefined;
+
+         // Validate type parameter
+         if (typeParam) {
+            const validTypes = [
+               'top-profit-player',
+               'most-active-player',
+               'highest-single-game-profit',
+               'most-consistent-player',
+               'biggest-loser',
+            ];
+            if (!validTypes.includes(typeParam)) {
+               return secureResponse(
+                  {
+                     error: 'Invalid stat type',
+                     details: ['Type must be one of: ' + validTypes.join(', ')],
+                  },
+                  { status: 400 }
+               );
+            }
+            statType = typeParam;
+         }
+
+         // Validate year parameter
+         if (yearParam) {
+            const parsedYear = parseInt(yearParam, 10);
+            if (
+               isNaN(parsedYear) ||
+               parsedYear < 2000 ||
+               parsedYear > new Date().getFullYear() + 1
+            ) {
+               return secureResponse(
+                  {
+                     error: 'Invalid year',
+                     details: [
+                        'Year must be between 2000 and ' +
+                           (new Date().getFullYear() + 1),
+                     ],
+                  },
+                  { status: 400 }
+               );
+            }
+            year = parsedYear;
+         }
+         const targetYear = year || dayjs().year();
+
+         // If no statType is provided, return general league stats
+         if (!statType) {
+            return getGeneralLeagueStats(
+               validatedLeagueId.toString(),
+               targetYear
+            );
+         }
+         const yearStart = dayjs().year(targetYear).startOf('year').toDate(); // January 1st
+         const yearEnd = dayjs().year(targetYear).endOf('year').toDate(); // December 31st
+
+         const db = getDb();
+
+         // First check if there are any completed games in this league for the target year
+         const gamesCount = await db
+            .select({
+               count: sql<number>`count(*)`.as('count'),
+            })
+            .from(games)
+            .where(
+               and(
+                  eq(games.leagueId, validatedLeagueId),
+                  eq(games.status, 'completed'),
+                  gte(games.endedAt, yearStart),
+                  lte(games.endedAt, yearEnd)
+               )
+            );
+
+         if (!gamesCount[0]?.count || gamesCount[0].count === 0) {
+            return secureResponse({
+               type: statType,
+               year: targetYear,
+               message: 'No completed games found for this year',
+               data: null,
+            });
+         }
+
+         // Calculate the requested stat
+         const result = await calculateStat(
+            db,
+            validatedLeagueId.toString(),
+            statType,
+            yearStart,
+            yearEnd,
+            {
+               gamePlayers,
+               games,
+               leagueMembers,
+               users,
+               and,
+               desc,
+               eq,
+               gte,
+               lte,
+               sql,
+               sum,
+               avg,
+               max,
+            }
          );
-      }
 
-      if (!leagueId) {
-         return Response.json(
-            { error: 'League ID is required' },
-            { status: 400 }
-         );
-      }
+         // Sanitize result data before returning
+         const sanitizedResult = result
+            ? {
+                 ...result,
+                 fullName: sanitizeString(result.fullName || ''),
+                 profileImageUrl: result.profileImageUrl || null,
+              }
+            : null;
 
-      // Get year boundaries (default to current year)
-      const targetYear = year ? parseInt(year) : dayjs().year();
-
-      // If no statType is provided, return general league stats
-      if (!statType) {
-         return getGeneralLeagueStats(leagueId, targetYear);
-      }
-      const yearStart = dayjs().year(targetYear).startOf('year').toDate(); // January 1st
-      const yearEnd = dayjs().year(targetYear).endOf('year').toDate(); // December 31st
-
-      const db = getDb();
-
-      // First check if there are any completed games in this league for the target year
-      const gamesCount = await db
-         .select({
-            count: sql<number>`count(*)`.as('count'),
-         })
-         .from(games)
-         .where(
-            and(
-               eq(games.leagueId, parseInt(leagueId)),
-               eq(games.status, 'completed'),
-               gte(games.endedAt, yearStart),
-               lte(games.endedAt, yearEnd)
-            )
-         );
-
-      if (!gamesCount[0]?.count || gamesCount[0].count === 0) {
-         return Response.json({
+         return secureResponse({
             type: statType,
             year: targetYear,
-            message: 'No completed games found for this year',
-            data: null,
+            data: sanitizedResult,
          });
+      } catch (error) {
+         console.error('Error fetching league stats:', error);
+         return secureResponse(
+            { error: 'Failed to fetch league statistics' },
+            { status: 500 }
+         );
       }
-
-      // Calculate the requested stat
-      const result = await calculateStat(
-         db,
-         leagueId,
-         statType,
-         yearStart,
-         yearEnd,
-         {
-            gamePlayers,
-            games,
-            leagueMembers,
-            users,
-            and,
-            desc,
-            eq,
-            gte,
-            lte,
-            sql,
-            sum,
-            avg,
-            max,
-         }
-      );
-
-      return Response.json({
-         type: statType,
-         year: targetYear,
-         data: result,
-      });
-   } catch (error) {
-      console.error(`Error fetching ${statType} stat:`, error);
-      return Response.json(
-         {
-            error: `Failed to fetch ${statType} stat`,
-            details: error instanceof Error ? error.message : 'Unknown error',
-         },
-         { status: 500 }
-      );
-   }
-});
+   }, 'general')
+);
 
 // Generic stat calculation function
 async function calculateStat(
@@ -150,8 +248,13 @@ async function calculateStat(
       max,
    } = modules;
 
+   const parsedLeagueId = parseInt(leagueId);
+   if (isNaN(parsedLeagueId)) {
+      throw new Error('Invalid league ID');
+   }
+
    const baseWhere = and(
-      eq(games.leagueId, leagueId),
+      eq(games.leagueId, parsedLeagueId),
       eq(games.status, 'completed'),
       gte(games.endedAt, yearStart),
       lte(games.endedAt, yearEnd),
@@ -178,7 +281,7 @@ async function calculateStat(
                leagueMembers,
                and(
                   eq(leagueMembers.userId, users.id),
-                  eq(leagueMembers.leagueId, leagueId)
+                  eq(leagueMembers.leagueId, parsedLeagueId)
                )
             )
             .where(baseWhere)
@@ -219,7 +322,7 @@ async function calculateStat(
                leagueMembers,
                and(
                   eq(leagueMembers.userId, users.id),
-                  eq(leagueMembers.leagueId, leagueId)
+                  eq(leagueMembers.leagueId, parsedLeagueId)
                )
             )
             .where(baseWhere)
@@ -260,7 +363,7 @@ async function calculateStat(
                leagueMembers,
                and(
                   eq(leagueMembers.userId, users.id),
-                  eq(leagueMembers.leagueId, leagueId)
+                  eq(leagueMembers.leagueId, parsedLeagueId)
                )
             )
             .where(baseWhere)
@@ -306,7 +409,7 @@ async function calculateStat(
                leagueMembers,
                and(
                   eq(leagueMembers.userId, users.id),
-                  eq(leagueMembers.leagueId, leagueId)
+                  eq(leagueMembers.leagueId, parsedLeagueId)
                )
             )
             .where(baseWhere)
@@ -503,17 +606,26 @@ async function getGeneralLeagueStats(leagueId: string, year: number) {
          averageGameDuration: averageGameDuration,
       };
 
-      return Response.json({
-         stats: stats,
+      // Sanitize stats before returning
+      const sanitizedStats = {
+         totalGames: Math.max(0, stats.totalGames),
+         activeGames: Math.max(0, stats.activeGames),
+         completedGames: Math.max(0, stats.completedGames),
+         totalPlayers: Math.max(0, stats.totalPlayers),
+         totalProfit: stats.totalProfit,
+         totalBuyIns: Math.max(0, stats.totalBuyIns),
+         totalBuyOuts: Math.max(0, stats.totalBuyOuts),
+         averageGameDuration: Math.max(0, stats.averageGameDuration),
+      };
+
+      return secureResponse({
+         stats: sanitizedStats,
          year: year,
       });
    } catch (error) {
       console.error('Error fetching general league stats:', error);
-      return Response.json(
-         {
-            error: 'Failed to fetch league statistics',
-            details: error instanceof Error ? error.message : 'Unknown error',
-         },
+      return secureResponse(
+         { error: 'Failed to fetch league statistics' },
          { status: 500 }
       );
    }

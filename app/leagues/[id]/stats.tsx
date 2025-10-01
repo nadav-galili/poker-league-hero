@@ -9,8 +9,9 @@ import { captureException } from '@/utils/sentry';
 import { Ionicons } from '@expo/vector-icons';
 
 import { router, useLocalSearchParams } from 'expo-router';
+import { Image } from 'expo-image';
 import React from 'react';
-import { Image, ScrollView, Text, TouchableOpacity, View } from 'react-native';
+import { ScrollView, Text, TouchableOpacity, View } from 'react-native';
 
 interface LeagueData {
    id: string;
@@ -30,27 +31,41 @@ export default function LeagueStats() {
    const [league, setLeague] = React.useState<LeagueData | null>(null);
    const [isLoading, setIsLoading] = React.useState(true);
    const [error, setError] = React.useState<string | null>(null);
-   const [activeGame, setActiveGame] = React.useState<any | null>(null);
+   const [activeGame, setActiveGame] = React.useState<{
+      id: string;
+      leagueId: string;
+      status: string;
+      createdAt: string;
+   } | null>(null);
    const [isCheckingActiveGame, setIsCheckingActiveGame] =
       React.useState(false);
 
-   // Function to load league details
-   const loadLeagueDetails = React.useCallback(async () => {
-      if (!id) return;
+   // Function to load league details with abort controller support
+   const loadLeagueDetails = React.useCallback(async (abortSignal?: AbortSignal) => {
+      if (!id || abortSignal?.aborted) return;
 
       try {
          setIsLoading(true);
          setError(null);
 
-         const response = await fetchWithAuth(`${BASE_URL}/api/leagues/${id}`);
+         const response = await fetchWithAuth(`${BASE_URL}/api/leagues/${id}`, {
+            signal: abortSignal,
+         });
+
+         if (abortSignal?.aborted) return;
 
          if (!response.ok) {
             throw new Error('Failed to fetch league details');
          }
 
          const data = await response.json();
+
+         if (abortSignal?.aborted) return;
+
          setLeague(data.league);
       } catch (err) {
+         if (abortSignal?.aborted) return;
+
          const errorMessage =
             err instanceof Error
                ? err.message
@@ -62,22 +77,30 @@ export default function LeagueStats() {
             leagueId: id,
          });
       } finally {
-         setIsLoading(false);
+         if (!abortSignal?.aborted) {
+            setIsLoading(false);
+         }
       }
    }, [id, fetchWithAuth]);
 
-   // Function to check for active game
-   const checkActiveGame = React.useCallback(async () => {
-      if (!league) return;
+   // Function to check for active game with abort controller support
+   const checkActiveGame = React.useCallback(async (abortSignal?: AbortSignal) => {
+      if (!league || abortSignal?.aborted) return;
 
       try {
          setIsCheckingActiveGame(true);
          const activeGameResponse = await fetchWithAuth(
-            `${BASE_URL}/api/games/active/${league.id}`
+            `${BASE_URL}/api/games/active/${league.id}`,
+            { signal: abortSignal }
          );
+
+         if (abortSignal?.aborted) return;
 
          if (activeGameResponse.ok) {
             const activeGameData = await activeGameResponse.json();
+
+            if (abortSignal?.aborted) return;
+
             if (activeGameData.success && activeGameData.game) {
                setActiveGame(activeGameData.game);
             } else {
@@ -87,23 +110,37 @@ export default function LeagueStats() {
             setActiveGame(null);
          }
       } catch (error) {
+         if (abortSignal?.aborted) return;
+
          console.error('Error checking for active game:', error);
          setActiveGame(null);
       } finally {
-         setIsCheckingActiveGame(false);
+         if (!abortSignal?.aborted) {
+            setIsCheckingActiveGame(false);
+         }
       }
    }, [league, fetchWithAuth]);
 
-   // Load league details on mount
+   // Load league details on mount with proper cleanup
    React.useEffect(() => {
-      loadLeagueDetails();
+      const abortController = new AbortController();
+      loadLeagueDetails(abortController.signal);
+
+      return () => {
+         abortController.abort();
+      };
    }, [loadLeagueDetails]);
 
-   // Check for active game when league is loaded
+   // Check for active game when league is loaded with proper cleanup
    React.useEffect(() => {
-      if (league) {
-         checkActiveGame();
-      }
+      if (!league) return;
+
+      const abortController = new AbortController();
+      checkActiveGame(abortController.signal);
+
+      return () => {
+         abortController.abort();
+      };
    }, [league, checkActiveGame]);
 
    const handleBack = () => {
@@ -196,9 +233,20 @@ export default function LeagueStats() {
                <View className="mr-6">
                   <Image
                      source={{ uri: league.imageUrl }}
-                     width={120}
-                     height={120}
-                     className="w-30 h-30 rounded-2xl border-8 border-primary object-cover shadow-[6px_6px_0px_0px_rgba(0,0,0,1)]"
+                     style={{
+                        width: 120,
+                        height: 120,
+                        borderRadius: 16,
+                        borderWidth: 8,
+                        borderColor: colors.primary,
+                     }}
+                     className="shadow-[6px_6px_0px_0px_rgba(0,0,0,1)]"
+                     contentFit="cover"
+                     cachePolicy="memory-disk"
+                     priority="high"
+                     placeholder={{ uri: 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNk+M9QDwADhgGAWjR9awAAAABJRU5ErkJggg==' }}
+                     placeholderContentFit="cover"
+                     transition={300}
                      onError={(error) => {
                         captureException(
                            new Error('League image loading failed'),

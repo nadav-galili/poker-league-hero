@@ -3,27 +3,32 @@ import { MyLeaguesHeader } from '@/components/league/MyLeaguesHeader';
 import { EmptyState } from '@/components/shared/EmptyState';
 import { ErrorState } from '@/components/shared/ErrorState';
 import { LoadingState } from '@/components/shared/LoadingState';
+import { LeagueCardSkeleton } from '@/components/shared/LeagueCardSkeleton';
 import { Text } from '@/components/Text';
 import { useMyLeagues } from '@/hooks';
+import { LeagueWithTheme } from '@/types/league';
 import { captureException } from '@/utils/sentry';
+import { FlashList } from '@shopify/flash-list';
 import React from 'react';
-import { FlatList, View } from 'react-native';
+import { RefreshControl, View } from 'react-native';
 
 export default function MyLeagues() {
    const {
       leagues,
       isLoading,
       error,
+      refreshing,
       loadLeagues,
       handleCreateLeague,
       handleJoinLeague,
       handleShareLeague,
       handleLeaguePress,
+      handleRefresh,
    } = useMyLeagues();
 
    // Render function for league cards
    const renderLeagueCard = React.useCallback(
-      ({ item }: { item: any }) => {
+      ({ item }: { item: LeagueWithTheme }) => {
          try {
             return (
                <LeagueCard
@@ -58,7 +63,13 @@ export default function MyLeagues() {
          />
 
          {/* Loading State */}
-         {isLoading && <LoadingState />}
+         {isLoading && (
+            <View className="p-5 gap-4">
+               {Array.from({ length: 3 }).map((_, index) => (
+                  <LeagueCardSkeleton key={index} />
+               ))}
+            </View>
+         )}
 
          {/* Error State */}
          {error && !isLoading && (
@@ -67,25 +78,24 @@ export default function MyLeagues() {
 
          {/* Leagues List */}
          {!isLoading && !error && (
-            <FlatList
+            <FlashList
                data={leagues}
                renderItem={renderLeagueCard}
                keyExtractor={(item) => item.id}
-               contentContainerClassName={`p-5 gap-4 ${leagues.length === 0 ? 'flex-grow justify-center' : ''}`}
-               onScrollToIndexFailed={(info) => {
-                  captureException(
-                     new Error('FlatList scroll to index failed'),
-                     {
-                        function: 'FlatList.onScrollToIndexFailed',
-                        screen: 'MyLeagues',
-                        index: info.index,
-                        highestMeasuredFrameIndex:
-                           info.highestMeasuredFrameIndex,
-                        averageItemLength: info.averageItemLength,
-                     }
-                  );
+               contentContainerStyle={{
+                  padding: 20,
                }}
+               ItemSeparatorComponent={() => <View className="h-4" />}
+               estimatedItemSize={140}
                showsVerticalScrollIndicator={false}
+               refreshControl={
+                  <RefreshControl
+                     refreshing={refreshing}
+                     onRefresh={handleRefresh}
+                     colors={['#6366F1']} // Primary color for Android
+                     tintColor="#6366F1"  // Primary color for iOS
+                  />
+               }
                ListEmptyComponent={
                   <EmptyState
                      onCreateLeague={handleCreateLeague}

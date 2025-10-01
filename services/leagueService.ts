@@ -192,7 +192,8 @@ export class LeagueService {
  * Fetch user leagues (standalone function for hooks)
  */
 export async function fetchUserLeagues(
-   fetchWithAuth: (url: string, options: RequestInit) => Promise<Response>
+   fetchWithAuth: (url: string, options: RequestInit) => Promise<Response>,
+   abortSignal?: AbortSignal
 ): Promise<League[]> {
    try {
       const response = await fetchWithAuth(`${BASE_URL}/api/leagues/user`, {
@@ -200,6 +201,7 @@ export async function fetchUserLeagues(
          headers: {
             'Content-Type': 'application/json',
          },
+         signal: abortSignal,
       });
 
       if (!response.ok) {
@@ -210,6 +212,10 @@ export async function fetchUserLeagues(
       const data = await response.json();
       return data.leagues || [];
    } catch (error) {
+      // Don't log error if request was aborted
+      if (error instanceof Error && error.name === 'AbortError') {
+         throw error;
+      }
       console.error('Error fetching user leagues:', error);
       throw error;
    }
