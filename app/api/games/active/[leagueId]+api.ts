@@ -1,6 +1,6 @@
 import { withAuth } from '@/utils/middleware';
 import { and, desc, eq } from 'drizzle-orm';
-const { getDb, games, leagueMembers } = await import('../../../../db');
+import { games, getDb, leagueMembers } from '../../../../db';
 
 export const GET = withAuth(async (request: Request, user) => {
    try {

@@ -1,11 +1,12 @@
-import { colors, getTheme } from '@/colors';
+import { colors } from '@/colors';
 import { useLocalization } from '@/context/localization';
 import { Ionicons } from '@expo/vector-icons';
 import { Tabs } from 'expo-router';
-import { View } from 'react-native';
+import { Dimensions, View } from 'react-native';
+
+const { width: screenWidth } = Dimensions.get('window');
 
 export default function TabLayout() {
-   const theme = getTheme('light');
    const { t } = useLocalization();
 
    return (
@@ -13,70 +14,116 @@ export default function TabLayout() {
          screenOptions={{
             headerShown: false,
             tabBarStyle: {
-               backgroundColor: theme.primary,
-               borderTopWidth: 6, // Thicker neo-brutalist border
-               borderTopColor: theme.border,
-               borderLeftWidth: 4,
-               borderRightWidth: 4,
-               borderLeftColor: theme.border,
-               borderRightColor: theme.border,
-               paddingBottom: 12,
-               paddingTop: 12,
-               paddingHorizontal: 8,
-               height: 88, // Increased height for better touch targets
-               elevation: 20,
+               backgroundColor: colors.text, // Pure black background
+               borderTopWidth: 8, // Even thicker border
+               borderTopColor: colors.accent, // Neon yellow top border
+               borderLeftWidth: 6,
+               borderRightWidth: 6,
+               borderLeftColor: colors.text,
+               borderRightColor: colors.text,
+               paddingBottom: 16,
+               paddingTop: 16,
+               paddingHorizontal: 12,
+               height: 100, // Taller for more presence
+               elevation: 24,
                shadowColor: colors.text,
-               shadowOffset: { width: 0, height: -8 }, // Stronger shadow
-               shadowOpacity: 1, // Full opacity for brutal shadow
+               shadowOffset: { width: 0, height: -12 }, // More aggressive shadow
+               shadowOpacity: 1,
                shadowRadius: 0, // Hard shadow
+               position: 'absolute', // Ensure it floats above content
             },
             tabBarLabelStyle: {
-               fontSize: 11,
-               fontWeight: '900', // Heavier weight
-               letterSpacing: 1.2, // More spacing
+               fontSize: 10,
+               fontWeight: '900', // Black weight
+               letterSpacing: 2, // Wide letter spacing
                textTransform: 'uppercase',
-               marginTop: 6,
-               textShadowColor: 'rgba(0,0,0,0.5)',
-               textShadowOffset: { width: 1, height: 1 },
+               marginTop: 8,
+               textShadowColor: colors.text,
+               textShadowOffset: { width: 2, height: 2 },
                textShadowRadius: 0,
             },
-            tabBarActiveTintColor: theme.accent, // Neon yellow for active
-            tabBarInactiveTintColor: 'rgba(255,255,255,0.7)',
+            tabBarActiveTintColor: colors.accent, // Neon yellow for active
+            tabBarInactiveTintColor: colors.background, // White for inactive
             tabBarIconStyle: {
-               marginTop: 6,
-               transform: [{ scale: 1.1 }], // Slightly larger icons
+               marginTop: 4,
             },
             tabBarItemStyle: {
-               borderRadius: 0, // Remove rounded corners
-               marginHorizontal: 4,
-               marginVertical: 6,
-               paddingVertical: 4,
+               borderRadius: 0, // Sharp corners
+               marginHorizontal: 8,
+               marginVertical: 4,
+               paddingVertical: 8,
+               paddingHorizontal: 4,
             },
             tabBarBackground: () => (
-               // Custom background with geometric accent
-               <View style={{
-                  flex: 1,
-                  backgroundColor: theme.primary,
-                  position: 'relative',
-               }}>
-                  <View style={{
-                     position: 'absolute',
-                     top: -3,
-                     left: 20,
-                     width: 60,
-                     height: 6,
-                     backgroundColor: theme.accent,
-                     transform: [{ skewX: '-15deg' }],
-                  }} />
-                  <View style={{
-                     position: 'absolute',
-                     top: -3,
-                     right: 20,
-                     width: 60,
-                     height: 6,
-                     backgroundColor: theme.secondary,
-                     transform: [{ skewX: '15deg' }],
-                  }} />
+               <View
+                  style={{
+                     flex: 1,
+                     backgroundColor: colors.primary,
+                     position: 'relative',
+                     overflow: 'hidden',
+                  }}
+               >
+                  {/* Top accent stripe */}
+                  <View
+                     style={{
+                        position: 'absolute',
+                        top: 0,
+                        left: 0,
+                        right: 0,
+                        height: 8,
+                        backgroundColor: colors.accent,
+                     }}
+                  />
+
+                  {/* Geometric accent elements */}
+                  {/* <View
+                     style={{
+                        position: 'absolute',
+                        top: 12,
+                        left: screenWidth * 0.1,
+                        width: 40,
+                        height: 4,
+                        backgroundColor: colors.success,
+                        transform: [{ skewX: '-20deg' }],
+                     }}
+                  />
+
+                  <View
+                     style={{
+                        position: 'absolute',
+                        top: 12,
+                        right: screenWidth * 0.1,
+                        width: 40,
+                        height: 4,
+                        backgroundColor: colors.secondary,
+                        transform: [{ skewX: '20deg' }],
+                     }}
+                  /> */}
+
+                  {/* Bottom geometric elements */}
+                  {/* <View
+                     style={{
+                        position: 'absolute',
+                        bottom: 8,
+                        left: screenWidth * 0.25,
+                        width: 20,
+                        height: 20,
+                        backgroundColor: colors.primary,
+                        transform: [{ rotate: '45deg' }],
+                     }}
+                  />
+
+                  <View
+                     style={{
+                        position: 'absolute',
+                        bottom: 8,
+                        right: screenWidth * 0.25,
+                        width: 20,
+                        height: 20,
+                        backgroundColor: colors.error,
+                        transform: [{ rotate: '45deg' }],
+                     }}
+                  /> */}
                </View>
             ),
          }}
@@ -85,8 +132,39 @@ export default function TabLayout() {
             name="my-leagues"
             options={{
                title: t('myLeagues'),
-               tabBarIcon: ({ color, size }) => (
-                  <Ionicons name="trophy" size={size} color={color} />
+               tabBarIcon: ({ color, focused, size }) => (
+                  <View
+                     style={{
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        width: focused ? 44 : 40,
+                        height: focused ? 44 : 40,
+                        backgroundColor: focused
+                           ? colors.accent
+                           : 'transparent',
+                        borderWidth: focused ? 3 : 2,
+                        borderColor: focused ? colors.text : color,
+                        borderRadius: 0, // Sharp corners
+                        shadowColor: focused ? colors.text : 'transparent',
+                        shadowOffset: { width: 3, height: 3 },
+                        shadowOpacity: focused ? 1 : 0,
+                        shadowRadius: 0,
+                        elevation: focused ? 8 : 0,
+                     }}
+                  >
+                     <Ionicons
+                        name={focused ? 'trophy' : 'trophy-outline'}
+                        size={focused ? 24 : 22}
+                        color={focused ? colors.text : color}
+                        style={{
+                           textShadowColor: focused
+                              ? colors.text
+                              : 'transparent',
+                           textShadowOffset: { width: 1, height: 1 },
+                           textShadowRadius: 0,
+                        }}
+                     />
+                  </View>
                ),
             }}
          />
@@ -94,8 +172,39 @@ export default function TabLayout() {
             name="account"
             options={{
                title: t('account'),
-               tabBarIcon: ({ color, size }) => (
-                  <Ionicons name="person" size={size} color={color} />
+               tabBarIcon: ({ color, focused, size }) => (
+                  <View
+                     style={{
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        width: focused ? 44 : 40,
+                        height: focused ? 44 : 40,
+                        backgroundColor: focused
+                           ? colors.secondary
+                           : 'transparent',
+                        borderWidth: focused ? 3 : 2,
+                        borderColor: focused ? colors.text : color,
+                        borderRadius: 0, // Sharp corners
+                        shadowColor: focused ? colors.text : 'transparent',
+                        shadowOffset: { width: 3, height: 3 },
+                        shadowOpacity: focused ? 1 : 0,
+                        shadowRadius: 0,
+                        elevation: focused ? 8 : 0,
+                     }}
+                  >
+                     <Ionicons
+                        name={focused ? 'person' : 'person-outline'}
+                        size={focused ? 24 : 22}
+                        color={focused ? colors.text : color}
+                        style={{
+                           textShadowColor: focused
+                              ? colors.text
+                              : 'transparent',
+                           textShadowOffset: { width: 1, height: 1 },
+                           textShadowRadius: 0,
+                        }}
+                     />
+                  </View>
                ),
             }}
          />
