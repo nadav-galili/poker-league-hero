@@ -93,14 +93,10 @@ export function validateRequest<T>(
       const validatedData = schema.parse(data);
       return { success: true, data: validatedData };
    } catch (error) {
-      if (
-         error instanceof z.ZodError &&
-         error.errors &&
-         Array.isArray(error.errors)
-      ) {
+      if (error instanceof z.ZodError && Array.isArray(error.issues)) {
          return {
             success: false,
-            errors: error.errors.map((err) => {
+            errors: error.issues.map((err) => {
                const path = Array.isArray(err.path)
                   ? err.path.join('.')
                   : String(err.path || '');

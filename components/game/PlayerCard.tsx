@@ -1,5 +1,4 @@
 import { colors, getTheme } from '@/colors';
-import Button from '@/components/Button';
 import { Text } from '@/components/Text';
 import { useLocalization } from '@/context/localization';
 import { GamePlayer } from '@/hooks/useGameData';
@@ -7,6 +6,7 @@ import { Ionicons } from '@expo/vector-icons';
 import { Image } from 'expo-image';
 import React from 'react';
 import { TouchableOpacity, View } from 'react-native';
+import { AppButton } from '../ui/AppButton';
 
 interface PlayerCardProps {
    player: GamePlayer;
@@ -114,24 +114,25 @@ const PlayerCard: React.FC<PlayerCardProps> = ({
          {/* Action Buttons */}
          {player.isActive && (
             <View className="flex-row gap-2 items-center">
-               <Button
+               <AppButton
                   title={t('buyIn')}
                   onPress={() => onBuyIn(player)}
-                  variant="outline"
-                  size="small"
-                  icon="add-circle"
-                  disabled={isProcessing}
-                  className="bg-primary"
+                  bgColor={colors.primary}
                   textColor={colors.textInverse}
+                  disabled={isProcessing}
+                  width="35%"
+                  icon="add-circle"
+                  iconSize={20}
                />
-               <Button
+               <AppButton
                   title={t('cashOut')}
                   onPress={() => onCashOut(player)}
-                  variant="primary"
-                  icon="cash-outline"
-                  size="small"
-                  className="bg-secondary flex-1"
+                  bgColor={colors.secondary}
+                  textColor={colors.textInverse}
                   disabled={isProcessing}
+                  width="35%"
+                  icon="cash-outline"
+                  iconSize={20}
                />
                <TouchableOpacity
                   onPress={() => onRemovePlayer(player)}
