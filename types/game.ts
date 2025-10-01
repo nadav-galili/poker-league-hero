@@ -51,8 +51,8 @@ export interface BlindLevel {
 
 export interface CreateGameRequest {
    leagueId: string;
-   selectedPlayerIds: string[];
-   buyIn: number;
+   selectedPlayerIds: number[];
+   buyIn: string;
    name?: string;
    settings?: Partial<GameSettings>;
 }

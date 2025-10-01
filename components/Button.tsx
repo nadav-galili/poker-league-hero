@@ -1,7 +1,7 @@
 import { colors, getTheme } from '@/colors';
 import { Ionicons } from '@expo/vector-icons';
 import React from 'react';
-import { Pressable, View, StyleSheet } from 'react-native';
+import { Pressable, StyleSheet, View } from 'react-native';
 import { Text } from './Text';
 
 export type ButtonVariant = 'primary' | 'secondary' | 'outline' | 'warning';
@@ -38,7 +38,17 @@ export default function Button({
       if (backgroundColor) {
          return {
             backgroundColor,
-            borderColor: colors.text,
+            borderColor:
+               backgroundColor === colors.secondary
+                  ? colors.secondary
+                  : backgroundColor === colors.success
+                    ? colors.success
+                    : colors.text,
+            borderWidth:
+               backgroundColor === colors.secondary ||
+               backgroundColor === colors.success
+                  ? 5
+                  : 2,
          };
       }
 
@@ -54,12 +64,6 @@ export default function Button({
                borderColor: theme.secondary,
                borderWidth: 5,
             };
-// ...
-   const getTextColor = () => {
-      if (textColor) return textColor;
-      if (variant === 'outline') return theme.primary;
-      return '#FFFFFF';
-   };
          case 'outline':
             return {
                backgroundColor: 'transparent',
@@ -114,7 +118,8 @@ export default function Button({
    const getTextColor = () => {
       if (textColor) return textColor;
       if (variant === 'outline') return theme.primary;
-      return colors.text;
+      if (variant === 'secondary') return colors.text;
+      return '#FFFFFF';
    };
 
    const getTypographyVariant = () => {
@@ -164,6 +169,9 @@ export default function Button({
                shadowOpacity: 1,
                shadowRadius: 0,
                elevation: pressed ? 6 : 12,
+               // Force backgroundColor override
+               ...(backgroundColor && { backgroundColor }),
+               ...(textColor && { color: textColor }),
             },
             fullWidth && { width: '100%' },
             style,
@@ -173,17 +181,19 @@ export default function Button({
       >
          <View style={styles.content}>
             {icon && (
-               <View style={[
-                  styles.iconContainer,
-                  {
-                     width: 32,
-                     height: 32,
-                     borderRadius: 8,
-                     borderWidth: 2,
-                     borderColor: 'rgba(255, 255, 255, 0.3)',
-                     backgroundColor: 'rgba(255, 255, 255, 0.2)',
-                  }
-               ]}>
+               <View
+                  style={[
+                     styles.iconContainer,
+                     {
+                        width: 32,
+                        height: 32,
+                        borderRadius: 8,
+                        borderWidth: 2,
+                        borderColor: 'rgba(255, 255, 255, 0.3)',
+                        backgroundColor: 'rgba(255, 255, 255, 0.2)',
+                     },
+                  ]}
+               >
                   <Ionicons
                      name={icon}
                      size={getIconSize()}

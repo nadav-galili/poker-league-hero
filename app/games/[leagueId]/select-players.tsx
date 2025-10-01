@@ -15,7 +15,7 @@ import { useGameCreation, useLeagueMembers, usePlayerSelection } from '@/hooks';
 import { Ionicons } from '@expo/vector-icons';
 import { router, useLocalSearchParams } from 'expo-router';
 import React from 'react';
-import { TouchableOpacity, View } from 'react-native';
+import { Pressable, TouchableOpacity, View } from 'react-native';
 
 export default function SelectPlayers() {
    const theme = getTheme('light');
@@ -205,7 +205,7 @@ export default function SelectPlayers() {
             <View
                className="absolute bottom-0 left-0 right-0 p-6 pb-10 shadow-lg"
                style={{
-                  backgroundColor: theme.background,
+                  backgroundColor: 'transparent',
                   shadowColor: colors.shadow,
                   shadowOffset: { width: 0, height: -4 },
                   shadowOpacity: 1,
@@ -213,12 +213,28 @@ export default function SelectPlayers() {
                   elevation: 16,
                }}
             >
-               <Button
-                  title={t('startGame')}
+               <Pressable
                   onPress={handleStartGame}
-                  variant="secondary"
-                  size="large"
-               />
+                  className="bg-success border-success  border-[5px] rounded-2xl py-5 px-6 items-center justify-center w-3/4 mx-auto shadow-lg"
+                  style={{
+                     shadowColor: '#000000',
+                     shadowOffset: {
+                        width: 8,
+                        height: 8,
+                     },
+                     shadowOpacity: 1,
+                     shadowRadius: 0,
+                     elevation: 12,
+                  }}
+               >
+                  <Text
+                     variant="buttonLarge"
+                     color={colors.text}
+                     className="tracking-widest text-center"
+                  >
+                     {t('startGame').toUpperCase()}
+                  </Text>
+               </Pressable>
             </View>
          )}
 

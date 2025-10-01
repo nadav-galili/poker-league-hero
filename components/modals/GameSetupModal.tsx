@@ -241,9 +241,9 @@ export function GameSetupModal({
                         console.error('❌ Error calling onCreateGame:', error);
                      }
                   }}
-                  variant="primary"
                   size="large"
-                  className="bg-secondary"
+                  backgroundColor={colors.success}
+                  textColor={colors.text}
                   disabled={isCreatingGame}
                   fullWidth
                />
