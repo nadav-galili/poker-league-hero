@@ -1,5 +1,11 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import React, { createContext, useContext, useEffect, useState } from 'react';
+import React, {
+   createContext,
+   useCallback,
+   useContext,
+   useEffect,
+   useState,
+} from 'react';
 import { I18nManager } from 'react-native';
 
 export type Language = 'en' | 'he';
@@ -595,12 +601,7 @@ export function LocalizationProvider({
    const [language, setLanguageState] = useState<Language>('en');
    const [isInitialized, setIsInitialized] = useState(false);
 
-   // Load saved language on app start
-   useEffect(() => {
-      loadSavedLanguage();
-   }, []);
-
-   const loadSavedLanguage = async () => {
+   const loadSavedLanguage = useCallback(async () => {
       try {
          const savedLanguage = await AsyncStorage.getItem(LANGUAGE_STORAGE_KEY);
          if (
@@ -615,7 +616,12 @@ export function LocalizationProvider({
       } finally {
          setIsInitialized(true);
       }
-   };
+   }, []);
+
+   // Load saved language on app start
+   useEffect(() => {
+      loadSavedLanguage();
+   }, [loadSavedLanguage]);
 
    const updateRTLMode = async (lang: Language) => {
       const isRTL = lang === 'he';
