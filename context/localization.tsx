@@ -136,6 +136,8 @@ export interface Translations {
 
    // Game Setup Modal
    gameSetup: string;
+   league: string;
+   buyInPerPlayer: string;
    selectedPlayers: string;
    gameName: string;
    optional: string;
@@ -326,6 +328,8 @@ const enTranslations: Translations = {
 
    // Game Setup Modal
    gameSummary: 'GAME SUMMARY',
+   league: 'LEAGUE',
+   buyInPerPlayer: 'BUY-IN PER PLAYER',
    totalPlayers: 'TOTAL PLAYERS',
    gameSetup: 'GAME SETUP',
    selectedPlayers: 'SELECTED PLAYERS',
@@ -492,7 +496,7 @@ const heTranslations: Translations = {
    quickStats: 'סטטיסטיקות מהירות',
    totalGames: 'סה״כ משחקים',
    activePlayers: 'שחקנים פעילים',
-   totalPot: 'סה״כ כדים',
+   totalPot: 'סה״כ קופה',
    lastGame: 'משחק אחרון',
    viewDetailedStats: 'צפה בסטטיסטיקות מפורטות',
    viewStatsDescription: 'ראה דירוגי שחקנים, היסטוריית משחקים וניתוח ביצועים',
@@ -517,6 +521,8 @@ const heTranslations: Translations = {
 
    // Game Setup Modal
    gameSetup: 'הגדרת משחק',
+   league: 'ליגה',
+   buyInPerPlayer: 'סכום כניסה לשחקן',
    totalPlayers: 'סה״כ שחקנים',
    selectedPlayers: 'שחקנים נבחרים',
    gameName: 'שם המשחק',
