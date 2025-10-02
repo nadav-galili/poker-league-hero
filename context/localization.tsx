@@ -113,6 +113,8 @@ export interface Translations {
    checkingGamesDescription: string;
    continueGame: string;
    continueGameDescription: string;
+   playerStats: string;
+   leagueOverview: string;
 
    // Select Players Screen
    selectPlayers: string;
@@ -279,6 +281,8 @@ const enTranslations: Translations = {
    tryAgain: 'Try Again',
 
    // League Stats Screen
+   leagueOverview: 'LEAGUE OVERVIEW',
+   playerStats: 'PLAYER STATS',
    leagueStats: 'LEAGUE STATS',
    loadingLeagueDetails: 'Loading league details...',
    leagueNotFound: 'League not found',
@@ -467,6 +471,8 @@ const heTranslations: Translations = {
    tryAgain: 'נסה שוב',
 
    // League Stats Screen
+   leagueOverview: 'סטטיסטיקות ליגה',
+   playerStats: 'סטטיסטיקות שחקנים',
    leagueStats: 'סטטיסטיקות ליגה',
    loadingLeagueDetails: 'טוען פרטי ליגה...',
    leagueNotFound: 'הליגה לא נמצאה',

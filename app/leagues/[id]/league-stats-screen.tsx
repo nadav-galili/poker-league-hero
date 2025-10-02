@@ -104,12 +104,12 @@ export default function LeagueStatsScreen() {
             }
          >
             {/* Player Stats Cards Grid */}
-            <View style={styles.cardsSection}>
-               <Text className="text-primary text-center mb-6 text-2xl font-black uppercase tracking-[3px]">
-                  PLAYER STATS
-               </Text>
+            <View className="mb-6 items-center px-6">
+               <RNText className="text-primary text-center mb-6 text-2xl font-black uppercase tracking-[3px]">
+                  {t('playerStats')}
+               </RNText>
 
-               <View style={styles.cardsGrid}>
+               <View className="flex-row flex-wrap justify-center items-start w-full gap-4">
                   <TopProfitPlayerCard leagueId={leagueId!} t={t} />
                   <PlayerStatCard
                      leagueId={leagueId!}
@@ -137,7 +137,7 @@ export default function LeagueStatsScreen() {
             {/* Main Stats Grid */}
             <View className="mb-6 items-center px-6">
                <RNText className="text-primary text-center mb-6 text-2xl font-black uppercase tracking-[3px]">
-                  LEAGUE OVERVIEW
+                  {t('leagueOverview')}
                </RNText>
                <View className="flex-row flex-wrap justify-center items-start w-full gap-4">
                   {statCards.map((card, index) => (

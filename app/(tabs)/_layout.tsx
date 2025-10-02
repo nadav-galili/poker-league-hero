@@ -2,9 +2,7 @@ import { colors } from '@/colors';
 import { useLocalization } from '@/context/localization';
 import { Ionicons } from '@expo/vector-icons';
 import { Tabs } from 'expo-router';
-import { Dimensions, View } from 'react-native';
-
-const { width: screenWidth } = Dimensions.get('window');
+import { View } from 'react-native';
 
 export default function TabLayout() {
    const { t } = useLocalization();
