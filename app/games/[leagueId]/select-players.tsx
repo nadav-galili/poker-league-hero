@@ -165,7 +165,7 @@ export default function SelectPlayers() {
                   {league.name}
                </Text>
                <Text variant="body" color={theme.textMuted}>
-                  {t('Select Players For Game')}
+                  {t('selectPlayers')}
                </Text>
             </View>
          )}

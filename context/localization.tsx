@@ -146,6 +146,8 @@ export interface Translations {
    creatingGame: string;
    gameCreatedSuccess: string;
    validBuyInRequired: string;
+   gameSummary: string;
+   totalPlayers: string;
 
    // Game Screen
    gameDetails: string;
@@ -323,6 +325,8 @@ const enTranslations: Translations = {
    member: 'MEMBER',
 
    // Game Setup Modal
+   gameSummary: 'GAME SUMMARY',
+   totalPlayers: 'TOTAL PLAYERS',
    gameSetup: 'GAME SETUP',
    selectedPlayers: 'SELECTED PLAYERS',
    gameName: 'GAME NAME',
@@ -513,6 +517,7 @@ const heTranslations: Translations = {
 
    // Game Setup Modal
    gameSetup: 'הגדרת משחק',
+   totalPlayers: 'סה״כ שחקנים',
    selectedPlayers: 'שחקנים נבחרים',
    gameName: 'שם המשחק',
    optional: 'אופציונלי',
@@ -523,6 +528,7 @@ const heTranslations: Translations = {
    creatingGame: 'יוצר משחק...',
    gameCreatedSuccess: 'המשחק נוצר בהצלחה! השחקנים יכולים להצטרף כעת.',
    validBuyInRequired: 'אנא הכנס סכום כניסה תקין',
+   gameSummary: 'סיכום המשחק',
 
    // Game Screen
    gameDetails: 'פרטי המשחק',
