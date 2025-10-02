@@ -74,56 +74,6 @@ export default function TabLayout() {
                         backgroundColor: colors.accent,
                      }}
                   />
-
-                  {/* Geometric accent elements */}
-                  {/* <View
-                     style={{
-                        position: 'absolute',
-                        top: 12,
-                        left: screenWidth * 0.1,
-                        width: 40,
-                        height: 4,
-                        backgroundColor: colors.success,
-                        transform: [{ skewX: '-20deg' }],
-                     }}
-                  />
-
-                  <View
-                     style={{
-                        position: 'absolute',
-                        top: 12,
-                        right: screenWidth * 0.1,
-                        width: 40,
-                        height: 4,
-                        backgroundColor: colors.secondary,
-                        transform: [{ skewX: '20deg' }],
-                     }}
-                  /> */}
-
-                  {/* Bottom geometric elements */}
-                  {/* <View
-                     style={{
-                        position: 'absolute',
-                        bottom: 8,
-                        left: screenWidth * 0.25,
-                        width: 20,
-                        height: 20,
-                        backgroundColor: colors.primary,
-                        transform: [{ rotate: '45deg' }],
-                     }}
-                  />
-
-                  <View
-                     style={{
-                        position: 'absolute',
-                        bottom: 8,
-                        right: screenWidth * 0.25,
-                        width: 20,
-                        height: 20,
-                        backgroundColor: colors.error,
-                        transform: [{ rotate: '45deg' }],
-                     }}
-                  /> */}
                </View>
             ),
          }}
