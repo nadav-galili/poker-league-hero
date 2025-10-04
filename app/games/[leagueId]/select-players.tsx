@@ -4,17 +4,18 @@
  */
 
 import { colors, getTheme } from '@/colors';
+
 import Button from '@/components/Button';
-import { LoadingState } from '@/components/LoadingState';
-import { Text } from '@/components/Text';
 import { GameSetupModal } from '@/components/modals';
+import { LoadingState } from '@/components/shared/LoadingState';
+import { Text } from '@/components/Text';
 import { PlayerGrid } from '@/components/ui';
 import { useLocalization } from '@/context/localization';
 import { useGameCreation, useLeagueMembers, usePlayerSelection } from '@/hooks';
 import { Ionicons } from '@expo/vector-icons';
 import { router, useLocalSearchParams } from 'expo-router';
 import React from 'react';
-import { TouchableOpacity, View } from 'react-native';
+import { Pressable, TouchableOpacity, View } from 'react-native';
 
 export default function SelectPlayers() {
    const theme = getTheme('light');
@@ -113,6 +114,7 @@ export default function SelectPlayers() {
                   onPress={refetch}
                   variant="secondary"
                   size="medium"
+                  backgroundColor={theme.background}
                />
             </View>
          </View>
@@ -163,7 +165,7 @@ export default function SelectPlayers() {
                   {league.name}
                </Text>
                <Text variant="body" color={theme.textMuted}>
-                  {t('Select Players For Game')}
+                  {t('selectPlayers')}
                </Text>
             </View>
          )}
@@ -201,9 +203,9 @@ export default function SelectPlayers() {
          {/* Start Game Button */}
          {selectedCount > 0 && (
             <View
-               className="absolute bottom-0 left-0 right-0 p-4 pb-8 shadow-lg"
+               className="absolute bottom-0 left-0 right-0 p-6 pb-10 shadow-lg"
                style={{
-                  backgroundColor: theme.background,
+                  backgroundColor: 'transparent',
                   shadowColor: colors.shadow,
                   shadowOffset: { width: 0, height: -4 },
                   shadowOpacity: 1,
@@ -211,14 +213,28 @@ export default function SelectPlayers() {
                   elevation: 16,
                }}
             >
-               <Button
-                  title={t('startGame')}
+               <Pressable
                   onPress={handleStartGame}
-                  variant="primary"
-                  size="large"
-                  className="bg-secondary"
-                  fullWidth
-               />
+                  className="bg-success border-success  border-[5px] rounded-2xl py-5 px-6 items-center justify-center w-3/4 mx-auto shadow-lg"
+                  style={{
+                     shadowColor: '#000000',
+                     shadowOffset: {
+                        width: 8,
+                        height: 8,
+                     },
+                     shadowOpacity: 1,
+                     shadowRadius: 0,
+                     elevation: 12,
+                  }}
+               >
+                  <Text
+                     variant="buttonLarge"
+                     color={colors.text}
+                     className="tracking-widest text-center"
+                  >
+                     {t('startGame').toUpperCase()}
+                  </Text>
+               </Pressable>
             </View>
          )}
 

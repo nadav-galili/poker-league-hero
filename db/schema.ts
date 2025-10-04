@@ -3,15 +3,18 @@ import {
    boolean,
    decimal,
    integer,
+   pgEnum,
    pgTable,
    text,
    timestamp,
-   uuid,
    varchar,
 } from 'drizzle-orm/pg-core';
 
+// Enums
+export const gameStatusEnum = pgEnum('game_status', ['active', 'completed']);
+
 export const users = pgTable('users', {
-   id: uuid('id').defaultRandom().primaryKey(),
+   id: integer('id').generatedAlwaysAsIdentity().primaryKey(),
    email: varchar('email', { length: 255 }).notNull().unique(),
    fullName: text('full_name').notNull(),
    firstName: varchar('first_name', { length: 100 }),
@@ -25,11 +28,11 @@ export const users = pgTable('users', {
 });
 
 export const leagues = pgTable('leagues', {
-   id: uuid('id').defaultRandom().primaryKey(),
+   id: integer('id').generatedAlwaysAsIdentity().primaryKey(),
    name: varchar('name', { length: 100 }).notNull(),
    imageUrl: text('image_url'),
    inviteCode: varchar('invite_code', { length: 5 }).notNull().unique(), // 5-char unique invite code
-   adminUserId: uuid('admin_user_id')
+   adminUserId: integer('admin_user_id')
       .notNull()
       .references(() => users.id, { onDelete: 'cascade' }),
    isActive: boolean('is_active').notNull().default(true),
@@ -38,11 +41,11 @@ export const leagues = pgTable('leagues', {
 });
 
 export const leagueMembers = pgTable('league_members', {
-   id: uuid('id').defaultRandom().primaryKey(),
-   leagueId: uuid('league_id')
+   id: integer('id').generatedAlwaysAsIdentity().primaryKey(),
+   leagueId: integer('league_id')
       .notNull()
       .references(() => leagues.id, { onDelete: 'cascade' }),
-   userId: uuid('user_id')
+   userId: integer('user_id')
       .notNull()
       .references(() => users.id, { onDelete: 'cascade' }),
    role: varchar('role', { length: 20 }).notNull().default('member'), // "admin", "member", "moderator"
@@ -52,15 +55,15 @@ export const leagueMembers = pgTable('league_members', {
 
 // Games table - represents a poker game session
 export const games = pgTable('games', {
-   id: uuid('id').defaultRandom().primaryKey(),
-   leagueId: uuid('league_id')
+   id: integer('id').generatedAlwaysAsIdentity().primaryKey(),
+   leagueId: integer('league_id')
       .notNull()
       .references(() => leagues.id, { onDelete: 'cascade' }),
-   createdBy: uuid('created_by')
+   createdBy: integer('created_by')
       .notNull()
       .references(() => users.id, { onDelete: 'cascade' }),
    buyIn: decimal('buy_in', { precision: 10, scale: 2 }).notNull(), // Buy-in amount
-   status: varchar('status', { length: 20 }).notNull().default('active'), // "active", "completed", "cancelled"
+   status: gameStatusEnum('status').notNull().default('active'), // "active", "completed"
    startedAt: timestamp('started_at').defaultNow().notNull(),
    endedAt: timestamp('ended_at'),
    createdAt: timestamp('created_at').defaultNow().notNull(),
@@ -69,11 +72,11 @@ export const games = pgTable('games', {
 
 // Game Players table - tracks which players participate in each game
 export const gamePlayers = pgTable('game_players', {
-   id: uuid('id').defaultRandom().primaryKey(),
-   gameId: uuid('game_id')
+   id: integer('id').generatedAlwaysAsIdentity().primaryKey(),
+   gameId: integer('game_id')
       .notNull()
       .references(() => games.id, { onDelete: 'cascade' }),
-   userId: uuid('user_id')
+   userId: integer('user_id')
       .notNull()
       .references(() => users.id, { onDelete: 'cascade' }),
    finalAmount: decimal('final_amount', { precision: 10, scale: 2 }), // Final chip amount when game ends
@@ -85,14 +88,14 @@ export const gamePlayers = pgTable('game_players', {
 
 // Cash Ins table - tracks all buy-ins, rebuys, and add-ons
 export const cashIns = pgTable('cash_ins', {
-   id: uuid('id').defaultRandom().primaryKey(),
-   gameId: uuid('game_id')
+   id: integer('id').generatedAlwaysAsIdentity().primaryKey(),
+   gameId: integer('game_id')
       .notNull()
       .references(() => games.id, { onDelete: 'cascade' }),
-   userId: uuid('user_id')
+   userId: integer('user_id')
       .notNull()
       .references(() => users.id, { onDelete: 'cascade' }),
-   gamePlayerId: uuid('game_player_id')
+   gamePlayerId: integer('game_player_id')
       .notNull()
       .references(() => gamePlayers.id, { onDelete: 'cascade' }),
    amount: decimal('amount', { precision: 10, scale: 2 }).notNull(), // Cash-in amount

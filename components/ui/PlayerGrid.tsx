@@ -99,14 +99,14 @@ export function PlayerGrid({
             variant === 'grid'
                ? {
                     padding: 16,
-                    paddingBottom: 100,
+                    paddingBottom: 120,
                     flexGrow: members.length === 0 ? 1 : 0,
                     justifyContent:
                        members.length === 0 ? 'center' : 'flex-start',
                  }
                : {
                     padding: 8,
-                    paddingBottom: 100,
+                    paddingBottom: 120,
                     flexGrow: members.length === 0 ? 1 : 0,
                     justifyContent:
                        members.length === 0 ? 'center' : 'flex-start',

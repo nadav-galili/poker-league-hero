@@ -1,6 +1,7 @@
 import { colors, getTheme } from '@/colors';
 import Button from '@/components/Button';
-import { LoadingState } from '@/components/LoadingState';
+import { BrutalistFormField, ClearButton, ValidationState } from '@/components/forms/BrutalistFormField';
+import { LoadingState } from '@/components/shared/LoadingState';
 import { Text } from '@/components/Text';
 import { BASE_URL } from '@/constants';
 import { useAuth } from '@/context/auth';
@@ -9,11 +10,10 @@ import { Ionicons } from '@expo/vector-icons';
 import { Image } from 'expo-image';
 import * as ImagePicker from 'expo-image-picker';
 import { router } from 'expo-router';
-import React, { useState } from 'react';
+import React, { useState, useCallback } from 'react';
 import {
    ScrollView,
    StyleSheet,
-   TextInput,
    TouchableOpacity,
    View,
 } from 'react-native';
@@ -28,8 +28,64 @@ export default function CreateLeague() {
       image: null as string | null,
       adminUserEmail: '',
    });
+   const [validationStates, setValidationStates] = useState<{
+      name: ValidationState;
+   }>({
+      name: 'idle',
+   });
+   const [errors, setErrors] = useState<{
+      name?: string;
+   }>({});
    //get user data from auth context
    const { user } = useAuth();
+
+   // Validation functions
+   const validateLeagueName = useCallback((name: string): string | null => {
+      if (!name.trim()) {
+         return 'League name is required';
+      }
+      if (name.trim().length < 3) {
+         return 'League name must be at least 3 characters';
+      }
+      if (name.trim().length > 50) {
+         return 'League name must be less than 50 characters';
+      }
+      if (!/^[a-zA-Z0-9\s\-_']+$/.test(name.trim())) {
+         return 'League name contains invalid characters';
+      }
+      return null;
+   }, []);
+
+   const handleNameChange = useCallback((text: string) => {
+      setFormData(prev => ({ ...prev, name: text }));
+
+      // Real-time validation
+      const error = validateLeagueName(text);
+      if (text.length === 0) {
+         setValidationStates(prev => ({ ...prev, name: 'idle' }));
+         setErrors(prev => ({ ...prev, name: undefined }));
+      } else if (error) {
+         setValidationStates(prev => ({ ...prev, name: 'error' }));
+         setErrors(prev => ({ ...prev, name: error }));
+      } else {
+         setValidationStates(prev => ({ ...prev, name: 'valid' }));
+         setErrors(prev => ({ ...prev, name: undefined }));
+      }
+   }, [validateLeagueName]);
+
+   const validateForm = useCallback((): boolean => {
+      const nameError = validateLeagueName(formData.name);
+
+      setValidationStates({
+         name: nameError ? 'error' : 'valid',
+      });
+
+      setErrors({
+         name: nameError || undefined,
+      });
+
+      return !nameError;
+   }, [formData.name, validateLeagueName]);
    const handleCreateLeague = async () => {
       try {
          setIsLoading(true);
@@ -42,15 +98,17 @@ export default function CreateLeague() {
             return;
          }
 
-         formData.adminUserEmail = user.email;
-         if (!formData.name.trim()) {
+         // Validate form before submission
+         if (!validateForm()) {
             Toast.show({
                type: 'error',
                text1: t('error'),
-               text2: 'Please enter a league name',
+               text2: 'Please fix the form errors',
             });
             return;
          }
+
+         formData.adminUserEmail = user.email;
 
          // TODO: Implement actual league creation API call
          console.log('Creating league:', formData);
@@ -146,36 +204,29 @@ export default function CreateLeague() {
             showsVerticalScrollIndicator={false}
          >
             {/* League Name */}
-            <View style={styles.inputGroup}>
-               <Text style={[styles.label, { color: colors.secondary }]}>
-                  {t('leagueName')}
-               </Text>
-               <View style={styles.inputContainer}>
-                  <Ionicons
-                     name="trophy"
-                     size={20}
-                     color={colors.secondary}
-                     style={styles.inputIcon}
-                  />
-                  <TextInput
-                     style={[
-                        styles.input,
-                        {
-                           backgroundColor: colors.background,
-                           borderColor: colors.secondary,
-                           color: theme.text,
-                        },
-                     ]}
-                     value={formData.name}
-                     onChangeText={(text) =>
-                        setFormData({ ...formData, name: text })
-                     }
-                     placeholder="Enter league name"
-                     placeholderTextColor={colors.secondaryTint}
-                     maxLength={50}
-                  />
-               </View>
-            </View>
+            <BrutalistFormField
+               label={t('leagueName')}
+               icon="trophy"
+               value={formData.name}
+               onChangeText={handleNameChange}
+               validationState={validationStates.name}
+               errorMessage={errors.name}
+               successMessage={validationStates.name === 'valid' ? 'Perfect!' : undefined}
+               placeholder="Enter league name"
+               maxLength={50}
+               showCharacterCount={true}
+               required={true}
+               helpText="Choose a unique name for your poker league"
+               variant="large"
+               rightComponent={
+                  formData.name.length > 0 ? (
+                     <ClearButton
+                        onPress={() => handleNameChange('')}
+                        visible={formData.name.length > 0}
+                     />
+                  ) : undefined
+               }
+            />
 
             {/* League Image */}
             <View style={styles.inputGroup}>
@@ -236,9 +287,11 @@ export default function CreateLeague() {
                   title={t('createLeagueButton')}
                   onPress={handleCreateLeague}
                   variant="primary"
-                  style={styles.createButton}
-                  backgroundColor={colors.accent}
-                  textColor={colors.text}
+                  className="bg-primary"
+                  textColor={colors.textInverse}
+                  size="large"
+                  fullWidth
+                  icon="add-circle"
                />
             </View>
          </ScrollView>

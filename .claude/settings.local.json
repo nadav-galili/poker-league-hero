@@ -1,7 +1,16 @@
 {
-   "permissions": {
-      "allow": ["WebFetch(domain:www.nativewind.dev)"],
-      "deny": [],
-      "ask": []
-   }
+  "permissions": {
+    "allow": [
+      "WebFetch(domain:www.nativewind.dev)",
+      "Bash(npm install:*)",
+      "Bash(bun add:*)",
+      "Bash(bun list:*)",
+      "Bash(cat:*)",
+      "Bash(curl:*)",
+      "Bash(find:*)",
+      "Bash(npx tsc:*)"
+    ],
+    "deny": [],
+    "ask": []
+  }
 }

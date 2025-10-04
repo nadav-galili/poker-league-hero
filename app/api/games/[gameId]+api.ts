@@ -3,7 +3,7 @@ import { withAuth } from '@/utils/middleware';
 export const GET = withAuth(async (request: Request, user) => {
    try {
       const url = new URL(request.url);
-      const gameId = url.pathname.split('/').pop(); // Extract gameId from path
+      const gameId = parseInt(url.pathname.split('/').pop() || '', 10); // Extract gameId from path
 
       if (!user.userId) {
          return Response.json(

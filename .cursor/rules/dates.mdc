@@ -1,0 +1,6 @@
+---
+alwaysApply: true
+---
+
+For calculating and displaying dates objects or functions ,
+use the daysjs npm instead ov vanilla new Date()

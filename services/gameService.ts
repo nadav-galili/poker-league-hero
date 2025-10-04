@@ -1,170 +1,206 @@
-/**
- * Game Service - Handles all game-related API operations
- */
-
 import { BASE_URL } from '@/constants';
-import {
-   CreateGameRequest,
-   CreateGameResponse,
-   Game,
-   GameStats,
-} from '@/types';
+import { GamePlayer, LeagueMember } from '@/hooks/useGameData';
+import { captureException } from '@/utils/sentry';
+
+export interface GameServiceDependencies {
+   fetchWithAuth: (url: string, options: any) => Promise<Response>;
+   gameId?: string; // Optional for game creation
+   t: (key: string) => string;
+}
 
 export class GameService {
-   constructor(
-      private fetchWithAuth: (
-         url: string,
-         options: RequestInit
-      ) => Promise<Response>
-   ) {}
+   constructor(private deps: GameServiceDependencies) {}
 
-   /**
-    * Create a new game with selected players
-    */
-   async createGame(request: CreateGameRequest): Promise<CreateGameResponse> {
-      console.log('🚀 GameService.createGame called with:', request);
-      console.log('🌐 BASE_URL:', BASE_URL);
-      console.log('🌐 API URL:', `${BASE_URL}/api/games/create`);
-
-      const response = await this.fetchWithAuth(
-         `${BASE_URL}/api/games/create`,
-         {
-            method: 'POST',
-            headers: {
-               'Content-Type': 'application/json',
-            },
-            body: JSON.stringify(request),
-         }
-      );
-
-      console.log('📡 API Response status:', response.status);
-
-      if (!response.ok) {
-         const errorData = await response.json();
-         throw new Error(
-            errorData.message || errorData.error || 'Failed to create game'
+   async createGame(data: {
+      leagueId: string;
+      selectedPlayerIds: number[];
+      buyIn: string;
+      gameName?: string;
+   }): Promise<{ gameId: string }> {
+      try {
+         const response = await this.deps.fetchWithAuth(
+            `${BASE_URL}/api/games/create`,
+            {
+               method: 'POST',
+               headers: { 'Content-Type': 'application/json' },
+               body: JSON.stringify({
+                  leagueId: data.leagueId,
+                  selectedPlayerIds: data.selectedPlayerIds,
+                  buyIn: data.buyIn,
+               }),
+            }
          );
-      }
 
-      const data = await response.json();
-
-      if (!data.success) {
-         throw new Error(data.message || data.error || 'Failed to create game');
-      }
-
-      return {
-         success: true,
-         gameId: data.gameId,
-         message: data.message,
-         game: data.game,
-      };
-   }
-
-   /**
-    * Get game details by ID
-    */
-   async getGame(gameId: string): Promise<Game> {
-      const response = await this.fetchWithAuth(
-         `${BASE_URL}/api/games/${gameId}`,
-         {}
-      );
-
-      if (!response.ok) {
-         throw new Error('Failed to fetch game details');
-      }
-
-      const data = await response.json();
-
-      if (!data.success || !data.game) {
-         throw new Error(data.message || 'Failed to load game details');
-      }
-
-      return data.game;
-   }
-
-   /**
-    * Get games for a specific league
-    */
-   async getLeagueGames(
-      leagueId: string,
-      page = 1,
-      limit = 20
-   ): Promise<{
-      games: Game[];
-      total: number;
-      hasMore: boolean;
-   }> {
-      const response = await this.fetchWithAuth(
-         `${BASE_URL}/api/leagues/${leagueId}/games?page=${page}&limit=${limit}`,
-         {}
-      );
-
-      if (!response.ok) {
-         throw new Error('Failed to fetch league games');
-      }
-
-      const data = await response.json();
-
-      if (!data.success) {
-         throw new Error(data.message || 'Failed to load league games');
-      }
-
-      return {
-         games: data.games || [],
-         total: data.total || 0,
-         hasMore: data.hasMore || false,
-      };
-   }
-
-   /**
-    * Update game status
-    */
-   async updateGameStatus(gameId: string, status: string): Promise<void> {
-      const response = await this.fetchWithAuth(
-         `${BASE_URL}/api/games/${gameId}/status`,
-         {
-            method: 'PATCH',
-            headers: {
-               'Content-Type': 'application/json',
-            },
-            body: JSON.stringify({ status }),
+         if (!response.ok) {
+            const errorData = await response.json();
+            throw new Error(
+               errorData.message || errorData.error || 'Failed to create game'
+            );
          }
-      );
 
-      if (!response.ok) {
-         const errorData = await response.json();
-         throw new Error(errorData.message || 'Failed to update game status');
+         const result = await response.json();
+         return { gameId: result.gameId };
+      } catch (error) {
+         captureException(error as Error, {
+            function: 'createGame',
+            screen: 'GameCreation',
+            leagueId: data.leagueId,
+            selectedPlayerIds: data.selectedPlayerIds,
+         });
+         throw error;
       }
    }
 
-   /**
-    * Get game statistics
-    */
-   async getGameStats(gameId: string): Promise<GameStats> {
-      const response = await this.fetchWithAuth(
-         `${BASE_URL}/api/games/${gameId}/stats`,
-         {}
-      );
+   async buyIn(player: GamePlayer, buyInAmount: string): Promise<void> {
+      try {
+         const response = await this.deps.fetchWithAuth(
+            `${BASE_URL}/api/games/${this.deps.gameId}/buy-in`,
+            {
+               method: 'POST',
+               headers: { 'Content-Type': 'application/json' },
+               body: JSON.stringify({
+                  playerId: player.userId,
+                  amount: buyInAmount,
+               }),
+            }
+         );
 
-      if (!response.ok) {
-         throw new Error('Failed to fetch game statistics');
+         if (!response.ok) {
+            const errorData = await response.json();
+            throw new Error(errorData.error || 'Failed to process buy-in');
+         }
+      } catch (error) {
+         captureException(error as Error, {
+            function: 'handleBuyIn',
+            screen: 'GameScreen',
+            gameId: this.deps.gameId,
+            playerId: player.userId,
+         });
+         throw error;
       }
+   }
 
-      const data = await response.json();
+   async cashOut(
+      player: GamePlayer,
+      amount: string
+   ): Promise<{ profit: string }> {
+      try {
+         const response = await this.deps.fetchWithAuth(
+            `${BASE_URL}/api/games/${this.deps.gameId}/buy-out`,
+            {
+               method: 'POST',
+               headers: { 'Content-Type': 'application/json' },
+               body: JSON.stringify({
+                  playerId: player.userId,
+                  amount: amount,
+               }),
+            }
+         );
 
-      if (!data.success || !data.stats) {
-         throw new Error(data.message || 'Failed to load game statistics');
+         if (!response.ok) {
+            const errorData = await response.json();
+            throw new Error(errorData.error || 'Failed to process cash out');
+         }
+
+         return await response.json();
+      } catch (error) {
+         captureException(error as Error, {
+            function: 'processCashOut',
+            screen: 'GameScreen',
+            gameId: this.deps.gameId,
+            playerId: player.userId,
+         });
+         throw error;
       }
+   }
 
-      return data.stats;
+   async addPlayer(member: LeagueMember, buyInAmount: string): Promise<void> {
+      try {
+         const response = await this.deps.fetchWithAuth(
+            `${BASE_URL}/api/games/${this.deps.gameId}/add-player`,
+            {
+               method: 'POST',
+               headers: { 'Content-Type': 'application/json' },
+               body: JSON.stringify({
+                  playerId: member.id,
+                  buyInAmount: buyInAmount,
+               }),
+            }
+         );
+
+         if (!response.ok) {
+            const errorData = await response.json();
+            throw new Error(errorData.error || 'Failed to add player');
+         }
+      } catch (error) {
+         captureException(error as Error, {
+            function: 'handleAddPlayer',
+            screen: 'GameScreen',
+            gameId: this.deps.gameId,
+            playerId: member.id,
+         });
+         throw error;
+      }
+   }
+
+   async removePlayer(player: GamePlayer): Promise<void> {
+      try {
+         const response = await this.deps.fetchWithAuth(
+            `${BASE_URL}/api/games/${this.deps.gameId}/remove-player`,
+            {
+               method: 'POST',
+               headers: { 'Content-Type': 'application/json' },
+               body: JSON.stringify({
+                  playerId: player.userId,
+               }),
+            }
+         );
+
+         if (!response.ok) {
+            const errorData = await response.json();
+            throw new Error(errorData.error || 'Failed to remove player');
+         }
+      } catch (error) {
+         captureException(error as Error, {
+            function: 'removePlayer',
+            screen: 'GameScreen',
+            gameId: this.deps.gameId,
+            playerId: player.userId,
+         });
+         throw error;
+      }
+   }
+
+   async endGame(): Promise<void> {
+      try {
+         const response = await this.deps.fetchWithAuth(
+            `${BASE_URL}/api/games/${this.deps.gameId}/end-game`,
+            {
+               method: 'POST',
+               headers: { 'Content-Type': 'application/json' },
+            }
+         );
+
+         if (!response.ok) {
+            const errorData = await response.json();
+            throw new Error(errorData.error || 'Failed to end game');
+         }
+      } catch (error) {
+         captureException(error as Error, {
+            function: 'handleEndGame',
+            screen: 'GameScreen',
+            gameId: this.deps.gameId,
+         });
+         throw error;
+      }
    }
 }
 
-/**
- * Factory function to create GameService instance
- */
-export const createGameService = (
-   fetchWithAuth: (url: string, options: RequestInit) => Promise<Response>
-) => {
-   return new GameService(fetchWithAuth);
-};
+// Factory function to create GameService instance
+export function createGameService(
+   fetchWithAuth: (url: string, options: any) => Promise<Response>,
+   t: (key: string) => string,
+   gameId?: string
+): GameService {
+   return new GameService({ fetchWithAuth, t, gameId });
+}

@@ -51,8 +51,8 @@ export interface BlindLevel {
 
 export interface CreateGameRequest {
    leagueId: string;
-   selectedPlayerIds: string[];
-   buyIn: number;
+   selectedPlayerIds: number[];
+   buyIn: string;
    name?: string;
    settings?: Partial<GameSettings>;
 }
@@ -74,12 +74,7 @@ export interface GameStats {
    averageChipStack: number;
 }
 
-export type GameStatus =
-   | 'setup'
-   | 'active'
-   | 'paused'
-   | 'completed'
-   | 'cancelled';
+export type GameStatus = 'active' | 'completed';
 export type GameType = 'tournament' | 'cash' | 'sit-n-go';
 export type PlayerAction =
    | 'fold'

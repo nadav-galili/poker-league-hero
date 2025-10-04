@@ -3,8 +3,8 @@
  */
 
 import { colors, getTheme } from '@/colors';
-import Button from '@/components/Button';
 import { Text } from '@/components/Text';
+import { AppButton } from '@/components/ui/AppButton';
 import { BuyInSelector } from '@/components/ui/BuyInSelector';
 import { useLocalization } from '@/context/localization';
 import { LeagueMember } from '@/types';
@@ -225,27 +225,16 @@ export function GameSetupModal({
             </ScrollView>
 
             {/* Create Game Button */}
-            <View
-               style={[
-                  styles.modalFooter,
-                  { backgroundColor: theme.background },
-               ]}
-            >
-               <Button
+            <View className="flex justify-center items-center pb-10 pt-4">
+               <AppButton
                   title={isCreatingGame ? t('creatingGame') : t('createGame')}
                   onPress={() => {
-                     console.log('🔘 Create Game button pressed');
-                     try {
-                        onCreateGame();
-                     } catch (error) {
-                        console.error('❌ Error calling onCreateGame:', error);
-                     }
+                     onCreateGame();
                   }}
-                  variant="primary"
-                  size="large"
-                  className="bg-secondary"
+                  textColor={colors.text}
+                  bgColor={colors.success}
                   disabled={isCreatingGame}
-                  fullWidth
+                  width="80%"
                />
             </View>
          </View>

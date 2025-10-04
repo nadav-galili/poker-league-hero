@@ -3,17 +3,26 @@
  */
 
 export { GameService, createGameService } from './gameService';
-export { LeagueService, createLeagueService } from './leagueService';
-export {
-   validateInviteCode,
-   type ValidationResult,
-} from './leagueValidationService';
-export {
-   shareLeague,
-   type ShareableLeague,
-   type ShareResult,
-} from './leagueSharingService';
 export {
    joinLeagueWithCode,
    type JoinLeagueResult,
 } from './leagueOperationsService';
+export { LeagueService, createLeagueService } from './leagueService';
+export {
+   shareLeague,
+   type ShareResult,
+   type ShareableLeague,
+} from './leagueSharingService';
+export {
+   LeagueStatsService,
+   createLeagueStatsService,
+   type PlayerStat,
+   type StatResponse,
+   type StatType,
+   type TopProfitPlayer,
+   type TopProfitPlayerResponse,
+} from './leagueStatsService';
+export {
+   validateInviteCode,
+   type ValidationResult,
+} from './leagueValidationService';

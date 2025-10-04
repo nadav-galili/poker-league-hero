@@ -1,14 +1,15 @@
 import { colors } from '@/colors';
-import ErrorBoundary from '@/components/ErrorBoundary';
-import LocalizedErrorFallback from '@/components/LocalizedErrorFallback';
+import ErrorBoundary from '@/components/shared/ErrorBoundary';
+import LocalizedErrorFallback from '@/components/shared/LocalizedErrorFallback';
 import { AuthProvider } from '@/context/auth';
 import { LocalizationProvider } from '@/context/localization';
+import { NavigationProvider } from '@/context/navigation';
 import { loadFonts } from '@/utils/fonts';
 import * as Sentry from '@sentry/react-native';
 import { Stack } from 'expo-router';
 import * as SplashScreen from 'expo-splash-screen';
 import { useEffect, useState } from 'react';
-import { SafeAreaView } from 'react-native-safe-area-context';
+import { SafeAreaProvider, SafeAreaView } from 'react-native-safe-area-context';
 import Toast, {
    BaseToast,
    ErrorToast,
@@ -77,7 +78,7 @@ const toastConfig = {
             borderRightWidth: 3,
             borderTopColor: colors.border,
             borderTopWidth: 3,
-            backgroundColor: colors.background,
+            backgroundColor: colors.danger,
             shadowColor: colors.shadow,
             shadowOffset: { width: 4, height: 4 },
             shadowOpacity: 1,
@@ -90,14 +91,14 @@ const toastConfig = {
          text1Style={{
             fontSize: 16,
             fontWeight: '700',
-            color: colors.text,
+            color: colors.textInverse,
             textTransform: 'uppercase',
             letterSpacing: 0.5,
          }}
          text2Style={{
             fontSize: 14,
             fontWeight: '500',
-            color: colors.textSecondary,
+            color: colors.textInverse,
          }}
       />
    ),
@@ -168,19 +169,23 @@ export default Sentry.wrap(function RootLayout() {
 
    return (
       <SafeAreaView style={{ flex: 1 }}>
-         <LocalizationProvider>
-            <ErrorBoundary
-               fallback={<LocalizedErrorFallback onRetry={handleRetry} />}
-            >
-               <AuthProvider>
-                  <Stack
-                     screenOptions={{
-                        headerShown: false,
-                     }}
-                  />
-               </AuthProvider>
-            </ErrorBoundary>
-         </LocalizationProvider>
+         <SafeAreaProvider>
+            <LocalizationProvider>
+               <NavigationProvider>
+                  <ErrorBoundary
+                     fallback={<LocalizedErrorFallback onRetry={handleRetry} />}
+                  >
+                     <AuthProvider>
+                        <Stack
+                           screenOptions={{
+                              headerShown: false,
+                           }}
+                        />
+                     </AuthProvider>
+                  </ErrorBoundary>
+               </NavigationProvider>
+            </LocalizationProvider>
+         </SafeAreaProvider>
          <Toast config={toastConfig} />
       </SafeAreaView>
    );

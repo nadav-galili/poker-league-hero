@@ -1,8 +1,8 @@
-import React from 'react';
+import { BASE_URL } from '@/constants';
 import { useAuth } from '@/context/auth';
 import { useLocalization } from '@/context/localization';
-import { BASE_URL } from '@/constants';
 import { captureException } from '@/utils/sentry';
+import React from 'react';
 
 export interface CashIn {
    id: string;
@@ -15,7 +15,7 @@ export interface CashIn {
 
 export interface GamePlayer {
    id: string;
-   userId: string;
+   userId: number;
    fullName: string;
    profileImageUrl?: string;
    isActive: boolean;

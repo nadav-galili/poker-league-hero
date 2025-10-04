@@ -1,15 +1,15 @@
 import { colors, getTheme } from '@/colors';
 import {
-   AdditionalStatsCard,
    LeagueHeader,
-   PlayerCard,
+   PlayerStatCard,
    StatCard,
-} from '@/components/LeagueStats';
-import { LoadingState } from '@/components/LoadingState';
+   TopProfitPlayerCard,
+} from '@/components/league/LeagueStats';
+import { LoadingState } from '@/components/shared/LoadingState';
 import { Text } from '@/components/Text';
 import { useLocalization } from '@/context/localization';
 import { useLeagueStats } from '@/hooks/useLeagueStats';
-import { createStatCards, createTopPlayers } from '@/utils/leagueStatsHelpers';
+import { createStatCards } from '@/services/leagueStatsHelpers';
 import { Ionicons } from '@expo/vector-icons';
 import { router, useLocalSearchParams } from 'expo-router';
 import React from 'react';
@@ -87,7 +87,7 @@ export default function LeagueStatsScreen() {
    }
 
    const statCards = createStatCards(stats, t);
-   const topPlayers = createTopPlayers(stats, t);
+   //   const topPlayers = createTopPlayers(stats, t);
 
    return (
       <View style={[styles.container, { backgroundColor: theme.background }]}>
@@ -103,19 +103,50 @@ export default function LeagueStatsScreen() {
                />
             }
          >
-            {/* Main Stats Grid */}
-            <View style={styles.section}>
-               <RNText className="text-primary text-center mb-4 text-2xl font-bold uppercase tracking-widest">
-                  {t('league Overview')}
+            {/* Player Stats Cards Grid */}
+            <View className="mb-6 items-center px-6">
+               <RNText className="text-primary text-center mb-6 text-2xl font-black uppercase tracking-[3px]">
+                  {t('playerStats')}
                </RNText>
-               <View style={styles.statsGrid}>
+
+               <View className="flex-row flex-wrap justify-center items-start w-full gap-4">
+                  <TopProfitPlayerCard leagueId={leagueId!} t={t} />
+                  <PlayerStatCard
+                     leagueId={leagueId!}
+                     statType="most-active-player"
+                     t={t}
+                  />
+                  <PlayerStatCard
+                     leagueId={leagueId!}
+                     statType="highest-single-game-profit"
+                     t={t}
+                  />
+                  <PlayerStatCard
+                     leagueId={leagueId!}
+                     statType="most-consistent-player"
+                     t={t}
+                  />
+                  <PlayerStatCard
+                     leagueId={leagueId!}
+                     statType="biggest-loser"
+                     t={t}
+                  />
+               </View>
+            </View>
+
+            {/* Main Stats Grid */}
+            <View className="mb-6 items-center px-6">
+               <RNText className="text-primary text-center mb-6 text-2xl font-black uppercase tracking-[3px]">
+                  {t('leagueOverview')}
+               </RNText>
+               <View className="flex-row flex-wrap justify-center items-start w-full gap-4">
                   {statCards.map((card, index) => (
                      <StatCard key={index} card={card} />
                   ))}
                </View>
             </View>
 
-            {/* Top Players */}
+            {/*
             <View style={styles.section}>
                <Text
                   variant="h3"
@@ -128,8 +159,9 @@ export default function LeagueStatsScreen() {
                   <PlayerCard key={index} item={item} t={t} />
                ))}
             </View>
+             Top Players */}
 
-            {/* Additional Stats */}
+            {/* 
             <View style={[styles.section, { marginBottom: 32 }]}>
                <Text
                   variant="h3"
@@ -140,6 +172,7 @@ export default function LeagueStatsScreen() {
                </Text>
                <AdditionalStatsCard league={league} t={t} />
             </View>
+            Additional Stats */}
          </ScrollView>
       </View>
    );
@@ -171,6 +204,17 @@ const styles = StyleSheet.create({
       marginBottom: 24,
       alignItems: 'center',
       paddingHorizontal: 24,
+   },
+   cardsSection: {
+      marginBottom: 32,
+      paddingHorizontal: 24,
+   },
+   cardsGrid: {
+      flexDirection: 'row',
+      flexWrap: 'wrap',
+      justifyContent: 'space-between',
+      alignItems: 'flex-start',
+      gap: 16,
    },
    sectionTitle: {
       textAlign: 'center',

@@ -9,7 +9,7 @@ export interface LeagueStats {
    totalBuyIns: number;
    totalBuyOuts: number;
    activeGames: number;
-   finishedGames: number;
+   completedGames: number;
    totalPlayers: number;
    averageGameDuration: number;
    mostProfitablePlayer: {
@@ -51,69 +51,106 @@ export function useLeagueStats(
    const [error, setError] = React.useState<string | null>(null);
    const [refreshing, setRefreshing] = React.useState(false);
 
-   const loadLeagueData = React.useCallback(async () => {
-      if (!leagueId) return;
+   const loadLeagueData = React.useCallback(
+      async (abortSignal?: AbortSignal) => {
+         if (!leagueId || abortSignal?.aborted) return;
 
-      try {
-         setError(null);
-         if (!refreshing) setIsLoading(true);
+         try {
+            setError(null);
+            if (!refreshing && !abortSignal?.aborted) setIsLoading(true);
 
-         // Fetch league details
-         const leagueResponse = await fetchWithAuth(
-            `${BASE_URL}/api/leagues/${leagueId}`,
-            {}
-         );
+            // Fetch league details
+            const leagueResponse = await fetchWithAuth(
+               `${BASE_URL}/api/leagues/${leagueId}`,
+               { signal: abortSignal }
+            );
 
-         if (!leagueResponse.ok) {
-            throw new Error('Failed to fetch league details');
+            if (abortSignal?.aborted) return;
+
+            if (!leagueResponse.ok) {
+               throw new Error('Failed to fetch league details');
+            }
+
+            const leagueData = await leagueResponse.json();
+
+            if (abortSignal?.aborted) return;
+
+            setLeague(leagueData.league);
+
+            // Fetch league stats
+            const statsResponse = await fetchWithAuth(
+               `${BASE_URL}/api/leagues/${leagueId}/stats`,
+               { signal: abortSignal }
+            );
+
+            if (abortSignal?.aborted) return;
+
+            if (!statsResponse.ok) {
+               throw new Error('Failed to fetch league stats');
+            }
+
+            const statsData = await statsResponse.json();
+
+            if (abortSignal?.aborted) return;
+
+            setStats(statsData.stats);
+         } catch (err) {
+            if (abortSignal?.aborted) return;
+
+            const errorMessage =
+               err instanceof Error
+                  ? err.message
+                  : 'Failed to load league data';
+            setError(errorMessage);
+            captureException(err as Error, {
+               function: 'loadLeagueData',
+               screen: 'LeagueStatsScreen',
+               leagueId,
+            });
+         } finally {
+            if (!abortSignal?.aborted) {
+               setIsLoading(false);
+               setRefreshing(false);
+            }
          }
-
-         const leagueData = await leagueResponse.json();
-         setLeague(leagueData.league);
-
-         // Fetch league stats
-         const statsResponse = await fetchWithAuth(
-            `${BASE_URL}/api/leagues/${leagueId}/stats`,
-            {}
-         );
-
-         if (!statsResponse.ok) {
-            throw new Error('Failed to fetch league stats');
-         }
-
-         const statsData = await statsResponse.json();
-         setStats(statsData.stats);
-      } catch (err) {
-         const errorMessage =
-            err instanceof Error ? err.message : 'Failed to load league data';
-         setError(errorMessage);
-         captureException(err as Error, {
-            function: 'loadLeagueData',
-            screen: 'LeagueStatsScreen',
-            leagueId,
-         });
-      } finally {
-         setIsLoading(false);
-         setRefreshing(false);
-      }
-   }, [leagueId, fetchWithAuth, refreshing]);
+      },
+      [leagueId, fetchWithAuth, refreshing]
+   );
 
    const handleRefresh = React.useCallback(() => {
       setRefreshing(true);
-      loadLeagueData();
+      const abortController = new AbortController();
+      loadLeagueData(abortController.signal);
    }, [loadLeagueData]);
 
    React.useEffect(() => {
-      loadLeagueData();
+      const abortController = new AbortController();
+      loadLeagueData(abortController.signal);
+
+      return () => {
+         abortController.abort();
+      };
    }, [loadLeagueData]);
 
-   return {
-      league,
-      stats,
-      isLoading,
-      error,
-      refreshing,
-      loadLeagueData,
-      handleRefresh,
-   };
+   // Memoize the returned object to prevent unnecessary re-renders
+   return React.useMemo(
+      () => ({
+         league,
+         stats,
+         isLoading,
+         error,
+         refreshing,
+         loadLeagueData,
+         handleRefresh,
+      }),
+      [
+         league,
+         stats,
+         isLoading,
+         error,
+         refreshing,
+         loadLeagueData,
+         handleRefresh,
+      ]
+   );
 }

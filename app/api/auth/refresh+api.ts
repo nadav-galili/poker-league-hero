@@ -8,6 +8,7 @@ import {
    REFRESH_COOKIE_OPTIONS,
    REFRESH_TOKEN_EXPIRY,
 } from '@/constants';
+import { addBreadcrumb } from '@/utils/sentry';
 import * as jose from 'jose';
 
 /**
@@ -38,7 +39,8 @@ export async function POST(request: Request) {
                refreshToken = jsonBody.refreshToken;
             }
          } catch (e) {
-            console.log('Failed to parse JSON body, using default platform');
+            addBreadcrumb('Failed to parse JSON body, using default platform');
+            console.log('Failed to parse JSON body, using default platform', e);
          }
       } else if (
          contentType.includes('application/x-www-form-urlencoded') ||
@@ -56,7 +58,8 @@ export async function POST(request: Request) {
                refreshToken = formData.get('refreshToken') as string;
             }
          } catch (e) {
-            console.log('Failed to parse form data, using default platform');
+            addBreadcrumb('Failed to parse form data, using default platform');
+            console.log('Failed to parse form data, using default platform', e);
          }
       } else {
          // For other content types or no content type, check URL parameters
@@ -64,8 +67,12 @@ export async function POST(request: Request) {
             const url = new URL(request.url);
             platform = url.searchParams.get('platform') || 'native';
          } catch (e) {
-            console.log(
+            addBreadcrumb(
                'Failed to parse URL parameters, using default platform'
+            );
+            console.log(
+               'Failed to parse URL parameters, using default platform',
+               e
             );
          }
       }
@@ -178,7 +185,9 @@ export async function POST(request: Request) {
                      'Using access token fallback - refresh token missing',
                });
             } catch (error) {
-               console.log('🚀 ~ POST ~ error:', error);
+               addBreadcrumb('Failed to verify access token', 'auth', {
+                  error: error,
+               });
                // Access token is invalid or expired
                return Response.json(
                   { error: 'Authentication required - no valid refresh token' },
@@ -202,6 +211,13 @@ export async function POST(request: Request) {
          );
       } catch (error) {
          if (error instanceof jose.errors.JWTExpired) {
+            addBreadcrumb(
+               'Refresh token expired, please sign in again',
+               'auth',
+               {
+                  error: error,
+               }
+            );
             return Response.json(
                { error: 'Refresh token expired, please sign in again' },
                { status: 401 }

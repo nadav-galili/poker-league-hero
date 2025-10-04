@@ -1,6 +1,7 @@
 import { colors, getTheme } from '@/colors';
 import { Ionicons } from '@expo/vector-icons';
-import { Pressable, View } from 'react-native';
+import React from 'react';
+import { Pressable, StyleSheet, View } from 'react-native';
 import { Text } from './Text';
 
 export type ButtonVariant = 'primary' | 'secondary' | 'outline' | 'warning';
@@ -17,7 +18,6 @@ interface ButtonProps {
    backgroundColor?: string;
    textColor?: string;
    style?: any;
-   className?: string;
 }
 
 export default function Button({
@@ -31,7 +31,6 @@ export default function Button({
    backgroundColor,
    textColor,
    style,
-   className,
 }: ButtonProps) {
    const theme = getTheme('light');
 
@@ -39,7 +38,17 @@ export default function Button({
       if (backgroundColor) {
          return {
             backgroundColor,
-            borderColor: colors.text,
+            borderColor:
+               backgroundColor === colors.secondary
+                  ? colors.secondary
+                  : backgroundColor === colors.success
+                    ? colors.success
+                    : colors.text,
+            borderWidth:
+               backgroundColor === colors.secondary ||
+               backgroundColor === colors.success
+                  ? 5
+                  : 2,
          };
       }
 
@@ -52,7 +61,8 @@ export default function Button({
          case 'secondary':
             return {
                backgroundColor: theme.secondary,
-               borderColor: colors.text,
+               borderColor: theme.secondary,
+               borderWidth: 5,
             };
          case 'outline':
             return {
@@ -72,22 +82,43 @@ export default function Button({
       }
    };
 
-   const getSizeClasses = () => {
+   const getSizeStyles = () => {
       switch (size) {
          case 'small':
-            return 'py-3 px-4 rounded-xl border-2';
+            return {
+               paddingVertical: 12,
+               paddingHorizontal: 16,
+               borderRadius: 12,
+               borderWidth: 2,
+            };
          case 'medium':
-            return 'py-4 px-5 rounded-[14px] border-[3px]';
+            return {
+               paddingVertical: 16,
+               paddingHorizontal: 20,
+               borderRadius: 14,
+               borderWidth: 3,
+            };
          case 'large':
-            return 'py-5 px-6 rounded-2xl border-4';
+            return {
+               paddingVertical: 20,
+               paddingHorizontal: 24,
+               borderRadius: 16,
+               borderWidth: 4,
+            };
          default:
-            return 'py-4 px-5 rounded-[14px] border-[3px]';
+            return {
+               paddingVertical: 16,
+               paddingHorizontal: 20,
+               borderRadius: 14,
+               borderWidth: 3,
+            };
       }
    };
 
    const getTextColor = () => {
       if (textColor) return textColor;
       if (variant === 'outline') return theme.primary;
+      if (variant === 'secondary') return colors.text;
       return '#FFFFFF';
    };
 
@@ -118,25 +149,51 @@ export default function Button({
    };
 
    const variantStyles = getVariantStyles();
-   const sizeClasses = getSizeClasses();
+   const sizeStyles = getSizeStyles();
 
    return (
       <Pressable
-         className={`relative items-center justify-center overflow-hidden elevation-3 active:scale-[0.97] active:translate-x-0.5 active:translate-y-0.5 ${sizeClasses} ${fullWidth ? 'w-full' : ''} ${disabled ? 'opacity-50' : ''} ${className || ''}`}
-         style={({ pressed }) => ({
-            ...variantStyles,
-            shadowColor: colors.text,
-            shadowOffset: { width: pressed ? 3 : 6, height: pressed ? 3 : 6 },
-            shadowOpacity: 0.3,
-            shadowRadius: 0,
-            ...style,
-         })}
+         style={({ pressed }) => [
+            {
+               ...variantStyles,
+               ...sizeStyles,
+               alignItems: 'center',
+               justifyContent: 'center',
+               opacity: disabled ? 0.5 : pressed ? 0.9 : 1,
+               transform: [{ scale: pressed && !disabled ? 0.98 : 1 }],
+               shadowColor: colors.text,
+               shadowOffset: {
+                  width: pressed ? 4 : 8,
+                  height: pressed ? 4 : 8,
+               },
+               shadowOpacity: 1,
+               shadowRadius: 0,
+               elevation: pressed ? 6 : 12,
+               // Force backgroundColor override
+               ...(backgroundColor && { backgroundColor }),
+               ...(textColor && { color: textColor }),
+            },
+            fullWidth && { width: '100%' },
+            style,
+         ]}
          onPress={onPress}
          disabled={disabled}
       >
-         <View className="flex-row items-center gap-3">
+         <View style={styles.content}>
             {icon && (
-               <View className="w-8 h-8 rounded-lg items-center justify-center border-2 border-white/30 bg-white/20">
+               <View
+                  style={[
+                     styles.iconContainer,
+                     {
+                        width: 32,
+                        height: 32,
+                        borderRadius: 8,
+                        borderWidth: 2,
+                        borderColor: 'rgba(255, 255, 255, 0.3)',
+                        backgroundColor: 'rgba(255, 255, 255, 0.2)',
+                     },
+                  ]}
+               >
                   <Ionicons
                      name={icon}
                      size={getIconSize()}
@@ -147,17 +204,27 @@ export default function Button({
             <Text
                variant={getTypographyVariant()}
                color={getTextColor()}
-               className="tracking-widest text-center"
+               style={styles.text}
             >
                {title.toUpperCase()}
             </Text>
          </View>
-
-         {/* Neo-brutalist border overlay */}
-         <View
-            className="absolute top-0 left-0 right-0 bottom-0 border-[3px] rounded-[14px] opacity-80 pointer-events-none"
-            style={{ borderColor: variantStyles.borderColor }}
-         />
       </Pressable>
    );
 }
+
+const styles = StyleSheet.create({
+   content: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      gap: 12,
+   },
+   iconContainer: {
+      alignItems: 'center',
+      justifyContent: 'center',
+   },
+   text: {
+      letterSpacing: 2,
+      textAlign: 'center',
+   },
+});

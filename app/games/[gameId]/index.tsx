@@ -1,6 +1,6 @@
 import { colors, getTheme } from '@/colors';
 import Button from '@/components/Button';
-import { LoadingState } from '@/components/LoadingState';
+import { LoadingState } from '@/components/shared/LoadingState';
 import { Text } from '@/components/Text';
 import { useAuth } from '@/context/auth';
 import { useLocalization } from '@/context/localization';
@@ -10,12 +10,13 @@ import React from 'react';
 import { FlatList, TouchableOpacity, View } from 'react-native';
 import Toast from 'react-native-toast-message';
 
-import { AddPlayerModal } from '@/app/components/game/AddPlayerModal';
-import { CashOutModal } from '@/app/components/game/CashOutModal';
-import { GameSummary } from '@/app/components/game/GameSummary';
-import { PlayerCard } from '@/app/components/game/PlayerCard';
-import { GameService } from '@/app/services/gameService';
+import AddPlayerModal from '@/components/game/AddPlayerModal';
+import CashOutModal from '@/components/game/CashOutModal';
+import GameSummary from '@/components/game/GameSummary';
+import PlayerCard from '@/components/game/PlayerCard';
+import { AppButton } from '@/components/ui/AppButton';
 import { GamePlayer, LeagueMember, useGameData } from '@/hooks/useGameData';
+import { createGameService } from '@/services/gameService';
 
 export default function GameScreen() {
    const theme = getTheme('light');
@@ -40,12 +41,13 @@ export default function GameScreen() {
    const [selectedPlayer, setSelectedPlayer] =
       React.useState<GamePlayer | null>(null);
    const [cashOutAmount, setCashOutAmount] = React.useState('');
+   const [cashOutError, setCashOutError] = React.useState<string>('');
    const [isProcessing, setIsProcessing] = React.useState(false);
 
    // Initialize game service
    const gameService = React.useMemo(() => {
       if (!gameId) return null;
-      return new GameService({ fetchWithAuth, gameId, t });
+      return createGameService(fetchWithAuth, t, gameId);
    }, [fetchWithAuth, gameId, t]);
 
    const handleBack = () => {
@@ -62,7 +64,7 @@ export default function GameScreen() {
          Toast.show({
             type: 'success',
             text1: t('success'),
-            text2: t('buyInSuccessful'),
+            text2: `${t('buyInSuccessful')} for ${player.fullName} - ${t('currency')}${game.buyIn}`,
          });
          loadGameData();
       } catch (error) {
@@ -81,26 +83,30 @@ export default function GameScreen() {
    const handleCashOut = (player: GamePlayer) => {
       setSelectedPlayer(player);
       setCashOutAmount('');
+      setCashOutError('');
       setShowCashOutModal(true);
    };
 
+   const handleCashOutAmountChange = (amount: string) => {
+      setCashOutAmount(amount);
+      // Clear error when user starts typing
+      if (cashOutError) {
+         setCashOutError('');
+      }
+   };
+
    const processCashOut = async () => {
+      // Clear any previous error
+      setCashOutError('');
+
       if (!selectedPlayer || !cashOutAmount.trim() || !gameService) {
-         Toast.show({
-            type: 'error',
-            text1: t('error'),
-            text2: t('invalidAmount'),
-         });
+         setCashOutError(t('invalidAmount'));
          return;
       }
 
       const amount = parseFloat(cashOutAmount);
       if (isNaN(amount) || amount < 0) {
-         Toast.show({
-            type: 'error',
-            text1: t('error'),
-            text2: t('invalidAmount'),
-         });
+         setCashOutError(t('invalidAmount'));
          return;
       }
 
@@ -230,7 +236,11 @@ export default function GameScreen() {
             text2: t('gameEndedSuccessfully'),
          });
 
-         loadGameData();
+         await loadGameData();
+         router.replace({
+            pathname: '/leagues/[id]/stats',
+            params: { id: game.leagueId },
+         });
       } catch (error) {
          const errorMessage =
             error instanceof Error ? error.message : 'Failed to end game';
@@ -354,6 +364,27 @@ export default function GameScreen() {
 
          {/* Game Summary */}
          <GameSummary game={game} />
+         <View className="px-4 pb-2 items-center my-4">
+            <AppButton
+               title={t('addPlayer')}
+               onPress={openAddPlayerModal}
+               bgColor={colors.info}
+               textColor={colors.textInverse}
+               disabled={isProcessing}
+               width="50%"
+               icon="person-add"
+               iconSize={20}
+            />
+         </View>
+
+         {/* Add Player Modal */}
+         <AddPlayerModal
+            visible={showAddPlayerModal}
+            availableMembers={availableMembers}
+            isProcessing={isProcessing}
+            onClose={() => setShowAddPlayerModal(false)}
+            onAddPlayer={handleAddPlayer}
+         />
 
          {/* Players List */}
          <FlatList
@@ -367,41 +398,16 @@ export default function GameScreen() {
             ItemSeparatorComponent={() => <View className="h-3" />}
          />
 
-         {/* Add Player Button */}
-         <TouchableOpacity
-            className="absolute bottom-5 right-5 flex-row items-center px-4 py-3 rounded-3xl border-3 border-black shadow-lg elevation-8"
-            style={{ backgroundColor: colors.primary }}
-            onPress={openAddPlayerModal}
-            disabled={isProcessing}
-         >
-            <Ionicons name="person-add" size={24} color={colors.textInverse} />
-            <Text
-               variant="labelSmall"
-               color={colors.textInverse}
-               className="ml-2 font-bold tracking-wide"
-            >
-               {t('addPlayer')}
-            </Text>
-         </TouchableOpacity>
-
          {/* Cash Out Modal */}
          <CashOutModal
             visible={showCashOutModal}
             selectedPlayer={selectedPlayer}
             cashOutAmount={cashOutAmount}
             isProcessing={isProcessing}
+            errorMessage={cashOutError}
             onClose={() => setShowCashOutModal(false)}
-            onCashOutAmountChange={setCashOutAmount}
+            onCashOutAmountChange={handleCashOutAmountChange}
             onConfirm={processCashOut}
-         />
-
-         {/* Add Player Modal */}
-         <AddPlayerModal
-            visible={showAddPlayerModal}
-            availableMembers={availableMembers}
-            isProcessing={isProcessing}
-            onClose={() => setShowAddPlayerModal(false)}
-            onAddPlayer={handleAddPlayer}
          />
       </View>
    );

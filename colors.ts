@@ -24,11 +24,18 @@ const rawColors = {
    shockRed: '#FF0000', // Pure red
 
    // Toned versions for backgrounds
+   electricBlue10: 'rgba(0, 102, 255, 0.1)',
    electricBlue20: 'rgba(0, 102, 255, 0.2)',
+   hotPink10: 'rgba(255, 20, 147, 0.1)',
    hotPink20: 'rgba(255, 20, 147, 0.2)',
+   neonYellow10: 'rgba(255, 255, 0, 0.1)',
    neonYellow20: 'rgba(255, 255, 0, 0.2)',
+   acidGreen10: 'rgba(50, 255, 50, 0.1)',
    acidGreen20: 'rgba(50, 255, 50, 0.2)',
+   blazeOrange10: 'rgba(255, 69, 0, 0.1)',
    blazeOrange20: 'rgba(255, 69, 0, 0.2)',
+   cyberPurple10: 'rgba(138, 43, 226, 0.1)',
+   cyberPurple20: 'rgba(138, 43, 226, 0.2)',
 
    // Text colors
    textPrimary: '#000000', // Black text on light
@@ -73,7 +80,7 @@ export const colors = {
    errorTint: rawColors.blazeOrange20,
 
    info: rawColors.cyberPurple, // Cyber purple for info
-   infoTint: 'rgba(138, 43, 226, 0.2)',
+   infoTint: rawColors.cyberPurple20,
 
    // Additional accents for variety
    highlight: rawColors.toxicLime, // Toxic lime for highlights

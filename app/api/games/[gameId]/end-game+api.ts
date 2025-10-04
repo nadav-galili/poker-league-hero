@@ -32,7 +32,7 @@ export const POST = withAuth(async (request: Request, user) => {
             createdBy: games.createdBy,
          })
          .from(games)
-         .where(eq(games.id, gameId))
+         .where(eq(games.id, parseInt(gameId)))
          .limit(1);
 
       if (gameResult.length === 0) {
@@ -58,7 +58,10 @@ export const POST = withAuth(async (request: Request, user) => {
          .select({ id: gamePlayers.id, userId: gamePlayers.userId })
          .from(gamePlayers)
          .where(
-            and(eq(gamePlayers.gameId, gameId), eq(gamePlayers.isActive, true))
+            and(
+               eq(gamePlayers.gameId, parseInt(gameId)),
+               eq(gamePlayers.isActive, true)
+            )
          );
 
       if (activePlayers.length > 0) {
@@ -71,14 +74,14 @@ export const POST = withAuth(async (request: Request, user) => {
          );
       }
 
-      // Update game status to 'finished' and set endedAt timestamp
+      // Update game status to 'completed' and set endedAt timestamp
       const updatedGame = await db
          .update(games)
          .set({
-            status: 'finished',
+            status: 'completed',
             endedAt: new Date(),
          })
-         .where(eq(games.id, gameId))
+         .where(eq(games.id, parseInt(gameId)))
          .returning();
 
       return Response.json({

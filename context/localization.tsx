@@ -1,5 +1,11 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import React, { createContext, useContext, useEffect, useState } from 'react';
+import React, {
+   createContext,
+   useCallback,
+   useContext,
+   useEffect,
+   useState,
+} from 'react';
 import { I18nManager } from 'react-native';
 
 export type Language = 'en' | 'he';
@@ -54,6 +60,7 @@ export interface Translations {
    hebrew: string;
    success: string;
    ok: string;
+   currency: string;
 
    // League Creation
    createLeaguePrompt: string;
@@ -108,6 +115,12 @@ export interface Translations {
    viewStatsDescription: string;
    startNewGame: string;
    startGameDescription: string;
+   checkingGames: string;
+   checkingGamesDescription: string;
+   continueGame: string;
+   continueGameDescription: string;
+   playerStats: string;
+   leagueOverview: string;
 
    // Select Players Screen
    selectPlayers: string;
@@ -123,6 +136,8 @@ export interface Translations {
 
    // Game Setup Modal
    gameSetup: string;
+   league: string;
+   buyInPerPlayer: string;
    selectedPlayers: string;
    gameName: string;
    optional: string;
@@ -133,6 +148,8 @@ export interface Translations {
    creatingGame: string;
    gameCreatedSuccess: string;
    validBuyInRequired: string;
+   gameSummary: string;
+   totalPlayers: string;
 
    // Game Screen
    gameDetails: string;
@@ -162,9 +179,37 @@ export interface Translations {
    endGame: string;
    confirmEndGame: string;
    endGameMessage: string;
+   cannotEndGame: string;
    gameEnded: string;
    loadingGame: string;
    gameNotFound: string;
+
+   // Top Profit Player Card
+   topProfitPlayer: string;
+   loadingTopPlayer: string;
+   noTopPlayerData: string;
+   noCompletedGames: string;
+   gamesPlayed: string;
+
+   // Generic Player Stats
+   loadingPlayerStat: string;
+   mostActivePlayer: string;
+   highestSingleGameProfit: string;
+   mostConsistentPlayer: string;
+   biggestLoser: string;
+   totalProfit: string;
+   avgProfit: string;
+
+   // League Overview Card Subtitles
+   positiveProfit: string;
+   negativeProfit: string;
+   totalMoneyIn: string;
+   totalMoneyOut: string;
+   active: string;
+   finished: string;
+   uniquePlayers: string;
+   perGame: string;
+   avgGameDuration: string;
 }
 
 // English translations
@@ -206,6 +251,7 @@ const enTranslations: Translations = {
    hebrew: 'עברית',
    success: 'Success',
    ok: 'OK',
+   currency: '$',
 
    // League Creation
    createLeaguePrompt: 'Navigation to create league form coming soon!',
@@ -245,6 +291,8 @@ const enTranslations: Translations = {
    tryAgain: 'Try Again',
 
    // League Stats Screen
+   leagueOverview: 'LEAGUE OVERVIEW',
+   playerStats: 'PLAYER STATS',
    leagueStats: 'LEAGUE STATS',
    loadingLeagueDetails: 'Loading league details...',
    leagueNotFound: 'League not found',
@@ -261,6 +309,10 @@ const enTranslations: Translations = {
       'See player rankings, game history, and performance analytics',
    startNewGame: 'START NEW GAME',
    startGameDescription: 'Create a new poker game for this league',
+   checkingGames: 'CHECKING GAMES',
+   checkingGamesDescription: 'Looking for active games in this league',
+   continueGame: 'CONTINUE GAME',
+   continueGameDescription: 'Resume the currently active game',
 
    // Select Players Screen
    selectPlayers: 'SELECT PLAYERS',
@@ -275,6 +327,10 @@ const enTranslations: Translations = {
    member: 'MEMBER',
 
    // Game Setup Modal
+   gameSummary: 'GAME SUMMARY',
+   league: 'LEAGUE',
+   buyInPerPlayer: 'BUY-IN PER PLAYER',
+   totalPlayers: 'TOTAL PLAYERS',
    gameSetup: 'GAME SETUP',
    selectedPlayers: 'SELECTED PLAYERS',
    gameName: 'GAME NAME',
@@ -305,7 +361,7 @@ const enTranslations: Translations = {
    enterCashOutAmount: 'Enter the amount this player is cashing out with:',
    cashOutAmount: 'Cash Out Amount',
    invalidAmount: 'Please enter a valid amount',
-   playerCashedOut: 'Player cashed out successfully',
+   playerCashedOut: 'Player cashed out',
    buyInSuccessful: 'Buy-in successful',
    selectPlayerToAdd: 'Select a player to add to the game',
    playerAdded: 'Player added to the game',
@@ -314,12 +370,40 @@ const enTranslations: Translations = {
       'Are you sure you want to remove this player from the game?',
    playerRemoved: 'Player removed from the game',
    endGame: 'END GAME',
+   cannotEndGame: 'Cannot end game with active players',
    confirmEndGame: 'End Game',
    endGameMessage:
       'Are you sure you want to end this game? This action cannot be undone.',
    gameEnded: 'Game ended successfully',
    loadingGame: 'Loading game details...',
    gameNotFound: 'Game not found',
+
+   // Top Profit Player Card
+   topProfitPlayer: 'TOP PROFIT PLAYER',
+   loadingTopPlayer: 'Loading top player...',
+   noTopPlayerData: 'No profit data available',
+   noCompletedGames: 'No completed games yet',
+   gamesPlayed: 'games played',
+
+   // Generic Player Stats
+   loadingPlayerStat: 'Loading player stat...',
+   mostActivePlayer: 'MOST ACTIVE PLAYER',
+   highestSingleGameProfit: 'HIGHEST SINGLE GAME',
+   mostConsistentPlayer: 'MOST CONSISTENT PLAYER',
+   biggestLoser: 'BIGGEST LOSER',
+   totalProfit: 'Total Profit',
+   avgProfit: 'Avg Profit',
+
+   // League Overview Card Subtitles
+   positiveProfit: 'Positive Return',
+   negativeProfit: 'Negative Return',
+   totalMoneyIn: 'Money In',
+   totalMoneyOut: 'Money Out',
+   active: 'active',
+   finished: 'finished',
+   uniquePlayers: 'Unique Players',
+   perGame: 'Per Game',
+   avgGameDuration: 'AVG GAME DURATION',
 };
 
 // Hebrew translations
@@ -361,6 +445,7 @@ const heTranslations: Translations = {
    hebrew: 'עברית',
    success: 'הצלחה',
    ok: 'אישור',
+   currency: '₪',
 
    // League Creation
    createLeaguePrompt: 'ניווט לטופס יצירת ליגה יגיע בקרוב!',
@@ -400,6 +485,8 @@ const heTranslations: Translations = {
    tryAgain: 'נסה שוב',
 
    // League Stats Screen
+   leagueOverview: 'סטטיסטיקות ליגה',
+   playerStats: 'סטטיסטיקות שחקנים',
    leagueStats: 'סטטיסטיקות ליגה',
    loadingLeagueDetails: 'טוען פרטי ליגה...',
    leagueNotFound: 'הליגה לא נמצאה',
@@ -409,12 +496,16 @@ const heTranslations: Translations = {
    quickStats: 'סטטיסטיקות מהירות',
    totalGames: 'סה״כ משחקים',
    activePlayers: 'שחקנים פעילים',
-   totalPot: 'סה״כ כדים',
+   totalPot: 'סה״כ קופה',
    lastGame: 'משחק אחרון',
    viewDetailedStats: 'צפה בסטטיסטיקות מפורטות',
    viewStatsDescription: 'ראה דירוגי שחקנים, היסטוריית משחקים וניתוח ביצועים',
    startNewGame: 'התחל משחק חדש',
    startGameDescription: 'צור משחק פוקר חדש עבור הליגה הזו',
+   checkingGames: 'בודק משחקים',
+   checkingGamesDescription: 'מחפש משחקים פעילים בליגה הזו',
+   continueGame: 'המשך משחק',
+   continueGameDescription: 'חזור למשחק הפעיל הנוכחי',
 
    // Select Players Screen
    selectPlayers: 'בחר שחקנים',
@@ -430,6 +521,9 @@ const heTranslations: Translations = {
 
    // Game Setup Modal
    gameSetup: 'הגדרת משחק',
+   league: 'ליגה',
+   buyInPerPlayer: 'סכום כניסה לשחקן',
+   totalPlayers: 'סה״כ שחקנים',
    selectedPlayers: 'שחקנים נבחרים',
    gameName: 'שם המשחק',
    optional: 'אופציונלי',
@@ -440,10 +534,11 @@ const heTranslations: Translations = {
    creatingGame: 'יוצר משחק...',
    gameCreatedSuccess: 'המשחק נוצר בהצלחה! השחקנים יכולים להצטרף כעת.',
    validBuyInRequired: 'אנא הכנס סכום כניסה תקין',
+   gameSummary: 'סיכום המשחק',
 
    // Game Screen
    gameDetails: 'פרטי המשחק',
-   gameInProgress: 'משחק בעיצומו',
+   gameInProgress: 'משחק פעיל',
    totalBuyIns: 'סך כל הכניסות',
    totalBuyOuts: 'סך כל היציאות',
    currentProfit: 'רווח נוכחי',
@@ -459,7 +554,7 @@ const heTranslations: Translations = {
    enterCashOutAmount: 'הכנס את הסכום שהשחקן מושך:',
    cashOutAmount: 'סכום משיכה',
    invalidAmount: 'אנא הכנס סכום תקף',
-   playerCashedOut: 'השחקן משך כסף בהצלחה',
+   playerCashedOut: 'השחקן משך כסף',
    buyInSuccessful: 'כניסה בוצעה בהצלחה',
    selectPlayerToAdd: 'בחר שחקן להוסיף למשחק',
    playerAdded: 'השחקן נוסף למשחק',
@@ -467,12 +562,40 @@ const heTranslations: Translations = {
    removePlayerMessage: 'האם אתה בטוח שברצונך להסיר את השחקן מהמשחק?',
    playerRemoved: 'השחקן הוסר מהמשחק',
    endGame: 'סיים משחק',
+   cannotEndGame: 'יש עדיין שחקנים פעילים',
    confirmEndGame: 'סיים משחק',
    endGameMessage:
       'האם אתה בטוח שברצונך לסיים את המשחק? פעולה זו לא ניתנת לביטול.',
    gameEnded: 'המשחק הסתיים בהצלחה',
    loadingGame: 'טוען פרטי משחק...',
    gameNotFound: 'המשחק לא נמצא',
+
+   // Top Profit Player Card
+   topProfitPlayer: 'שחקן עם הרווח הגבוה ביותר',
+   loadingTopPlayer: 'טוען שחקן מוביל...',
+   noTopPlayerData: 'אין נתוני רווח זמינים',
+   noCompletedGames: 'עדיין אין משחקים שהסתיימו',
+   gamesPlayed: 'משחקים ששיחק',
+
+   // Generic Player Stats
+   loadingPlayerStat: 'טוען סטטיסטיקת שחקן...',
+   mostActivePlayer: 'השחקן הכי פעיל',
+   highestSingleGameProfit: 'הרווח הגבוה במשחק בודד',
+   mostConsistentPlayer: 'השחקן הכי עקבי',
+   biggestLoser: 'המפסיד הכי גדול',
+   totalProfit: 'סך הרווח',
+   avgProfit: 'ממוצע רווח',
+
+   // League Overview Card Subtitles
+   positiveProfit: 'תשואה חיובית',
+   negativeProfit: 'תשואה שלילית',
+   totalMoneyIn: 'כסף נכנס',
+   totalMoneyOut: 'כסף יוצא',
+   active: 'פעילים',
+   finished: 'הסתיימו',
+   uniquePlayers: 'שחקנים ייחודיים',
+   perGame: 'למשחק',
+   avgGameDuration: 'משך משחק ממוצע',
 };
 
 const translations = {
@@ -490,12 +613,7 @@ export function LocalizationProvider({
    const [language, setLanguageState] = useState<Language>('en');
    const [isInitialized, setIsInitialized] = useState(false);
 
-   // Load saved language on app start
-   useEffect(() => {
-      loadSavedLanguage();
-   }, []);
-
-   const loadSavedLanguage = async () => {
+   const loadSavedLanguage = useCallback(async () => {
       try {
          const savedLanguage = await AsyncStorage.getItem(LANGUAGE_STORAGE_KEY);
          if (
@@ -510,7 +628,12 @@ export function LocalizationProvider({
       } finally {
          setIsInitialized(true);
       }
-   };
+   }, []);
+
+   // Load saved language on app start
+   useEffect(() => {
+      loadSavedLanguage();
+   }, [loadSavedLanguage]);
 
    const updateRTLMode = async (lang: Language) => {
       const isRTL = lang === 'he';
