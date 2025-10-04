@@ -7,7 +7,10 @@ import { colors, getTheme } from '@/colors';
 import { Text } from '@/components/Text';
 import { Ionicons } from '@expo/vector-icons';
 import React, { useEffect, useRef } from 'react';
-import { Animated, View, Dimensions, Easing, Pressable } from 'react-native';
+import { Animated, Dimensions, Easing, Pressable, View } from 'react-native';
+
+// Toast context and hook for easy usage
+import { createContext, ReactNode, useContext, useState } from 'react';
 
 export type ToastType = 'success' | 'error' | 'warning' | 'info';
 
@@ -28,7 +31,7 @@ export function BrutalistToast({
    message,
    duration = 4000,
    onHide,
-   onPress
+   onPress,
 }: BrutalistToastProps) {
    const theme = getTheme('light');
    const { width } = Dimensions.get('window');
@@ -68,22 +71,24 @@ export function BrutalistToast({
          );
 
          // Pulse animation for urgent types
-         const pulseAnimation = (type === 'error' || type === 'warning') && Animated.loop(
-            Animated.sequence([
-               Animated.timing(pulseAnim, {
-                  toValue: 1.05,
-                  duration: 600,
-                  easing: Easing.inOut(Easing.sine),
-                  useNativeDriver: true,
-               }),
-               Animated.timing(pulseAnim, {
-                  toValue: 1,
-                  duration: 600,
-                  easing: Easing.inOut(Easing.sine),
-                  useNativeDriver: true,
-               }),
-            ])
-         );
+         const pulseAnimation =
+            (type === 'error' || type === 'warning') &&
+            Animated.loop(
+               Animated.sequence([
+                  Animated.timing(pulseAnim, {
+                     toValue: 1.05,
+                     duration: 600,
+                     easing: Easing.inOut(Easing.sin),
+                     useNativeDriver: true,
+                  }),
+                  Animated.timing(pulseAnim, {
+                     toValue: 1,
+                     duration: 600,
+                     easing: Easing.inOut(Easing.sin),
+                     useNativeDriver: true,
+                  }),
+               ])
+            );
 
          if (type === 'success') {
             iconRotation.start();
@@ -138,14 +143,14 @@ export function BrutalistToast({
                backgroundColor: theme.success,
                borderColor: theme.border,
                iconName: 'checkmark-circle' as const,
-               iconColor: theme.textInverse,
+               iconColor: theme.text,
             };
          case 'error':
             return {
                backgroundColor: theme.error,
                borderColor: theme.border,
                iconName: 'close-circle' as const,
-               iconColor: theme.textInverse,
+               iconColor: theme.text,
             };
          case 'warning':
             return {
@@ -159,14 +164,14 @@ export function BrutalistToast({
                backgroundColor: theme.info,
                borderColor: theme.border,
                iconName: 'information-circle' as const,
-               iconColor: theme.textInverse,
+               iconColor: theme.text,
             };
          default:
             return {
                backgroundColor: theme.primary,
                borderColor: theme.border,
                iconName: 'information-circle' as const,
-               iconColor: theme.textInverse,
+               iconColor: theme.text,
             };
       }
    };
@@ -223,7 +228,8 @@ export function BrutalistToast({
                className="w-12 h-12 border-4 border-border rounded-xl items-center justify-center mr-4"
                style={{
                   backgroundColor: 'rgba(255,255,255,0.2)',
-                  transform: type === 'success' ? [{ rotate: rotation }] : undefined,
+                  transform:
+                     type === 'success' ? [{ rotate: rotation }] : undefined,
                }}
             >
                <Ionicons
@@ -237,14 +243,18 @@ export function BrutalistToast({
             <View className="flex-1">
                <Text
                   variant="h4"
-                  color={type === 'warning' ? theme.text : theme.textInverse}
+                  color={type === 'warning' ? theme.text : theme.text}
                   className="font-black uppercase tracking-wide mb-1"
                >
                   {title}
                </Text>
                <Text
                   variant="body"
-                  color={type === 'warning' ? theme.textSecondary : 'rgba(255,255,255,0.9)'}
+                  color={
+                     type === 'warning'
+                        ? theme.textSecondary
+                        : 'rgba(255,255,255,0.9)'
+                  }
                   className="font-medium leading-5"
                >
                   {message}
@@ -259,11 +269,7 @@ export function BrutalistToast({
                }}
                onPress={handleHide}
             >
-               <Ionicons
-                  name="close"
-                  size={16}
-                  color={styles.iconColor}
-               />
+               <Ionicons name="close" size={16} color={styles.iconColor} />
             </Pressable>
 
             {/* Corner accents */}
@@ -291,9 +297,6 @@ export function BrutalistToast({
    );
 }
 
-// Toast context and hook for easy usage
-import { createContext, useContext, useState, ReactNode } from 'react';
-
 interface ToastContextType {
    showToast: (props: Omit<BrutalistToastProps, 'visible' | 'onHide'>) => void;
 }
@@ -306,7 +309,9 @@ export function ToastProvider({ children }: { children: ReactNode }) {
       props?: Omit<BrutalistToastProps, 'visible' | 'onHide'>;
    }>({ visible: false });
 
-   const showToast = (props: Omit<BrutalistToastProps, 'visible' | 'onHide'>) => {
+   const showToast = (
+      props: Omit<BrutalistToastProps, 'visible' | 'onHide'>
+   ) => {
       setToast({ visible: true, props });
    };
 
