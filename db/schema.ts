@@ -105,6 +105,18 @@ export const cashIns = pgTable('cash_ins', {
    createdAt: timestamp('created_at').defaultNow().notNull(),
 });
 
+// summary table
+export const summaries = pgTable('summaries', {
+   id: integer('id').generatedAlwaysAsIdentity().primaryKey(),
+   leagueId: integer('league_id')
+      .unique()
+      .notNull()
+      .references(() => leagues.id, { onDelete: 'cascade' }),
+   content: text('content').notNull(),
+   generatedAt: timestamp('generated_at').defaultNow().notNull(),
+   expiresAt: timestamp('expires_at').notNull(),
+});
+
 // Relations
 export const usersRelations = relations(users, ({ many }) => ({
    leagues: many(leagueMembers),
@@ -121,6 +133,13 @@ export const leaguesRelations = relations(leagues, ({ one, many }) => ({
    }),
    members: many(leagueMembers),
    games: many(games),
+}));
+
+export const summariesRelations = relations(summaries, ({ one }) => ({
+   league: one(leagues, {
+      fields: [summaries.leagueId],
+      references: [leagues.id],
+   }),
 }));
 
 export const leagueMembersRelations = relations(leagueMembers, ({ one }) => ({
@@ -186,3 +205,5 @@ export type GamePlayer = typeof gamePlayers.$inferSelect;
 export type NewGamePlayer = typeof gamePlayers.$inferInsert;
 export type CashIn = typeof cashIns.$inferSelect;
 export type NewCashIn = typeof cashIns.$inferInsert;
+export type Summary = typeof summaries.$inferSelect;
+export type NewSummary = typeof summaries.$inferInsert;

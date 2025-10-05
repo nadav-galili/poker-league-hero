@@ -51,6 +51,7 @@
       "form-data": "^4.0.4",
       "jose": "^6.0.12",
       "nativewind": "^4.1.23",
+      "openai": "^6.1.0",
       "postgres": "^3.4.7",
       "react": "19.0.0",
       "react-dom": "19.0.0",
