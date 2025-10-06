@@ -30,6 +30,7 @@ const Summary = ({ leagueId }: Props) => {
                headers: {
                   'Content-Type': 'application/json',
                },
+               body: JSON.stringify({ createSummary: false }),
             }
          );
 
@@ -66,7 +67,7 @@ const Summary = ({ leagueId }: Props) => {
          </Text>
 
          <View className="bg-primaryTint rounded-lg p-4">
-            <Text className="text-black font-bold text-md">
+            <Text className="text-black font-bold text-lg">
                {summary?.summary ??
                   'No games played in this year OR summary not generated yet'}
             </Text>

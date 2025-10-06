@@ -93,9 +93,10 @@ export const POST = withAuth(
          }
          const targetYear = year || dayjs().year();
 
+         const body = await request?.json();
          const existingSummary = await getLeagueStatsSummary(validatedLeagueId);
 
-         if (existingSummary) {
+         if (existingSummary && !body.createSummary) {
             return Response.json({ summary: existingSummary });
          }
 
