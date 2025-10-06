@@ -4,6 +4,7 @@ import { llmClient } from '@/services/llmClient';
 import {
    getLeagueStatsSummary,
    storeLeagueStatsSummary,
+   updateSummaryExpiresAt,
 } from '@/services/llmService';
 import { checkLeagueAccess, extractLeagueId } from '@/utils/authorization';
 import { withAuth } from '@/utils/middleware';
@@ -94,9 +95,12 @@ export const POST = withAuth(
          const targetYear = year || dayjs().year();
 
          const body = await request?.json();
+         if (body.createSummary) {
+            await updateSummaryExpiresAt(validatedLeagueId);
+         }
          const existingSummary = await getLeagueStatsSummary(validatedLeagueId);
 
-         if (existingSummary && !body.createSummary) {
+         if (existingSummary) {
             return Response.json({ summary: existingSummary });
          }
 

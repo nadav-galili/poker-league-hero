@@ -1,7 +1,7 @@
 import { BASE_URL } from '@/constants';
 import { useAuth } from '@/context/auth';
-import { useMutation } from '@tanstack/react-query';
-import { useEffect } from 'react';
+import { useQuery } from '@tanstack/react-query';
+import React, { useEffect } from 'react';
 import { Text, View } from 'react-native';
 import { LeagueCardSkeleton } from '../shared/LeagueCardSkeleton';
 
@@ -15,16 +15,21 @@ type getSummaryListResponse = {
 
 const Summary = ({ leagueId }: Props) => {
    const { fetchWithAuth } = useAuth();
+   const [refreshKey, setRefreshKey] = React.useState(0);
+
+   useEffect(() => {
+      setRefreshKey((prev) => prev + 1);
+   }, [leagueId]);
 
    const {
-      mutate,
       data: summary,
       isPending: isLoading,
       error,
-   } = useMutation<getSummaryListResponse, Error>({
-      mutationFn: async () => {
+   } = useQuery<getSummaryListResponse, Error>({
+      queryKey: ['summary', leagueId, refreshKey],
+      queryFn: async () => {
          const response = await fetchWithAuth(
-            `${BASE_URL}/api/leagues/${leagueId}/ai-summary`,
+            `${BASE_URL}/api/leagues/${leagueId}/ai-summary?t=${Date.now()}`,
             {
                method: 'POST',
                headers: {
@@ -36,13 +41,16 @@ const Summary = ({ leagueId }: Props) => {
 
          return response.json();
       },
+      staleTime: 0,
+      gcTime: 0,
+      refetchOnMount: true,
+      refetchOnWindowFocus: true,
+      placeholderData: undefined,
+      initialData: undefined,
+      notifyOnChangeProps: ['data', 'error', 'isLoading'],
+      enabled: true,
+      retry: false,
    });
-
-   useEffect(() => {
-      if (leagueId) {
-         mutate();
-      }
-   }, [leagueId, mutate]);
 
    if (isLoading)
       return (
