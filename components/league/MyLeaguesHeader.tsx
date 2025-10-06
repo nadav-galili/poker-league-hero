@@ -3,9 +3,9 @@
  */
 
 import { colors } from '@/colors';
-import Button from '@/components/Button';
 import { LanguageSelector } from '@/components/shared/LanguageSelector';
 import { Text } from '@/components/Text';
+import { AppButton } from '@/components/ui/AppButton';
 import { useLocalization } from '@/context/localization';
 import React from 'react';
 import { View } from 'react-native';
@@ -40,24 +40,20 @@ export function MyLeaguesHeader({
          {/* Action Buttons Row */}
          <View className={`flex-row gap-3 ${isRTL ? 'flex-row-reverse' : ''}`}>
             <View className="flex-1 ">
-               <Button
+               <AppButton
                   title={t('join')}
                   onPress={onJoinLeague}
-                  variant="outline"
-                  size="medium"
                   icon="enter"
-                  className="bg-secondary"
+                  bgColor={colors.secondary}
                   textColor={colors.textInverse}
                />
             </View>
             <View className="flex-1">
-               <Button
+               <AppButton
                   title={t('create')}
                   onPress={onCreateLeague}
-                  variant="primary"
-                  size="medium"
                   icon="add-circle"
-                  className="bg-success"
+                  bgColor={colors.success}
                   textColor={colors.text}
                />
             </View>
