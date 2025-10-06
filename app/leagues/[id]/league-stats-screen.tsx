@@ -6,7 +6,7 @@ import {
    TopProfitPlayerCard,
 } from '@/components/league/LeagueStats';
 import { LoadingState } from '@/components/shared/LoadingState';
-import SummaryList from '@/components/summary/summaryList';
+import Summary from '@/components/summary/summary';
 import { Text } from '@/components/Text';
 import { useLocalization } from '@/context/localization';
 import { useLeagueStats } from '@/hooks/useLeagueStats';
@@ -104,7 +104,7 @@ export default function LeagueStatsScreen() {
                />
             }
          >
-            <SummaryList leagueId={parseInt(leagueId!)} />
+            <Summary leagueId={parseInt(leagueId!)} />
 
             {/* Player Stats Cards Grid */}
             <View className="mb-6 items-center px-6">

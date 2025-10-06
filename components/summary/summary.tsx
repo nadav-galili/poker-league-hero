@@ -32,10 +32,7 @@ const Summary = ({ leagueId }: Props) => {
                },
             }
          );
-         if (!response.ok) {
-            const errorData = await response.text();
-            throw new Error(errorData || 'Failed to fetch AI summary');
-         }
+
          return response.json();
       },
    });
