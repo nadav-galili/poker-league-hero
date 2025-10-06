@@ -1,5 +1,6 @@
 import { getDb, summaries } from '@/db';
 import dayjs from 'dayjs';
+import { eq } from 'drizzle-orm';
 
 export async function storeLeagueStatsSummary(
    leagueId: string,
@@ -25,3 +26,12 @@ export async function storeLeagueStatsSummary(
          },
       });
 }
+
+export const getLeagueStatsSummary = async (leagueId: number) => {
+   const db = getDb();
+   const summary = await db
+      .select()
+      .from(summaries)
+      .where(eq(summaries.leagueId, leagueId));
+   return summary;
+};

@@ -1,5 +1,8 @@
 import { getGeneralLeagueStats } from '@/services/leagueStatsApiService';
-import { storeLeagueStatsSummary } from '@/services/llmService';
+import {
+   getLeagueStatsSummary,
+   storeLeagueStatsSummary,
+} from '@/services/llmService';
 import { checkLeagueAccess, extractLeagueId } from '@/utils/authorization';
 import { withAuth } from '@/utils/middleware';
 import {
@@ -37,6 +40,7 @@ export const POST = withAuth(
          }
 
          const { leagueId, error: idError } = extractLeagueId(request.url);
+         console.log('🚀 ~ leagueId:', leagueId);
          if (idError || !leagueId) {
             return secureResponse(
                { error: idError || 'League ID is required' },
@@ -81,17 +85,23 @@ export const POST = withAuth(
          }
          const targetYear = year || dayjs().year();
 
+         const existingSummary = await getLeagueStatsSummary(validatedLeagueId);
+
+         if (existingSummary && existingSummary[0].expiresAt > new Date()) {
+            return Response.json({ summary: existingSummary[0].content });
+         }
+
          const statsResponse = await getGeneralLeagueStats(
             validatedLeagueId.toString(),
             targetYear
          );
          const stats = await statsResponse.json();
+         console.log('🚀 ~ stats:', stats);
 
          const prompt = template.replace(
             '{{leagues_stats}}',
             JSON.stringify(stats)
          );
-         console.log('🚀 ~ prompt:', prompt);
 
          const { text: summary } = await llmClient.generateText({
             model: 'gpt-4o-mini',
@@ -103,19 +113,6 @@ export const POST = withAuth(
 
          await storeLeagueStatsSummary(validatedLeagueId.toString(), summary);
          return Response.json({ summary: summary });
-         //  const prompt = `Analyze the following home poker league stats into a short paragraph highlighting
-         //  key insights:
-
-         //  ${JSON.stringify(stats)}
-
-         //  `;
-         //  const response = await client.responses.create({
-         //     model: 'gpt-4o-mini',
-         //     input: prompt,
-         //     temperature: 0.2,
-         //     max_output_tokens: 500,
-         //  });
-         //  return Response.json({ summary: response.output_text });
       } catch (error) {
          console.error('Error fetching league stats summary:', error);
          return secureResponse(
