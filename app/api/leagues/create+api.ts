@@ -1,16 +1,17 @@
-import { createLeague } from '../../../services/leagueUtils';
-import { withAuth } from '../../../utils/middleware';
+import { createLeague } from '@/services/leagueUtils';
+import { withAuth } from '@/utils/middleware';
 import {
-   withRateLimit,
-   validateRequestSecurity,
    secureResponse,
-} from '../../../utils/rateLimiting';
+   validateRequestSecurity,
+   withRateLimit,
+} from '@/utils/rateLimiting';
+import { captureException } from '@/utils/sentry';
 import {
-   validateRequest,
    createLeagueSchema,
    sanitizeString,
    validateEmail,
-} from '../../../utils/validation';
+   validateRequest,
+} from '@/utils/validation';
 
 export const POST = withAuth(
    withRateLimit(async (request: Request, user) => {
@@ -28,7 +29,14 @@ export const POST = withAuth(
          let body;
          try {
             body = await request.json();
-         } catch (parseError) {
+         } catch (error) {
+            // Capture actual errors
+            captureException(error as Error, {
+               function: 'parseRequestBody',
+               screen: 'CreateLeague',
+               body: body,
+            });
+            console.error('Error parsing request body:', error);
             return secureResponse(
                { error: 'Invalid JSON payload' },
                { status: 400 }
@@ -78,8 +86,12 @@ export const POST = withAuth(
             );
          }
 
+         console.log('Creating league with data:', sanitizedData);
+
          // Create league with sanitized data
          const league = await createLeague(sanitizedData);
+
+         console.log('League created successfully:', league.id);
 
          return secureResponse(
             {

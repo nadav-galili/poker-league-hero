@@ -36,7 +36,7 @@ export default function CreateLeague() {
       name?: string;
    }>({});
    //get user data from auth context
-   const { user } = useAuth();
+   const { user, fetchWithAuth } = useAuth();
 
    // Validation functions
    const validateLeagueName = useCallback((name: string): string | null => {
@@ -112,19 +112,42 @@ export default function CreateLeague() {
 
          formData.adminUserEmail = user.email;
 
-         //send data to backend
-         const response = await fetch(`${BASE_URL}/api/leagues/create`, {
-            method: 'POST',
-            body: JSON.stringify(formData),
-         });
+         // Clean up form data - remove null/empty image
+         const cleanFormData = {
+            ...formData,
+            image:
+               formData.image && formData.image.trim()
+                  ? formData.image
+                  : undefined,
+         };
+
+         //send data to backend using authenticated fetch
+         const response = await fetchWithAuth(
+            `${BASE_URL}/api/leagues/create`,
+            {
+               method: 'POST',
+               headers: {
+                  'Content-Type': 'application/json',
+               },
+               body: JSON.stringify(cleanFormData),
+            }
+         );
 
          if (!response.ok) {
+            const errorData = await response.json().catch(() => ({}));
+            console.error('League creation failed:', {
+               status: response.status,
+               statusText: response.statusText,
+               error: errorData,
+            });
             Toast.show({
                type: 'error',
                text1: t('error'),
-               text2: 'Failed to create league',
+               text2: errorData.error || 'Failed to create league',
             });
-            throw new Error('Failed to create league');
+            throw new Error(
+               `Failed to create league: ${errorData.error || response.statusText}`
+            );
          }
 
          const data = await response.json();

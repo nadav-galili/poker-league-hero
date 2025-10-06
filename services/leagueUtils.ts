@@ -123,17 +123,28 @@ export async function createLeague(data: {
    image?: string;
    adminUserEmail: string;
 }): Promise<any> {
+   console.log('createLeague called with:', {
+      ...data,
+      image: data.image ? 'present' : 'none',
+   });
+
    const { getDb, leagues } = await import('../db');
    const db = getDb();
-   ///gete user id from email
+
+   // Get user id from email
+   console.log('Looking up user with email:', data.adminUserEmail);
    const user = await db
       .select()
       .from(users)
       .where(eq(users.email, data.adminUserEmail));
-   if (!user) {
+
+   console.log('User lookup result:', user);
+
+   if (!user || user.length === 0) {
       throw new Error('User not found');
    }
    const userId = user[0].id;
+   console.log('Found user ID:', userId);
    let imageUrl = data.image;
    if (imageUrl && imageUrl.startsWith('file://')) {
       // Upload to Cloudflare R2 first using server-side upload
@@ -141,7 +152,8 @@ export async function createLeague(data: {
       const uploadedUrl = await uploadImageToR2Server(imageUrl);
       imageUrl = uploadedUrl;
    } else if (!imageUrl) {
-      imageUrl = undefined; // No default image - let the UI handle the fallback
+      imageUrl =
+         'https://pub-6908906fe4c24b7b82ff61e803190c28.r2.dev/Gemini_Generated_Image_70gku770gku770gk.png'; // No default image - let the UI handle the fallback
    }
    data.image = imageUrl;
    const inviteCode = await generateUniqueInviteCode();
