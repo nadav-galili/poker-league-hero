@@ -1,5 +1,6 @@
 import { getGeneralLeagueStats } from '@/services/leagueStatsApiService';
 import { getLeagueDetails } from '@/services/leagueUtils';
+import { llmClient } from '@/services/llmClient';
 import {
    getLeagueStatsSummary,
    storeLeagueStatsSummary,
@@ -15,7 +16,6 @@ import { validateDatabaseId } from '@/utils/validation';
 import dayjs from 'dayjs';
 import { readFileSync } from 'fs';
 import { join } from 'path';
-import { llmClient } from '../../llm/client';
 
 const template = readFileSync(
    join(process.cwd(), 'app/api/llm/prompts/summarize-leagues.txt'),
@@ -121,7 +121,6 @@ export const POST = withAuth(
             prompt,
             temperature: 0.2,
             maxTokens: 500,
-            apiKey: process.env.OPENAI_API_KEY!,
          });
 
          await storeLeagueStatsSummary(validatedLeagueId.toString(), summary);

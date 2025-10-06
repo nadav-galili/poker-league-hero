@@ -6,7 +6,6 @@ type GenerateTextOptions = {
    temperature?: number;
    instructions?: string;
    maxTokens?: number;
-   apiKey: string;
 };
 
 type GenerateTextResult = {
@@ -21,10 +20,9 @@ export const llmClient = {
       instructions,
       temperature = 0.2,
       maxTokens = 500,
-      apiKey,
    }: GenerateTextOptions): Promise<GenerateTextResult> {
       const client = new OpenAI({
-         apiKey: apiKey,
+         apiKey: process.env.OPENAI_API_KEY,
       });
 
       const response = await client.responses.create({
