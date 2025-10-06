@@ -6,6 +6,7 @@ import { LocalizationProvider } from '@/context/localization';
 import { NavigationProvider } from '@/context/navigation';
 import { loadFonts } from '@/utils/fonts';
 import * as Sentry from '@sentry/react-native';
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { Stack } from 'expo-router';
 import * as SplashScreen from 'expo-splash-screen';
 import { useEffect, useState } from 'react';
@@ -32,6 +33,8 @@ Sentry.init({
    // uncomment the line below to enable Spotlight (https://spotlightjs.com)
    // spotlight: __DEV__,
 });
+
+const queryClient = new QueryClient();
 
 // Prevent the splash screen from auto-hiding before asset loading is complete.
 SplashScreen.preventAutoHideAsync();
@@ -170,21 +173,25 @@ export default Sentry.wrap(function RootLayout() {
    return (
       <SafeAreaView style={{ flex: 1 }}>
          <SafeAreaProvider>
-            <LocalizationProvider>
-               <NavigationProvider>
-                  <ErrorBoundary
-                     fallback={<LocalizedErrorFallback onRetry={handleRetry} />}
-                  >
-                     <AuthProvider>
-                        <Stack
-                           screenOptions={{
-                              headerShown: false,
-                           }}
-                        />
-                     </AuthProvider>
-                  </ErrorBoundary>
-               </NavigationProvider>
-            </LocalizationProvider>
+            <QueryClientProvider client={queryClient}>
+               <LocalizationProvider>
+                  <NavigationProvider>
+                     <ErrorBoundary
+                        fallback={
+                           <LocalizedErrorFallback onRetry={handleRetry} />
+                        }
+                     >
+                        <AuthProvider>
+                           <Stack
+                              screenOptions={{
+                                 headerShown: false,
+                              }}
+                           />
+                        </AuthProvider>
+                     </ErrorBoundary>
+                  </NavigationProvider>
+               </LocalizationProvider>
+            </QueryClientProvider>
          </SafeAreaProvider>
          <Toast config={toastConfig} />
       </SafeAreaView>

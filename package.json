@@ -25,6 +25,7 @@
       "@react-navigation/native": "^7.1.6",
       "@sentry/react-native": "^6.19.0",
       "@shopify/flash-list": "^2.1.0",
+      "@tanstack/react-query": "^5.90.2",
       "aws-sdk": "^2.1692.0",
       "bun": "^1.2.19",
       "dayjs": "^1.11.18",

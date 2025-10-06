@@ -1,8 +1,8 @@
 import { BASE_URL } from '@/constants';
 import { useAuth } from '@/context/auth';
 
-import { captureException } from '@/utils/sentry';
-import { useCallback, useEffect, useState } from 'react';
+import { useQuery } from '@tanstack/react-query';
+import { useCallback } from 'react';
 import { Text, View } from 'react-native';
 import { LeagueCardSkeleton } from '../shared/LeagueCardSkeleton';
 
@@ -15,43 +15,31 @@ type getSummaryListResponse = {
 };
 
 const Summary = ({ leagueId }: Props) => {
-   const [summary, setSummary] = useState<getSummaryListResponse | null>(null);
-   const [isLoading, setIsLoading] = useState(false);
-   const [error, setError] = useState<string>('');
+   const {
+      data: summary,
+      isLoading,
+      error,
+   } = useQuery<getSummaryListResponse>({
+      queryKey: ['summary', leagueId],
+      queryFn: () => fetchSummary(),
+   });
+
    const { fetchWithAuth } = useAuth();
 
    const fetchSummary = useCallback(async () => {
-      try {
-         setIsLoading(true);
-         const response = await fetchWithAuth(
-            `${BASE_URL}/api/leagues/${leagueId}/ai-summary`,
-            {
-               method: 'POST',
-               headers: {
-                  'Content-Type': 'application/json',
-               },
-            }
-         );
+      const response = await fetchWithAuth(
+         `${BASE_URL}/api/leagues/${leagueId}/ai-summaryx`,
+         {
+            method: 'POST',
+            headers: {
+               'Content-Type': 'application/json',
+            },
+         }
+      );
 
-         const data = await response.json();
-
-         setSummary(data);
-      } catch (error) {
-         console.log('🚀 ~ Summary ~ error:', error);
-         setError('Failed to fetch summary');
-         captureException(error as Error, {
-            function: 'fetchSummary',
-            screen: 'SummaryList',
-            leagueId: leagueId,
-         });
-      } finally {
-         setIsLoading(false);
-      }
+      const data = await response.json();
+      return data;
    }, [leagueId, fetchWithAuth]);
-
-   useEffect(() => {
-      fetchSummary();
-   }, [fetchSummary]);
 
    if (isLoading)
       return (
@@ -65,7 +53,7 @@ const Summary = ({ leagueId }: Props) => {
    if (error)
       return (
          <View className="bg-errorTint rounded-lg p-4">
-            <Text className="text-error">{error}</Text>
+            <Text className="text-error">Failed to fetch AI summary</Text>
          </View>
       );
 
