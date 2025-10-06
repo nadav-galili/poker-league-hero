@@ -1,8 +1,7 @@
 import { BASE_URL } from '@/constants';
 import { useAuth } from '@/context/auth';
-
-import { useQuery } from '@tanstack/react-query';
-import { useCallback } from 'react';
+import { useMutation } from '@tanstack/react-query';
+import { useEffect } from 'react';
 import { Text, View } from 'react-native';
 import { LeagueCardSkeleton } from '../shared/LeagueCardSkeleton';
 
@@ -15,31 +14,37 @@ type getSummaryListResponse = {
 };
 
 const Summary = ({ leagueId }: Props) => {
-   const {
-      data: summary,
-      isLoading,
-      error,
-   } = useQuery<getSummaryListResponse>({
-      queryKey: ['summary', leagueId],
-      queryFn: () => fetchSummary(),
-   });
-
    const { fetchWithAuth } = useAuth();
 
-   const fetchSummary = useCallback(async () => {
-      const response = await fetchWithAuth(
-         `${BASE_URL}/api/leagues/${leagueId}/ai-summaryx`,
-         {
-            method: 'POST',
-            headers: {
-               'Content-Type': 'application/json',
-            },
+   const {
+      mutate,
+      data: summary,
+      isPending: isLoading,
+      error,
+   } = useMutation<getSummaryListResponse, Error>({
+      mutationFn: async () => {
+         const response = await fetchWithAuth(
+            `${BASE_URL}/api/leagues/${leagueId}/ai-summary`,
+            {
+               method: 'POST',
+               headers: {
+                  'Content-Type': 'application/json',
+               },
+            }
+         );
+         if (!response.ok) {
+            const errorData = await response.text();
+            throw new Error(errorData || 'Failed to fetch AI summary');
          }
-      );
+         return response.json();
+      },
+   });
 
-      const data = await response.json();
-      return data;
-   }, [leagueId, fetchWithAuth]);
+   useEffect(() => {
+      if (leagueId) {
+         mutate();
+      }
+   }, [leagueId, mutate]);
 
    if (isLoading)
       return (
@@ -60,7 +65,7 @@ const Summary = ({ leagueId }: Props) => {
    return (
       <View>
          <Text className="text-primary text-center mb-6 text-2xl font-black uppercase tracking-[3px]">
-            AI Summary
+            ✨ AI Summary
          </Text>
 
          <View className="bg-primaryTint rounded-lg p-4">
