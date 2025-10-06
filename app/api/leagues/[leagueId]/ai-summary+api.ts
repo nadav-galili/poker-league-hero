@@ -102,7 +102,7 @@ export const POST = withAuth(
          });
 
          await storeLeagueStatsSummary(validatedLeagueId.toString(), summary);
-         return Response.json({ summary: stats.summary });
+         return Response.json({ summary: summary });
          //  const prompt = `Analyze the following home poker league stats into a short paragraph highlighting
          //  key insights:
 
