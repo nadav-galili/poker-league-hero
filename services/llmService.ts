@@ -1,6 +1,6 @@
 import { getDb, summaries } from '@/db';
 import dayjs from 'dayjs';
-import { eq } from 'drizzle-orm';
+import { and, eq, gt } from 'drizzle-orm';
 
 export async function storeLeagueStatsSummary(
    leagueId: string,
@@ -27,11 +27,19 @@ export async function storeLeagueStatsSummary(
       });
 }
 
-export const getLeagueStatsSummary = async (leagueId: number) => {
+export const getLeagueStatsSummary = async (
+   leagueId: number
+): Promise<string | null> => {
    const db = getDb();
    const summary = await db
-      .select()
+      .select({ content: summaries.content })
       .from(summaries)
-      .where(eq(summaries.leagueId, leagueId));
-   return summary;
+      .where(
+         and(
+            eq(summaries.leagueId, leagueId),
+            gt(summaries.expiresAt, new Date())
+         )
+      )
+      .limit(1);
+   return summary[0]?.content || null;
 };

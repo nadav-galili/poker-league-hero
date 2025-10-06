@@ -6,6 +6,7 @@ import {
    TopProfitPlayerCard,
 } from '@/components/league/LeagueStats';
 import { LoadingState } from '@/components/shared/LoadingState';
+import SummaryList from '@/components/summary/summaryList';
 import { Text } from '@/components/Text';
 import { useLocalization } from '@/context/localization';
 import { useLeagueStats } from '@/hooks/useLeagueStats';
@@ -103,6 +104,9 @@ export default function LeagueStatsScreen() {
                />
             }
          >
+            <View>
+               <SummaryList leagueId={parseInt(leagueId!)} />
+            </View>
             {/* Player Stats Cards Grid */}
             <View className="mb-6 items-center px-6">
                <RNText className="text-primary text-center mb-6 text-2xl font-black uppercase tracking-[3px]">

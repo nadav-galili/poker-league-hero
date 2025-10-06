@@ -95,8 +95,8 @@ export const POST = withAuth(
 
          const existingSummary = await getLeagueStatsSummary(validatedLeagueId);
 
-         if (existingSummary && existingSummary[0]?.expiresAt > new Date()) {
-            return Response.json({ summary: existingSummary[0].content });
+         if (existingSummary) {
+            return Response.json({ summary: existingSummary });
          }
 
          const statsResponse = await getGeneralLeagueStats(
