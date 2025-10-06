@@ -9,7 +9,24 @@ import {
 } from '@/db';
 import { secureResponse } from '@/utils/rateLimiting';
 import dayjs from 'dayjs';
-import { and, desc, eq, gte, lte, sql, sum } from 'drizzle-orm';
+import { and, desc, eq, exists, gte, lte, sql, sum } from 'drizzle-orm';
+
+type GeneralLeagueStats = {
+   totalGames: number;
+   activeGames: number;
+   completedGames: number;
+   totalPlayers: number;
+   totalProfit: string;
+   totalBuyIns: number;
+   totalBuyOuts: number;
+   totalGamesPlayed: number;
+   gamesWon: number;
+   gamesLost: number;
+   gamesTied: number;
+   totalCashInAmount: string;
+   avgProfit: number;
+   averageGameDuration: number;
+};
 
 export async function getGeneralLeagueStats(leagueId: string, year: number) {
    const db = getDb();
@@ -189,12 +206,21 @@ export async function getLeagueStatsForAi(leagueId: string) {
       })
       .from(leagueMembers)
       .innerJoin(users, eq(leagueMembers.userId, users.id))
-      .leftJoin(gamePlayers, eq(gamePlayers.userId, users.id))
       .leftJoin(
-         games,
+         gamePlayers,
          and(
-            eq(games.id, gamePlayers.gameId),
-            eq(games.leagueId, parseInt(leagueId))
+            eq(gamePlayers.userId, users.id),
+            exists(
+               db
+                  .select()
+                  .from(games)
+                  .where(
+                     and(
+                        eq(games.id, gamePlayers.gameId),
+                        eq(games.leagueId, parseInt(leagueId))
+                     )
+                  )
+            )
          )
       )
       .leftJoin(cashIns, eq(cashIns.gamePlayerId, gamePlayers.id))
@@ -249,7 +275,7 @@ export async function getLeagueStatsForAi(leagueId: string) {
       .limit(10);
 
    return {
-      memberStats: memberStats.map((stat: any) => ({
+      memberStats: memberStats.map((stat: GeneralLeagueStats) => ({
          ...stat,
          winRate:
             stat.totalGamesPlayed > 0

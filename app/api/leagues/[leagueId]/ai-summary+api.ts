@@ -1,4 +1,5 @@
-import { getLeagueStatsForAi } from '@/services/leagueStatsApiService';
+import { getGeneralLeagueStats } from '@/services/leagueStatsApiService';
+import { storeLeagueStatsSummary } from '@/services/llmService';
 import { checkLeagueAccess, extractLeagueId } from '@/utils/authorization';
 import { withAuth } from '@/utils/middleware';
 import {
@@ -8,7 +9,14 @@ import {
 } from '@/utils/rateLimiting';
 import { validateDatabaseId } from '@/utils/validation';
 import dayjs from 'dayjs';
-import OpenAI from 'openai';
+import { readFileSync } from 'fs';
+import { join } from 'path';
+import { llmClient } from '../../llm/client';
+
+const template = readFileSync(
+   join(process.cwd(), 'app/api/llm/prompts/summarize-leagues.txt'),
+   'utf-8'
+);
 
 export const POST = withAuth(
    withRateLimit(async (request: Request, user) => {
@@ -73,23 +81,41 @@ export const POST = withAuth(
          }
          const targetYear = year || dayjs().year();
 
-         const statsResponse = await getLeagueStatsForAi(
-            validatedLeagueId.toString()
+         const statsResponse = await getGeneralLeagueStats(
+            validatedLeagueId.toString(),
+            targetYear
          );
-         const stats = statsResponse;
-         const prompt = `Analyze the following home poker league stats into a short paragraph highlighting
-          key insights:
+         const stats = await statsResponse.json();
 
-          ${JSON.stringify(stats)}
+         const prompt = template.replace(
+            '{{leagues_stats}}',
+            JSON.stringify(stats)
+         );
+         console.log('🚀 ~ prompt:', prompt);
 
-          `;
-         const response = await client.responses.create({
+         const { text: summary } = await llmClient.generateText({
             model: 'gpt-4o-mini',
-            input: prompt,
+            prompt,
             temperature: 0.2,
-            max_output_tokens: 500,
+            maxTokens: 500,
+            apiKey: process.env.OPENAI_API_KEY!,
          });
-         return Response.json({ summary: response.output_text });
+
+         await storeLeagueStatsSummary(validatedLeagueId.toString(), summary);
+         return Response.json({ summary: stats.summary });
+         //  const prompt = `Analyze the following home poker league stats into a short paragraph highlighting
+         //  key insights:
+
+         //  ${JSON.stringify(stats)}
+
+         //  `;
+         //  const response = await client.responses.create({
+         //     model: 'gpt-4o-mini',
+         //     input: prompt,
+         //     temperature: 0.2,
+         //     max_output_tokens: 500,
+         //  });
+         //  return Response.json({ summary: response.output_text });
       } catch (error) {
          console.error('Error fetching league stats summary:', error);
          return secureResponse(
@@ -99,7 +125,3 @@ export const POST = withAuth(
       }
    }, 'general')
 );
-
-const client = new OpenAI({
-   apiKey: process.env.OPENAI_API_KEY,
-});

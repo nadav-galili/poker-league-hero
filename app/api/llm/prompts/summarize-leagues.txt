@@ -1,0 +1,4 @@
+Analyze the following home poker league stats into a short paragraph highlighting
+key insights:
+
+{{leagues_stats}}

@@ -35,7 +35,7 @@ export const POST = withAuth(async (request: Request, user) => {
             buyIn: games.buyIn,
          })
          .from(games)
-         .where(eq(games.id, gameId))
+         .where(eq(games.id, parseInt(gameId)))
          .limit(1);
 
       if (gameResult.length === 0) {
@@ -73,7 +73,7 @@ export const POST = withAuth(async (request: Request, user) => {
          .from(gamePlayers)
          .where(
             and(
-               eq(gamePlayers.gameId, gameId),
+               eq(gamePlayers.gameId, parseInt(gameId)),
                eq(gamePlayers.userId, playerId)
             )
          )

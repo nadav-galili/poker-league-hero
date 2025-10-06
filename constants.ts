@@ -44,3 +44,5 @@ export const REFRESH_COOKIE_OPTIONS = {
    path: '/api/auth/refresh',
    maxAge: REFRESH_TOKEN_MAX_AGE,
 };
+
+export const OPENAI_API_KEY = process.env.OPENAI_API_KEY!;
