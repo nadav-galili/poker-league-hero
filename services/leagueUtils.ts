@@ -298,7 +298,7 @@ export async function getLeagueDetails(leagueId: string): Promise<any> {
       .limit(1);
 
    if (league.length === 0) {
-      throw new Error('League not found');
+      return null;
    }
 
    const members = await db

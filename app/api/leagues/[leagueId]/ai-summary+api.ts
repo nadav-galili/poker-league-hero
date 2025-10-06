@@ -1,4 +1,5 @@
 import { getGeneralLeagueStats } from '@/services/leagueStatsApiService';
+import { getLeagueDetails } from '@/services/leagueUtils';
 import {
    getLeagueStatsSummary,
    storeLeagueStatsSummary,
@@ -40,10 +41,17 @@ export const POST = withAuth(
          }
 
          const { leagueId, error: idError } = extractLeagueId(request.url);
-         console.log('🚀 ~ leagueId:', leagueId);
          if (idError || !leagueId) {
             return secureResponse(
                { error: idError || 'League ID is required' },
+               { status: 400 }
+            );
+         }
+
+         const getLeague = await getLeagueDetails(leagueId.toString());
+         if (!getLeague) {
+            return secureResponse(
+               { error: 'League not found' },
                { status: 400 }
             );
          }
@@ -87,7 +95,7 @@ export const POST = withAuth(
 
          const existingSummary = await getLeagueStatsSummary(validatedLeagueId);
 
-         if (existingSummary && existingSummary[0].expiresAt > new Date()) {
+         if (existingSummary && existingSummary[0]?.expiresAt > new Date()) {
             return Response.json({ summary: existingSummary[0].content });
          }
 
@@ -96,7 +104,12 @@ export const POST = withAuth(
             targetYear
          );
          const stats = await statsResponse.json();
-         console.log('🚀 ~ stats:', stats);
+         if (!stats?.stats?.totalGames) {
+            return Response.json(
+               { error: 'No games played in this year' },
+               { status: 400 }
+            );
+         }
 
          const prompt = template.replace(
             '{{leagues_stats}}',
@@ -117,7 +130,7 @@ export const POST = withAuth(
          console.error('Error fetching league stats summary:', error);
          return secureResponse(
             { error: 'Failed to fetch league statistics summary' },
-            { status: 500 }
+            { status: 400 }
          );
       }
    }, 'general')
