@@ -302,12 +302,12 @@ export default function GameScreen() {
                   <Ionicons
                      name={isRTL ? 'arrow-forward' : 'arrow-back'}
                      size={24}
-                     color={colors.textInverse}
+                     color={colors.text}
                   />
                </TouchableOpacity>
                <Text
                   className="text-xl font-bold uppercase tracking-wide"
-                  style={{ color: colors.textInverse }}
+                  style={{ color: colors.text }}
                >
                   {t('gameDetails')}
                </Text>
@@ -351,33 +351,29 @@ export default function GameScreen() {
                <Ionicons
                   name={isRTL ? 'arrow-forward' : 'arrow-back'}
                   size={24}
-                  color={colors.textInverse}
+                  color={colors.text}
                />
             </TouchableOpacity>
             <Text
                className="text-xl font-bold uppercase tracking-wide"
-               style={{ color: colors.textInverse }}
+               style={{ color: colors.text }}
             >
                {t('gameDetails')}
             </Text>
             <View className="flex-row items-center gap-2">
                <TouchableOpacity onPress={handleRefresh} className="p-2">
-                  <Ionicons
-                     name="refresh"
-                     size={24}
-                     color={colors.textInverse}
-                  />
+                  <Ionicons name="refresh" size={24} color={colors.text} />
                </TouchableOpacity>
                {game?.status === 'active' && (
                   <TouchableOpacity
                      onPress={handleEndGame}
                      className="p-2 rounded-lg border-2 border-gray-600"
-                     style={{ backgroundColor: colors.error }}
+                     style={{ backgroundColor: colors.errorGradientEnd }}
                   >
                      <Ionicons
                         name="stop-circle"
                         size={24}
-                        color={colors.textInverse}
+                        color={colors.text}
                      />
                   </TouchableOpacity>
                )}
@@ -390,12 +386,10 @@ export default function GameScreen() {
             <AppButton
                title={t('addPlayer')}
                onPress={openAddPlayerModal}
-               bgColor={colors.info}
-               textColor={colors.textInverse}
+               color="info"
                disabled={isProcessing}
                width="50%"
                icon="person-add"
-               iconSize={20}
             />
          </View>
 

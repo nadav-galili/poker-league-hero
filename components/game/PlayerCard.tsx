@@ -1,11 +1,11 @@
-import { colors, getTheme } from '@/colors';
-import { Text } from '@/components/Text';
+import { colors } from '@/colors';
+// import { Text } from '@/components/Text';
 import { useLocalization } from '@/context/localization';
 import { GamePlayer } from '@/hooks/useGameData';
 import { Ionicons } from '@expo/vector-icons';
 import { Image } from 'expo-image';
 import React from 'react';
-import { TouchableOpacity, View } from 'react-native';
+import { Text, TouchableOpacity, View } from 'react-native';
 import { AppButton } from '../ui/AppButton';
 
 interface PlayerCardProps {
@@ -25,11 +25,10 @@ const PlayerCard: React.FC<PlayerCardProps> = ({
    onCashOut,
    onRemovePlayer,
 }) => {
-   const theme = getTheme('light');
    const { t } = useLocalization();
 
    return (
-      <View className="p-4 rounded-xl  shadow-sm elevation-4 bg-primaryTint">
+      <View className="p-4 rounded-xl  shadow-sm elevation-4 border-2 border-primary bg-[#8B5CF6]">
          {/* Player Info */}
          <View className="flex-row items-center mb-3">
             <Image
@@ -55,25 +54,19 @@ const PlayerCard: React.FC<PlayerCardProps> = ({
                style={{ backgroundColor: colors.error }}
                disabled={isProcessing}
             >
-               <Ionicons
-                  name="remove-circle"
-                  size={20}
-                  color={colors.textInverse}
-               />
+               <Ionicons name="remove-circle" size={20} color={colors.text} />
             </TouchableOpacity>
             <View className="flex-1">
-               <Text variant="h4" className="tracking-wider mb-0.5">
+               <Text className="text-xl tracking-wider mb-0.5 text-text">
                   {player.fullName}
                </Text>
-               <Text variant="body" className="text-xs text-textMuted">
+               <Text className="text-xs text-text">
                   {player.isActive ? t('gameInProgress') : 'Inactive'}
                </Text>
             </View>
             {!player.isActive && (
-               <View className="px-1.5 py-0.5 rounded-lg border border-primary bg-textMuted">
-                  <Text variant="captionSmall" color={colors.textInverse}>
-                     OUT
-                  </Text>
+               <View className="px-1.5 py-0.5 rounded-lg border m-4 border-primary bg-red-500">
+                  <Text className="text-xs text-text">OUT</Text>
                </View>
             )}
          </View>
@@ -81,42 +74,36 @@ const PlayerCard: React.FC<PlayerCardProps> = ({
          {/* Player Stats */}
          <View className="flex-row justify-between mb-3">
             <View className="items-center flex-1">
-               <Text variant="captionSmall" className="text-textMuted">
-                  {t('initialBuyIn')}
-               </Text>
-               <Text variant="h4" className="text-primary">
+               <Text className="text-xs text-text">{t('initialBuyIn')}</Text>
+               <Text className="text-xl text-primary">
                   {t('currency')}
                   {gameBaseAmount}
                </Text>
             </View>
             <View className="items-center flex-1">
-               <Text variant="captionSmall" className="text-textMuted">
-                  {t('totalBuyIns')}
-               </Text>
-               <Text variant="h4" className="text-text">
+               <Text className="text-xs text-text">{t('totalBuyIns')}</Text>
+               <Text className="text-xl text-text">
                   {t('currency')}
                   {player.totalBuyIns}
                </Text>
             </View>
             <View className="items-center flex-1">
-               <Text variant="captionSmall" color={theme.textMuted}>
-                  {t('totalBuyOuts')}
-               </Text>
-               <Text variant="h4" color={theme.text}>
+               <Text className="text-xs text-text">{t('totalBuyOuts')}</Text>
+               <Text className="text-xl text-text">
                   {t('currency')}
                   {player.totalBuyOuts}
                </Text>
             </View>
             <View className="items-center flex-1">
-               <Text variant="captionSmall" color={theme.textMuted}>
-                  {t('currentProfit')}
-               </Text>
+               <Text className="text-xs text-text">{t('currentProfit')}</Text>
                <Text
-                  variant="h4"
-                  color={
-                     player.currentProfit >= 0 ? colors.success : colors.error
-                  }
-                  className="font-bold"
+                  className="text-xl text-text"
+                  style={{
+                     color:
+                        player.currentProfit >= 0
+                           ? colors.success
+                           : colors.error,
+                  }}
                >
                   {t('currency')}
                   {(player.currentProfit || 0).toFixed(2)}
@@ -126,26 +113,22 @@ const PlayerCard: React.FC<PlayerCardProps> = ({
 
          {/* Action Buttons */}
          {player.isActive && (
-            <View className="flex-row gap-2 items-center">
+            <View className="flex-row gap-2 items-center justify-between w-full mt-4">
                <AppButton
                   title={t('buyIn')}
                   onPress={() => onBuyIn(player)}
-                  bgColor={colors.primary}
-                  textColor={colors.textInverse}
+                  color="success"
                   disabled={isProcessing}
-                  width="50%"
+                  width="100%"
                   icon="add-circle"
-                  iconSize={20}
                />
                <AppButton
                   title={t('cashOut')}
                   onPress={() => onCashOut(player)}
-                  bgColor={colors.secondary}
-                  textColor={colors.textInverse}
+                  color="error"
                   disabled={isProcessing}
-                  width="50%"
+                  width="100%"
                   icon="cash-outline"
-                  iconSize={20}
                />
             </View>
          )}

@@ -115,7 +115,8 @@ export const useGameData = (gameId: string | undefined) => {
          const data = await response.json();
          const currentPlayerIds = game.players.map((p) => p.userId);
          const availableMembers = data.members.filter(
-            (member: LeagueMember) => !currentPlayerIds.includes(member.id)
+            (member: LeagueMember) =>
+               !currentPlayerIds.includes(parseInt(member.id))
          );
 
          setAvailableMembers(availableMembers);
