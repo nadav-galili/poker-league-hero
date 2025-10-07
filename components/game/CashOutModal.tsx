@@ -1,5 +1,4 @@
 import { colors, getTheme } from '@/colors';
-import { Text } from '@/components/Text';
 import { useLocalization } from '@/context/localization';
 import { GamePlayer } from '@/hooks/useGameData';
 import { Ionicons } from '@expo/vector-icons';
@@ -8,6 +7,7 @@ import {
    Image,
    Modal,
    ScrollView,
+   Text,
    TextInput,
    TouchableOpacity,
    View,
@@ -47,17 +47,11 @@ const CashOutModal: React.FC<CashOutModalProps> = ({
       >
          <View className="flex-1" style={{ backgroundColor: theme.background }}>
             {/* Header */}
-            <View
-               className="flex-row items-center justify-between px-5 pt-15 pb-4 border-b-6 border-black"
-               style={{ backgroundColor: colors.primary }}
-            >
+            <View className="flex-row items-center justify-between px-5 pt-15 pb-4 border-b-6 border-black bg-[#A78BFA]">
                <TouchableOpacity onPress={onClose} className="p-2">
-                  <Ionicons name="close" size={24} color={colors.textInverse} />
+                  <Ionicons name="close" size={24} color={colors.text} />
                </TouchableOpacity>
-               <Text
-                  className="text-xl font-bold uppercase tracking-wide"
-                  style={{ color: colors.textInverse }}
-               >
+               <Text className="text-xl font-bold uppercase tracking-wide text-text">
                   {t('confirmCashOut')}
                </Text>
                <View className="w-10" />
@@ -78,56 +72,36 @@ const CashOutModal: React.FC<CashOutModalProps> = ({
                            }}
                            className="rounded-lg border-2 border-primary mb-2 w-24 h-24"
                         />
-                        <Text
-                           variant="h3"
-                           color={theme.text}
-                           className="tracking-wide"
-                        >
+                        <Text className="text-xl tracking-wide text-text">
                            {selectedPlayer.fullName}
                         </Text>
                      </View>
 
-                     <Text
-                        variant="body"
-                        color={theme.text}
-                        className="text-center mb-4 leading-5"
-                     >
+                     <Text className="text-center mb-4 leading-5 text-xl text-text">
                         {t('enterCashOutAmount')}
                      </Text>
 
                      <View className="p-4 rounded-xl border-3 border-primary mb-4 bg-primaryTint">
-                        <Text
-                           variant="h4"
-                           color={theme.text}
-                           className="tracking-wide mb-2"
-                        >
+                        <Text className="text-xl tracking-wide mb-2 text-text font-bold">
                            {t('cashOutAmount')}
                         </Text>
                         <TextInput
-                           className="border-2 border-gray-400 rounded-lg px-3 py-8 text-md font-semibold text-center mb-2"
+                           className="border-2 border-gray-400 rounded-lg px-3 py-8 text-md font-semibold text-center mb-2 text-text"
                            value={cashOutAmount}
                            onChangeText={onCashOutAmountChange}
                            placeholder="0.00"
-                           placeholderTextColor={theme.textMuted}
+                           placeholderTextColor={colors.text}
                            keyboardType="numeric"
                            autoFocus
                         />
                         {errorMessage && (
                            <View className="mb-2 p-2 rounded-lg border-2 border-red-500 bg-red-50">
-                              <Text
-                                 variant="captionSmall"
-                                 color={theme.error}
-                                 className="text-center font-semibold"
-                              >
+                              <Text className="text-center font-semibold text-black">
                                  {errorMessage}
                               </Text>
                            </View>
                         )}
-                        <Text
-                           variant="captionSmall"
-                           color={theme.textMuted}
-                           className="text-center"
-                        >
+                        <Text className="text-center text-text text-md font-bold">
                            Current Buy-ins: {t('currency')}
                            {selectedPlayer.totalBuyIns}
                         </Text>
