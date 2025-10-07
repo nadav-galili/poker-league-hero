@@ -34,7 +34,15 @@ export const createLeagueSchema = z.object({
       .min(1, 'League name is required')
       .max(100, 'League name must be less than 100 characters')
       .regex(/^[a-zA-Z0-9\s\-_.]+$/, 'League name contains invalid characters'),
-   image: z.string().url('Invalid image URL').optional().or(z.literal('')),
+   image: z
+      .union([
+         z.string().url('Invalid image URL'),
+         z.literal(''),
+         z.literal(null),
+         z.undefined(),
+      ])
+      .optional()
+      .transform((val) => (val === '' || val === null ? undefined : val)),
    adminUserEmail: z
       .string()
       .email('Invalid email format')

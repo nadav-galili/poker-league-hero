@@ -1,8 +1,12 @@
 import { colors, getTheme } from '@/colors';
-import Button from '@/components/Button';
-import { BrutalistFormField, ClearButton, ValidationState } from '@/components/forms/BrutalistFormField';
+import {
+   BrutalistFormField,
+   ClearButton,
+   ValidationState,
+} from '@/components/forms/BrutalistFormField';
 import { LoadingState } from '@/components/shared/LoadingState';
 import { Text } from '@/components/Text';
+import { AppButton } from '@/components/ui/AppButton';
 import { BASE_URL } from '@/constants';
 import { useAuth } from '@/context/auth';
 import { useLocalization } from '@/context/localization';
@@ -10,13 +14,8 @@ import { Ionicons } from '@expo/vector-icons';
 import { Image } from 'expo-image';
 import * as ImagePicker from 'expo-image-picker';
 import { router } from 'expo-router';
-import React, { useState, useCallback } from 'react';
-import {
-   ScrollView,
-   StyleSheet,
-   TouchableOpacity,
-   View,
-} from 'react-native';
+import React, { useCallback, useState } from 'react';
+import { ScrollView, StyleSheet, TouchableOpacity, View } from 'react-native';
 import Toast from 'react-native-toast-message';
 
 export default function CreateLeague() {
@@ -37,7 +36,7 @@ export default function CreateLeague() {
       name?: string;
    }>({});
    //get user data from auth context
-   const { user } = useAuth();
+   const { user, fetchWithAuth } = useAuth();
 
    // Validation functions
    const validateLeagueName = useCallback((name: string): string | null => {
@@ -56,22 +55,25 @@ export default function CreateLeague() {
       return null;
    }, []);
 
-   const handleNameChange = useCallback((text: string) => {
-      setFormData(prev => ({ ...prev, name: text }));
+   const handleNameChange = useCallback(
+      (text: string) => {
+         setFormData((prev) => ({ ...prev, name: text }));
 
-      // Real-time validation
-      const error = validateLeagueName(text);
-      if (text.length === 0) {
-         setValidationStates(prev => ({ ...prev, name: 'idle' }));
-         setErrors(prev => ({ ...prev, name: undefined }));
-      } else if (error) {
-         setValidationStates(prev => ({ ...prev, name: 'error' }));
-         setErrors(prev => ({ ...prev, name: error }));
-      } else {
-         setValidationStates(prev => ({ ...prev, name: 'valid' }));
-         setErrors(prev => ({ ...prev, name: undefined }));
-      }
-   }, [validateLeagueName]);
+         // Real-time validation
+         const error = validateLeagueName(text);
+         if (text.length === 0) {
+            setValidationStates((prev) => ({ ...prev, name: 'idle' }));
+            setErrors((prev) => ({ ...prev, name: undefined }));
+         } else if (error) {
+            setValidationStates((prev) => ({ ...prev, name: 'error' }));
+            setErrors((prev) => ({ ...prev, name: error }));
+         } else {
+            setValidationStates((prev) => ({ ...prev, name: 'valid' }));
+            setErrors((prev) => ({ ...prev, name: undefined }));
+         }
+      },
+      [validateLeagueName]
+   );
 
    const validateForm = useCallback((): boolean => {
       const nameError = validateLeagueName(formData.name);
@@ -110,22 +112,42 @@ export default function CreateLeague() {
 
          formData.adminUserEmail = user.email;
 
-         // TODO: Implement actual league creation API call
-         console.log('Creating league:', formData);
+         // Clean up form data - remove null/empty image
+         const cleanFormData = {
+            ...formData,
+            image:
+               formData.image && formData.image.trim()
+                  ? formData.image
+                  : undefined,
+         };
 
-         //send data to backend
-         const response = await fetch(`${BASE_URL}/api/leagues/create`, {
-            method: 'POST',
-            body: JSON.stringify(formData),
-         });
+         //send data to backend using authenticated fetch
+         const response = await fetchWithAuth(
+            `${BASE_URL}/api/leagues/create`,
+            {
+               method: 'POST',
+               headers: {
+                  'Content-Type': 'application/json',
+               },
+               body: JSON.stringify(cleanFormData),
+            }
+         );
 
          if (!response.ok) {
+            const errorData = await response.json().catch(() => ({}));
+            console.error('League creation failed:', {
+               status: response.status,
+               statusText: response.statusText,
+               error: errorData,
+            });
             Toast.show({
                type: 'error',
                text1: t('error'),
-               text2: 'Failed to create league',
+               text2: errorData.error || 'Failed to create league',
             });
-            throw new Error('Failed to create league');
+            throw new Error(
+               `Failed to create league: ${errorData.error || response.statusText}`
+            );
          }
 
          const data = await response.json();
@@ -211,7 +233,9 @@ export default function CreateLeague() {
                onChangeText={handleNameChange}
                validationState={validationStates.name}
                errorMessage={errors.name}
-               successMessage={validationStates.name === 'valid' ? 'Perfect!' : undefined}
+               successMessage={
+                  validationStates.name === 'valid' ? 'Perfect!' : undefined
+               }
                placeholder="Enter league name"
                maxLength={50}
                showCharacterCount={true}
@@ -283,14 +307,12 @@ export default function CreateLeague() {
 
             {/* Create Button */}
             <View style={styles.buttonContainer}>
-               <Button
+               <AppButton
                   title={t('createLeagueButton')}
                   onPress={handleCreateLeague}
-                  variant="primary"
-                  className="bg-primary"
+                  bgColor={colors.primary}
                   textColor={colors.textInverse}
-                  size="large"
-                  fullWidth
+                  width="100%"
                   icon="add-circle"
                />
             </View>

@@ -3,7 +3,7 @@
  * Features thick borders, validation states, haptic feedback, and animations
  */
 
-import { colors, getTheme } from '@/colors';
+import { getTheme } from '@/colors';
 import { Text } from '@/components/Text';
 import { sanitizeString } from '@/utils/validation';
 import { Ionicons } from '@expo/vector-icons';
@@ -11,6 +11,7 @@ import * as Haptics from 'expo-haptics';
 import React, { useCallback, useEffect, useRef, useState } from 'react';
 import {
    Animated,
+   ColorValue,
    Easing,
    I18nManager,
    TextInput,
@@ -58,11 +59,11 @@ export function BrutalistFormField({
    const [isFocused, setIsFocused] = useState(false);
 
    // Animation values
-   const borderColorAnim = useRef(new Animated.Value(0)).current;
-   const shadowAnim = useRef(new Animated.Value(0)).current;
-   const shakeAnim = useRef(new Animated.Value(0)).current;
-   const successRotateAnim = useRef(new Animated.Value(0)).current;
-   const glowAnim = useRef(new Animated.Value(0)).current;
+   const borderColorAnim = useRef(new Animated.Value(0));
+   const shadowAnim = useRef(new Animated.Value(0));
+   const shakeAnim = useRef(new Animated.Value(0));
+   const successRotateAnim = useRef(new Animated.Value(0));
+   const glowAnim = useRef(new Animated.Value(0));
 
    // Animate border color based on validation state and focus
    useEffect(() => {
@@ -78,23 +79,23 @@ export function BrutalistFormField({
          targetValue = 4; // validating state
       }
 
-      Animated.timing(borderColorAnim, {
+      Animated.timing(borderColorAnim.current, {
          toValue: targetValue,
          duration: 300,
          easing: Easing.out(Easing.cubic),
          useNativeDriver: false,
       }).start();
-   }, [isFocused, validationState, borderColorAnim]);
+   }, [isFocused, validationState]);
 
    // Animate shadow on focus
    useEffect(() => {
-      Animated.timing(shadowAnim, {
+      Animated.timing(shadowAnim.current, {
          toValue: isFocused ? 1 : 0,
          duration: 200,
          easing: Easing.out(Easing.quad),
          useNativeDriver: false,
       }).start();
-   }, [isFocused, shadowAnim]);
+   }, [isFocused]);
 
    // Shake animation on error
    useEffect(() => {
@@ -102,25 +103,25 @@ export function BrutalistFormField({
          Haptics.notificationAsync(Haptics.NotificationFeedbackType.Error);
 
          const shakeSequence = Animated.sequence([
-            Animated.timing(shakeAnim, {
+            Animated.timing(shakeAnim.current, {
                toValue: 10,
                duration: 100,
                easing: Easing.linear,
                useNativeDriver: true,
             }),
-            Animated.timing(shakeAnim, {
+            Animated.timing(shakeAnim.current, {
                toValue: -10,
                duration: 100,
                easing: Easing.linear,
                useNativeDriver: true,
             }),
-            Animated.timing(shakeAnim, {
+            Animated.timing(shakeAnim.current, {
                toValue: 5,
                duration: 100,
                easing: Easing.linear,
                useNativeDriver: true,
             }),
-            Animated.timing(shakeAnim, {
+            Animated.timing(shakeAnim.current, {
                toValue: 0,
                duration: 100,
                easing: Easing.linear,
@@ -129,7 +130,7 @@ export function BrutalistFormField({
          ]);
          shakeSequence.start();
       }
-   }, [validationState, hapticFeedback, shakeAnim]);
+   }, [validationState, hapticFeedback]);
 
    // Success checkmark rotation animation
    useEffect(() => {
@@ -138,16 +139,16 @@ export function BrutalistFormField({
             Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
          }
 
-         Animated.timing(successRotateAnim, {
+         Animated.timing(successRotateAnim.current, {
             toValue: 1,
             duration: 500,
             easing: Easing.elastic(2),
             useNativeDriver: true,
          }).start();
       } else {
-         successRotateAnim.setValue(0);
+         successRotateAnim.current.setValue(0);
       }
-   }, [validationState, hapticFeedback, successRotateAnim]);
+   }, [validationState, hapticFeedback]);
 
    // Glow effect for focused state with proper cleanup
    useEffect(() => {
@@ -156,13 +157,13 @@ export function BrutalistFormField({
       if (isFocused) {
          glowLoop = Animated.loop(
             Animated.sequence([
-               Animated.timing(glowAnim, {
+               Animated.timing(glowAnim.current, {
                   toValue: 1,
                   duration: 1000,
                   easing: Easing.inOut(Easing.sin),
                   useNativeDriver: false,
                }),
-               Animated.timing(glowAnim, {
+               Animated.timing(glowAnim.current, {
                   toValue: 0,
                   duration: 1000,
                   easing: Easing.inOut(Easing.sin),
@@ -172,7 +173,7 @@ export function BrutalistFormField({
          );
          glowLoop.start();
       } else {
-         glowAnim.setValue(0);
+         glowAnim.current.setValue(0);
       }
 
       // Cleanup function to prevent memory leaks
@@ -181,42 +182,51 @@ export function BrutalistFormField({
             glowLoop.stop();
          }
       };
-   }, [isFocused, glowAnim]);
+   }, [isFocused]);
 
-   const handleFocus = useCallback((e: any) => {
-      setIsFocused(true);
-      if (hapticFeedback) {
-         Haptics.selectionAsync();
-      }
-      onFocus?.(e);
-   }, [onFocus, hapticFeedback]);
+   const handleFocus = useCallback(
+      (e: any) => {
+         setIsFocused(true);
+         if (hapticFeedback) {
+            Haptics.selectionAsync();
+         }
+         onFocus?.(e);
+      },
+      [onFocus, hapticFeedback]
+   );
 
-   const handleBlur = useCallback((e: any) => {
-      setIsFocused(false);
-      onBlur?.(e);
-   }, [onBlur]);
+   const handleBlur = useCallback(
+      (e: any) => {
+         setIsFocused(false);
+         onBlur?.(e);
+      },
+      [onBlur]
+   );
 
-   const handleChangeText = useCallback((text: string) => {
-      // Sanitize input to prevent XSS attacks
-      const sanitizedText = sanitizeString(text);
-      onChangeText?.(sanitizedText);
-   }, [onChangeText]);
+   const handleChangeText = useCallback(
+      (text: string) => {
+         // Sanitize input to prevent XSS attacks
+         const sanitizedText = sanitizeString(text);
+         onChangeText?.(sanitizedText);
+      },
+      [onChangeText]
+   );
 
    const getBorderColor = () => {
-      return borderColorAnim.interpolate({
+      return borderColorAnim.current.interpolate({
          inputRange: [0, 1, 2, 3, 4],
          outputRange: [
-            theme.border,          // idle
-            theme.primary,         // focused
-            theme.error,           // error
-            theme.success,         // valid
-            theme.accent,          // validating
+            theme.border, // idle
+            theme.primary, // focused
+            theme.error, // error
+            theme.success, // valid
+            theme.accent, // validating
          ],
       });
    };
 
    const getGlowColor = () => {
-      return glowAnim.interpolate({
+      return glowAnim.current.interpolate({
          inputRange: [0, 1],
          outputRange: ['rgba(0, 102, 255, 0)', 'rgba(0, 102, 255, 0.3)'],
       });
@@ -224,25 +234,34 @@ export function BrutalistFormField({
 
    const getFieldHeight = () => {
       switch (variant) {
-         case 'large': return 60;
-         case 'compact': return 40;
-         default: return 50;
+         case 'large':
+            return 60;
+         case 'compact':
+            return 40;
+         default:
+            return 50;
       }
    };
 
    const getIconSize = () => {
       switch (variant) {
-         case 'large': return 24;
-         case 'compact': return 16;
-         default: return 20;
+         case 'large':
+            return 24;
+         case 'compact':
+            return 16;
+         default:
+            return 20;
       }
    };
 
    const getFontSize = () => {
       switch (variant) {
-         case 'large': return 18;
-         case 'compact': return 14;
-         default: return 16;
+         case 'large':
+            return 18;
+         case 'compact':
+            return 14;
+         default:
+            return 16;
       }
    };
 
@@ -254,15 +273,17 @@ export function BrutalistFormField({
          {/* Label with required indicator */}
          <View className="flex-row items-center mb-2">
             <Text
-               variant="labelMedium"
+               variant="label"
                className="font-semibold uppercase tracking-wide"
-               style={{ color: isFocused ? theme.primary : theme.textSecondary }}
+               style={{
+                  color: isFocused ? theme.primary : theme.textSecondary,
+               }}
             >
                {label}
             </Text>
             {required && (
                <Text
-                  variant="labelMedium"
+                  variant="label"
                   className="ml-1 font-bold"
                   style={{ color: theme.error }}
                >
@@ -275,7 +296,7 @@ export function BrutalistFormField({
          <Animated.View
             className="relative"
             style={{
-               transform: [{ translateX: shakeAnim }],
+               transform: [{ translateX: shakeAnim.current }],
             }}
          >
             {/* Glow effect */}
@@ -304,21 +325,32 @@ export function BrutalistFormField({
                            validationState === 'error'
                               ? theme.error
                               : validationState === 'valid'
-                              ? theme.success
-                              : isFocused
-                              ? theme.primary
-                              : theme.textMuted
+                                ? theme.success
+                                : isFocused
+                                  ? theme.primary
+                                  : theme.textMuted
                         }
                      />
                   </View>
                )}
 
-               <Animated.View className="flex-1" style={[{
-                  shadowColor: shadowAnim.interpolate({
-                     inputRange: [0, 1],
-                     outputRange: [theme.shadow, theme.primary],
-                  }),
-               }]}>
+               <Animated.View
+                  className="flex-1"
+                  style={{
+                     shadowColor: shadowAnim.current.interpolate({
+                        inputRange: [0, 1],
+                        outputRange: [theme.shadow, theme.primary],
+                     }),
+                     borderColor: getBorderColor(),
+                     borderWidth: 4,
+                     borderRadius: 12,
+                     shadowOffset: { width: 4, height: 4 },
+                     shadowOpacity: 1,
+                     shadowRadius: 0,
+                     elevation: 8,
+                     backgroundColor: theme.surfaceElevated,
+                  }}
+               >
                   <TextInput
                      {...textInputProps}
                      value={value}
@@ -327,26 +359,15 @@ export function BrutalistFormField({
                      onBlur={handleBlur}
                      maxLength={maxLength}
                      className="font-semibold"
-                     style={[
-                        {
-                           height: getFieldHeight(),
-                           borderWidth: 4,
-                           borderRadius: 12,
-                           paddingHorizontal: icon ? 52 : 16,
-                           paddingRight: rightComponent ? 52 : 16,
-                           fontSize: getFontSize(),
-                           backgroundColor: theme.surfaceElevated,
-                           color: theme.text,
-                           textAlign: I18nManager.isRTL ? 'right' : 'left',
-                           shadowOffset: { width: 4, height: 4 },
-                           shadowOpacity: 1,
-                           shadowRadius: 0,
-                           elevation: 8,
-                        },
-                        {
-                           borderColor: getBorderColor(),
-                        },
-                     ]}
+                     style={{
+                        height: getFieldHeight(),
+                        paddingHorizontal: icon ? 52 : 16,
+                        paddingRight: rightComponent ? 52 : 16,
+                        fontSize: getFontSize(),
+                        color: theme.text,
+                        textAlign: I18nManager.isRTL ? 'right' : 'left',
+                        backgroundColor: 'transparent',
+                     }}
                      placeholderTextColor={theme.textMuted}
                   />
                </Animated.View>
@@ -364,12 +385,14 @@ export function BrutalistFormField({
                   {validationState === 'validating' && (
                      <Animated.View
                         style={{
-                           transform: [{
-                              rotate: borderColorAnim.interpolate({
-                                 inputRange: [0, 4],
-                                 outputRange: ['0deg', '360deg'],
-                              })
-                           }]
+                           transform: [
+                              {
+                                 rotate: borderColorAnim.current.interpolate({
+                                    inputRange: [0, 4],
+                                    outputRange: ['0deg', '360deg'],
+                                 }),
+                              },
+                           ],
                         }}
                      >
                         <Ionicons
@@ -383,12 +406,14 @@ export function BrutalistFormField({
                   {validationState === 'valid' && (
                      <Animated.View
                         style={{
-                           transform: [{
-                              rotate: successRotateAnim.interpolate({
-                                 inputRange: [0, 1],
-                                 outputRange: ['0deg', '360deg'],
-                              })
-                           }]
+                           transform: [
+                              {
+                                 rotate: successRotateAnim.current.interpolate({
+                                    inputRange: [0, 1],
+                                    outputRange: ['0deg', '360deg'],
+                                 }),
+                              },
+                           ],
                         }}
                      >
                         <Ionicons
@@ -462,7 +487,7 @@ export function BrutalistFormField({
                   variant="captionSmall"
                   className="font-mono"
                   style={{
-                     color: isNearMaxLength ? theme.warning : theme.textMuted
+                     color: isNearMaxLength ? theme.warning : theme.textMuted,
                   }}
                >
                   {characterCount}/{maxLength}
@@ -492,11 +517,7 @@ export function ClearButton({
          style={{ backgroundColor: theme.textMuted }}
          activeOpacity={0.7}
       >
-         <Ionicons
-            name="close"
-            size={14}
-            color={theme.background}
-         />
+         <Ionicons name="close" size={14} color={theme.background} />
       </TouchableOpacity>
    );
 }

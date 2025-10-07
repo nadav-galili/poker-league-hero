@@ -2,7 +2,6 @@ import { LeagueCard } from '@/components/league/LeagueCard';
 import { MyLeaguesHeader } from '@/components/league/MyLeaguesHeader';
 import { EmptyState } from '@/components/shared/EmptyState';
 import { ErrorState } from '@/components/shared/ErrorState';
-import { LoadingState } from '@/components/shared/LoadingState';
 import { LeagueCardSkeleton } from '@/components/shared/LeagueCardSkeleton';
 import { Text } from '@/components/Text';
 import { useMyLeagues } from '@/hooks';
@@ -86,14 +85,13 @@ export default function MyLeagues() {
                   padding: 20,
                }}
                ItemSeparatorComponent={() => <View className="h-4" />}
-               estimatedItemSize={140}
                showsVerticalScrollIndicator={false}
                refreshControl={
                   <RefreshControl
                      refreshing={refreshing}
                      onRefresh={handleRefresh}
                      colors={['#6366F1']} // Primary color for Android
-                     tintColor="#6366F1"  // Primary color for iOS
+                     tintColor="#6366F1" // Primary color for iOS
                   />
                }
                ListEmptyComponent={

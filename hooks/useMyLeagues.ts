@@ -46,7 +46,9 @@ export function useMyLeagues() {
 
             if (abortSignal?.aborted) return;
 
-            const leaguesWithTheme = addThemeToLeagues(userLeagues);
+            const leaguesWithTheme = addThemeToLeagues(
+               userLeagues
+            ) as unknown as LeagueWithTheme[];
             setLeagues(leaguesWithTheme);
          } catch (err) {
             if (abortSignal?.aborted) return;
@@ -157,7 +159,9 @@ export function useMyLeagues() {
 
             if (result.success && result.league) {
                // Optimistic update: Add the league to the list immediately
-               const leagueWithTheme = addThemeToLeagues([result.league])[0];
+               const leagueWithTheme = addThemeToLeagues([
+                  result.league,
+               ])[0] as unknown as LeagueWithTheme;
                setLeagues((prevLeagues) => [...prevLeagues, leagueWithTheme]);
 
                // Success! Show success message

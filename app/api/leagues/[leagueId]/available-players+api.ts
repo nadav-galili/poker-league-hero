@@ -37,7 +37,7 @@ export const GET = withAuth(async (request: Request, user) => {
          .innerJoin(users, eq(leagueMembers.userId, users.id))
          .where(
             and(
-               eq(leagueMembers.leagueId, leagueId),
+               eq(leagueMembers.leagueId, Number(leagueId)),
                eq(leagueMembers.isActive, true)
             )
          );

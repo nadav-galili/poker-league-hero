@@ -15,8 +15,14 @@ import CashOutModal from '@/components/game/CashOutModal';
 import GameSummary from '@/components/game/GameSummary';
 import PlayerCard from '@/components/game/PlayerCard';
 import { AppButton } from '@/components/ui/AppButton';
+import { BASE_URL } from '@/constants';
 import { GamePlayer, LeagueMember, useGameData } from '@/hooks/useGameData';
 import { createGameService } from '@/services/gameService';
+import { useMutation } from '@tanstack/react-query';
+
+type getSummaryListResponse = {
+   summary: string;
+};
 
 export default function GameScreen() {
    const theme = getTheme('light');
@@ -44,6 +50,22 @@ export default function GameScreen() {
    const [cashOutError, setCashOutError] = React.useState<string>('');
    const [isProcessing, setIsProcessing] = React.useState(false);
 
+   const createAiSummaryMutation = useMutation<getSummaryListResponse, Error>({
+      mutationFn: async () => {
+         const response = await fetchWithAuth(
+            `${BASE_URL}/api/leagues/${game?.leagueId}/ai-summary`,
+            {
+               method: 'POST',
+               headers: {
+                  'Content-Type': 'application/json',
+               },
+               body: JSON.stringify({ createSummary: true }),
+            }
+         );
+
+         return response.json();
+      },
+   });
    // Initialize game service
    const gameService = React.useMemo(() => {
       if (!gameId) return null;
@@ -235,7 +257,7 @@ export default function GameScreen() {
             text1: t('success'),
             text2: t('gameEndedSuccessfully'),
          });
-
+         createAiSummaryMutation.mutate();
          await loadGameData();
          router.replace({
             pathname: '/leagues/[id]/stats',
