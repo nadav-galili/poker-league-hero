@@ -2,8 +2,8 @@ import { colors, getTheme } from '@/colors';
 import {
    BrutalistFormField,
    ClearButton,
-   ValidationState,
 } from '@/components/forms/BrutalistFormField';
+import type { ValidationState } from '@/components/forms/BrutalistFormField';
 import { LoadingState } from '@/components/shared/LoadingState';
 import { Text } from '@/components/Text';
 import { AppButton } from '@/components/ui/AppButton';

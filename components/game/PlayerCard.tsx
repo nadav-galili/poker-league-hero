@@ -28,7 +28,7 @@ const PlayerCard: React.FC<PlayerCardProps> = ({
    const { t } = useLocalization();
 
    return (
-      <View className="p-4 rounded-xl  shadow-sm elevation-4 border-2 border-primary bg-[#8B5CF6]">
+      <View className="p-4 rounded-xl  shadow-sm elevation-4 border-2 border-primary bg-[#60A5FA]">
          {/* Player Info */}
          <View className="flex-row items-center mb-3">
             <Image
@@ -50,7 +50,7 @@ const PlayerCard: React.FC<PlayerCardProps> = ({
             />
             <TouchableOpacity
                onPress={() => onRemovePlayer(player)}
-               className="w-9 h-9 rounded-full items-center justify-center border-2 border-black"
+               className="w-9 h-9 rounded-full items-center justify-center border-2 border-black m-2"
                style={{ backgroundColor: colors.error }}
                disabled={isProcessing}
             >
@@ -75,7 +75,7 @@ const PlayerCard: React.FC<PlayerCardProps> = ({
          <View className="flex-row justify-between mb-3">
             <View className="items-center flex-1">
                <Text className="text-xs text-text">{t('initialBuyIn')}</Text>
-               <Text className="text-xl text-primary">
+               <Text className="text-xl text-text">
                   {t('currency')}
                   {gameBaseAmount}
                </Text>

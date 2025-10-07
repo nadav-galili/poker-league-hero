@@ -125,12 +125,10 @@ const CashOutModal: React.FC<CashOutModalProps> = ({
                <AppButton
                   title={isProcessing ? t('processing') : t('confirmCashOut')}
                   onPress={onConfirm}
-                  bgColor={colors.secondary}
-                  textColor={colors.textInverse}
+                  color="primary"
                   icon="cash-outline"
                   disabled={isProcessing || !cashOutAmount.trim()}
                   width="100%"
-                  iconSize={20}
                />
             </View>
          </View>

@@ -326,9 +326,11 @@ export function BrutalistFormField({
                               ? theme.error
                               : validationState === 'valid'
                                 ? theme.success
-                                : isFocused
-                                  ? theme.primary
-                                  : theme.textMuted
+                                : validationState === 'validating'
+                                  ? theme.accent
+                                  : isFocused
+                                    ? theme.primary
+                                    : theme.textMuted
                         }
                      />
                   </View>

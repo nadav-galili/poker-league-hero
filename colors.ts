@@ -29,6 +29,9 @@ const rawColors = {
    infoBlue: '#60A5FA', // Modern info blue
    infoBlueDark: '#3B82F6', // Darker info blue
 
+   // Accent color for special states like 'validating'
+   accent: '#c026d3', // A vibrant fuchsia for standout highlights
+
    // Special accent
    pinkAccent: '#FF1493', // Bright pink accent
    pinkAccentDark: '#E1306C', // Darker pink accent
@@ -91,6 +94,7 @@ export const colors = {
    // Secondary/accent system
    secondary: rawColors.pinkAccent,
    secondaryDark: rawColors.pinkAccentDark,
+   accent: rawColors.accent, // Add accent color
 
    // Status colors with gradients
    success: rawColors.successGreen,
@@ -154,6 +158,8 @@ export type Theme = {
    // Secondary colors
    secondary: string;
    secondaryDark: string;
+   accent: string; // Add accent type
+
    // Status colors with gradients
    info: string;
    infoDark: string;
@@ -208,6 +214,8 @@ export const themes: Record<ThemeName, Theme> = {
       // Secondary
       secondary: colors.secondary,
       secondaryDark: colors.secondaryDark,
+      accent: colors.accent,
+
       // Status colors
       info: colors.info,
       infoDark: colors.infoDark,
@@ -254,6 +262,7 @@ export const themes: Record<ThemeName, Theme> = {
       primaryGradientEnd: colors.primaryGradientEnd,
       secondary: colors.secondary,
       secondaryDark: colors.secondaryDark,
+      accent: colors.accent,
       info: colors.info,
       infoDark: colors.infoDark,
       infoGradientStart: colors.infoGradientStart,
