@@ -1,5 +1,7 @@
+import { colors } from '@/colors';
 import { BASE_URL } from '@/constants';
 import { useAuth } from '@/context/auth';
+import { Ionicons } from '@expo/vector-icons';
 import { useQuery } from '@tanstack/react-query';
 import React, { useEffect } from 'react';
 import { Text, View } from 'react-native';
@@ -69,13 +71,18 @@ const Summary = ({ leagueId }: Props) => {
       );
 
    return (
-      <View>
+      <View className="px-6 mb-8">
          <Text className="text-primary text-center mb-6 text-2xl font-black uppercase tracking-[3px]">
-            ✨ AI Summary
+            <Ionicons
+               name="sparkles"
+               size={24}
+               color={colors.warningGradientEnd}
+            />
+            AI Summary
          </Text>
 
          <View className="bg-primaryTint rounded-lg p-4">
-            <Text className="text-black font-bold text-lg">
+            <Text className="text-blue-300  font-bold text-lg">
                {summary?.summary ??
                   'No games played in this year OR summary not generated yet'}
             </Text>

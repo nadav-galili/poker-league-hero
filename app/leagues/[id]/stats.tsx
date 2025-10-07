@@ -5,12 +5,19 @@ import { useLocalization } from '@/context/localization';
 import { captureException } from '@/utils/sentry';
 import { Ionicons } from '@expo/vector-icons';
 
-import { router, useLocalSearchParams } from 'expo-router';
 import { Image } from 'expo-image';
 import { LinearGradient } from 'expo-linear-gradient';
+import { router, useLocalSearchParams } from 'expo-router';
 import React from 'react';
-import { ScrollView, Text, View, Pressable, StyleSheet, ActivityIndicator } from 'react-native';
 import type { ViewStyle } from 'react-native';
+import {
+   ActivityIndicator,
+   Pressable,
+   ScrollView,
+   StyleSheet,
+   Text,
+   View,
+} from 'react-native';
 
 // TypeScript interfaces for better type safety
 interface LeagueData {
@@ -73,76 +80,83 @@ const setCachedData = (key: string, data: any): void => {
 };
 
 // GlassmorphismLoader component for consistent loading state
-const GlassmorphismLoader = React.memo<GlassmorphismLoaderProps>(({ message = 'Loading...' }) => {
-   return (
-      <LinearGradient colors={['#1a0033', '#0f001a', '#000000']} style={styles.loaderContainer}>
-         <View style={styles.loaderContent}>
-            <View style={styles.loaderInner}>
-               <ActivityIndicator size="large" color="#60A5FA" />
-               <Text style={styles.loaderText}>{message}</Text>
+const GlassmorphismLoader = React.memo<GlassmorphismLoaderProps>(
+   ({ message = 'Loading...' }) => {
+      return (
+         <LinearGradient
+            colors={['#1a0033', '#0f001a', '#000000']}
+            style={styles.loaderContainer}
+         >
+            <View style={styles.loaderContent}>
+               <View style={styles.loaderInner}>
+                  <ActivityIndicator size="large" color="#60A5FA" />
+                  <Text style={styles.loaderText}>{message}</Text>
+               </View>
             </View>
-         </View>
-      </LinearGradient>
-   );
-});
+         </LinearGradient>
+      );
+   }
+);
 
 GlassmorphismLoader.displayName = 'GlassmorphismLoader';
 
 // Reusable ActionCard component to reduce code duplication
-const ActionCard = React.memo<ActionCardProps>(({
-   title,
-   description,
-   iconName,
-   iconColor,
-   bgColor,
-   borderColor,
-   shadowColor,
-   onPress,
-   isRTL,
-   accessibilityLabel,
-   accessibilityHint
-}) => {
-   return (
-      <Pressable
-         className="active:scale-[0.98]"
-         onPress={onPress}
-         accessibilityRole="button"
-         accessibilityLabel={accessibilityLabel || title}
-         accessibilityHint={accessibilityHint || description}
-      >
-         <View
-            className={`${bgColor} backdrop-blur-xl ${borderColor} rounded-3xl p-6`}
-            style={[styles.actionCard, { shadowColor }]}
+const ActionCard = React.memo<ActionCardProps>(
+   ({
+      title,
+      description,
+      iconName,
+      iconColor,
+      bgColor,
+      borderColor,
+      shadowColor,
+      onPress,
+      isRTL,
+      accessibilityLabel,
+      accessibilityHint,
+   }) => {
+      return (
+         <Pressable
+            className="active:scale-[0.98]"
+            onPress={onPress}
+            accessibilityRole="button"
+            accessibilityLabel={accessibilityLabel || title}
+            accessibilityHint={accessibilityHint || description}
          >
-            <View className="flex-row items-center">
-               <View
-                  className={`w-16 h-16 ${bgColor.replace('/10', '/20')} backdrop-blur-xl ${borderColor.replace('/30', '/40')} rounded-2xl items-center justify-center mr-5`}
-                  style={[styles.iconContainer, { shadowColor }]}
-               >
-                  <Ionicons name={iconName} size={28} color={iconColor} />
-               </View>
+            <View
+               className={`${bgColor} backdrop-blur-xl ${borderColor} rounded-3xl p-6`}
+               style={[styles.actionCard, { shadowColor }]}
+            >
+               <View className="flex-row items-center">
+                  <View
+                     className={`w-16 h-16 ${bgColor.replace('/10', '/20')} backdrop-blur-xl ${borderColor.replace('/30', '/40')} rounded-2xl items-center justify-center mr-5`}
+                     style={[styles.iconContainer, { shadowColor }]}
+                  >
+                     <Ionicons name={iconName} size={28} color={iconColor} />
+                  </View>
 
-               <View className="flex-1">
-                  <Text className="text-white font-semibold text-lg mb-2">
-                     {title}
-                  </Text>
-                  <Text className="text-white/70 font-medium">
-                     {description}
-                  </Text>
-               </View>
+                  <View className="flex-1">
+                     <Text className="text-white font-semibold text-lg mb-2">
+                        {title}
+                     </Text>
+                     <Text className="text-white/70 font-medium">
+                        {description}
+                     </Text>
+                  </View>
 
-               <View className="ml-4">
-                  <Ionicons
-                     name={isRTL ? 'chevron-back' : 'chevron-forward'}
-                     size={24}
-                     color={iconColor}
-                  />
+                  <View className="ml-4">
+                     <Ionicons
+                        name={isRTL ? 'chevron-back' : 'chevron-forward'}
+                        size={24}
+                        color={iconColor}
+                     />
+                  </View>
                </View>
             </View>
-         </View>
-      </Pressable>
-   );
-});
+         </Pressable>
+      );
+   }
+);
 
 ActionCard.displayName = 'ActionCard';
 
@@ -155,7 +169,8 @@ function LeagueStatsComponent() {
    const [isLoading, setIsLoading] = React.useState(true);
    const [error, setError] = React.useState<string | null>(null);
    const [activeGame, setActiveGame] = React.useState<ActiveGame | null>(null);
-   const [isCheckingActiveGame, setIsCheckingActiveGame] = React.useState(false);
+   const [isCheckingActiveGame, setIsCheckingActiveGame] =
+      React.useState(false);
 
    // Add mounted ref to prevent memory leaks from state updates after unmount
    const mountedRef = React.useRef(true);
@@ -168,138 +183,166 @@ function LeagueStatsComponent() {
    }, []);
 
    // Function to load league details with abort controller support and caching
-   const loadLeagueDetails = React.useCallback(async (abortSignal?: AbortSignal, retryCount = 0) => {
-      if (!id || abortSignal?.aborted) return;
+   const loadLeagueDetails = React.useCallback(
+      async (abortSignal?: AbortSignal, retryCount = 0) => {
+         if (!id || abortSignal?.aborted) return;
 
-      // Check cache first
-      const cacheKey = `league_${id}`;
-      const cachedData = getCachedData(cacheKey);
-      if (cachedData && retryCount === 0) {
-         if (mountedRef.current) {
-            setLeague(cachedData);
-            setIsLoading(false);
-            return;
-         }
-      }
-
-      try {
-         if (mountedRef.current) {
-            setIsLoading(true);
-            setError(null);
+         // Check cache first
+         const cacheKey = `league_${id}`;
+         const cachedData = getCachedData(cacheKey);
+         if (cachedData && retryCount === 0) {
+            if (mountedRef.current) {
+               setLeague(cachedData);
+               setIsLoading(false);
+               return;
+            }
          }
 
-         const response = await fetchWithAuth(`${BASE_URL}/api/leagues/${id}`, {
-            signal: abortSignal,
-         });
+         try {
+            if (mountedRef.current) {
+               setIsLoading(true);
+               setError(null);
+            }
 
-         if (abortSignal?.aborted || !mountedRef.current) return;
-
-         if (!response.ok) {
-            throw new Error(`Failed to fetch league details: ${response.status}`);
-         }
-
-         const data = await response.json();
-
-         if (abortSignal?.aborted || !mountedRef.current) return;
-
-         // Cache the data
-         setCachedData(cacheKey, data.league);
-         setLeague(data.league);
-      } catch (err) {
-         if (abortSignal?.aborted || !mountedRef.current) return;
-
-         const errorMessage = err instanceof Error ? err.message : 'Failed to load league details';
-
-         // Retry logic for network errors (max 2 retries)
-         if (retryCount < 2 && (errorMessage.includes('network') || errorMessage.includes('fetch'))) {
-            setTimeout(() => {
-               loadLeagueDetails(abortSignal, retryCount + 1);
-            }, 1000 * (retryCount + 1)); // Exponential backoff
-            return;
-         }
-
-         setError(errorMessage);
-         captureException(err as Error, {
-            function: 'loadLeagueDetails',
-            screen: 'LeagueStats',
-            leagueId: id,
-            retryCount,
-         });
-      } finally {
-         if (!abortSignal?.aborted && mountedRef.current) {
-            setIsLoading(false);
-         }
-      }
-   }, [id, fetchWithAuth]);
-
-   // Function to check for active game with abort controller support and caching
-   const checkActiveGame = React.useCallback(async (abortSignal?: AbortSignal, retryCount = 0) => {
-      if (!league || abortSignal?.aborted) return;
-
-      // Check cache first
-      const cacheKey = `active_game_${league.id}`;
-      const cachedData = getCachedData(cacheKey);
-      if (cachedData && retryCount === 0) {
-         if (mountedRef.current) {
-            setActiveGame(cachedData);
-            setIsCheckingActiveGame(false);
-            return;
-         }
-      }
-
-      try {
-         if (mountedRef.current) {
-            setIsCheckingActiveGame(true);
-         }
-
-         const activeGameResponse = await fetchWithAuth(
-            `${BASE_URL}/api/games/active/${league.id}`,
-            { signal: abortSignal }
-         );
-
-         if (abortSignal?.aborted || !mountedRef.current) return;
-
-         if (activeGameResponse.ok) {
-            const activeGameData = await activeGameResponse.json();
+            const response = await fetchWithAuth(
+               `${BASE_URL}/api/leagues/${id}`,
+               {
+                  signal: abortSignal,
+               }
+            );
 
             if (abortSignal?.aborted || !mountedRef.current) return;
 
-            const gameData = activeGameData.success && activeGameData.game ? activeGameData.game : null;
+            if (!response.ok) {
+               throw new Error(
+                  `Failed to fetch league details: ${response.status}`
+               );
+            }
+
+            const data = await response.json();
+
+            if (abortSignal?.aborted || !mountedRef.current) return;
 
             // Cache the data
-            setCachedData(cacheKey, gameData);
-            setActiveGame(gameData);
-         } else {
-            // Cache null result
-            setCachedData(cacheKey, null);
+            setCachedData(cacheKey, data.league);
+            setLeague(data.league);
+         } catch (err) {
+            if (abortSignal?.aborted || !mountedRef.current) return;
+
+            const errorMessage =
+               err instanceof Error
+                  ? err.message
+                  : 'Failed to load league details';
+
+            // Retry logic for network errors (max 2 retries)
+            if (
+               retryCount < 2 &&
+               (errorMessage.includes('network') ||
+                  errorMessage.includes('fetch'))
+            ) {
+               setTimeout(
+                  () => {
+                     loadLeagueDetails(abortSignal, retryCount + 1);
+                  },
+                  1000 * (retryCount + 1)
+               ); // Exponential backoff
+               return;
+            }
+
+            setError(errorMessage);
+            captureException(err as Error, {
+               function: 'loadLeagueDetails',
+               screen: 'LeagueStats',
+               leagueId: id,
+               retryCount,
+            });
+         } finally {
+            if (!abortSignal?.aborted && mountedRef.current) {
+               setIsLoading(false);
+            }
+         }
+      },
+      [id, fetchWithAuth]
+   );
+
+   // Function to check for active game with abort controller support and caching
+   const checkActiveGame = React.useCallback(
+      async (abortSignal?: AbortSignal, retryCount = 0) => {
+         if (!league || abortSignal?.aborted) return;
+
+         // Check cache first
+         const cacheKey = `active_game_${league.id}`;
+         const cachedData = getCachedData(cacheKey);
+         if (cachedData && retryCount === 0) {
+            if (mountedRef.current) {
+               setActiveGame(cachedData);
+               setIsCheckingActiveGame(false);
+               return;
+            }
+         }
+
+         try {
+            if (mountedRef.current) {
+               setIsCheckingActiveGame(true);
+            }
+
+            const activeGameResponse = await fetchWithAuth(
+               `${BASE_URL}/api/games/active/${league.id}`,
+               { signal: abortSignal }
+            );
+
+            if (abortSignal?.aborted || !mountedRef.current) return;
+
+            if (activeGameResponse.ok) {
+               const activeGameData = await activeGameResponse.json();
+
+               if (abortSignal?.aborted || !mountedRef.current) return;
+
+               const gameData =
+                  activeGameData.success && activeGameData.game
+                     ? activeGameData.game
+                     : null;
+
+               // Cache the data
+               setCachedData(cacheKey, gameData);
+               setActiveGame(gameData);
+            } else {
+               // Cache null result
+               setCachedData(cacheKey, null);
+               setActiveGame(null);
+            }
+         } catch (error) {
+            if (abortSignal?.aborted || !mountedRef.current) return;
+
+            // Retry logic for network errors (max 1 retry for active game check)
+            if (
+               retryCount < 1 &&
+               error instanceof Error &&
+               (error.message.includes('network') ||
+                  error.message.includes('fetch'))
+            ) {
+               setTimeout(() => {
+                  checkActiveGame(abortSignal, retryCount + 1);
+               }, 1000);
+               return;
+            }
+
+            console.error('Error checking for active game:', error);
+            captureException(error as Error, {
+               function: 'checkActiveGame',
+               screen: 'LeagueStats',
+               leagueId: league.id,
+               retryCount,
+            });
             setActiveGame(null);
+         } finally {
+            if (!abortSignal?.aborted && mountedRef.current) {
+               setIsCheckingActiveGame(false);
+            }
          }
-      } catch (error) {
-         if (abortSignal?.aborted || !mountedRef.current) return;
-
-         // Retry logic for network errors (max 1 retry for active game check)
-         if (retryCount < 1 && error instanceof Error &&
-             (error.message.includes('network') || error.message.includes('fetch'))) {
-            setTimeout(() => {
-               checkActiveGame(abortSignal, retryCount + 1);
-            }, 1000);
-            return;
-         }
-
-         console.error('Error checking for active game:', error);
-         captureException(error as Error, {
-            function: 'checkActiveGame',
-            screen: 'LeagueStats',
-            leagueId: league.id,
-            retryCount,
-         });
-         setActiveGame(null);
-      } finally {
-         if (!abortSignal?.aborted && mountedRef.current) {
-            setIsCheckingActiveGame(false);
-         }
-      }
-   }, [league, fetchWithAuth]);
+      },
+      [league, fetchWithAuth]
+   );
 
    // Load league details on mount with proper cleanup
    React.useEffect(() => {
@@ -350,39 +393,51 @@ function LeagueStatsComponent() {
    }, [loadLeagueDetails]);
 
    // Memoize style objects to prevent recreation on every render
-   const headerButtonStyle = React.useMemo(() => ({
-      shadowColor: '#000000',
-      shadowOffset: { width: 0, height: 4 },
-      shadowOpacity: 0.3,
-      shadowRadius: 8,
-      elevation: 8,
-   }), []);
+   const headerButtonStyle = React.useMemo(
+      () => ({
+         shadowColor: '#000000',
+         shadowOffset: { width: 0, height: 4 },
+         shadowOpacity: 0.3,
+         shadowRadius: 8,
+         elevation: 8,
+      }),
+      []
+   );
 
-   const leagueHeaderStyle = React.useMemo(() => ({
-      shadowColor: '#FFFFFF',
-      shadowOffset: { width: 0, height: 8 },
-      shadowOpacity: 0.1,
-      shadowRadius: 16,
-      elevation: 16,
-   }), []);
+   const leagueHeaderStyle = React.useMemo(
+      () => ({
+         shadowColor: '#FFFFFF',
+         shadowOffset: { width: 0, height: 8 },
+         shadowOpacity: 0.1,
+         shadowRadius: 16,
+         elevation: 16,
+      }),
+      []
+   );
 
-   const imageStyle = React.useMemo(() => ({
-      width: 100,
-      height: 100,
-      borderRadius: 20,
-      shadowColor: '#FFFFFF',
-      shadowOffset: { width: 0, height: 4 },
-      shadowOpacity: 0.2,
-      shadowRadius: 8,
-   }), []);
+   const imageStyle = React.useMemo(
+      () => ({
+         width: 100,
+         height: 100,
+         borderRadius: 20,
+         shadowColor: '#FFFFFF',
+         shadowOffset: { width: 0, height: 4 },
+         shadowOpacity: 0.2,
+         shadowRadius: 8,
+      }),
+      []
+   );
 
-   const inviteCodeStyle = React.useMemo(() => ({
-      shadowColor: '#8B5CF6',
-      shadowOffset: { width: 0, height: 4 },
-      shadowOpacity: 0.3,
-      shadowRadius: 8,
-      elevation: 8,
-   }), []);
+   const inviteCodeStyle = React.useMemo(
+      () => ({
+         shadowColor: '#8B5CF6',
+         shadowOffset: { width: 0, height: 4 },
+         shadowOpacity: 0.3,
+         shadowRadius: 8,
+         elevation: 8,
+      }),
+      []
+   );
 
    if (isLoading) {
       return <GlassmorphismLoader message={t('loadingLeagueDetails')} />;
@@ -496,7 +551,9 @@ function LeagueStatsComponent() {
                      contentFit="cover"
                      cachePolicy="memory-disk"
                      priority="high"
-                     placeholder={{ uri: 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNk+M9QDwADhgGAWjR9awAAAABJRU5ErkJggg==' }}
+                     placeholder={{
+                        uri: 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNk+M9QDwADhgGAWjR9awAAAABJRU5ErkJggg==',
+                     }}
                      placeholderContentFit="cover"
                      transition={300}
                      accessible={true}
@@ -562,13 +619,16 @@ function LeagueStatsComponent() {
                   <View
                      className="bg-gray-500/10 backdrop-blur-xl border border-gray-400/30 rounded-3xl p-6"
                      style={[styles.actionCard, { shadowColor: '#6B7280' }]}
-                     accessibilityRole="status"
+                     accessibilityRole="text"
                      accessibilityLabel={t('checkingGames')}
                   >
                      <View className="flex-row items-center">
                         <View
                            className="w-16 h-16 bg-gray-500/20 backdrop-blur-xl border border-gray-400/40 rounded-2xl items-center justify-center mr-5"
-                           style={[styles.iconContainer, { shadowColor: '#6B7280' }]}
+                           style={[
+                              styles.iconContainer,
+                              { shadowColor: '#6B7280' },
+                           ]}
                         >
                            <ActivityIndicator size="small" color="#9CA3AF" />
                         </View>

@@ -124,6 +124,7 @@ export interface Translations {
 
    // Select Players Screen
    selectPlayers: string;
+   selectPlayersToStartGame: string;
    loadingPlayers: string;
    selectPlayersInstruction: string;
    playersSelected: string;
@@ -315,6 +316,7 @@ const enTranslations: Translations = {
    continueGameDescription: 'Resume the currently active game',
 
    // Select Players Screen
+   selectPlayersToStartGame: 'Select players to start a new game',
    selectPlayers: 'SELECT PLAYERS',
    loadingPlayers: 'Loading players...',
    selectPlayersInstruction: 'Choose players for the new game',
@@ -508,6 +510,7 @@ const heTranslations: Translations = {
    continueGameDescription: 'חזור למשחק הפעיל הנוכחי',
 
    // Select Players Screen
+   selectPlayersToStartGame: 'בחר שחקנים להתחיל משחק חדש',
    selectPlayers: 'בחר שחקנים',
    loadingPlayers: 'טוען שחקנים...',
    selectPlayersInstruction: 'בחר שחקנים למשחק החדש',

@@ -29,6 +29,7 @@ interface GameSetupModalProps {
    onCreateGame: () => void;
    onBuyInChange: (value: string) => void;
    leagueName?: string;
+   theme?: 'light' | 'dark';
 }
 
 export function GameSetupModal({
@@ -41,8 +42,9 @@ export function GameSetupModal({
    onCreateGame,
    onBuyInChange,
    leagueName,
+   theme: themeProp = 'light',
 }: GameSetupModalProps) {
-   const theme = getTheme('light');
+   const theme = getTheme(themeProp);
    const { t } = useLocalization();
 
    const buyInOptions = availableBuyIns.map((value) => ({

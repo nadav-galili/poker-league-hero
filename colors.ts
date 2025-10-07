@@ -1,185 +1,303 @@
-// Centralized color system with semantic naming
-// Source: design.md (Design Tokens section)
-// Use semantic names for easy color scheme changes
+// Modern Dark Theme Color System
+// Optimized for glass-morphism effects and gradient backgrounds
 
-// Neo-Brutalist Color Palette
+// Modern Color Palette - Dark Theme Focus
 const rawColors = {
-   // Base neutrals - high contrast
-   ink: '#000000', // Pure black for maximum contrast
-   paper: '#FFFFFF', // Pure white for stark contrast
-   bone: '#F8F8F8', // Off-white for subtle backgrounds
-   concrete: '#c4c2c2', // Light gray for cards
-   shadow: '#000000', // Black shadows for depth
+   // Deep purple gradient backgrounds
+   deepPurple: '#1a0033', // Primary dark purple
+   midPurple: '#0f001a', // Mid gradient purple
+   voidBlack: '#000000', // Pure black for deepest areas
 
-   // Neo-brutalist accent colors - bold and electric
-   electricBlue: '#0066FF', // Primary brand - vivid blue
-   hotPink: '#FF1493', // Secondary - shocking pink
-   neonYellow: '#FFFF00', // Warning/highlight - pure yellow
-   acidGreen: '#32FF32', // Success - bright green
-   blazeOrange: '#FF4500', // Error/danger - red-orange
+   // Glass-morphism colors
+   glassWhite: 'rgba(255, 255, 255, 0.1)', // Semi-transparent white
+   glassWhiteMedium: 'rgba(255, 255, 255, 0.15)', // Medium opacity glass
+   glassWhiteHigh: 'rgba(255, 255, 255, 0.2)', // Higher opacity glass
+   glassBlur: 'rgba(255, 255, 255, 0.05)', // Very subtle glass effect
 
-   // Supporting vibrant colors
-   cyberPurple: '#8A2BE2', // Purple accent
-   toxicLime: '#CCFF00', // Lime accent
-   shockRed: '#FF0000', // Pure red
+   // Modern accent colors
+   primaryPurple: '#8B5CF6', // Purple primary
+   primaryPurpleLight: '#A78BFA', // Lighter purple
+   primaryPurpleDark: '#7C3AED', // Darker purple
 
-   // Toned versions for backgrounds
-   electricBlue10: 'rgba(0, 102, 255, 0.1)',
-   electricBlue20: 'rgba(0, 102, 255, 0.2)',
-   hotPink10: 'rgba(255, 20, 147, 0.1)',
-   hotPink20: 'rgba(255, 20, 147, 0.2)',
-   neonYellow10: 'rgba(255, 255, 0, 0.1)',
-   neonYellow20: 'rgba(255, 255, 0, 0.2)',
-   acidGreen10: 'rgba(50, 255, 50, 0.1)',
-   acidGreen20: 'rgba(50, 255, 50, 0.2)',
-   blazeOrange10: 'rgba(255, 69, 0, 0.1)',
-   blazeOrange20: 'rgba(255, 69, 0, 0.2)',
-   cyberPurple10: 'rgba(138, 43, 226, 0.1)',
-   cyberPurple20: 'rgba(138, 43, 226, 0.2)',
+   // Status colors - modern and accessible
+   successGreen: '#4ADE80', // Modern success green
+   successGreenDark: '#10B981', // Darker success green
+   errorRed: '#F87171', // Modern error red
+   errorRedDark: '#EF4444', // Darker error red
+   warningOrange: '#FB923C', // Modern warning orange
+   warningOrangeDark: '#F59E0B', // Darker warning orange
+   infoBlue: '#60A5FA', // Modern info blue
+   infoBlueDark: '#3B82F6', // Darker info blue
 
-   // Text colors
-   textPrimary: '#000000', // Black text on light
-   textSecondary: '#333333', // Dark gray for secondary
-   textMuted: '#666666', // Medium gray for muted
-   textInverse: '#FFFFFF', // White text on dark
+   // Special accent
+   pinkAccent: '#FF1493', // Bright pink accent
+   pinkAccentDark: '#E1306C', // Darker pink accent
+
+   // Text colors for dark theme
+   textPrimary: '#FFFFFF', // Pure white text
+   textSecondary: 'rgba(255, 255, 255, 0.8)', // Semi-transparent white
+   textMuted: 'rgba(255, 255, 255, 0.6)', // More transparent white
+   textDisabled: 'rgba(255, 255, 255, 0.4)', // Disabled text
+
+   // Shadow colors with tints
+   shadowPurple: 'rgba(139, 92, 246, 0.3)', // Purple tinted shadow
+   shadowPink: 'rgba(255, 20, 147, 0.3)', // Pink tinted shadow
+   shadowBlack: 'rgba(0, 0, 0, 0.5)', // Standard black shadow
+
+   // Gradient stops
+   gradientStart: '#8B5CF6', // Purple gradient start
+   gradientEnd: '#A78BFA', // Purple gradient end
+   successGradientStart: '#4ADE80',
+   successGradientEnd: '#10B981',
+   errorGradientStart: '#F87171',
+   errorGradientEnd: '#EF4444',
+   warningGradientStart: '#FB923C',
+   warningGradientEnd: '#F59E0B',
+   infoGradientStart: '#60A5FA',
+   infoGradientEnd: '#3B82F6',
 } as const;
 
-// Semantic color tokens (use these in components)
+// Semantic color tokens optimized for modern dark theme
 export const colors = {
-   // Core semantic colors - Neo-brutalist style
+   // Text colors - optimized for dark backgrounds
    text: rawColors.textPrimary,
    textSecondary: rawColors.textSecondary,
    textMuted: rawColors.textMuted,
-   textInverse: rawColors.textInverse,
+   textDisabled: rawColors.textDisabled,
 
-   background: rawColors.paper, // Pure white background
-   surface: rawColors.concrete, // Light gray for cards
-   surfaceElevated: rawColors.paper, // White for elevated surfaces
+   // Background system - dark theme first
+   background: rawColors.deepPurple, // Deep purple background
+   backgroundGradientStart: rawColors.deepPurple,
+   backgroundGradientMid: rawColors.midPurple,
+   backgroundGradientEnd: rawColors.voidBlack,
 
-   border: rawColors.ink, // Black borders for brutalist style
-   shadow: rawColors.shadow, // Black shadows
+   // Surface system with glass-morphism
+   surface: rawColors.glassWhite, // Semi-transparent surfaces
+   surfaceElevated: rawColors.glassWhiteMedium, // Elevated surfaces
+   surfaceHighlight: rawColors.glassWhiteHigh, // Highlighted surfaces
+   surfaceBlur: rawColors.glassBlur, // Subtle surface tint
 
-   // Neo-brutalist brand colors - bold and electric
-   primary: rawColors.electricBlue, // Electric blue primary
-   primaryTint: rawColors.electricBlue20,
+   // Border system - subtle and modern
+   border: rawColors.glassWhite, // Semi-transparent borders
+   borderMuted: rawColors.glassBlur, // Very subtle borders
 
-   secondary: rawColors.hotPink, // Hot pink secondary
-   secondaryTint: rawColors.hotPink20,
+   // Primary color system
+   primary: rawColors.primaryPurple,
+   primaryLight: rawColors.primaryPurpleLight,
+   primaryDark: rawColors.primaryPurpleDark,
+   primaryGradientStart: rawColors.gradientStart,
+   primaryGradientEnd: rawColors.gradientEnd,
 
-   accent: rawColors.neonYellow, // Neon yellow accent
-   accentTint: rawColors.neonYellow20,
+   // Secondary/accent system
+   secondary: rawColors.pinkAccent,
+   secondaryDark: rawColors.pinkAccentDark,
 
-   // Status colors - vibrant and bold
-   success: rawColors.acidGreen, // Acid green for success
-   successTint: rawColors.acidGreen20,
+   // Status colors with gradients
+   success: rawColors.successGreen,
+   successDark: rawColors.successGreenDark,
+   successGradientStart: rawColors.successGradientStart,
+   successGradientEnd: rawColors.successGradientEnd,
 
-   warning: rawColors.neonYellow, // Neon yellow for warnings
-   warningTint: rawColors.neonYellow20,
+   warning: rawColors.warningOrange,
+   warningDark: rawColors.warningOrangeDark,
+   warningGradientStart: rawColors.warningGradientStart,
+   warningGradientEnd: rawColors.warningGradientEnd,
 
-   error: rawColors.blazeOrange, // Blaze orange for errors
-   errorTint: rawColors.blazeOrange20,
+   error: rawColors.errorRed,
+   errorDark: rawColors.errorRedDark,
+   errorGradientStart: rawColors.errorGradientStart,
+   errorGradientEnd: rawColors.errorGradientEnd,
 
-   info: rawColors.cyberPurple, // Cyber purple for info
-   infoTint: rawColors.cyberPurple20,
+   info: rawColors.infoBlue,
+   infoDark: rawColors.infoBlueDark,
+   infoGradientStart: rawColors.infoGradientStart,
+   infoGradientEnd: rawColors.infoGradientEnd,
 
-   // Additional accents for variety
-   highlight: rawColors.toxicLime, // Toxic lime for highlights
-   highlightTint: 'rgba(204, 255, 0, 0.2)',
-
-   danger: rawColors.shockRed, // Shock red for danger
-   dangerTint: 'rgba(255, 0, 0, 0.2)',
-
-   // Dark theme
-   backgroundDark: rawColors.ink,
-   surfaceDark: '#1A1A1A',
-   textDark: rawColors.textInverse,
+   // Shadow system with color tints
+   shadow: rawColors.shadowBlack,
+   shadowPurple: rawColors.shadowPurple,
+   shadowPink: rawColors.shadowPink,
 } as const;
 
 export type ThemeName = 'light' | 'dark';
 
 export type Theme = {
    name: ThemeName;
+   // Backgrounds
    background: string;
+   backgroundGradientStart: string;
+   backgroundGradientMid: string;
+   backgroundGradientEnd: string;
+   // Surfaces
    surface: string;
    surfaceElevated: string;
+   surfaceHighlight: string;
+   surfaceBlur: string;
+   // Text
    text: string;
    textSecondary: string;
    textMuted: string;
+   textDisabled: string;
+   // Borders
    border: string;
+   borderMuted: string;
+   // Shadows
    shadow: string;
+   shadowPurple: string;
+   shadowPink: string;
+   // Primary colors
    primary: string;
-   primaryTint: string;
+   primaryLight: string;
+   primaryDark: string;
+   primaryGradientStart: string;
+   primaryGradientEnd: string;
+   // Secondary colors
    secondary: string;
-   secondaryTint: string;
-   accent: string;
-   accentTint: string;
+   secondaryDark: string;
+   // Status colors with gradients
    info: string;
-   infoTint: string;
+   infoDark: string;
+   infoGradientStart: string;
+   infoGradientEnd: string;
    warning: string;
-   warningTint: string;
+   warningDark: string;
+   warningGradientStart: string;
+   warningGradientEnd: string;
    error: string;
-   errorTint: string;
+   errorDark: string;
+   errorGradientStart: string;
+   errorGradientEnd: string;
    success: string;
-   successTint: string;
-   highlight: string;
-   highlightTint: string;
+   successDark: string;
+   successGradientStart: string;
+   successGradientEnd: string;
 };
 
 export const themes: Record<ThemeName, Theme> = {
-   light: {
-      name: 'light',
+   // Dark theme is now the primary theme
+   dark: {
+      name: 'dark',
+      // Backgrounds
       background: colors.background,
+      backgroundGradientStart: colors.backgroundGradientStart,
+      backgroundGradientMid: colors.backgroundGradientMid,
+      backgroundGradientEnd: colors.backgroundGradientEnd,
+      // Surfaces
       surface: colors.surface,
       surfaceElevated: colors.surfaceElevated,
+      surfaceHighlight: colors.surfaceHighlight,
+      surfaceBlur: colors.surfaceBlur,
+      // Text
       text: colors.text,
       textSecondary: colors.textSecondary,
       textMuted: colors.textMuted,
+      textDisabled: colors.textDisabled,
+      // Borders
       border: colors.border,
+      borderMuted: colors.borderMuted,
+      // Shadows
       shadow: colors.shadow,
+      shadowPurple: colors.shadowPurple,
+      shadowPink: colors.shadowPink,
+      // Primary
       primary: colors.primary,
-      primaryTint: colors.primaryTint,
+      primaryLight: colors.primaryLight,
+      primaryDark: colors.primaryDark,
+      primaryGradientStart: colors.primaryGradientStart,
+      primaryGradientEnd: colors.primaryGradientEnd,
+      // Secondary
       secondary: colors.secondary,
-      secondaryTint: colors.secondaryTint,
-      accent: colors.accent,
-      accentTint: colors.accentTint,
+      secondaryDark: colors.secondaryDark,
+      // Status colors
       info: colors.info,
-      infoTint: colors.infoTint,
+      infoDark: colors.infoDark,
+      infoGradientStart: colors.infoGradientStart,
+      infoGradientEnd: colors.infoGradientEnd,
       warning: colors.warning,
-      warningTint: colors.warningTint,
+      warningDark: colors.warningDark,
+      warningGradientStart: colors.warningGradientStart,
+      warningGradientEnd: colors.warningGradientEnd,
       error: colors.error,
-      errorTint: colors.errorTint,
+      errorDark: colors.errorDark,
+      errorGradientStart: colors.errorGradientStart,
+      errorGradientEnd: colors.errorGradientEnd,
       success: colors.success,
-      successTint: colors.successTint,
-      highlight: colors.highlight,
-      highlightTint: colors.highlightTint,
+      successDark: colors.successDark,
+      successGradientStart: colors.successGradientStart,
+      successGradientEnd: colors.successGradientEnd,
    },
-   dark: {
-      name: 'dark',
-      background: colors.backgroundDark,
-      surface: colors.surfaceDark,
-      surfaceElevated: colors.backgroundDark,
-      text: colors.textDark,
-      textSecondary: colors.textMuted,
+   // Light theme kept for compatibility but uses dark theme colors
+   light: {
+      name: 'light',
+      // Use same colors as dark theme since app is designed for dark
+      background: colors.background,
+      backgroundGradientStart: colors.backgroundGradientStart,
+      backgroundGradientMid: colors.backgroundGradientMid,
+      backgroundGradientEnd: colors.backgroundGradientEnd,
+      surface: colors.surface,
+      surfaceElevated: colors.surfaceElevated,
+      surfaceHighlight: colors.surfaceHighlight,
+      surfaceBlur: colors.surfaceBlur,
+      text: colors.text,
+      textSecondary: colors.textSecondary,
       textMuted: colors.textMuted,
+      textDisabled: colors.textDisabled,
       border: colors.border,
+      borderMuted: colors.borderMuted,
       shadow: colors.shadow,
+      shadowPurple: colors.shadowPurple,
+      shadowPink: colors.shadowPink,
       primary: colors.primary,
-      primaryTint: colors.primaryTint,
+      primaryLight: colors.primaryLight,
+      primaryDark: colors.primaryDark,
+      primaryGradientStart: colors.primaryGradientStart,
+      primaryGradientEnd: colors.primaryGradientEnd,
       secondary: colors.secondary,
-      secondaryTint: colors.secondaryTint,
-      accent: colors.accent,
-      accentTint: colors.accentTint,
+      secondaryDark: colors.secondaryDark,
       info: colors.info,
-      infoTint: colors.infoTint,
+      infoDark: colors.infoDark,
+      infoGradientStart: colors.infoGradientStart,
+      infoGradientEnd: colors.infoGradientEnd,
       warning: colors.warning,
-      warningTint: colors.warningTint,
+      warningDark: colors.warningDark,
+      warningGradientStart: colors.warningGradientStart,
+      warningGradientEnd: colors.warningGradientEnd,
       error: colors.error,
-      errorTint: colors.errorTint,
+      errorDark: colors.errorDark,
+      errorGradientStart: colors.errorGradientStart,
+      errorGradientEnd: colors.errorGradientEnd,
       success: colors.success,
-      successTint: colors.successTint,
-      highlight: colors.highlight,
-      highlightTint: colors.highlightTint,
+      successDark: colors.successDark,
+      successGradientStart: colors.successGradientStart,
+      successGradientEnd: colors.successGradientEnd,
    },
 };
 
 export const getTheme = (name: ThemeName = 'dark'): Theme => themes[name];
+
+// Utility function to create gradient arrays for React Native LinearGradient
+export const getGradient = (
+   type: 'primary' | 'success' | 'error' | 'warning' | 'info' | 'background'
+) => {
+   const theme = getTheme();
+   switch (type) {
+      case 'primary':
+         return [theme.primaryGradientStart, theme.primaryGradientEnd];
+      case 'success':
+         return [theme.successGradientStart, theme.successGradientEnd];
+      case 'error':
+         return [theme.errorGradientStart, theme.errorGradientEnd];
+      case 'warning':
+         return [theme.warningGradientStart, theme.warningGradientEnd];
+      case 'info':
+         return [theme.infoGradientStart, theme.infoGradientEnd];
+      case 'background':
+         return [
+            theme.backgroundGradientStart,
+            theme.backgroundGradientMid,
+            theme.backgroundGradientEnd,
+         ];
+      default:
+         return [theme.primaryGradientStart, theme.primaryGradientEnd];
+   }
+};

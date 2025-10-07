@@ -1,11 +1,10 @@
-import { colors, getTheme } from '@/colors';
-import { Text } from '@/components/Text';
 import { usePlayerStat } from '@/hooks/usePlayerStat';
 import { formatCurrency } from '@/services/leagueStatsFormatters';
 import { StatType } from '@/services/leagueStatsService';
 import { Ionicons } from '@expo/vector-icons';
+import { Image } from 'expo-image';
 import React from 'react';
-import { Dimensions, Image, StyleSheet, View } from 'react-native';
+import { ActivityIndicator, Dimensions, StyleSheet, Text, View } from 'react-native';
 
 const { width: screenWidth } = Dimensions.get('window');
 
@@ -16,19 +15,23 @@ interface PlayerStatCardProps {
    t: (key: string) => string;
 }
 
-// Stat type configurations
+// Stat type configurations with modern colors
 const STAT_CONFIGS = {
    'top-profit-player': {
       title: 'topProfitPlayer',
       icon: 'trophy',
-      color: colors.success,
+      color: '#4ADE80', // Green
+      bgColor: 'bg-green-500/10',
+      borderColor: 'border-green-400/30',
       formatValue: (value: number | string | undefined | null) =>
          formatCurrency(value),
    },
    'most-active-player': {
       title: 'mostActivePlayer',
       icon: 'star',
-      color: colors.primary,
+      color: '#60A5FA', // Blue
+      bgColor: 'bg-blue-500/10',
+      borderColor: 'border-blue-400/30',
       formatValue: (value: number | string | undefined | null) => {
          if (value === null || value === undefined) {
             return 'N/A';
@@ -39,14 +42,18 @@ const STAT_CONFIGS = {
    'highest-single-game-profit': {
       title: 'highestSingleGameProfit',
       icon: 'trending-up',
-      color: colors.accent,
+      color: '#FB923C', // Orange
+      bgColor: 'bg-orange-500/10',
+      borderColor: 'border-orange-400/30',
       formatValue: (value: number | string | undefined | null) =>
          formatCurrency(value),
    },
    'most-consistent-player': {
       title: 'mostConsistentPlayer',
       icon: 'checkmark-circle',
-      color: colors.info,
+      color: '#A78BFA', // Purple
+      bgColor: 'bg-purple-500/10',
+      borderColor: 'border-purple-400/30',
       formatValue: (value: number | string | undefined | null) => {
          if (value === null || value === undefined) {
             return 'N/A';
@@ -61,7 +68,9 @@ const STAT_CONFIGS = {
    'biggest-loser': {
       title: 'biggestLoser',
       icon: 'sad',
-      color: colors.error,
+      color: '#F87171', // Red
+      bgColor: 'bg-red-500/10',
+      borderColor: 'border-red-400/30',
       formatValue: (value: number | string | undefined | null) =>
          formatCurrency(value),
    },
@@ -73,22 +82,45 @@ export default function PlayerStatCard({
    year,
    t,
 }: PlayerStatCardProps) {
-   const theme = getTheme('light');
    const { data, isLoading, error } = usePlayerStat(leagueId, statType, year);
    const config = STAT_CONFIGS[statType];
 
+   const cardStyle = React.useMemo(
+      () => ({
+         shadowColor: config.color,
+         shadowOffset: { width: 0, height: 8 },
+         shadowOpacity: 0.2,
+         shadowRadius: 16,
+         elevation: 16,
+      }),
+      [config.color]
+   );
+
+   const iconContainerStyle = React.useMemo(
+      () => ({
+         shadowColor: config.color,
+         shadowOffset: { width: 0, height: 4 },
+         shadowOpacity: 0.3,
+         shadowRadius: 8,
+         elevation: 8,
+      }),
+      [config.color]
+   );
+
    if (isLoading) {
       return (
-         <View style={styles.card}>
+         <View
+            className={`${config.bgColor} backdrop-blur-xl ${config.borderColor} rounded-3xl p-6 mb-4`}
+            style={[styles.card, cardStyle]}
+         >
             <View className="items-center justify-center py-8">
-               <View className="w-12 h-12 bg-concrete border-4 border-ink rounded-lg items-center justify-center mb-3">
-                  <Ionicons
-                     name={config.icon as any}
-                     size={24}
-                     color={colors.textMuted}
-                  />
+               <View
+                  className="w-12 h-12 bg-white/10 border border-white/20 rounded-2xl items-center justify-center mb-3"
+                  style={iconContainerStyle}
+               >
+                  <ActivityIndicator size="small" color={config.color} />
                </View>
-               <Text className="text-textMuted text-xs font-bold uppercase tracking-wider">
+               <Text className="text-white/70 text-sm font-medium">
                   {t('loading')}...
                </Text>
             </View>
@@ -98,16 +130,33 @@ export default function PlayerStatCard({
 
    if (error || !data) {
       return (
-         <View style={styles.card}>
+         <View
+            className="bg-red-500/10 backdrop-blur-xl border-red-400/30 rounded-3xl p-6 mb-4"
+            style={[
+               styles.card,
+               {
+                  shadowColor: '#F87171',
+                  shadowOffset: { width: 0, height: 8 },
+                  shadowOpacity: 0.2,
+                  shadowRadius: 16,
+                  elevation: 16,
+               },
+            ]}
+         >
             <View className="items-center justify-center py-8">
-               <View className="w-12 h-12 bg-errorTint border-4 border-ink rounded-lg items-center justify-center mb-3">
-                  <Ionicons
-                     name={config.icon as any}
-                     size={24}
-                     color={colors.error}
-                  />
+               <View
+                  className="w-12 h-12 bg-red-500/20 border border-red-400/40 rounded-2xl items-center justify-center mb-3"
+                  style={{
+                     shadowColor: '#F87171',
+                     shadowOffset: { width: 0, height: 4 },
+                     shadowOpacity: 0.3,
+                     shadowRadius: 8,
+                     elevation: 8,
+                  }}
+               >
+                  <Ionicons name={config.icon as any} size={24} color="#F87171" />
                </View>
-               <Text className="text-error text-xs font-bold uppercase tracking-wider text-center">
+               <Text className="text-red-400 text-sm font-medium text-center">
                   {error || t('noCompletedGames')}
                </Text>
             </View>
@@ -115,25 +164,26 @@ export default function PlayerStatCard({
       );
    }
 
-   const cardBackgroundColor = config.color + '10'; // Very light tint
-   const iconBackgroundColor = config.color + '20'; // Light tint
-
    return (
-      <View style={[styles.card, { backgroundColor: cardBackgroundColor }]}>
+      <View
+         className={`${config.bgColor} backdrop-blur-xl ${config.borderColor} rounded-3xl p-6 mb-4`}
+         style={[styles.card, cardStyle]}
+      >
          {/* Header with Icon */}
          <View className="flex-row items-center justify-between mb-4">
             <View
-               className="w-10 h-10 border-3 border-ink rounded-lg items-center justify-center"
-               style={{ backgroundColor: iconBackgroundColor }}
+               className="w-12 h-12 border border-white/30 rounded-2xl items-center justify-center"
+               style={[
+                  {
+                     backgroundColor: `${config.color}20`,
+                  },
+                  iconContainerStyle,
+               ]}
             >
-               <Ionicons
-                  name={config.icon as any}
-                  size={20}
-                  color={config.color}
-               />
+               <Ionicons name={config.icon as any} size={20} color={config.color} />
             </View>
             <Text
-               className="text-textSecondary text-xs font-black uppercase tracking-widest flex-1 text-right"
+               className="text-white/90 text-sm font-semibold flex-1 text-right"
                numberOfLines={2}
             >
                {t(config.title)}
@@ -145,12 +195,30 @@ export default function PlayerStatCard({
             {data.profileImageUrl ? (
                <Image
                   source={{ uri: data.profileImageUrl }}
-                  className="w-16 h-16 rounded-full border-4 border-ink"
-                  defaultSource={require('@/assets/images/icon.png')}
+                  style={{
+                     width: 64,
+                     height: 64,
+                     borderRadius: 32,
+                     shadowColor: '#FFFFFF',
+                     shadowOffset: { width: 0, height: 4 },
+                     shadowOpacity: 0.2,
+                     shadowRadius: 8,
+                  }}
+                  contentFit="cover"
+                  cachePolicy="memory-disk"
                />
             ) : (
-               <View className="w-16 h-16 bg-primaryTint border-4 border-ink rounded-full items-center justify-center">
-                  <Ionicons name="person" size={28} color={colors.primary} />
+               <View
+                  className="w-16 h-16 bg-white/10 border border-white/20 rounded-full items-center justify-center"
+                  style={{
+                     shadowColor: config.color,
+                     shadowOffset: { width: 0, height: 4 },
+                     shadowOpacity: 0.3,
+                     shadowRadius: 8,
+                     elevation: 8,
+                  }}
+               >
+                  <Ionicons name="person" size={28} color={config.color} />
                </View>
             )}
          </View>
@@ -158,33 +226,30 @@ export default function PlayerStatCard({
          {/* Player Info */}
          <View className="items-center">
             <Text
-               className="text-ink text-lg font-black uppercase tracking-wide text-center mb-1"
+               className="text-white text-lg font-semibold text-center mb-2"
                numberOfLines={1}
             >
                {data.fullName}
             </Text>
-            <Text
-               className="text-2xl font-black mb-2"
-               style={{ color: config.color }}
-            >
+            <Text className="text-2xl font-bold mb-3" style={{ color: config.color }}>
                {config.formatValue(data.value)}
             </Text>
 
-            {/* Additional Data - Compact */}
+            {/* Additional Data - Modern Design */}
             {data.additionalData && (
                <View className="items-center">
                   {data.additionalData.gamesPlayed && (
                      <View
-                        className="px-3 py-1 border-2 border-ink mb-1"
-                        style={{ backgroundColor: config.color }}
+                        className="px-4 py-2 rounded-2xl mb-2 border border-white/20"
+                        style={{ backgroundColor: `${config.color}20` }}
                      >
-                        <Text className="text-ink text-xs font-black uppercase tracking-wider">
+                        <Text className="text-white font-medium text-sm">
                            {data.additionalData.gamesPlayed} {t('gamesPlayed')}
                         </Text>
                      </View>
                   )}
                   {data.additionalData.totalProfit !== undefined && (
-                     <Text className="text-textMuted text-xs font-bold text-center">
+                     <Text className="text-white/70 text-sm font-medium text-center">
                         {t('totalProfit')}:{' '}
                         {formatCurrency(data.additionalData.totalProfit)}
                      </Text>
@@ -209,15 +274,5 @@ const styles = StyleSheet.create({
       width: getCardWidth(),
       minWidth: 160,
       maxWidth: 220,
-      padding: 16,
-      borderRadius: 0, // Sharp corners for brutalist style
-      borderWidth: 4,
-      borderColor: colors.ink,
-      shadowColor: colors.ink,
-      shadowOffset: { width: 6, height: 6 },
-      shadowOpacity: 1,
-      shadowRadius: 0,
-      elevation: 12,
-      marginBottom: 16,
    },
 });
