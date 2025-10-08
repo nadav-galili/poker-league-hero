@@ -6,7 +6,7 @@
 import { GameSetupModal } from '@/components/modals';
 import { Text } from '@/components/Text';
 import { PlayerGrid } from '@/components/ui';
-import AppButton from '@/components/ui/AppButton';
+import { AppButton } from '@/components/ui/AppButton';
 import { useLocalization } from '@/context/localization';
 import { useGameCreation, useLeagueMembers, usePlayerSelection } from '@/hooks';
 import { Ionicons } from '@expo/vector-icons';

@@ -2,7 +2,6 @@
  * My Leagues Header Component
  */
 
-import { colors } from '@/colors';
 import { LanguageSelector } from '@/components/shared/LanguageSelector';
 import { Text } from '@/components/Text';
 import { AppButton } from '@/components/ui/AppButton';
@@ -44,8 +43,6 @@ export function MyLeaguesHeader({
                   title={t('join')}
                   onPress={onJoinLeague}
                   icon="enter"
-                  bgColor="#FF1493"
-                  textColor="#FFFFFF"
                />
             </View>
             <View className="flex-1">
@@ -53,8 +50,7 @@ export function MyLeaguesHeader({
                   title={t('create')}
                   onPress={onCreateLeague}
                   icon="add-circle"
-                  bgColor="#32FF32"
-                  textColor="#000000"
+                  color="success"
                />
             </View>
          </View>
