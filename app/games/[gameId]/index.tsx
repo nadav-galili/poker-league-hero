@@ -4,9 +4,9 @@ import { LoadingState } from '@/components/shared/LoadingState';
 import { Text } from '@/components/Text';
 import { useAuth } from '@/context/auth';
 import { useLocalization } from '@/context/localization';
+import useMixpanel from '@/hooks/useMixpanel';
 import { Ionicons } from '@expo/vector-icons';
 import { router, useLocalSearchParams } from 'expo-router';
-import useMixpanel from '@/hooks/useMixpanel';
 import React from 'react';
 import { FlatList, TouchableOpacity, View } from 'react-native';
 import Toast from 'react-native-toast-message';
@@ -94,7 +94,7 @@ export default function GameScreen() {
          trackGameEvent('game_buy_in', gameId || '', game.leagueId, {
             player_id: player.id,
             player_name: player.fullName,
-            buy_in_amount: game.buyIn
+            buy_in_amount: game.buyIn,
          });
 
          Toast.show({
@@ -106,7 +106,7 @@ export default function GameScreen() {
       } catch (error) {
          const errorMessage =
             error instanceof Error ? error.message : 'Failed to process buy-in';
-         trackError(error, 'game_screen_buy_in');
+         trackError(error as Error, 'game_screen_buy_in');
          Toast.show({
             type: 'error',
             text1: t('error'),
@@ -158,7 +158,7 @@ export default function GameScreen() {
             player_id: selectedPlayer.id,
             player_name: selectedPlayer.fullName,
             cash_out_amount: amount,
-            profit: result.profit
+            profit: result.profit,
          });
 
          Toast.show({
@@ -176,7 +176,7 @@ export default function GameScreen() {
             error instanceof Error
                ? error.message
                : 'Failed to process cash out';
-         trackError(error, 'game_screen_cash_out');
+         trackError(error as Error, 'game_screen_cash_out');
          Toast.show({
             type: 'error',
             text1: t('error'),
@@ -197,7 +197,7 @@ export default function GameScreen() {
          trackGameEvent('game_player_added', gameId || '', game.leagueId, {
             member_id: member.id,
             member_name: member.fullName,
-            buy_in_amount: game.buyIn
+            buy_in_amount: game.buyIn,
          });
 
          Toast.show({
@@ -210,7 +210,7 @@ export default function GameScreen() {
       } catch (error) {
          const errorMessage =
             error instanceof Error ? error.message : 'Failed to add player';
-         trackError(error, 'game_screen_add_player');
+         trackError(error as Error, 'game_screen_add_player');
          Toast.show({
             type: 'error',
             text1: t('error'),
@@ -239,7 +239,7 @@ export default function GameScreen() {
 
          trackGameEvent('game_player_removed', gameId || '', game.leagueId, {
             player_id: player.id,
-            player_name: player.fullName
+            player_name: player.fullName,
          });
 
          Toast.show({
@@ -251,7 +251,7 @@ export default function GameScreen() {
       } catch (error) {
          const errorMessage =
             error instanceof Error ? error.message : 'Failed to remove player';
-         trackError(error, 'game_screen_remove_player');
+         trackError(error as Error, 'game_screen_remove_player');
          Toast.show({
             type: 'error',
             text1: t('error'),
@@ -290,7 +290,10 @@ export default function GameScreen() {
 
          trackGameEvent('game_ended', gameId || '', game.leagueId, {
             total_players: game.players.length,
-            total_cash_out: game.players.reduce((sum, player) => sum + Number(player.profit), 0)
+            total_cash_out: game.players.reduce(
+               (sum, player) => sum + Number(player.profit),
+               0
+            ),
          });
 
          Toast.show({
@@ -307,7 +310,7 @@ export default function GameScreen() {
       } catch (error) {
          const errorMessage =
             error instanceof Error ? error.message : 'Failed to end game';
-         trackError(error, 'game_screen_end_game');
+         trackError(error as Error, 'game_screen_end_game');
          Toast.show({
             type: 'error',
             text1: t('error'),

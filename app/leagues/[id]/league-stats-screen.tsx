@@ -23,21 +23,23 @@ import {
 } from 'react-native';
 
 // GlassmorphismLoader component for consistent loading state
-const GlassmorphismLoader = React.memo<{ message?: string }>(({ message = 'Loading...' }) => {
-   return (
-      <LinearGradient
-         colors={['#1a0033', '#0f001a', '#000000']}
-         style={styles.loaderContainer}
-      >
-         <View style={styles.loaderContent}>
-            <View style={styles.loaderInner}>
-               <ActivityIndicator size="large" color="#60A5FA" />
-               <Text style={styles.loaderText}>{message}</Text>
+const GlassmorphismLoader = React.memo<{ message?: string }>(
+   ({ message = 'Loading...' }) => {
+      return (
+         <LinearGradient
+            colors={['#1a0033', '#0f001a', '#000000']}
+            style={styles.loaderContainer}
+         >
+            <View style={styles.loaderContent}>
+               <View style={styles.loaderInner}>
+                  <ActivityIndicator size="large" color="#60A5FA" />
+                  <Text style={styles.loaderText}>{message}</Text>
+               </View>
             </View>
-         </View>
-      </LinearGradient>
-   );
-});
+         </LinearGradient>
+      );
+   }
+);
 
 GlassmorphismLoader.displayName = 'GlassmorphismLoader';
 
@@ -241,19 +243,16 @@ export default function LeagueStatsScreen() {
             <View className="mb-8 px-6">
                <View
                   className="bg-blue-500/10 backdrop-blur-xl border border-blue-400/30 rounded-3xl p-6 mb-6"
-                  style={{
-                     shadowColor: '#3B82F6',
-                     shadowOffset: { width: 0, height: 8 },
-                     shadowOpacity: 0.2,
-                     shadowRadius: 16,
-                     elevation: 16,
-                  }}
+                  // style={{
+                  //    shadowColor: '#3B82F6',
+                  //    shadowOffset: { width: 0, height: 8 },
+                  //    shadowOpacity: 0.2,
+                  //    shadowRadius: 16,
+                  //    elevation: 16,
+                  // }}
                >
                   <Text className="text-blue-300 text-center mb-4 text-xl font-semibold">
                      {t('playerStats')}
-                  </Text>
-                  <Text className="text-white/70 text-center font-medium">
-                     {t('topPerformingPlayers')}
                   </Text>
                </View>
 
@@ -274,31 +273,20 @@ export default function LeagueStatsScreen() {
                      statType="most-consistent-player"
                      t={t}
                   />
-                  <PlayerStatCard
+                  {/* Temporarily hidden */}
+                  {/* <PlayerStatCard
                      leagueId={leagueId!}
                      statType="biggest-loser"
                      t={t}
-                  />
+                  /> */}
                </View>
             </View>
 
             {/* Main Stats Grid */}
             <View className="mb-8 px-6">
-               <View
-                  className="bg-purple-500/10 backdrop-blur-xl border border-purple-400/30 rounded-3xl p-6 mb-6"
-                  style={{
-                     shadowColor: '#8B5CF6',
-                     shadowOffset: { width: 0, height: 8 },
-                     shadowOpacity: 0.2,
-                     shadowRadius: 16,
-                     elevation: 16,
-                  }}
-               >
+               <View className="bg-purple-500/10 backdrop-blur-xl border border-purple-400/30 rounded-3xl p-6 mb-6">
                   <Text className="text-purple-300 text-center mb-4 text-xl font-semibold">
                      {t('leagueOverview')}
-                  </Text>
-                  <Text className="text-white/70 text-center font-medium">
-                     {t('generalStatistics')}
                   </Text>
                </View>
 
@@ -308,7 +296,6 @@ export default function LeagueStatsScreen() {
                   ))}
                </View>
             </View>
-
          </ScrollView>
       </LinearGradient>
    );

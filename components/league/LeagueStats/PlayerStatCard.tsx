@@ -4,7 +4,13 @@ import { StatType } from '@/services/leagueStatsService';
 import { Ionicons } from '@expo/vector-icons';
 import { Image } from 'expo-image';
 import React from 'react';
-import { ActivityIndicator, Dimensions, StyleSheet, Text, View } from 'react-native';
+import {
+   ActivityIndicator,
+   Dimensions,
+   StyleSheet,
+   Text,
+   View,
+} from 'react-native';
 
 const { width: screenWidth } = Dimensions.get('window');
 
@@ -154,7 +160,11 @@ export default function PlayerStatCard({
                      elevation: 8,
                   }}
                >
-                  <Ionicons name={config.icon as any} size={24} color="#F87171" />
+                  <Ionicons
+                     name={config.icon as any}
+                     size={24}
+                     color="#F87171"
+                  />
                </View>
                <Text className="text-red-400 text-sm font-medium text-center">
                   {error || t('noCompletedGames')}
@@ -180,7 +190,11 @@ export default function PlayerStatCard({
                   iconContainerStyle,
                ]}
             >
-               <Ionicons name={config.icon as any} size={20} color={config.color} />
+               <Ionicons
+                  name={config.icon as any}
+                  size={20}
+                  color={config.color}
+               />
             </View>
             <Text
                className="text-white/90 text-sm font-semibold flex-1 text-right"
@@ -231,7 +245,10 @@ export default function PlayerStatCard({
             >
                {data.fullName}
             </Text>
-            <Text className="text-2xl font-bold mb-3" style={{ color: config.color }}>
+            <Text
+               className="text-2xl font-bold mb-3"
+               style={{ color: config.color }}
+            >
                {config.formatValue(data.value)}
             </Text>
 
