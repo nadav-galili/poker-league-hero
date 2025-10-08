@@ -146,15 +146,20 @@ export async function createLeague(data: {
    const userId = user[0].id;
    console.log('Found user ID:', userId);
    let imageUrl = data.image;
+
+   // Note: If imageUrl starts with 'file://', it means the client didn't upload the image first.
+   // The client must upload via /api/upload/image before creating the league.
    if (imageUrl && imageUrl.startsWith('file://')) {
-      // Upload to Cloudflare R2 first using server-side upload
-      const { uploadImageToR2Server } = await import('../utils/serverUpload');
-      const uploadedUrl = await uploadImageToR2Server(imageUrl);
-      imageUrl = uploadedUrl;
-   } else if (!imageUrl) {
-      imageUrl =
-         'https://pub-6908906fe4c24b7b82ff61e803190c28.r2.dev/Gemini_Generated_Image_70gku770gku770gk.png'; // No default image - let the UI handle the fallback
+      throw new Error(
+         'Image must be uploaded to R2 before league creation. Use /api/upload/image endpoint first.'
+      );
    }
+
+   if (!imageUrl) {
+      imageUrl =
+         'https://pub-6908906fe4c24b7b82ff61e803190c28.r2.dev/Gemini_Generated_Image_70gku770gku770gk.png';
+   }
+
    data.image = imageUrl;
    const inviteCode = await generateUniqueInviteCode();
 

@@ -1,9 +1,9 @@
 import { colors, getTheme } from '@/colors';
+import type { ValidationState } from '@/components/forms/BrutalistFormField';
 import {
    BrutalistFormField,
    ClearButton,
 } from '@/components/forms/BrutalistFormField';
-import type { ValidationState } from '@/components/forms/BrutalistFormField';
 import { LoadingState } from '@/components/shared/LoadingState';
 import { Text } from '@/components/Text';
 import { AppButton } from '@/components/ui/AppButton';
@@ -112,13 +112,57 @@ export default function CreateLeague() {
 
          formData.adminUserEmail = user.email;
 
-         // Clean up form data - remove null/empty image
+         // Upload image to R2 if it's a local file path
+         let imageUrl = formData.image;
+         if (imageUrl && imageUrl.startsWith('file://')) {
+            try {
+               Toast.show({
+                  type: 'info',
+                  text1: t('uploadingImage'),
+                  text2: 'Please wait...',
+               });
+
+               // Create FormData for image upload
+               const uploadFormData = new FormData();
+               uploadFormData.append('file', {
+                  uri: imageUrl,
+                  type: 'image/jpeg',
+                  name: 'league-image.jpg',
+               } as any);
+
+               // Upload image to R2
+               const uploadResponse = await fetchWithAuth(
+                  `${BASE_URL}/api/upload/image`,
+                  {
+                     method: 'POST',
+                     body: uploadFormData,
+                     headers: {
+                        'Content-Type': 'multipart/form-data',
+                     },
+                  }
+               );
+
+               if (!uploadResponse.ok) {
+                  throw new Error('Failed to upload image');
+               }
+
+               const uploadData = await uploadResponse.json();
+               imageUrl = uploadData.url; // Use the R2 URL
+            } catch (uploadError) {
+               console.error('Image upload failed:', uploadError);
+               Toast.show({
+                  type: 'error',
+                  text1: t('error'),
+                  text2: 'Failed to upload image',
+               });
+               throw uploadError;
+            }
+         }
+
+         // Clean up form data - use uploaded image URL
          const cleanFormData = {
             ...formData,
-            image:
-               formData.image && formData.image.trim()
-                  ? formData.image
-                  : undefined,
+            image: imageUrl && imageUrl.trim() ? imageUrl : undefined,
          };
 
          //send data to backend using authenticated fetch

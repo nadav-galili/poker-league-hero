@@ -1,13 +1,15 @@
-import AWS from 'aws-sdk';
+import { PutObjectCommand, S3Client } from '@aws-sdk/client-s3';
 import { v4 as uuidv4 } from 'uuid';
 
 // Configure S3 client for Cloudflare R2
-const s3Client = new AWS.S3({
+const s3Client = new S3Client({
    region: 'auto',
    endpoint: process.env.R2_ENDPOINT,
-   accessKeyId: process.env.R2_ACCESS_KEY_ID,
-   secretAccessKey: process.env.R2_SECRET_ACCESS_KEY,
-   s3ForcePathStyle: true,
+   credentials: {
+      accessKeyId: process.env.R2_ACCESS_KEY_ID!,
+      secretAccessKey: process.env.R2_SECRET_ACCESS_KEY!,
+   },
+   forcePathStyle: true,
 });
 
 export async function POST(request: Request) {
@@ -27,17 +29,17 @@ export async function POST(request: Request) {
       const arrayBuffer = await file.arrayBuffer();
       const buffer = Buffer.from(arrayBuffer);
 
-      // Upload to R2
-      await s3Client
-         .upload({
-            Bucket: process.env.R2_BUCKET_NAME!,
-            Key: fileName,
-            Body: buffer,
-            ContentType: file.type || 'image/jpeg',
-         })
-         .promise();
+      // Upload to R2 using AWS SDK
+      const command = new PutObjectCommand({
+         Bucket: process.env.R2_BUCKET_NAME!,
+         Key: fileName,
+         Body: buffer,
+         ContentType: file.type || 'image/jpeg',
+      });
 
-      // Return the actual R2 public URL (using the actual domain with bucket prefix)
+      await s3Client.send(command);
+
+      // Return the actual R2 public URL
       const publicUrl = `${process.env.CLOUDFLARE_R2_PUBLIC_URL}/poker-league-images/${fileName}`;
 
       return Response.json({
