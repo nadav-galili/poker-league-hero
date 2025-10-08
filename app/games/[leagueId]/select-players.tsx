@@ -9,6 +9,7 @@ import { PlayerGrid } from '@/components/ui';
 import { AppButton } from '@/components/ui/AppButton';
 import { useLocalization } from '@/context/localization';
 import { useGameCreation, useLeagueMembers, usePlayerSelection } from '@/hooks';
+import useMixpanel from '@/hooks/useMixpanel';
 import { Ionicons } from '@expo/vector-icons';
 import { LinearGradient } from 'expo-linear-gradient';
 import { router, useLocalSearchParams } from 'expo-router';
@@ -18,6 +19,7 @@ import { Animated, TouchableOpacity, View } from 'react-native';
 export default function SelectPlayers() {
    const { t } = useLocalization();
    const { leagueId } = useLocalSearchParams<{ leagueId: string }>();
+   const { track, trackScreenView, trackGameEvent } = useMixpanel();
 
    // Custom hooks for clean separation of concerns
    const { league, isLoading, error, refetch } = useLeagueMembers(leagueId!);
@@ -57,6 +59,25 @@ export default function SelectPlayers() {
          ) || []
       );
    }, [league?.members, selectedPlayerIds]);
+
+   // Track screen view
+   React.useEffect(() => {
+      trackScreenView('Select Players', {
+         league_id: leagueId,
+         available_players: league?.members?.length || 0,
+      });
+   }, [league, leagueId, trackScreenView]);
+
+   // Track player selection changes
+   React.useEffect(() => {
+      if (selectedCount > 0) {
+         track('players_selected', {
+            league_id: leagueId,
+            selected_count: selectedCount,
+            player_ids: selectedPlayerIds,
+         });
+      }
+   }, [selectedCount, selectedPlayerIds, leagueId, track]);
 
    // Modern loading state with gradient background
    if (isLoading) {

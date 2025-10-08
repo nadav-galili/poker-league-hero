@@ -5,6 +5,7 @@ import { ErrorState } from '@/components/shared/ErrorState';
 import { LeagueCardSkeleton } from '@/components/shared/LeagueCardSkeleton';
 import { Text } from '@/components/Text';
 import { useMyLeagues } from '@/hooks';
+import { useMixpanel } from '@/hooks/useMixpanel';
 import { LeagueWithTheme } from '@/types/league';
 import { captureException } from '@/utils/sentry';
 import { FlashList } from '@shopify/flash-list';
@@ -25,6 +26,15 @@ export default function MyLeagues() {
       handleLeaguePress,
       handleRefresh,
    } = useMyLeagues();
+
+   const { trackScreenView } = useMixpanel();
+
+   // Track screen view on mount
+   React.useEffect(() => {
+      trackScreenView('My Leagues', {
+         leagues_count: leagues?.length || 0,
+      });
+   }, [leagues]);
 
    // Render function for league cards
    const renderLeagueCard = React.useCallback(

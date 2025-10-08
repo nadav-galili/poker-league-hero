@@ -51,6 +51,7 @@
       "expo-web-browser": "~14.2.0",
       "form-data": "^4.0.4",
       "jose": "^6.0.12",
+      "mixpanel-react-native": "^3.1.2",
       "nativewind": "^4.1.23",
       "openai": "^6.1.0",
       "postgres": "^3.4.7",

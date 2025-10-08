@@ -5,6 +5,7 @@
 import { addThemeToLeagues } from '@/constants/leagueThemes';
 import { useAuth } from '@/context/auth';
 import { useLocalization } from '@/context/localization';
+import { useMixpanel } from '@/hooks/useMixpanel';
 import { joinLeagueWithCode, shareLeague } from '@/services';
 import { fetchUserLeagues } from '@/services/leagueService';
 import { LeagueWithTheme } from '@/types/league';
@@ -21,6 +22,7 @@ import { Alert } from 'react-native';
 export function useMyLeagues() {
    const { t } = useLocalization();
    const { fetchWithAuth } = useAuth();
+   const { track, trackLeagueEvent } = useMixpanel();
 
    const [leagues, setLeagues] = React.useState<LeagueWithTheme[]>([]);
    const [isLoading, setIsLoading] = React.useState(true);
@@ -109,6 +111,11 @@ export function useMyLeagues() {
             action: 'create_league',
          });
 
+         // Track event in Mixpanel
+         track('league_created', {
+            source: 'my_leagues_screen',
+         });
+
          router.push('/leagues/create-league');
       } catch (error) {
          captureException(error as Error, {
@@ -117,7 +124,7 @@ export function useMyLeagues() {
          });
          Alert.alert(t('error'), 'Failed to open create league dialog');
       }
-   }, [t]);
+   }, [t, track]);
 
    const handleJoinLeague = React.useCallback(() => {
       try {
@@ -164,6 +171,17 @@ export function useMyLeagues() {
                ])[0] as unknown as LeagueWithTheme;
                setLeagues((prevLeagues) => [...prevLeagues, leagueWithTheme]);
 
+               // Track successful join in Mixpanel
+               trackLeagueEvent(
+                  'league_joined',
+                  result.league.id,
+                  result.league.name,
+                  {
+                     join_code: code,
+                     member_count: leagueWithTheme?.memberCount || 0,
+                  }
+               );
+
                // Success! Show success message
                Alert.alert(
                   t('success'),
@@ -194,7 +212,7 @@ export function useMyLeagues() {
             setIsLoading(false);
          }
       },
-      [fetchWithAuth, t, loadLeagues]
+      [fetchWithAuth, t, loadLeagues, trackLeagueEvent]
    );
 
    const handleShareLeague = React.useCallback(
@@ -203,29 +221,43 @@ export function useMyLeagues() {
 
          if (!result.success && !result.cancelled && result.error) {
             Alert.alert(t('error'), t('failedToShare'));
+         } else if (result.success) {
+            // Track share event in Mixpanel
+            trackLeagueEvent('league_shared', league.id, league.name, {
+               share_method: 'native_share',
+            });
          }
       },
-      [t]
+      [t, trackLeagueEvent]
    );
 
-   const handleLeaguePress = React.useCallback((league: LeagueWithTheme) => {
-      try {
-         // Navigate to league stats
-         router.push(`/leagues/${league.id}/stats`);
+   const handleLeaguePress = React.useCallback(
+      (league: LeagueWithTheme) => {
+         try {
+            // Navigate to league stats
+            router.push(`/leagues/${league.id}/stats`);
 
-         captureMessage('User viewed league details', 'info', {
-            screen: 'MyLeagues',
-            leagueId: league.id,
-            leagueName: league.name,
-         });
-      } catch (error) {
-         captureException(error as Error, {
-            function: 'handleLeaguePress',
-            screen: 'MyLeagues',
-            leagueId: league.id,
-         });
-      }
-   }, []);
+            // Track league view in Mixpanel
+            trackLeagueEvent('league_viewed', league.id, league.name, {
+               source: 'my_leagues_screen',
+               member_count: league.memberCount || 0,
+            });
+
+            captureMessage('User viewed league details', 'info', {
+               screen: 'MyLeagues',
+               leagueId: league.id,
+               leagueName: league.name,
+            });
+         } catch (error) {
+            captureException(error as Error, {
+               function: 'handleLeaguePress',
+               screen: 'MyLeagues',
+               leagueId: league.id,
+            });
+         }
+      },
+      [trackLeagueEvent]
+   );
 
    // Handle refresh functionality
    const handleRefresh = React.useCallback(() => {
