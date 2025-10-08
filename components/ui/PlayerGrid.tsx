@@ -19,6 +19,7 @@ interface PlayerGridProps {
    numColumns?: number;
    loading?: boolean;
    error?: string | null;
+   theme?: 'light' | 'dark';
 }
 
 export function PlayerGrid({
@@ -30,8 +31,9 @@ export function PlayerGrid({
    numColumns = 3,
    loading = false,
    error = null,
+   theme: themeProp = 'light',
 }: PlayerGridProps) {
-   const theme = getTheme('light');
+   const theme = getTheme(themeProp);
    const { t } = useLocalization();
    const selectedSet = new Set(selectedPlayerIds);
 

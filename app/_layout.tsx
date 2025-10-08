@@ -4,6 +4,7 @@ import LocalizedErrorFallback from '@/components/shared/LocalizedErrorFallback';
 import { AuthProvider } from '@/context/auth';
 import { LocalizationProvider } from '@/context/localization';
 import { NavigationProvider } from '@/context/navigation';
+import { mixpanel } from '@/services/mixpanel';
 import { loadFonts } from '@/utils/fonts';
 import * as Sentry from '@sentry/react-native';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
@@ -81,7 +82,7 @@ const toastConfig = {
             borderRightWidth: 3,
             borderTopColor: colors.border,
             borderTopWidth: 3,
-            backgroundColor: colors.danger,
+            backgroundColor: colors.error,
             shadowColor: colors.shadow,
             shadowOffset: { width: 4, height: 4 },
             shadowOpacity: 1,
@@ -94,14 +95,14 @@ const toastConfig = {
          text1Style={{
             fontSize: 16,
             fontWeight: '700',
-            color: colors.textInverse,
+            color: colors.text,
             textTransform: 'uppercase',
             letterSpacing: 0.5,
          }}
          text2Style={{
             fontSize: 14,
             fontWeight: '500',
-            color: colors.textInverse,
+            color: colors.text,
          }}
       />
    ),
@@ -150,6 +151,10 @@ export default Sentry.wrap(function RootLayout() {
    useEffect(() => {
       async function prepare() {
          try {
+            // Initialize Mixpanel
+            await mixpanel.init();
+
+            // Load fonts
             await loadFonts();
          } catch (e) {
             console.warn(e);

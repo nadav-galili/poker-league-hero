@@ -5,9 +5,11 @@ import { ErrorState } from '@/components/shared/ErrorState';
 import { LeagueCardSkeleton } from '@/components/shared/LeagueCardSkeleton';
 import { Text } from '@/components/Text';
 import { useMyLeagues } from '@/hooks';
+import { useMixpanel } from '@/hooks/useMixpanel';
 import { LeagueWithTheme } from '@/types/league';
 import { captureException } from '@/utils/sentry';
 import { FlashList } from '@shopify/flash-list';
+import { LinearGradient } from 'expo-linear-gradient';
 import React from 'react';
 import { RefreshControl, View } from 'react-native';
 
@@ -24,6 +26,15 @@ export default function MyLeagues() {
       handleLeaguePress,
       handleRefresh,
    } = useMyLeagues();
+
+   const { trackScreenView } = useMixpanel();
+
+   // Track screen view on mount
+   React.useEffect(() => {
+      trackScreenView('My Leagues', {
+         leagues_count: leagues?.length || 0,
+      });
+   }, [leagues]);
 
    // Render function for league cards
    const renderLeagueCard = React.useCallback(
@@ -55,7 +66,10 @@ export default function MyLeagues() {
    );
 
    return (
-      <View className="flex-1 bg-background">
+      <LinearGradient
+         colors={['#1a0033', '#0f001a', '#000000']}
+         style={{ flex: 1 }}
+      >
          <MyLeaguesHeader
             onJoinLeague={handleJoinLeague}
             onCreateLeague={handleCreateLeague}
@@ -90,8 +104,8 @@ export default function MyLeagues() {
                   <RefreshControl
                      refreshing={refreshing}
                      onRefresh={handleRefresh}
-                     colors={['#6366F1']} // Primary color for Android
-                     tintColor="#6366F1" // Primary color for iOS
+                     colors={['#FF1493']} // Pink color for Android
+                     tintColor="#FF1493" // Pink color for iOS
                   />
                }
                ListEmptyComponent={
@@ -102,6 +116,6 @@ export default function MyLeagues() {
                }
             />
          )}
-      </View>
+      </LinearGradient>
    );
 }

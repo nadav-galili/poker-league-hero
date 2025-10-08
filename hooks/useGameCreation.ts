@@ -10,6 +10,7 @@ import { addBreadcrumb, captureException } from '@/utils/sentry';
 import { router } from 'expo-router';
 import React from 'react';
 import { Alert } from 'react-native';
+import useMixpanel from '@/hooks/useMixpanel';
 
 interface UseGameCreationResult {
    showGameSetup: boolean;
@@ -37,6 +38,7 @@ export function useGameCreation({
 }: UseGameCreationProps): UseGameCreationResult {
    const { fetchWithAuth } = useAuth();
    const { t } = useLocalization();
+   const { trackGameEvent } = useMixpanel();
    const [showGameSetup, setShowGameSetup] = React.useState(false);
    const [buyIn, setBuyIn] = React.useState('50');
    const [isCreatingGame, setIsCreatingGame] = React.useState(false);
@@ -89,6 +91,13 @@ export function useGameCreation({
             gameId: result.gameId,
             leagueId,
             playerCount: selectedCount,
+         });
+
+         // Track game creation in Mixpanel
+         trackGameEvent('game_started', result.gameId, leagueId, {
+            player_count: selectedCount,
+            buy_in: buyIn,
+            player_ids: selectedPlayerIds,
          });
 
          // Close the modal first and wait a bit for it to close
@@ -145,7 +154,15 @@ export function useGameCreation({
       } finally {
          setIsCreatingGame(false);
       }
-   }, [leagueId, selectedPlayerIds, buyIn, selectedCount, gameService, t]);
+   }, [
+      leagueId,
+      selectedPlayerIds,
+      buyIn,
+      selectedCount,
+      gameService,
+      t,
+      trackGameEvent,
+   ]);
 
    const handleCancelGameSetup = React.useCallback(() => {
       setShowGameSetup(false);

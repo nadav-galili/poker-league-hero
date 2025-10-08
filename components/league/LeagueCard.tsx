@@ -1,9 +1,7 @@
 /**
- * League Card Component - Enhanced with Neo-Brutalist styling
+ * League Card Component - Modern dark theme design
  */
 
-import { getTheme } from '@/colors';
-import { BrutalistCard } from '@/components/cards/BrutalistCard';
 import { Text } from '@/components/Text';
 import { useLocalization } from '@/context/localization';
 import { LeagueWithTheme } from '@/types/league';
@@ -20,7 +18,6 @@ interface LeagueCardProps {
 }
 
 const LeagueCardComponent = ({ league, onPress, onShare }: LeagueCardProps) => {
-   const theme = getTheme('light');
    const { t } = useLocalization();
 
    const handlePress = () => {
@@ -48,105 +45,115 @@ const LeagueCardComponent = ({ league, onPress, onShare }: LeagueCardProps) => {
       }
    };
 
+   // Mock data for statistics - you can replace with actual data from league object
+   const stats = {
+      members: league.memberCount || 0,
+      games: 12, // Mock data - replace with actual games count
+      wins: 5,   // Mock data - replace with actual wins count
+   };
+
    return (
-      <BrutalistCard
-         variant="elevated"
-         size="large"
-         customBorderColor={theme.primary}
-         shadowIntensity="heavy"
-         pressAnimation={true}
-         glowOnPress={true}
+      <Pressable
          onPress={handlePress}
-         style={{ padding: 0 }} // Remove default padding to use custom layout
+         className="bg-gray-900/80 backdrop-blur-sm rounded-2xl p-4 mx-1 border border-gray-700/50"
+         style={{
+            shadowColor: '#000',
+            shadowOffset: { width: 0, height: 4 },
+            shadowOpacity: 0.3,
+            shadowRadius: 8,
+            elevation: 8,
+         }}
       >
-         <View className="flex-row items-center p-5">
-         {/* League Image with colored frame */}
-         <View className="relative mr-5">
-            {league.image && league.image.trim() !== '' ? (
-               <Image
-                  source={{ uri: league.image }}
-                  style={{
-                     width: 80,
-                     height: 80,
-                     borderRadius: 12,
-                     borderWidth: 6,
-                     borderColor: '#E5E7EB',
-                  }}
-                  contentFit="cover"
-                  cachePolicy="memory-disk"
-                  priority="normal"
-                  placeholder={{ uri: 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNk+M9QDwADhgGAWjR9awAAAABJRU5ErkJggg==' }}
-                  placeholderContentFit="cover"
-                  transition={200}
-                  onError={(error) => {
-                     captureException(new Error('Image loading failed'), {
-                        function: 'LeagueCard.Image.onError',
-                        screen: 'MyLeagues',
-                        leagueId: league.id,
-                        imageUri: league.image,
-                        error: error.toString(),
-                     });
-                  }}
-               />
-            ) : (
-               <View className="w-20 h-20 rounded-xl border-[6px] border-border bg-primary/20 items-center justify-center">
-                  <Ionicons name="people" size={32} color={theme.primary} />
-               </View>
-            )}
-            <View
-               className="absolute -top-2 -left-2 -right-2 -bottom-2 border-[6px] rounded-[20px] opacity-90"
-               style={{ borderColor: league.themeColor }}
-            />
-         </View>
+         <View className="flex-row items-start justify-between">
+            {/* Left side - League Info */}
+            <View className="flex-1 mr-4">
+               {/* League Name */}
+               <Text className="text-white text-lg font-bold mb-2">
+                  {league.name}
+               </Text>
 
-         {/* League Info with enhanced styling */}
-         <View className="flex-1 gap-3">
-            <Text
-               variant="h4"
-               className="tracking-widest font-bold uppercase text-base text-primary underline"
-            >
-               {league.name}
-            </Text>
-
-            <View className="flex-row items-center gap-3">
-               <View
-                  className="flex-1 px-3 py-2 rounded-md border-[3px]"
-                  style={{
-                     backgroundColor: league.accentColor,
-                     borderColor: league.themeColor,
-                  }}
-               >
-                  <Text variant="labelSmall" color={league.themeColor}>
-                     {t('leagueCode')}
-                  </Text>
-                  <Text
-                     variant="body"
-                     color={league.themeColor}
-                     className="tracking-wide"
+               {/* League Code Badge and Share Button */}
+               <View className="flex-row items-center gap-3 mb-3">
+                  <View
+                     className="px-3 py-1 rounded-full"
+                     style={{ backgroundColor: league.themeColor || '#6366F1' }}
                   >
-                     {league.code}
-                  </Text>
+                     <Text className="text-white text-sm font-semibold">
+                        {league.code}
+                     </Text>
+                  </View>
+
+                  <Pressable
+                     className="bg-gray-700/50 p-2 rounded-full"
+                     onPress={handleShare}
+                  >
+                     <Ionicons name="share-outline" size={16} color="#FFFFFF" />
+                  </Pressable>
                </View>
 
-               <Pressable
-                  className="w-10 h-10 rounded-md border-[3px] border-border items-center justify-center shadow-[4px_4px_0px_0px] shadow-shadow"
-                  style={{ backgroundColor: league.themeColor }}
-                  onPress={handleShare}
-               >
-                  <Ionicons name="share" size={16} color="#FFFFFF" />
-               </Pressable>
+               {/* Statistics Row */}
+               <View className="flex-row items-center gap-4">
+                  <View className="flex-row items-center gap-1">
+                     <Ionicons name="people-outline" size={16} color="#9CA3AF" />
+                     <Text className="text-gray-400 text-sm">
+                        {stats.members}
+                     </Text>
+                  </View>
+
+                  <View className="flex-row items-center gap-1">
+                     <Ionicons name="game-controller-outline" size={16} color="#9CA3AF" />
+                     <Text className="text-gray-400 text-sm">
+                        {stats.games}
+                     </Text>
+                  </View>
+
+                  <View className="flex-row items-center gap-1">
+                     <Ionicons name="trophy-outline" size={16} color="#9CA3AF" />
+                     <Text className="text-gray-400 text-sm">
+                        {stats.wins}
+                     </Text>
+                  </View>
+               </View>
             </View>
 
-            <Text
-               variant="captionSmall"
-               color={theme.textMuted}
-               className="tracking-wide uppercase"
-            >
-               {league.memberCount} {t('members')}
-            </Text>
+            {/* Right side - League Avatar/Image */}
+            <View className="items-center">
+               {league.image && league.image.trim() !== '' ? (
+                  <Image
+                     source={{ uri: league.image }}
+                     style={{
+                        width: 60,
+                        height: 60,
+                        borderRadius: 12,
+                        backgroundColor: league.themeColor || '#6366F1',
+                     }}
+                     contentFit="cover"
+                     cachePolicy="memory-disk"
+                     priority="normal"
+                     placeholder={{ uri: 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNk+M9QDwADhgGAWjR9awAAAABJRU5ErkJggg==' }}
+                     placeholderContentFit="cover"
+                     transition={200}
+                     onError={(error) => {
+                        captureException(new Error('Image loading failed'), {
+                           function: 'LeagueCard.Image.onError',
+                           screen: 'MyLeagues',
+                           leagueId: league.id,
+                           imageUri: league.image,
+                           error: error.toString(),
+                        });
+                     }}
+                  />
+               ) : (
+                  <View
+                     className="w-15 h-15 rounded-xl items-center justify-center"
+                     style={{ backgroundColor: league.themeColor || '#6366F1' }}
+                  >
+                     <Ionicons name="people" size={24} color="#FFFFFF" />
+                  </View>
+               )}
+            </View>
          </View>
-         </View>
-      </BrutalistCard>
+      </Pressable>
    );
 };
 

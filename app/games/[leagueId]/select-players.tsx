@@ -1,26 +1,25 @@
 /**
- * Select Players Screen - Refactored with clean architecture
- * Reduced from 873 lines to ~120 lines using extracted components and hooks
+ * Select Players Screen - Modern Dark Theme Design
+ * Features glass-morphism effects, deep purple gradients, and smooth animations
  */
 
-import { colors, getTheme } from '@/colors';
-
-import Button from '@/components/Button';
 import { GameSetupModal } from '@/components/modals';
-import { LoadingState } from '@/components/shared/LoadingState';
 import { Text } from '@/components/Text';
 import { PlayerGrid } from '@/components/ui';
+import { AppButton } from '@/components/ui/AppButton';
 import { useLocalization } from '@/context/localization';
 import { useGameCreation, useLeagueMembers, usePlayerSelection } from '@/hooks';
+import useMixpanel from '@/hooks/useMixpanel';
 import { Ionicons } from '@expo/vector-icons';
+import { LinearGradient } from 'expo-linear-gradient';
 import { router, useLocalSearchParams } from 'expo-router';
 import React from 'react';
-import { Pressable, TouchableOpacity, View } from 'react-native';
+import { Animated, TouchableOpacity, View } from 'react-native';
 
 export default function SelectPlayers() {
-   const theme = getTheme('light');
    const { t } = useLocalization();
    const { leagueId } = useLocalSearchParams<{ leagueId: string }>();
+   const { track, trackScreenView, trackGameEvent } = useMixpanel();
 
    // Custom hooks for clean separation of concerns
    const { league, isLoading, error, refetch } = useLeagueMembers(leagueId!);
@@ -61,130 +60,266 @@ export default function SelectPlayers() {
       );
    }, [league?.members, selectedPlayerIds]);
 
-   // Loading state
-   if (isLoading) {
-      return <LoadingState />;
-   }
+   // Track screen view
+   React.useEffect(() => {
+      trackScreenView('Select Players', {
+         league_id: leagueId,
+         available_players: league?.members?.length || 0,
+      });
+   }, [league, leagueId, trackScreenView]);
 
-   // Error state
-   if (error) {
+   // Track player selection changes
+   React.useEffect(() => {
+      if (selectedCount > 0) {
+         track('players_selected', {
+            league_id: leagueId,
+            selected_count: selectedCount,
+            player_ids: selectedPlayerIds,
+         });
+      }
+   }, [selectedCount, selectedPlayerIds, leagueId, track]);
+
+   // Modern loading state with gradient background
+   if (isLoading) {
       return (
-         <View className="flex-1" style={{ backgroundColor: theme.background }}>
+         <LinearGradient
+            colors={['#1a0033', '#0f001a', '#000000']}
+            style={{ flex: 1 }}
+         >
             <View
-               className="flex-row items-center justify-between px-5 pt-15 pb-4 border-b-[6px]"
+               className="flex-row items-center justify-between px-5 pt-16 pb-4"
                style={{
-                  backgroundColor: colors.primary,
-                  borderBottomColor: colors.text,
+                  backgroundColor: 'rgba(255, 255, 255, 0.1)',
+                  backdropFilter: 'blur(20px)',
                }}
             >
-               <TouchableOpacity onPress={handleBack} className="p-2">
+               <TouchableOpacity
+                  onPress={handleBack}
+                  className="p-2"
+                  accessibilityLabel={t('goBack')}
+                  accessibilityRole="button"
+               >
                   <Ionicons
                      name="arrow-back"
                      size={24}
-                     color={colors.textInverse}
+                     color="rgba(255, 255, 255, 0.9)"
                   />
                </TouchableOpacity>
                <Text
                   variant="h3"
-                  color={colors.textInverse}
-                  className="tracking-wider uppercase"
+                  color="rgba(255, 255, 255, 0.9)"
+                  className="text-center font-medium"
                >
                   {t('selectPlayers')}
                </Text>
                <View className="w-10" />
             </View>
 
-            <View className="flex-1 justify-center items-center px-10 py-15">
+            {/* Modern Loading Animation */}
+            <View className="flex-1 justify-center items-center px-8">
+               <View
+                  className="rounded-2xl p-8 items-center"
+                  style={{
+                     backgroundColor: 'rgba(255, 255, 255, 0.1)',
+                     backdropFilter: 'blur(20px)',
+                  }}
+               >
+                  <View className="mb-6">
+                     <Animated.View
+                        className="w-16 h-16 rounded-full"
+                        style={{
+                           backgroundColor: 'rgba(138, 43, 226, 0.3)',
+                           borderWidth: 2,
+                           borderColor: '#60A5FA',
+                        }}
+                     />
+                  </View>
+                  <Text
+                     variant="body"
+                     color="rgba(255, 255, 255, 0.8)"
+                     className="text-center font-medium"
+                  >
+                     {t('loadingPlayers')}
+                  </Text>
+               </View>
+            </View>
+         </LinearGradient>
+      );
+   }
+
+   // Modern error state with gradient background
+   if (error) {
+      return (
+         <LinearGradient
+            colors={['#1a0033', '#0f001a', '#000000']}
+            style={{ flex: 1 }}
+         >
+            <View
+               className="flex-row items-center justify-between px-5 pt-16 pb-4"
+               style={{
+                  backgroundColor: 'rgba(255, 255, 255, 0.1)',
+                  backdropFilter: 'blur(20px)',
+               }}
+            >
+               <TouchableOpacity
+                  onPress={handleBack}
+                  className="p-2"
+                  accessibilityLabel={t('goBack')}
+                  accessibilityRole="button"
+               >
+                  <Ionicons
+                     name="arrow-back"
+                     size={24}
+                     color="rgba(255, 255, 255, 0.9)"
+                  />
+               </TouchableOpacity>
                <Text
                   variant="h3"
-                  color={theme.error}
-                  className="text-center mb-3"
+                  color="rgba(255, 255, 255, 0.9)"
+                  className="text-center font-medium"
                >
-                  {t('errorLoadingPlayers')}
+                  {t('selectPlayers')}
                </Text>
-               <Text
-                  variant="body"
-                  color={theme.textMuted}
-                  className="text-center mb-6 leading-5"
-               >
-                  {error}
-               </Text>
-               <Button
-                  title={t('tryAgain')}
-                  onPress={refetch}
-                  variant="secondary"
-                  size="medium"
-                  backgroundColor={theme.background}
-               />
+               <View className="w-10" />
             </View>
-         </View>
+
+            <View className="flex-1 justify-center items-center px-8">
+               <View
+                  className="rounded-2xl p-8 items-center"
+                  style={{
+                     backgroundColor: 'rgba(255, 255, 255, 0.1)',
+                     backdropFilter: 'blur(20px)',
+                  }}
+               >
+                  <View className="mb-6">
+                     <Ionicons
+                        name="warning-outline"
+                        size={48}
+                        color="#EF4444"
+                     />
+                  </View>
+                  <Text
+                     variant="h3"
+                     color="rgba(255, 255, 255, 0.9)"
+                     className="text-center mb-3 font-medium"
+                  >
+                     {t('errorLoadingPlayers')}
+                  </Text>
+                  <Text
+                     variant="body"
+                     color="rgba(255, 255, 255, 0.7)"
+                     className="text-center mb-6 leading-6"
+                  >
+                     {error}
+                  </Text>
+                  <TouchableOpacity
+                     onPress={refetch}
+                     className="px-6 py-3 rounded-xl"
+                     style={{
+                        backgroundColor: 'rgba(138, 43, 226, 0.8)',
+                     }}
+                     accessibilityLabel={t('tryAgain')}
+                     accessibilityRole="button"
+                  >
+                     <Text
+                        variant="button"
+                        color="rgba(255, 255, 255, 0.9)"
+                        className="font-medium"
+                     >
+                        {t('tryAgain')}
+                     </Text>
+                  </TouchableOpacity>
+               </View>
+            </View>
+         </LinearGradient>
       );
    }
 
    return (
-      <View className="flex-1" style={{ backgroundColor: theme.background }}>
-         {/* Header */}
+      <LinearGradient
+         colors={['#1a0033', '#0f001a', '#000000']}
+         style={{ flex: 1 }}
+      >
+         {/* Modern Header with Glass-morphism */}
          <View
-            className="flex-row items-center justify-between px-5 pt-15 pb-4 border-b-[6px]"
+            className="flex-row items-center justify-between px-5 pt-16 pb-4"
             style={{
-               backgroundColor: colors.primary,
-               borderBottomColor: colors.text,
+               backgroundColor: 'rgba(255, 255, 255, 0.1)',
+               backdropFilter: 'blur(20px)',
             }}
          >
-            <TouchableOpacity onPress={handleBack} className="p-2">
+            <TouchableOpacity
+               onPress={handleBack}
+               className="p-2"
+               accessibilityLabel={t('goBack')}
+               accessibilityRole="button"
+            >
                <Ionicons
                   name="arrow-back"
                   size={24}
-                  color={colors.textInverse}
+                  color="rgba(255, 255, 255, 0.9)"
                />
             </TouchableOpacity>
             <Text
                variant="h3"
-               color={colors.textInverse}
-               className="tracking-wider uppercase"
+               color="rgba(255, 255, 255, 0.9)"
+               className="text-center font-medium"
             >
                {t('selectPlayers')}
             </Text>
             <View className="w-10" />
          </View>
 
-         {/* League Info Header */}
+         {/* Modern League Info Header with Glass Effect */}
          {league && (
             <View
-               className="p-4 border-b-2"
+               className="mx-5 mt-4 mb-2 p-5 rounded-2xl"
                style={{
-                  backgroundColor: theme.surfaceElevated,
-                  borderBottomColor: colors.border,
+                  backgroundColor: 'rgba(255, 255, 255, 0.15)',
+                  backdropFilter: 'blur(20px)',
                }}
+               accessibilityRole="text"
+               accessibilityLabel={`${league.name}. ${t('selectPlayersToStartGame')}`}
             >
                <Text
                   variant="h3"
-                  color={theme.text}
-                  className="tracking-wide mb-1"
+                  color="rgba(255, 255, 255, 0.9)"
+                  className="font-semibold mb-2"
                >
                   {league.name}
                </Text>
-               <Text variant="body" color={theme.textMuted}>
-                  {t('selectPlayers')}
+               <Text
+                  variant="body"
+                  color="rgba(255, 255, 255, 0.7)"
+                  className="font-medium"
+               >
+                  {t('selectPlayersToStartGame')}
                </Text>
             </View>
          )}
 
-         {/* Selection Summary */}
+         {/* Modern Selection Summary with Glass-morphism */}
          {selectedCount > 0 && (
             <View
-               className="px-4 py-3 border-b-2"
+               className="mx-5 mb-4 px-5 py-4 rounded-2xl"
                style={{
-                  backgroundColor: colors.primaryTint,
-                  borderBottomColor: colors.primary,
+                  backgroundColor: 'rgba(138, 43, 226, 0.2)',
+                  backdropFilter: 'blur(20px)',
+                  borderWidth: 1,
+                  borderColor: 'rgba(138, 43, 226, 0.3)',
                }}
+               accessibilityRole="text"
+               accessibilityLabel={`${selectedCount} ${selectedCount === 1 ? t('playerSelected') : t('playersSelected')}`}
             >
                <Text
                   variant="h4"
-                  color={colors.primary}
-                  className="text-center tracking-wide"
+                  color="rgba(255, 255, 255, 0.9)"
+                  className="text-center font-semibold"
                >
-                  {selectedCount} {t('playersSelected')}
+                  {selectedCount}{' '}
+                  {selectedCount === 1
+                     ? t('playerSelected')
+                     : t('playersSelected')}
                </Text>
             </View>
          )}
@@ -198,43 +333,20 @@ export default function SelectPlayers() {
             numColumns={3}
             loading={isLoading}
             error={error}
+            theme="dark"
          />
 
-         {/* Start Game Button */}
+         {/* Modern Start Game Button */}
          {selectedCount > 0 && (
-            <View
-               className="absolute bottom-0 left-0 right-0 p-6 pb-10 shadow-lg"
-               style={{
-                  backgroundColor: 'transparent',
-                  shadowColor: colors.shadow,
-                  shadowOffset: { width: 0, height: -4 },
-                  shadowOpacity: 1,
-                  shadowRadius: 0,
-                  elevation: 16,
-               }}
-            >
-               <Pressable
+            <View className="absolute bottom-0 left-0 right-0 p-6 pb-10">
+               <AppButton
+                  title={t('startGame')}
                   onPress={handleStartGame}
-                  className="bg-success border-success  border-[5px] rounded-2xl py-5 px-6 items-center justify-center w-3/4 mx-auto shadow-lg"
-                  style={{
-                     shadowColor: '#000000',
-                     shadowOffset: {
-                        width: 8,
-                        height: 8,
-                     },
-                     shadowOpacity: 1,
-                     shadowRadius: 0,
-                     elevation: 12,
-                  }}
-               >
-                  <Text
-                     variant="buttonLarge"
-                     color={colors.text}
-                     className="tracking-widest text-center"
-                  >
-                     {t('startGame').toUpperCase()}
-                  </Text>
-               </Pressable>
+                  variant="gradient"
+                  color="success"
+                  size="large"
+                  icon="play-circle-outline"
+               />
             </View>
          )}
 
@@ -249,7 +361,8 @@ export default function SelectPlayers() {
             onCreateGame={handleCreateGame}
             onBuyInChange={setBuyIn}
             leagueName={league?.name}
+            theme="dark"
          />
-      </View>
+      </LinearGradient>
    );
 }

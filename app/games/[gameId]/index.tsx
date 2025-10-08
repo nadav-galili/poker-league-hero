@@ -6,6 +6,7 @@ import { useAuth } from '@/context/auth';
 import { useLocalization } from '@/context/localization';
 import { Ionicons } from '@expo/vector-icons';
 import { router, useLocalSearchParams } from 'expo-router';
+import useMixpanel from '@/hooks/useMixpanel';
 import React from 'react';
 import { FlatList, TouchableOpacity, View } from 'react-native';
 import Toast from 'react-native-toast-message';
@@ -27,8 +28,9 @@ type getSummaryListResponse = {
 export default function GameScreen() {
    const theme = getTheme('light');
    const { t, isRTL } = useLocalization();
-   const { fetchWithAuth } = useAuth();
+   const { fetchWithAuth, user } = useAuth();
    const { gameId } = useLocalSearchParams<{ gameId: string }>();
+   const { trackScreenView, trackGameEvent, trackError } = useMixpanel();
 
    const {
       game,
@@ -40,6 +42,12 @@ export default function GameScreen() {
       loadAvailableMembers,
       handleRefresh,
    } = useGameData(gameId);
+
+   React.useEffect(() => {
+      if (gameId) {
+         trackScreenView('game_details', { game_id: gameId });
+      }
+   }, [gameId]);
 
    // Modal states
    const [showCashOutModal, setShowCashOutModal] = React.useState(false);
@@ -83,6 +91,12 @@ export default function GameScreen() {
          setIsProcessing(true);
          await gameService.buyIn(player, game.buyIn);
 
+         trackGameEvent('game_buy_in', gameId || '', game.leagueId, {
+            player_id: player.id,
+            player_name: player.fullName,
+            buy_in_amount: game.buyIn
+         });
+
          Toast.show({
             type: 'success',
             text1: t('success'),
@@ -92,6 +106,7 @@ export default function GameScreen() {
       } catch (error) {
          const errorMessage =
             error instanceof Error ? error.message : 'Failed to process buy-in';
+         trackError(error, 'game_screen_buy_in');
          Toast.show({
             type: 'error',
             text1: t('error'),
@@ -139,6 +154,13 @@ export default function GameScreen() {
             amount.toString()
          );
 
+         trackGameEvent('game_cash_out', gameId || '', game?.leagueId || '', {
+            player_id: selectedPlayer.id,
+            player_name: selectedPlayer.fullName,
+            cash_out_amount: amount,
+            profit: result.profit
+         });
+
          Toast.show({
             type: 'success',
             text1: t('success'),
@@ -154,6 +176,7 @@ export default function GameScreen() {
             error instanceof Error
                ? error.message
                : 'Failed to process cash out';
+         trackError(error, 'game_screen_cash_out');
          Toast.show({
             type: 'error',
             text1: t('error'),
@@ -171,6 +194,12 @@ export default function GameScreen() {
          setIsProcessing(true);
          await gameService.addPlayer(member, game.buyIn);
 
+         trackGameEvent('game_player_added', gameId || '', game.leagueId, {
+            member_id: member.id,
+            member_name: member.fullName,
+            buy_in_amount: game.buyIn
+         });
+
          Toast.show({
             type: 'success',
             text1: t('success'),
@@ -181,6 +210,7 @@ export default function GameScreen() {
       } catch (error) {
          const errorMessage =
             error instanceof Error ? error.message : 'Failed to add player';
+         trackError(error, 'game_screen_add_player');
          Toast.show({
             type: 'error',
             text1: t('error'),
@@ -201,11 +231,16 @@ export default function GameScreen() {
    };
 
    const removePlayer = async (player: GamePlayer) => {
-      if (!gameService) return;
+      if (!gameService || !game) return;
 
       try {
          setIsProcessing(true);
          await gameService.removePlayer(player);
+
+         trackGameEvent('game_player_removed', gameId || '', game.leagueId, {
+            player_id: player.id,
+            player_name: player.fullName
+         });
 
          Toast.show({
             type: 'success',
@@ -216,6 +251,7 @@ export default function GameScreen() {
       } catch (error) {
          const errorMessage =
             error instanceof Error ? error.message : 'Failed to remove player';
+         trackError(error, 'game_screen_remove_player');
          Toast.show({
             type: 'error',
             text1: t('error'),
@@ -252,6 +288,11 @@ export default function GameScreen() {
          setIsProcessing(true);
          await gameService.endGame();
 
+         trackGameEvent('game_ended', gameId || '', game.leagueId, {
+            total_players: game.players.length,
+            total_cash_out: game.players.reduce((sum, player) => sum + Number(player.profit), 0)
+         });
+
          Toast.show({
             type: 'success',
             text1: t('success'),
@@ -266,6 +307,7 @@ export default function GameScreen() {
       } catch (error) {
          const errorMessage =
             error instanceof Error ? error.message : 'Failed to end game';
+         trackError(error, 'game_screen_end_game');
          Toast.show({
             type: 'error',
             text1: t('error'),
@@ -302,12 +344,12 @@ export default function GameScreen() {
                   <Ionicons
                      name={isRTL ? 'arrow-forward' : 'arrow-back'}
                      size={24}
-                     color={colors.textInverse}
+                     color={colors.text}
                   />
                </TouchableOpacity>
                <Text
                   className="text-xl font-bold uppercase tracking-wide"
-                  style={{ color: colors.textInverse }}
+                  style={{ color: colors.text }}
                >
                   {t('gameDetails')}
                </Text>
@@ -351,33 +393,29 @@ export default function GameScreen() {
                <Ionicons
                   name={isRTL ? 'arrow-forward' : 'arrow-back'}
                   size={24}
-                  color={colors.textInverse}
+                  color={colors.text}
                />
             </TouchableOpacity>
             <Text
                className="text-xl font-bold uppercase tracking-wide"
-               style={{ color: colors.textInverse }}
+               style={{ color: colors.text }}
             >
                {t('gameDetails')}
             </Text>
             <View className="flex-row items-center gap-2">
                <TouchableOpacity onPress={handleRefresh} className="p-2">
-                  <Ionicons
-                     name="refresh"
-                     size={24}
-                     color={colors.textInverse}
-                  />
+                  <Ionicons name="refresh" size={24} color={colors.text} />
                </TouchableOpacity>
                {game?.status === 'active' && (
                   <TouchableOpacity
                      onPress={handleEndGame}
                      className="p-2 rounded-lg border-2 border-gray-600"
-                     style={{ backgroundColor: colors.error }}
+                     style={{ backgroundColor: colors.errorGradientEnd }}
                   >
                      <Ionicons
                         name="stop-circle"
                         size={24}
-                        color={colors.textInverse}
+                        color={colors.text}
                      />
                   </TouchableOpacity>
                )}
@@ -390,12 +428,10 @@ export default function GameScreen() {
             <AppButton
                title={t('addPlayer')}
                onPress={openAddPlayerModal}
-               bgColor={colors.info}
-               textColor={colors.textInverse}
+               color="info"
                disabled={isProcessing}
                width="50%"
                icon="person-add"
-               iconSize={20}
             />
          </View>
 
