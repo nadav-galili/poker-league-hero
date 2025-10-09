@@ -2,13 +2,13 @@
  * Enhanced Neo-Brutalist Empty State Component
  */
 
+import { colors, getTheme } from '@/colors';
 import Button from '@/components/Button';
 import { Text } from '@/components/Text';
-import { colors, getTheme } from '@/colors';
 import { useLocalization } from '@/context/localization';
 import { Ionicons } from '@expo/vector-icons';
 import React, { useEffect, useRef } from 'react';
-import { Animated, StyleSheet, View, Easing } from 'react-native';
+import { Animated, Easing, StyleSheet, View } from 'react-native';
 
 interface EmptyStateProps {
    onCreateLeague: () => void;
@@ -23,7 +23,7 @@ export function EmptyState({
    onJoinLeague,
    title,
    subtitle,
-   variant = 'leagues'
+   variant = 'leagues',
 }: EmptyStateProps) {
    const { t } = useLocalization();
    const theme = getTheme('light');
@@ -40,13 +40,13 @@ export function EmptyState({
             Animated.timing(floatAnim, {
                toValue: 1,
                duration: 2000,
-               easing: Easing.inOut(Easing.sine),
+               easing: Easing.inOut(Easing.ease),
                useNativeDriver: true,
             }),
             Animated.timing(floatAnim, {
                toValue: 0,
                duration: 2000,
-               easing: Easing.inOut(Easing.sine),
+               easing: Easing.inOut(Easing.ease),
                useNativeDriver: true,
             }),
          ])
@@ -68,13 +68,13 @@ export function EmptyState({
             Animated.timing(scaleAnim, {
                toValue: 1.05,
                duration: 1500,
-               easing: Easing.inOut(Easing.quad),
+               easing: Easing.inOut(Easing.ease),
                useNativeDriver: true,
             }),
             Animated.timing(scaleAnim, {
                toValue: 1,
                duration: 1500,
-               easing: Easing.inOut(Easing.quad),
+               easing: Easing.inOut(Easing.ease),
                useNativeDriver: true,
             }),
          ])
@@ -93,11 +93,16 @@ export function EmptyState({
 
    const getIconName = () => {
       switch (variant) {
-         case 'leagues': return 'trophy-outline';
-         case 'players': return 'people-outline';
-         case 'games': return 'game-controller-outline';
-         case 'stats': return 'stats-chart-outline';
-         default: return 'trophy-outline';
+         case 'leagues':
+            return 'trophy-outline';
+         case 'players':
+            return 'people-outline';
+         case 'games':
+            return 'game-controller-outline';
+         case 'stats':
+            return 'stats-chart-outline';
+         default:
+            return 'trophy-outline';
       }
    };
 
@@ -124,7 +129,7 @@ export function EmptyState({
             <Animated.View
                className="absolute w-60 h-60 border-4 border-secondary"
                style={{
-                  transform: [{ rotate: rotation, rotateY: '180deg' }],
+                  transform: [{ rotate: rotation }, { rotateY: '180deg' }],
                }}
             />
          </View>
@@ -144,11 +149,7 @@ export function EmptyState({
                   transform: [{ translateY: floatY }, { scale: scaleAnim }],
                }}
             >
-               <Ionicons
-                  name={getIconName()}
-                  size={64}
-                  color={theme.primary}
-               />
+               <Ionicons name={getIconName()} size={64} color={theme.primary} />
 
                {/* Corner accents */}
                <View
@@ -173,7 +174,7 @@ export function EmptyState({
                className="absolute -bottom-6 -right-6 w-5 h-5 border-2 border-border"
                style={{
                   backgroundColor: theme.success,
-                  transform: [{ rotate: rotation, rotateZ: '45deg' }],
+                  transform: [{ rotate: rotation }, { rotateZ: '45deg' }],
                }}
             />
          </View>
@@ -238,16 +239,18 @@ export function EmptyState({
 
          {/* Bottom decorative line */}
          <View className="flex-row items-center mt-8 gap-3">
-            {[theme.primary, theme.secondary, theme.accent].map((color, index) => (
-               <View
-                  key={index}
-                  className="w-8 h-1 border border-border"
-                  style={{
-                     backgroundColor: color,
-                     transform: [{ skewX: `${(index - 1) * 15}deg` }],
-                  }}
-               />
-            ))}
+            {[theme.primary, theme.secondary, theme.accent].map(
+               (color, index) => (
+                  <View
+                     key={index}
+                     className="w-8 h-1 border border-border"
+                     style={{
+                        backgroundColor: color,
+                        transform: [{ skewX: `${(index - 1) * 15}deg` }],
+                     }}
+                  />
+               )
+            )}
          </View>
       </View>
    );

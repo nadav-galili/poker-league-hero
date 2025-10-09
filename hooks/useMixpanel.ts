@@ -4,7 +4,9 @@
  */
 
 import { useAuth } from '@/context/auth';
-import mixpanel, {
+
+import {
+   mixpanel,
    MixpanelEventName,
    MixpanelEventProperties,
    MixpanelUserProperties,
