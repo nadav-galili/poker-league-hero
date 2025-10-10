@@ -1,5 +1,6 @@
-import { and, eq } from 'drizzle-orm';
-import { leagueMembers, users } from '../db';
+import { and, count, eq, inArray } from 'drizzle-orm';
+import { getDb, leagueMembers, leagues, users } from '../db';
+
 /**
  * Generate a secure, unique 5-character invite code
  * Uses alphanumeric characters, excluding confusing characters (0, O, 1, I, l)
@@ -58,7 +59,6 @@ export function validateInviteCode(inviteCode: string): {
 export async function findLeagueByInviteCode(
    inviteCode: string
 ): Promise<any | null> {
-   const { getDb, leagues } = await import('../db');
    const db = getDb();
 
    try {
@@ -81,7 +81,6 @@ export async function findLeagueByInviteCode(
 export async function isInviteCodeAvailable(
    inviteCode: string
 ): Promise<boolean> {
-   const { getDb, leagues } = await import('../db');
    const db = getDb();
 
    const existingLeague = await db
@@ -128,7 +127,6 @@ export async function createLeague(data: {
       image: data.image ? 'present' : 'none',
    });
 
-   const { getDb, leagues } = await import('../db');
    const db = getDb();
 
    // Get user id from email
@@ -193,8 +191,6 @@ export async function joinLeagueByInviteCode(
    inviteCode: string,
    userId: number
 ): Promise<any> {
-   const { getDb, leagues, leagueMembers } = await import('../db');
-   const { eq, and } = await import('drizzle-orm');
    const db = getDb();
 
    // Find the league by invite code
@@ -245,13 +241,16 @@ export async function joinLeagueByInviteCode(
  * Get all leagues for a user
  */
 export async function getUserLeagues(userId: number): Promise<any[]> {
-   const { getDb, leagueMembers, leagues } = await import('../db');
-   const { eq, count } = await import('drizzle-orm');
    const db = getDb();
 
+   // Single optimized query with subquery for member count
    const userLeagues = await db
       .select({
-         league: leagues,
+         id: leagues.id,
+         name: leagues.name,
+         inviteCode: leagues.inviteCode,
+         imageUrl: leagues.imageUrl,
+         isActive: leagues.isActive,
          memberRole: leagueMembers.role,
          joinedAt: leagueMembers.joinedAt,
       })
@@ -265,47 +264,49 @@ export async function getUserLeagues(userId: number): Promise<any[]> {
          )
       );
 
-   // Get member count for each league and format the data
-   const formattedLeagues = await Promise.all(
-      userLeagues.map(async (item: any) => {
-         // Get member count for this league
-         const memberCountResult = await db
-            .select({ count: count() })
-            .from(leagueMembers)
-            .where(
-               and(
-                  eq(leagueMembers.leagueId, item.league.id),
-                  eq(leagueMembers.isActive, true)
-               )
-            );
+   // If no leagues, return early
+   if (userLeagues.length === 0) {
+      return [];
+   }
 
-         const memberCount = memberCountResult[0]?.count || 0;
-
-         // Image URL is already in correct format from database
-         const imageUrl = item.league.imageUrl;
-
-         return {
-            id: item.league.id,
-            name: item.league.name,
-            code: item.league.inviteCode,
-            image: imageUrl || null, // Ensure null for empty values
-            memberCount,
-            status: item.league.isActive ? 'active' : 'inactive',
-            role: item.memberRole,
-            joinedAt: item.joinedAt,
-         };
+   // Get member counts for all leagues in a single query
+   const leagueIds = userLeagues.map((l: any) => l.id);
+   const memberCounts = await db
+      .select({
+         leagueId: leagueMembers.leagueId,
+         count: count(),
       })
+      .from(leagueMembers)
+      .where(
+         and(
+            eq(leagueMembers.isActive, true),
+            inArray(leagueMembers.leagueId, leagueIds)
+         )
+      )
+      .groupBy(leagueMembers.leagueId);
+
+   // Create a map for quick lookup
+   const memberCountMap = new Map(
+      memberCounts.map((mc: any) => [mc.leagueId, Number(mc.count)])
    );
 
-   return formattedLeagues;
+   // Format the data
+   return userLeagues.map((item: any) => ({
+      id: item.id,
+      name: item.name,
+      code: item.inviteCode,
+      image: item.imageUrl || null,
+      memberCount: memberCountMap.get(item.id) || 0,
+      status: item.isActive ? 'active' : 'inactive',
+      role: item.memberRole,
+      joinedAt: item.joinedAt,
+   }));
 }
 
 /**
  * Get league details with members
  */
 export async function getLeagueDetails(leagueId: string): Promise<any> {
-   const { getDb, leagues, leagueMembers, users } = await import('../db');
-   const { eq } = await import('drizzle-orm');
    const db = getDb();
 
    const league = await db

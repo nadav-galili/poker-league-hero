@@ -21,7 +21,7 @@
             "backgroundColor": "#ffffff"
          },
          "edgeToEdgeEnabled": true,
-         "package": "com.pokerleaguehero.app",
+         "package": "com.pokeraihomestack.app",
          "buildType": "apk"
       },
       "web": {
