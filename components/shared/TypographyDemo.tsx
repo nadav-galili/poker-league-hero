@@ -2,7 +2,7 @@ import { colors, getTheme } from '@/colors';
 import { Typography } from '@/constants/typography';
 import React from 'react';
 import { ScrollView, StyleSheet, View } from 'react-native';
-import { Text } from './Text';
+import { Text } from '../Text';
 
 export function TypographyDemo() {
    const theme = getTheme('light');
