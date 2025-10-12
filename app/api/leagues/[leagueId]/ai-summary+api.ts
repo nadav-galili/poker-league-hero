@@ -1,4 +1,5 @@
-import { getGeneralLeagueStats } from '@/services/leagueStatsApiService';
+import { getDb, games, leagueMembers, gamePlayers, cashIns } from '@/db';
+import { and, desc, eq, gte, lte, sql, sum } from 'drizzle-orm';
 import { getLeagueDetails } from '@/services/leagueUtils';
 import { llmClient } from '@/services/llmClient';
 import {
@@ -105,14 +106,81 @@ export const POST = withAuth(
             return Response.json({ summary: existingSummary });
          }
 
-         // Fetch league statistics
+         // Fetch league statistics directly from database (avoid HTTP subrequests)
          let stats;
          try {
-            const statsResponse = await getGeneralLeagueStats(
-               validatedLeagueId.toString(),
-               targetYear
-            );
-            stats = await statsResponse.json();
+            const db = getDb();
+            const yearStart = dayjs().year(targetYear).startOf('year').toDate();
+            const yearEnd = dayjs().year(targetYear).endOf('year').toDate();
+
+            console.log('📊 Fetching league stats directly from database...');
+
+            const totalGamesResult = await db
+               .select({ count: sql<number>`count(*)` })
+               .from(games)
+               .where(
+                  and(
+                     eq(games.leagueId, validatedLeagueId),
+                     gte(games.startedAt, yearStart),
+                     lte(games.startedAt, yearEnd)
+                  )
+               );
+
+            const completedGamesResult = await db
+               .select({ count: sql<number>`count(*)` })
+               .from(games)
+               .where(
+                  and(
+                     eq(games.leagueId, validatedLeagueId),
+                     eq(games.status, 'completed'),
+                     gte(games.startedAt, yearStart),
+                     lte(games.startedAt, yearEnd)
+                  )
+               );
+
+            const totalPlayersResult = await db
+               .select({ count: sql<number>`count(*)` })
+               .from(leagueMembers)
+               .where(
+                  and(
+                     eq(leagueMembers.leagueId, validatedLeagueId),
+                     eq(leagueMembers.isActive, true)
+                  )
+               );
+
+            const profitResult = await db
+               .select({
+                  totalBuyIns: sum(cashIns.amount).as('total_buy_ins'),
+                  totalBuyOuts:
+                     sql<number>`sum(case when ${cashIns.type} = 'buy_out' then ${cashIns.amount} else 0 end)`.as(
+                        'total_buy_outs'
+                     ),
+               })
+               .from(cashIns)
+               .innerJoin(gamePlayers, eq(cashIns.gamePlayerId, gamePlayers.id))
+               .innerJoin(games, eq(gamePlayers.gameId, games.id))
+               .where(
+                  and(
+                     eq(games.leagueId, validatedLeagueId),
+                     eq(games.status, 'completed'),
+                     gte(games.endedAt, yearStart),
+                     lte(games.endedAt, yearEnd)
+                  )
+               );
+
+            stats = {
+               stats: {
+                  totalGames: totalGamesResult[0]?.count || 0,
+                  completedGames: completedGamesResult[0]?.count || 0,
+                  totalPlayers: totalPlayersResult[0]?.count || 0,
+                  totalProfit:
+                     (profitResult[0]?.totalBuyOuts || 0) -
+                     (profitResult[0]?.totalBuyIns || 0),
+                  totalBuyIns: profitResult[0]?.totalBuyIns || 0,
+                  totalBuyOuts: profitResult[0]?.totalBuyOuts || 0,
+               },
+            };
+
             console.log('📊 Stats fetched successfully:', {
                hasStats: !!stats,
                totalGames: stats?.stats?.totalGames,
