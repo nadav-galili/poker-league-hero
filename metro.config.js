@@ -3,13 +3,92 @@ const { withNativeWind } = require('nativewind/metro');
 
 const config = getSentryExpoConfig(__dirname);
 
-// Optimize bundle size for Cloudflare Workers
+// Check if we're building for mobile platforms
+const platform = process.env.EXPO_PLATFORM || process.env.PLATFORM;
+const isMobileBuild =
+   platform === 'android' ||
+   platform === 'ios' ||
+   process.env.EAS_BUILD_PLATFORM === 'android' ||
+   process.env.EAS_BUILD_PLATFORM === 'ios';
+
+console.log(
+   'Metro Config - Platform:',
+   platform,
+   'EAS Platform:',
+   process.env.EAS_BUILD_PLATFORM,
+   'Is Mobile:',
+   isMobileBuild
+);
+
+// Custom resolver function to redirect database imports for mobile builds
+const path = require('path');
+const customResolver = (context, moduleName, platform) => {
+   // Only redirect for mobile platforms
+   if (isMobileBuild) {
+      // Redirect database imports to mobile stubs
+      if (
+         moduleName.includes('./db/connection') ||
+         moduleName.includes('../db/connection')
+      ) {
+         console.log('Redirecting db/connection to mobile stub');
+         const stubPath = path.resolve(__dirname, 'db/connection.mobile.ts');
+         return {
+            filePath: stubPath,
+            type: 'sourceFile',
+         };
+      }
+
+      if (
+         moduleName.includes('./db/schema') ||
+         moduleName.includes('../db/schema')
+      ) {
+         console.log('Redirecting db/schema to mobile stub');
+         const stubPath = path.resolve(__dirname, 'db/schema.mobile.ts');
+         return {
+            filePath: stubPath,
+            type: 'sourceFile',
+         };
+      }
+
+      if (
+         (moduleName.includes('../../db') ||
+            moduleName.includes('../../../db')) &&
+         !moduleName.includes('.mobile.ts')
+      ) {
+         console.log('Redirecting relative db import to mobile stub');
+         const stubPath = path.resolve(__dirname, 'db/index.mobile.ts');
+         return {
+            filePath: stubPath,
+            type: 'sourceFile',
+         };
+      }
+   }
+
+   // For everything else, fall back to default resolution
+   return context.resolveRequest(context, moduleName, platform);
+};
+
+// Optimize bundle size and exclude server-only dependencies
 config.resolver = {
    ...config.resolver,
    resolverMainFields: ['react-native', 'browser', 'main'],
    sourceExts: [
       ...(config.resolver?.sourceExts || ['js', 'jsx', 'ts', 'tsx', 'json']),
    ],
+   blockList: [
+      // Always block server-only node modules from client bundles
+      /node_modules\/@aws-sdk\/.*/,
+      /node_modules\/@smithy\/.*/,
+      /node_modules\/@neondatabase\/.*/,
+      /node_modules\/pg\/.*/,
+      /node_modules\/postgres\/.*/,
+      /node_modules\/drizzle-orm\/.*/,
+      /node_modules\/drizzle-kit\/.*/,
+      // Always block API routes from client bundles - they should only run on server
+      /.*\/app\/api\/.*\+api\.ts$/,
+   ],
+   platforms: ['ios', 'android', 'native', 'web'],
+   resolveRequest: customResolver,
 };
 
 // Exclude large server-only dependencies from client bundles

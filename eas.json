@@ -27,6 +27,9 @@
       },
       "production": {
          "autoIncrement": true,
+         "android": {
+            "buildType": "apk"
+         },
          "env": {
             "SENTRY_DISABLE_AUTO_UPLOAD": "true",
             "DATABASE_URL": "@DATABASE_URL",
@@ -41,7 +44,12 @@
             "R2_BUCKET_NAME": "@R2_BUCKET_NAME",
             "R2_ENDPOINT": "@R2_ENDPOINT",
             "CLOUDFLARE_R2_PUBLIC_URL": "@CLOUDFLARE_R2_PUBLIC_URL",
-            "SENTRY_AUTH_TOKEN": "@SENTRY_AUTH_TOKEN"
+            "SENTRY_AUTH_TOKEN": "@SENTRY_AUTH_TOKEN",
+            "EXPO_PUBLIC_BASE_URL": "@EXPO_PUBLIC_BASE_URL",
+            "EXPO_PUBLIC_SCHEME": "@EXPO_PUBLIC_SCHEME",
+            "EXPO_PUBLIC_MIXPANEL_TOKEN": "@EXPO_PUBLIC_MIXPANEL_TOKEN",
+            "EXPO_PUBLIC_API_SECRET": "@EXPO_PUBLIC_API_SECRET",
+            "EXPO_PUBLIC_MIXPANEL_SERVER_URL": "@EXPO_PUBLIC_MIXPANEL_SERVER_URL"
          }
       }
    },

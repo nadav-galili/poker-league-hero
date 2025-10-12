@@ -9,7 +9,17 @@
       "Bash(curl:*)",
       "Bash(find:*)",
       "Bash(npx tsc:*)",
-      "Bash(bun run lint:*)"
+      "Bash(bun run lint:*)",
+      "Bash(eas env:create:*)",
+      "Bash(eas secret:create:*)",
+      "Bash(eas secret:list:*)",
+      "mcp__context7__resolve-library-id",
+      "mcp__context7__get-library-docs",
+      "Bash(EXPO_PLATFORM=android bun start --clear)",
+      "Bash(bun run expo export:*)",
+      "Bash(eas build:*)",
+      "Bash(EXPO_PLATFORM=android bun run expo export --platform android --clear)",
+      "Bash(timeout 60 eas build:*)"
     ],
     "deny": [],
     "ask": []
