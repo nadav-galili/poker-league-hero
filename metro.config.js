@@ -68,6 +68,31 @@ const customResolver = (context, moduleName, platform) => {
    return context.resolveRequest(context, moduleName, platform);
 };
 
+// Create platform-specific block list
+const createBlockList = () => {
+   // For mobile platforms, block server-only dependencies and API routes
+   if (isMobileBuild) {
+      return [
+         // Block server-only node modules from mobile client bundles
+         /node_modules\/@aws-sdk\/.*/,
+         /node_modules\/@smithy\/.*/,
+         /node_modules\/@neondatabase\/.*/,
+         /node_modules\/pg\/.*/,
+         /node_modules\/postgres\/.*/,
+         /node_modules\/drizzle-orm\/.*/,
+         /node_modules\/drizzle-kit\/.*/,
+         // Block API routes from mobile client bundles - they should only run on server
+         /.*\/app\/api\/.*\+api\.ts$/,
+      ];
+   }
+
+   // For web builds (especially server output), allow database dependencies and API routes
+   // Only block development-only tools
+   return [
+      /node_modules\/drizzle-kit\/.*/, // Only block the CLI tool, not the ORM
+   ];
+};
+
 // Optimize bundle size and exclude server-only dependencies
 config.resolver = {
    ...config.resolver,
@@ -75,18 +100,7 @@ config.resolver = {
    sourceExts: [
       ...(config.resolver?.sourceExts || ['js', 'jsx', 'ts', 'tsx', 'json']),
    ],
-   blockList: [
-      // Always block server-only node modules from client bundles
-      /node_modules\/@aws-sdk\/.*/,
-      /node_modules\/@smithy\/.*/,
-      /node_modules\/@neondatabase\/.*/,
-      /node_modules\/pg\/.*/,
-      /node_modules\/postgres\/.*/,
-      /node_modules\/drizzle-orm\/.*/,
-      /node_modules\/drizzle-kit\/.*/,
-      // Always block API routes from client bundles - they should only run on server
-      /.*\/app\/api\/.*\+api\.ts$/,
-   ],
+   blockList: createBlockList(),
    platforms: ['ios', 'android', 'native', 'web'],
    resolveRequest: customResolver,
 };
