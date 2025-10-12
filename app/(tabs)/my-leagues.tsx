@@ -1,9 +1,11 @@
 import { LeagueCard } from '@/components/league/LeagueCard';
 import { MyLeaguesHeader } from '@/components/league/MyLeaguesHeader';
+import { InputModal } from '@/components/modals';
 import { EmptyState } from '@/components/shared/EmptyState';
 import { ErrorState } from '@/components/shared/ErrorState';
 import { LeagueCardSkeleton } from '@/components/shared/LeagueCardSkeleton';
 import { Text } from '@/components/Text';
+import { useLocalization } from '@/context/localization';
 import { useMyLeagues } from '@/hooks';
 import { useMixpanel } from '@/hooks/useMixpanel';
 import { LeagueWithTheme } from '@/types/league';
@@ -25,16 +27,23 @@ export default function MyLeagues() {
       handleShareLeague,
       handleLeaguePress,
       handleRefresh,
+      // Join modal state
+      joinModalVisible,
+      joinCode,
+      setJoinCode,
+      handleCloseJoinModal,
+      handleSubmitJoinCode,
    } = useMyLeagues();
 
    const { trackScreenView } = useMixpanel();
+   const { t } = useLocalization();
 
    // Track screen view on mount
    React.useEffect(() => {
       trackScreenView('My Leagues', {
          leagues_count: leagues?.length || 0,
       });
-   }, [leagues]);
+   }, [leagues, trackScreenView]);
 
    // Render function for league cards
    const renderLeagueCard = React.useCallback(
@@ -116,6 +125,21 @@ export default function MyLeagues() {
                }
             />
          )}
+
+         {/* Join League Modal */}
+         <InputModal
+            visible={joinModalVisible}
+            title={t('joinLeague')}
+            placeholder={t('enterLeagueCode')}
+            value={joinCode}
+            onChangeText={setJoinCode}
+            onClose={handleCloseJoinModal}
+            onSubmit={handleSubmitJoinCode}
+            submitText={t('join')}
+            cancelText={t('cancel')}
+            isLoading={isLoading}
+            theme="dark"
+         />
       </LinearGradient>
    );
 }

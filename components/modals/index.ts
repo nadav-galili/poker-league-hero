@@ -3,3 +3,4 @@
  */
 
 export { GameSetupModal } from './GameSetupModal';
+export { InputModal } from './InputModal';
