@@ -103,37 +103,107 @@ export const POST = withAuth(
             return Response.json({ summary: existingSummary });
          }
 
-         const statsResponse = await getGeneralLeagueStats(
-            validatedLeagueId.toString(),
-            targetYear
-         );
-         const stats = await statsResponse.json();
+         // Fetch league statistics
+         let stats;
+         try {
+            const statsResponse = await getGeneralLeagueStats(
+               validatedLeagueId.toString(),
+               targetYear
+            );
+            stats = await statsResponse.json();
+            console.log('📊 Stats fetched successfully:', {
+               hasStats: !!stats,
+               totalGames: stats?.stats?.totalGames,
+            });
+         } catch (error) {
+            console.error('❌ Error fetching league stats:', error);
+            return Response.json(
+               {
+                  error: 'Failed to fetch league statistics',
+                  details:
+                     error instanceof Error ? error.message : 'Unknown error',
+               },
+               { status: 500 }
+            );
+         }
+
          if (!stats?.stats?.totalGames) {
+            console.log(
+               '⚠️ No games found for league:',
+               validatedLeagueId,
+               'year:',
+               targetYear
+            );
             return Response.json(
                { error: 'No games played in this year' },
                { status: 400 }
             );
          }
 
-         const prompt = template.replace(
-            '{{leagues_stats}}',
-            JSON.stringify(stats)
-         );
+         // Generate AI summary
+         let summary;
+         try {
+            const prompt = template.replace(
+               '{{leagues_stats}}',
+               JSON.stringify(stats)
+            );
 
-         const { text: summary } = await llmClient.generateText({
-            model: 'gpt-4o-mini',
-            prompt,
-            temperature: 0.2,
-            maxTokens: 500,
-         });
+            console.log('🤖 Generating AI summary with OpenAI...');
+            const result = await llmClient.generateText({
+               model: 'gpt-4o-mini',
+               prompt,
+               temperature: 0.2,
+               maxTokens: 500,
+            });
+            summary = result.text;
+            console.log('✅ AI summary generated successfully:', {
+               length: summary.length,
+            });
+         } catch (error) {
+            console.error('❌ Error generating AI summary:', error);
+            return Response.json(
+               {
+                  error: 'Failed to generate AI summary',
+                  details:
+                     error instanceof Error ? error.message : 'Unknown error',
+               },
+               { status: 500 }
+            );
+         }
 
-         await storeLeagueStatsSummary(validatedLeagueId.toString(), summary);
+         // Store summary in database
+         try {
+            await storeLeagueStatsSummary(
+               validatedLeagueId.toString(),
+               summary
+            );
+            console.log('💾 Summary stored successfully');
+         } catch (error) {
+            console.error('❌ Error storing summary:', error);
+            // Continue anyway - we can still return the summary even if storage fails
+         }
+
          return Response.json({ summary: summary });
       } catch (error) {
-         console.error('Error fetching league stats summary:', error);
+         console.error('❌ Unexpected error in AI summary endpoint:', error);
+         const errorMessage =
+            error instanceof Error ? error.message : 'Unknown error';
+         const errorStack = error instanceof Error ? error.stack : '';
+
+         console.error('Error details:', {
+            message: errorMessage,
+            stack: errorStack,
+            leagueId: validatedLeagueId,
+            year: targetYear,
+         });
+
          return secureResponse(
-            { error: 'Failed to fetch league statistics summary' },
-            { status: 400 }
+            {
+               error: 'Failed to fetch league statistics summary',
+               details: errorMessage,
+               timestamp: new Date().toISOString(),
+            },
+            { status: 500 }
          );
       }
    }, 'general')
