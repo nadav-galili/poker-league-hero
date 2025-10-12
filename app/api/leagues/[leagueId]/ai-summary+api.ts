@@ -15,13 +15,12 @@ import {
 } from '@/utils/rateLimiting';
 import { validateDatabaseId } from '@/utils/validation';
 import dayjs from 'dayjs';
-import { readFileSync } from 'fs';
-import { join } from 'path';
 
-const template = readFileSync(
-   join(process.cwd(), 'app/api/llm/prompts/summarize-leagues.txt'),
-   'utf-8'
-);
+// Inline template for Cloudflare Workers compatibility (no filesystem access)
+const template = `Analyze the following home poker league stats into a short paragraph highlighting
+key insights:
+
+{{leagues_stats}}`;
 
 export const POST = withAuth(
    withRateLimit(async (request: Request, user) => {
