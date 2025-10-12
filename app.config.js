@@ -84,20 +84,12 @@ module.exports = ({ config }) => {
             projectId: '43b198a0-4fc4-46b7-a540-4550da1b1e45',
          },
       },
-   };
-
-   // Only add web configuration for web builds
-   const platform =
-      process.env.EXPO_PLATFORM || process.env.EAS_BUILD_PLATFORM || 'default';
-   console.log('App Config - Platform detected:', platform);
-
-   if (platform === 'web' || platform === undefined) {
-      baseConfig.web = {
+      web: {
          bundler: 'metro',
          output: 'server',
          favicon: './assets/images/icon.png',
-      };
-   }
+      },
+   };
 
    return baseConfig;
 };
