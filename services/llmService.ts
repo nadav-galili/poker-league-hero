@@ -7,7 +7,7 @@ export async function storeLeagueStatsSummary(
    summary: string
 ) {
    const now = new Date();
-   const expiresAt = dayjs().add(7, 'day').toDate();
+   const expiresAt = dayjs().add(3, 'day').toDate();
 
    const data = {
       content: summary,

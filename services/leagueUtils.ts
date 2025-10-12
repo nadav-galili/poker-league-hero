@@ -122,15 +122,9 @@ export async function createLeague(data: {
    image?: string;
    adminUserEmail: string;
 }): Promise<any> {
-   console.log('createLeague called with:', {
-      ...data,
-      image: data.image ? 'present' : 'none',
-   });
-
    const db = getDb();
 
    // Get user id from email
-   console.log('Looking up user with email:', data.adminUserEmail);
    const user = await db
       .select()
       .from(users)
@@ -142,7 +136,6 @@ export async function createLeague(data: {
       throw new Error('User not found');
    }
    const userId = user[0].id;
-   console.log('Found user ID:', userId);
    let imageUrl = data.image;
 
    // Note: If imageUrl starts with 'file://', it means the client didn't upload the image first.
@@ -154,8 +147,7 @@ export async function createLeague(data: {
    }
 
    if (!imageUrl) {
-      imageUrl =
-         'https://pub-6908906fe4c24b7b82ff61e803190c28.r2.dev/Gemini_Generated_Image_70gku770gku770gk.png';
+      imageUrl = 'https://pub-6908906fe4c24b7b82ff61e803190c28.r2.dev/icon.png';
    }
 
    data.image = imageUrl;

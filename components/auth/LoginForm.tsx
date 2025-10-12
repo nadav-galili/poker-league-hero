@@ -1,6 +1,7 @@
 import { useAuth } from '@/context/auth';
 import { useLocalization } from '@/context/localization';
 import { Ionicons } from '@expo/vector-icons';
+import { useRouter } from 'expo-router';
 import { BlurView } from 'expo-blur';
 import { LinearGradient } from 'expo-linear-gradient';
 import { Image, Pressable, StatusBar, Text, View } from 'react-native';
@@ -8,6 +9,7 @@ import { Image, Pressable, StatusBar, Text, View } from 'react-native';
 export default function LoginForm() {
    const { signIn } = useAuth();
    const { t } = useLocalization();
+   const router = useRouter();
 
    return (
       <>
@@ -236,8 +238,14 @@ export default function LoginForm() {
                      >
                         <Text className="text-xs text-center text-white/60 leading-relaxed">
                            By continuing, you agree to our{' '}
-                           <Text className="text-cyan-400">Terms</Text> and{' '}
-                           <Text className="text-cyan-400">Privacy Policy</Text>
+                           <Text
+                              className="text-cyan-400"
+                              onPress={() => router.push('/terms')}
+                           >Terms</Text> and{' '}
+                           <Text
+                              className="text-cyan-400"
+                              onPress={() => router.push('/privacy')}
+                           >Privacy Policy</Text>
                         </Text>
                      </BlurView>
                   </View>

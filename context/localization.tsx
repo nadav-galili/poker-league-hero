@@ -101,6 +101,7 @@ export interface Translations {
    tryAgain: string;
 
    // League Stats Screen
+   loadingLeagueStats: string;
    leagueStats: string;
    loadingLeagueDetails: string;
    leagueNotFound: string;
@@ -294,6 +295,7 @@ const enTranslations: Translations = {
    tryAgain: 'Try Again',
 
    // League Stats Screen
+   loadingLeagueStats: 'Loading league stats...',
    leagueOverview: 'LEAGUE OVERVIEW',
    playerStats: 'PLAYER STATS',
    leagueStats: 'LEAGUE STATS',
@@ -490,6 +492,7 @@ const heTranslations: Translations = {
    tryAgain: 'נסה שוב',
 
    // League Stats Screen
+   loadingLeagueStats: 'טוען סטטיסטיקות ליגה...',
    leagueOverview: 'סטטיסטיקות ליגה',
    playerStats: 'סטטיסטיקות שחקנים',
    leagueStats: 'סטטיסטיקות ליגה',

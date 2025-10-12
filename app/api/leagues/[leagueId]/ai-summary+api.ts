@@ -1,5 +1,4 @@
-import { getDb, games, leagueMembers, gamePlayers, cashIns } from '@/db';
-import { and, eq, gte, lte, sql, sum } from 'drizzle-orm';
+import { cashIns, gamePlayers, games, getDb, leagueMembers } from '@/db';
 import { getLeagueDetails } from '@/services/leagueUtils';
 import { llmClient } from '@/services/llmClient';
 import {
@@ -14,12 +13,21 @@ import {
    validateRequestSecurity,
    withRateLimit,
 } from '@/utils/rateLimiting';
+import { captureException } from '@/utils/sentry';
 import { validateDatabaseId } from '@/utils/validation';
 import dayjs from 'dayjs';
+import { and, eq, gte, lte, sql, sum } from 'drizzle-orm';
 
 // Template for AI summary generation
-const template = `Analyze the following home poker league stats into a short paragraph highlighting key insights:
+const template = `You are an enthusiastic and friendly AI poker analyst. Your goal is to analyze the provided home poker league statistics and generate a concise, engaging, two-paragraph summary.
 
+**Paragraph 1: Financial Snapshot**
+Summarize the league's overall financial health. Highlight the total number of games, the total money put in (Buy-Ins), and the total money taken out (Buy-Outs). State the **Total Profit/Loss** and comment on what it means for the league's pot or rake (e.g., "The league is down $X, which means the collective pot is X less than the buy-ins").
+
+**Paragraph 2: Engagement and Activity**
+Comment on the activity levels, noting the number of **total players** and **completed games**. Since 'averageGameDuration' is 0, mention that the duration data is not yet available and focus on the current player pool size.
+
+**Data to analyze:**
 {{leagues_stats}}`;
 
 export const POST = withAuth(
@@ -29,6 +37,15 @@ export const POST = withAuth(
       try {
          const securityCheck = validateRequestSecurity(request);
          if (!securityCheck.valid) {
+            captureException(
+               new Error(securityCheck.error ?? 'Invalid request'),
+               {
+                  function: 'validateRequestSecurity',
+                  screen: 'AiSummary',
+                  request: request,
+                  user: user,
+               }
+            );
             return secureResponse(
                { error: securityCheck.error },
                { status: 400 }
@@ -36,6 +53,12 @@ export const POST = withAuth(
          }
 
          if (!user.userId) {
+            captureException(new Error('User authentication required'), {
+               function: 'checkUserAuthentication',
+               screen: 'AiSummary',
+               request: request,
+               user: user,
+            });
             return secureResponse(
                { error: 'User authentication required' },
                { status: 401 }
@@ -44,6 +67,12 @@ export const POST = withAuth(
 
          const { leagueId, error: idError } = extractLeagueId(request.url);
          if (idError || !leagueId) {
+            captureException(new Error(idError || 'League ID is required'), {
+               function: 'extractLeagueId',
+               screen: 'AiSummary',
+               request: request,
+               user: user,
+            });
             return secureResponse(
                { error: idError || 'League ID is required' },
                { status: 400 }
@@ -52,6 +81,12 @@ export const POST = withAuth(
 
          const getLeague = await getLeagueDetails(leagueId.toString());
          if (!getLeague) {
+            captureException(new Error('League not found'), {
+               function: 'getLeagueDetails',
+               screen: 'AiSummary',
+               request: request,
+               user: user,
+            });
             return secureResponse(
                { error: 'League not found' },
                { status: 400 }
@@ -60,6 +95,12 @@ export const POST = withAuth(
 
          validatedLeagueId = validateDatabaseId(leagueId);
          if (!validatedLeagueId) {
+            captureException(new Error('Invalid league ID format'), {
+               function: 'validateDatabaseId',
+               screen: 'AiSummary',
+               request: request,
+               user: user,
+            });
             return secureResponse(
                { error: 'Invalid league ID format' },
                { status: 400 }
@@ -73,6 +114,12 @@ export const POST = withAuth(
          });
 
          if (!authResult.authorized) {
+            captureException(new Error(authResult.error || 'Access denied'), {
+               function: 'checkLeagueAccess',
+               screen: 'AiSummary',
+               request: request,
+               user: user,
+            });
             return secureResponse(
                { error: authResult.error || 'Access denied' },
                { status: 403 }
@@ -111,8 +158,6 @@ export const POST = withAuth(
             const db = getDb();
             const yearStart = dayjs().year(targetYear).startOf('year').toDate();
             const yearEnd = dayjs().year(targetYear).endOf('year').toDate();
-
-            console.log('📊 Fetching league stats directly from database...');
 
             const totalGamesResult = await db
                .select({ count: sql<number>`count(*)` })
@@ -179,13 +224,14 @@ export const POST = withAuth(
                   totalBuyOuts: profitResult[0]?.totalBuyOuts || 0,
                },
             };
-
-            console.log('📊 Stats fetched successfully:', {
-               hasStats: !!stats,
-               totalGames: stats?.stats?.totalGames,
-            });
          } catch (error) {
             console.error('❌ Error fetching league stats:', error);
+            captureException(new Error('Failed to fetch league statistics'), {
+               function: 'getLeagueStatsSummary',
+               screen: 'AiSummary',
+               request: request,
+               user: user,
+            });
             return Response.json(
                {
                   error: 'Failed to fetch league statistics',
@@ -197,12 +243,12 @@ export const POST = withAuth(
          }
 
          if (!stats?.stats?.totalGames) {
-            console.log(
-               '⚠️ No games found for league:',
-               validatedLeagueId,
-               'year:',
-               targetYear
-            );
+            captureException(new Error('No games played in this year'), {
+               function: 'getLeagueStatsSummary',
+               screen: 'AiSummary',
+               request: request,
+               user: user,
+            });
             return Response.json(
                { error: 'No games played in this year' },
                { status: 400 }
@@ -217,7 +263,6 @@ export const POST = withAuth(
                JSON.stringify(stats)
             );
 
-            console.log('🤖 Generating AI summary with OpenAI...');
             const result = await llmClient.generateText({
                model: 'gpt-4o-mini',
                prompt,
@@ -225,11 +270,15 @@ export const POST = withAuth(
                maxTokens: 500,
             });
             summary = result.text;
-            console.log('✅ AI summary generated successfully:', {
-               length: summary.length,
-            });
          } catch (error) {
+            captureException(new Error('Failed to generate AI summary'), {
+               function: 'llmClient.generateText',
+               screen: 'AiSummary',
+               request: request,
+               user: user,
+            });
             console.error('❌ Error generating AI summary:', error);
+
             return Response.json(
                {
                   error: 'Failed to generate AI summary',
@@ -246,9 +295,14 @@ export const POST = withAuth(
                validatedLeagueId.toString(),
                summary
             );
-            console.log('💾 Summary stored successfully');
          } catch (error) {
-            console.error('❌ Error storing summary:', error);
+            captureException(new Error('Failed to store summary'), {
+               function: 'storeLeagueStatsSummary',
+               screen: 'AiSummary',
+               request: request,
+               user: user,
+               error: error instanceof Error ? error.message : 'Unknown error',
+            });
             // Continue anyway - we can still return the summary even if storage fails
          }
 

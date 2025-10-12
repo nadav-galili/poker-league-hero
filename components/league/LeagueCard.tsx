@@ -48,8 +48,6 @@ const LeagueCardComponent = ({ league, onPress, onShare }: LeagueCardProps) => {
    // Mock data for statistics - you can replace with actual data from league object
    const stats = {
       members: league.memberCount || 0,
-      games: 12, // Mock data - replace with actual games count
-      wins: 5,   // Mock data - replace with actual wins count
    };
 
    return (
@@ -94,25 +92,33 @@ const LeagueCardComponent = ({ league, onPress, onShare }: LeagueCardProps) => {
                {/* Statistics Row */}
                <View className="flex-row items-center gap-4">
                   <View className="flex-row items-center gap-1">
-                     <Ionicons name="people-outline" size={16} color="#9CA3AF" />
+                     <Ionicons
+                        name="people-outline"
+                        size={16}
+                        color="#9CA3AF"
+                     />
                      <Text className="text-gray-400 text-sm">
                         {stats.members}
                      </Text>
                   </View>
 
-                  <View className="flex-row items-center gap-1">
-                     <Ionicons name="game-controller-outline" size={16} color="#9CA3AF" />
+                  {/* <View className="flex-row items-center gap-1">
+                     <Ionicons
+                        name="game-controller-outline"
+                        size={16}
+                        color="#9CA3AF"
+                     />
                      <Text className="text-gray-400 text-sm">
                         {stats.games}
                      </Text>
-                  </View>
+                  </View> */}
 
-                  <View className="flex-row items-center gap-1">
+                  {/* <View className="flex-row items-center gap-1">
                      <Ionicons name="trophy-outline" size={16} color="#9CA3AF" />
                      <Text className="text-gray-400 text-sm">
                         {stats.wins}
                      </Text>
-                  </View>
+                  </View> */}
                </View>
             </View>
 
@@ -130,7 +136,9 @@ const LeagueCardComponent = ({ league, onPress, onShare }: LeagueCardProps) => {
                      contentFit="cover"
                      cachePolicy="memory-disk"
                      priority="normal"
-                     placeholder={{ uri: 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNk+M9QDwADhgGAWjR9awAAAABJRU5ErkJggg==' }}
+                     placeholder={{
+                        uri: 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNk+M9QDwADhgGAWjR9awAAAABJRU5ErkJggg==',
+                     }}
                      placeholderContentFit="cover"
                      transition={200}
                      onError={(error) => {
@@ -158,17 +166,20 @@ const LeagueCardComponent = ({ league, onPress, onShare }: LeagueCardProps) => {
 };
 
 // Memoize the component with custom comparison function
-export const LeagueCard = React.memo(LeagueCardComponent, (prevProps, nextProps) => {
-   // Shallow comparison of league object and function references
-   return (
-      prevProps.league.id === nextProps.league.id &&
-      prevProps.league.name === nextProps.league.name &&
-      prevProps.league.code === nextProps.league.code &&
-      prevProps.league.memberCount === nextProps.league.memberCount &&
-      prevProps.league.image === nextProps.league.image &&
-      prevProps.league.themeColor === nextProps.league.themeColor &&
-      prevProps.league.accentColor === nextProps.league.accentColor &&
-      prevProps.onPress === nextProps.onPress &&
-      prevProps.onShare === nextProps.onShare
-   );
-});
+export const LeagueCard = React.memo(
+   LeagueCardComponent,
+   (prevProps, nextProps) => {
+      // Shallow comparison of league object and function references
+      return (
+         prevProps.league.id === nextProps.league.id &&
+         prevProps.league.name === nextProps.league.name &&
+         prevProps.league.code === nextProps.league.code &&
+         prevProps.league.memberCount === nextProps.league.memberCount &&
+         prevProps.league.image === nextProps.league.image &&
+         prevProps.league.themeColor === nextProps.league.themeColor &&
+         prevProps.league.accentColor === nextProps.league.accentColor &&
+         prevProps.onPress === nextProps.onPress &&
+         prevProps.onShare === nextProps.onShare
+      );
+   }
+);

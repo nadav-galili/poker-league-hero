@@ -230,9 +230,6 @@ export default function LeagueStatsScreen() {
                      <Text className="text-white mb-4 font-semibold text-xl">
                         {league.name}
                      </Text>
-                     <Text className="text-white/70 font-medium">
-                        {t('leagueStatistics')}
-                     </Text>
                   </View>
                </View>
             </View>

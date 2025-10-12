@@ -15,13 +15,14 @@ export const gameStatusEnum = pgEnum('game_status', ['active', 'completed']);
 
 export const users = pgTable('users', {
    id: integer('id').generatedAlwaysAsIdentity().primaryKey(),
-   email: varchar('email', { length: 255 }).notNull().unique(),
+   email: varchar('email', { length: 255 }).unique(),
    fullName: text('full_name').notNull(),
    firstName: varchar('first_name', { length: 100 }),
    lastName: varchar('last_name', { length: 100 }),
    profileImageUrl: text('profile_image_url'),
    googleId: varchar('google_id', { length: 50 }).unique(),
    provider: varchar('provider', { length: 20 }).notNull().default('google'),
+   isDeleted: boolean('is_deleted').notNull().default(false),
    createdAt: timestamp('created_at').defaultNow().notNull(),
    updatedAt: timestamp('updated_at').defaultNow().notNull(),
    lastLoginAt: timestamp('last_login_at'),

@@ -1,3 +1,4 @@
+import { colors } from '@/colors';
 import { LeagueCard } from '@/components/league/LeagueCard';
 import { MyLeaguesHeader } from '@/components/league/MyLeaguesHeader';
 import { InputModal } from '@/components/modals';
@@ -76,7 +77,7 @@ export default function MyLeagues() {
 
    return (
       <LinearGradient
-         colors={['#1a0033', '#0f001a', '#000000']}
+         colors={['#1a0033', '#0f001a', colors.accent]}
          style={{ flex: 1 }}
       >
          <MyLeaguesHeader
@@ -100,30 +101,32 @@ export default function MyLeagues() {
 
          {/* Leagues List */}
          {!isLoading && !error && (
-            <FlashList
-               data={leagues}
-               renderItem={renderLeagueCard}
-               keyExtractor={(item) => item.id}
-               contentContainerStyle={{
-                  padding: 20,
-               }}
-               ItemSeparatorComponent={() => <View className="h-4" />}
-               showsVerticalScrollIndicator={false}
-               refreshControl={
-                  <RefreshControl
-                     refreshing={refreshing}
-                     onRefresh={handleRefresh}
-                     colors={['#FF1493']} // Pink color for Android
-                     tintColor="#FF1493" // Pink color for iOS
-                  />
-               }
-               ListEmptyComponent={
-                  <EmptyState
-                     onCreateLeague={handleCreateLeague}
-                     onJoinLeague={handleJoinLeague}
-                  />
-               }
-            />
+            <View className="flex-1 mb-3 pb-32">
+               <FlashList
+                  data={leagues}
+                  renderItem={renderLeagueCard}
+                  keyExtractor={(item) => item.id}
+                  contentContainerStyle={{
+                     padding: 20,
+                  }}
+                  ItemSeparatorComponent={() => <View className="h-4" />}
+                  showsVerticalScrollIndicator={false}
+                  refreshControl={
+                     <RefreshControl
+                        refreshing={refreshing}
+                        onRefresh={handleRefresh}
+                        colors={['#FF1493']}
+                        tintColor="#FF1493"
+                     />
+                  }
+                  ListEmptyComponent={
+                     <EmptyState
+                        onCreateLeague={handleCreateLeague}
+                        onJoinLeague={handleJoinLeague}
+                     />
+                  }
+               />
+            </View>
          )}
 
          {/* Join League Modal */}
