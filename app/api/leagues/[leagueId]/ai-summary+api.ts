@@ -1,7 +1,6 @@
 import { getDb, games, leagueMembers, gamePlayers, cashIns } from '@/db';
-import { and, desc, eq, gte, lte, sql, sum } from 'drizzle-orm';
+import { and, eq, gte, lte, sql, sum } from 'drizzle-orm';
 import { getLeagueDetails } from '@/services/leagueUtils';
-import { llmClient } from '@/services/llmClient';
 import {
    getLeagueStatsSummary,
    storeLeagueStatsSummary,
@@ -16,12 +15,6 @@ import {
 } from '@/utils/rateLimiting';
 import { validateDatabaseId } from '@/utils/validation';
 import dayjs from 'dayjs';
-
-// Inline template for Cloudflare Workers compatibility (no filesystem access)
-const template = `Analyze the following home poker league stats into a short paragraph highlighting
-key insights:
-
-{{leagues_stats}}`;
 
 export const POST = withAuth(
    withRateLimit(async (request: Request, user) => {
@@ -210,30 +203,76 @@ export const POST = withAuth(
             );
          }
 
-         // Generate AI summary
+         // Generate summary based on league statistics (no external AI calls)
          let summary;
          try {
-            const prompt = template.replace(
-               '{{leagues_stats}}',
-               JSON.stringify(stats)
-            );
+            console.log('📝 Generating summary from league statistics...');
 
-            console.log('🤖 Generating AI summary with OpenAI...');
-            const result = await llmClient.generateText({
-               model: 'gpt-4o-mini',
-               prompt,
-               temperature: 0.2,
-               maxTokens: 500,
-            });
-            summary = result.text;
-            console.log('✅ AI summary generated successfully:', {
+            const statsData = stats.stats;
+            const insights = [];
+
+            // Generate insights based on the data
+            if (statsData.totalGames > 0) {
+               insights.push(
+                  `This league has hosted ${statsData.totalGames} games`
+               );
+
+               if (statsData.completedGames > 0) {
+                  const completionRate = Math.round(
+                     (statsData.completedGames / statsData.totalGames) * 100
+                  );
+                  insights.push(`with a ${completionRate}% completion rate`);
+               }
+            }
+
+            if (statsData.totalPlayers > 0) {
+               insights.push(
+                  `featuring ${statsData.totalPlayers} active players`
+               );
+            }
+
+            if (statsData.totalBuyIns > 0) {
+               insights.push(
+                  `Total buy-ins amount to ${statsData.totalBuyIns}`
+               );
+
+               if (statsData.totalProfit !== 0) {
+                  const profitText =
+                     statsData.totalProfit > 0
+                        ? `with a net profit of ${statsData.totalProfit}`
+                        : `with a net loss of ${Math.abs(statsData.totalProfit)}`;
+                  insights.push(profitText);
+               }
+            }
+
+            // Create a natural-sounding summary
+            if (insights.length > 0) {
+               summary = insights.join(', ') + '. ';
+
+               // Add conclusion based on activity level
+               if (statsData.totalGames >= 10) {
+                  summary +=
+                     'This shows strong league activity and player engagement.';
+               } else if (statsData.totalGames >= 5) {
+                  summary +=
+                     'The league shows moderate activity with room for growth.';
+               } else {
+                  summary +=
+                     'This is a newer league with growing participation.';
+               }
+            } else {
+               summary =
+                  'This league is just getting started with limited activity data available.';
+            }
+
+            console.log('✅ Summary generated successfully:', {
                length: summary.length,
             });
          } catch (error) {
-            console.error('❌ Error generating AI summary:', error);
+            console.error('❌ Error generating summary:', error);
             return Response.json(
                {
-                  error: 'Failed to generate AI summary',
+                  error: 'Failed to generate league summary',
                   details:
                      error instanceof Error ? error.message : 'Unknown error',
                },
