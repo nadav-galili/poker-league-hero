@@ -42,6 +42,7 @@ module.exports = ({ config }) => {
          [
             'expo-router',
             {
+               origin: 'https://poker-ai-homestack.expo.app',
                asyncRoutes: {
                   web: true,
                   default: false,
@@ -73,7 +74,7 @@ module.exports = ({ config }) => {
       },
       extra: {
          router: {
-            origin: false,
+            origin: 'https://poker-ai-homestack.expo.app',
             asyncRoutes: {
                web: true,
                default: false,
