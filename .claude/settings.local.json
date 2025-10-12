@@ -19,7 +19,13 @@
       "Bash(bun run expo export:*)",
       "Bash(eas build:*)",
       "Bash(EXPO_PLATFORM=android bun run expo export --platform android --clear)",
-      "Bash(timeout 60 eas build:*)"
+      "Bash(timeout 60 eas build:*)",
+      "Bash(npx expo export:*)",
+      "Bash(git checkout:*)",
+      "Bash(eas deploy:*)",
+      "Bash(node:*)",
+      "Bash(git add:*)",
+      "Bash(git commit:*)"
     ],
     "deny": [],
     "ask": []
