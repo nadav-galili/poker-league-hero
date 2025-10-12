@@ -301,6 +301,7 @@ export const POST = withAuth(
                screen: 'AiSummary',
                request: request,
                user: user,
+               error: error instanceof Error ? error.message : 'Unknown error',
             });
             // Continue anyway - we can still return the summary even if storage fails
          }

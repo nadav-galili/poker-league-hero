@@ -4,11 +4,13 @@ import { useLocalization } from '@/context/localization';
 import { Ionicons } from '@expo/vector-icons';
 import { Image } from 'expo-image';
 import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
+import { useRouter } from 'expo-router';
 
 export default function Account() {
    const theme = getTheme('light');
    const { user, signOut } = useAuth();
    const { t, isRTL } = useLocalization();
+   const router = useRouter();
 
    if (!user) {
       return (
@@ -139,6 +141,33 @@ export default function Account() {
                      style={[styles.actionBorder, { borderColor: colors.text }]}
                   />
                </Pressable>
+            </View>
+
+            {/* Legal Links */}
+            <View className="gap-4">
+               <Text className="text-2xl font-bold text-success">
+                  Legal
+               </Text>
+
+               <View className="gap-2">
+                  <Pressable
+                     onPress={() => router.push('/terms')}
+                     className="rounded-xl border-2 border-primary p-4 active:opacity-70"
+                  >
+                     <Text className="text-base text-white">
+                        Terms of Service
+                     </Text>
+                  </Pressable>
+
+                  <Pressable
+                     onPress={() => router.push('/privacy')}
+                     className="rounded-xl border-2 border-primary p-4 active:opacity-70"
+                  >
+                     <Text className="text-base text-white">
+                        Privacy Policy
+                     </Text>
+                  </Pressable>
+               </View>
             </View>
 
             {/* User Details */}
