@@ -10,6 +10,7 @@ import { AppButton } from '@/components/ui/AppButton';
 import { BASE_URL } from '@/constants';
 import { useAuth } from '@/context/auth';
 import { useLocalization } from '@/context/localization';
+import { captureException } from '@/utils/sentry';
 import { Ionicons } from '@expo/vector-icons';
 import { Image } from 'expo-image';
 import * as ImagePicker from 'expo-image-picker';
@@ -203,7 +204,10 @@ export default function CreateLeague() {
          });
          router.back();
       } catch (error) {
-         console.error('Failed to create league', error);
+         captureException(error as Error, {
+            function: 'handleCreateLeague',
+            screen: 'CreateLeague',
+         });
          Toast.show({
             type: 'error',
             text1: t('error'),
@@ -231,7 +235,10 @@ export default function CreateLeague() {
             setFormData({ ...formData, image: result.assets[0].uri });
          }
       } catch (error) {
-         console.error('Error picking image:', error);
+         captureException(error as Error, {
+            function: 'pickImage',
+            screen: 'CreateLeague',
+         });
          Toast.show({
             type: 'error',
             text1: t('error'),
@@ -255,10 +262,10 @@ export default function CreateLeague() {
                <Ionicons
                   name={isRTL ? 'arrow-forward' : 'arrow-back'}
                   size={24}
-                  color={colors.textInverse}
+                  color={colors.text}
                />
             </TouchableOpacity>
-            <Text style={[styles.headerTitle, { color: colors.textInverse }]}>
+            <Text style={[styles.headerTitle, { color: colors.text }]}>
                {t('createLeague')}
             </Text>
             <View style={styles.placeholder} />
@@ -325,8 +332,8 @@ export default function CreateLeague() {
                         style={[
                            styles.imagePickerButton,
                            {
-                              backgroundColor: colors.highlightTint,
-                              borderColor: colors.highlight,
+                              backgroundColor: colors.text,
+                              borderColor: colors.text,
                            },
                         ]}
                         onPress={pickImage}
@@ -334,12 +341,12 @@ export default function CreateLeague() {
                         <Ionicons
                            name="camera"
                            size={32}
-                           color={colors.highlight}
+                           color={colors.backgroundGradientEnd}
                         />
                         <Text
                            style={[
                               styles.imagePickerText,
-                              { color: colors.highlight },
+                              { color: colors.backgroundGradientEnd },
                            ]}
                         >
                            {t('selectImage')}
@@ -354,8 +361,7 @@ export default function CreateLeague() {
                <AppButton
                   title={t('createLeagueButton')}
                   onPress={handleCreateLeague}
-                  bgColor={colors.primary}
-                  textColor={colors.textInverse}
+                  color="success"
                   width="100%"
                   icon="add-circle"
                />
@@ -467,7 +473,7 @@ const styles = StyleSheet.create({
       position: 'absolute',
       top: -8,
       right: -8,
-      backgroundColor: colors.background,
+      backgroundColor: colors.text,
       borderRadius: 12,
       borderWidth: 2,
       borderColor: colors.border,

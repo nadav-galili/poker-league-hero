@@ -122,11 +122,6 @@ export async function createLeague(data: {
    image?: string;
    adminUserEmail: string;
 }): Promise<any> {
-   console.log('createLeague called with:', {
-      ...data,
-      image: data.image ? 'present' : 'none',
-   });
-
    const db = getDb();
 
    // Get user id from email
@@ -152,8 +147,7 @@ export async function createLeague(data: {
    }
 
    if (!imageUrl) {
-      imageUrl =
-         'https://pub-6908906fe4c24b7b82ff61e803190c28.r2.dev/Gemini_Generated_Image_70gku770gku770gk.png';
+      imageUrl = 'https://pub-6908906fe4c24b7b82ff61e803190c28.r2.dev/icon.png';
    }
 
    data.image = imageUrl;
