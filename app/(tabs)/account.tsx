@@ -3,14 +3,67 @@ import { useAuth } from '@/context/auth';
 import { useLocalization } from '@/context/localization';
 import { Ionicons } from '@expo/vector-icons';
 import { Image } from 'expo-image';
-import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
+import { Alert, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { useRouter } from 'expo-router';
+import { useState } from 'react';
 
 export default function Account() {
    const theme = getTheme('light');
-   const { user, signOut } = useAuth();
-   const { t, isRTL } = useLocalization();
+   const { user, signOut, fetchWithAuth } = useAuth();
+   const { t } = useLocalization();
    const router = useRouter();
+   const [isDeletingData, setIsDeletingData] = useState(false);
+
+   const handleDeleteData = () => {
+      Alert.alert(
+         'Delete Your Data',
+         'This will permanently delete all your personal information (name, email, profile picture) from HomeStack. Your game statistics will be preserved but will show as "Anonymous Player". This action cannot be undone.\n\nAre you sure you want to continue?',
+         [
+            {
+               text: 'Cancel',
+               style: 'cancel',
+            },
+            {
+               text: 'Delete My Data',
+               style: 'destructive',
+               onPress: async () => {
+                  setIsDeletingData(true);
+                  try {
+                     const response = await fetchWithAuth('/api/user/delete', {
+                        method: 'PUT',
+                        headers: {
+                           'Content-Type': 'application/json',
+                        },
+                     });
+
+                     if (!response.ok) {
+                        throw new Error('Failed to delete data');
+                     }
+
+                     Alert.alert(
+                        'Data Deleted',
+                        'Your personal data has been successfully deleted. You will be signed out now.',
+                        [
+                           {
+                              text: 'OK',
+                              onPress: () => signOut(),
+                           },
+                        ]
+                     );
+                  } catch (error) {
+                     console.error('Error deleting data:', error);
+                     Alert.alert(
+                        'Error',
+                        'Failed to delete your data. Please try again later or contact support.'
+                     );
+                  } finally {
+                     setIsDeletingData(false);
+                  }
+               },
+            },
+         ]
+      );
+   };
 
    if (!user) {
       return (
@@ -166,6 +219,24 @@ export default function Account() {
                      <Text className="text-base text-white">
                         Privacy Policy
                      </Text>
+                  </Pressable>
+
+                  <Pressable
+                     onPress={handleDeleteData}
+                     disabled={isDeletingData}
+                     className="rounded-xl border-2 border-error p-3 active:opacity-70 mt-4"
+                     style={{ opacity: isDeletingData ? 0.6 : 1 }}
+                  >
+                     <View className="flex-row items-center justify-center gap-2">
+                        <Ionicons
+                           name="trash-outline"
+                           size={16}
+                           color="#ef4444"
+                        />
+                        <Text className="text-sm text-error font-semibold">
+                           {isDeletingData ? 'Deleting Data...' : 'Delete My Data'}
+                        </Text>
+                     </View>
                   </Pressable>
                </View>
             </View>
