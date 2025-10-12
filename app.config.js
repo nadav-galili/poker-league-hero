@@ -86,7 +86,7 @@ module.exports = ({ config }) => {
       },
       web: {
          bundler: 'metro',
-         output: 'server',
+         output: 'server', // Force server-side rendering
          favicon: './assets/images/icon.png',
       },
    };
