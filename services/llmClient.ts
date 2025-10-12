@@ -1,5 +1,3 @@
-import OpenAI from 'openai';
-
 type GenerateTextOptions = {
    model?: string;
    prompt: string;
@@ -13,6 +11,7 @@ type GenerateTextResult = {
    text: string;
 };
 
+// Use native fetch API for Cloudflare Workers compatibility
 export const llmClient = {
    async generateText({
       model = 'gpt-4o-mini',
@@ -26,9 +25,7 @@ export const llmClient = {
          throw new Error('OPENAI_API_KEY environment variable is required');
       }
 
-      const client = new OpenAI({
-         apiKey,
-      });
+      console.log('🤖 Making OpenAI API request with native fetch...');
 
       const messages = [
          {
@@ -44,18 +41,47 @@ export const llmClient = {
          });
       }
 
-      const response = await client.chat.completions.create({
-         model,
-         messages,
-         temperature,
-         max_tokens: maxTokens,
-      });
+      try {
+         const response = await fetch(
+            'https://api.openai.com/v1/chat/completions',
+            {
+               method: 'POST',
+               headers: {
+                  'Content-Type': 'application/json',
+                  Authorization: `Bearer ${apiKey}`,
+               },
+               body: JSON.stringify({
+                  model,
+                  messages,
+                  temperature,
+                  max_tokens: maxTokens,
+               }),
+            }
+         );
 
-      const content = response.choices[0]?.message?.content || '';
+         if (!response.ok) {
+            const errorText = await response.text();
+            console.error('❌ OpenAI API error:', response.status, errorText);
+            throw new Error(
+               `OpenAI API error: ${response.status} ${errorText}`
+            );
+         }
 
-      return {
-         id: response.id,
-         text: content,
-      };
+         const data = await response.json();
+         console.log('✅ OpenAI API response received:', {
+            id: data.id,
+            contentLength: data.choices?.[0]?.message?.content?.length || 0,
+         });
+
+         const content = data.choices?.[0]?.message?.content || '';
+
+         return {
+            id: data.id || 'unknown',
+            text: content,
+         };
+      } catch (error) {
+         console.error('❌ Error in OpenAI fetch call:', error);
+         throw error;
+      }
    },
 };

@@ -24,6 +24,8 @@ key insights:
 
 export const POST = withAuth(
    withRateLimit(async (request: Request, user) => {
+      let validatedLeagueId: number | null | undefined;
+      let targetYear: number | undefined;
       try {
          const securityCheck = validateRequestSecurity(request);
          if (!securityCheck.valid) {
@@ -56,7 +58,7 @@ export const POST = withAuth(
             );
          }
 
-         const validatedLeagueId = validateDatabaseId(leagueId);
+         validatedLeagueId = validateDatabaseId(leagueId);
          if (!validatedLeagueId) {
             return secureResponse(
                { error: 'Invalid league ID format' },
@@ -91,7 +93,7 @@ export const POST = withAuth(
                year = parsedYear;
             }
          }
-         const targetYear = year || dayjs().year();
+         targetYear = year || dayjs().year();
 
          const body = await request?.json();
          if (body.createSummary) {
