@@ -67,7 +67,7 @@ export const createStatCards = (
       title: t('avgGameDuration'),
       value: formatDuration(stats.averageGameDuration),
       icon: 'time',
-      color: colors.highlight,
+      color: colors.primary,
       subtitle: t('perGame'),
    },
 ];

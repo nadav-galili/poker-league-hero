@@ -29,6 +29,10 @@ export function useMyLeagues() {
    const [error, setError] = React.useState<string | null>(null);
    const [refreshing, setRefreshing] = React.useState(false);
 
+   // Modal state for joining league
+   const [joinModalVisible, setJoinModalVisible] = React.useState(false);
+   const [joinCode, setJoinCode] = React.useState('');
+
    // Function to load leagues with abort controller for cleanup
    const loadLeagues = React.useCallback(
       async (abortSignal?: AbortSignal, isRefresh = false) => {
@@ -127,21 +131,10 @@ export function useMyLeagues() {
    }, [t, track]);
 
    const handleJoinLeague = React.useCallback(() => {
+      console.log('🔵 handleJoinLeague called');
       try {
-         Alert.prompt(
-            t('joinLeague'),
-            t('enterLeagueCode'),
-            [
-               { text: t('cancel'), style: 'cancel' },
-               {
-                  text: t('join'),
-                  onPress: async (code) => {
-                     await handleJoinLeagueWithCode(code);
-                  },
-               },
-            ],
-            'plain-text'
-         );
+         setJoinCode('');
+         setJoinModalVisible(true);
       } catch (error) {
          captureException(error as Error, {
             function: 'handleJoinLeague',
@@ -150,6 +143,11 @@ export function useMyLeagues() {
          Alert.alert(t('error'), 'Failed to open join league dialog');
       }
    }, [t]);
+
+   const handleCloseJoinModal = React.useCallback(() => {
+      setJoinModalVisible(false);
+      setJoinCode('');
+   }, []);
 
    const handleJoinLeagueWithCode = React.useCallback(
       async (code?: string) => {
@@ -215,6 +213,16 @@ export function useMyLeagues() {
       [fetchWithAuth, t, loadLeagues, trackLeagueEvent]
    );
 
+   const handleSubmitJoinCode = React.useCallback(async () => {
+      if (!joinCode.trim()) {
+         return;
+      }
+
+      setJoinModalVisible(false);
+      await handleJoinLeagueWithCode(joinCode);
+      setJoinCode('');
+   }, [joinCode, handleJoinLeagueWithCode]);
+
    const handleShareLeague = React.useCallback(
       async (league: LeagueWithTheme) => {
          const result = await shareLeague(league, t);
@@ -278,6 +286,12 @@ export function useMyLeagues() {
          handleShareLeague,
          handleLeaguePress,
          handleRefresh,
+         // Join modal state
+         joinModalVisible,
+         joinCode,
+         setJoinCode,
+         handleCloseJoinModal,
+         handleSubmitJoinCode,
       }),
       [
          leagues,
@@ -290,6 +304,10 @@ export function useMyLeagues() {
          handleShareLeague,
          handleLeaguePress,
          handleRefresh,
+         joinModalVisible,
+         joinCode,
+         handleCloseJoinModal,
+         handleSubmitJoinCode,
       ]
    );
 }

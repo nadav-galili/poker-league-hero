@@ -1,10 +1,9 @@
 import { colors, getTheme } from '@/colors';
-import { Text } from '@/components/Text';
 import { useAuth } from '@/context/auth';
 import { useLocalization } from '@/context/localization';
 import { Ionicons } from '@expo/vector-icons';
 import { Image } from 'expo-image';
-import { Pressable, ScrollView, StyleSheet, View } from 'react-native';
+import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 
 export default function Account() {
    const theme = getTheme('light');
@@ -25,20 +24,12 @@ export default function Account() {
                   },
                ]}
             >
-               <Text
-                  variant="h1"
-                  color={theme.text}
-                  style={[styles.headerTitle, isRTL && styles.rtlText]}
-               >
+               <Text className="text-2xl font-bold text-success">
                   {t('account')}
                </Text>
             </View>
             <View style={styles.content}>
-               <Text
-                  variant="body"
-                  color={colors.border}
-                  style={styles.placeholder}
-               >
+               <Text className="text-base text-white">
                   Please sign in to view account details
                </Text>
             </View>
@@ -47,27 +38,15 @@ export default function Account() {
    }
 
    return (
-      <View style={[styles.container, { backgroundColor: theme.background }]}>
-         <View
-            style={[
-               styles.header,
-               {
-                  backgroundColor: theme.surface,
-                  borderBottomColor: theme.border,
-               },
-            ]}
-         >
-            <Text
-               variant="h1"
-               color={theme.text}
-               style={[styles.headerTitle, isRTL && styles.rtlText]}
-            >
+      <View className="flex-1 bg-background">
+         <View className="p-4 border-b-4 border-primary shadow-shadow shadow-lg ">
+            <Text className="text-2xl font-bold text-success">
                {t('account')}
             </Text>
          </View>
 
          <ScrollView
-            style={styles.scrollContainer}
+            className="flex-1"
             contentContainerStyle={styles.content}
             showsVerticalScrollIndicator={false}
          >
@@ -107,11 +86,7 @@ export default function Account() {
                {/* User Info */}
                <View style={styles.userInfo}>
                   <View style={styles.nameContainer}>
-                     <Text
-                        variant="h3"
-                        color={theme.text}
-                        style={styles.userName}
-                     >
+                     <Text className="text-xl font-bold text-success">
                         {user.name || 'Unknown User'}
                      </Text>
                      <View
@@ -124,11 +99,7 @@ export default function Account() {
 
                   <View style={styles.emailContainer}>
                      <Ionicons name="mail" size={16} color={colors.info} />
-                     <Text
-                        variant="body"
-                        color={colors.border}
-                        style={styles.userEmail}
-                     >
+                     <Text className="text-base text-white">
                         {user.email || 'No email'}
                      </Text>
                   </View>
@@ -140,13 +111,7 @@ export default function Account() {
                            size={16}
                            color={colors.primary}
                         />
-                        <Text
-                           variant="labelSmall"
-                           color={colors.primary}
-                           style={styles.verifiedText}
-                        >
-                           VERIFIED
-                        </Text>
+                        <Text className="text-sm text-white">VERIFIED</Text>
                      </View>
                   )}
                </View>
@@ -154,32 +119,19 @@ export default function Account() {
 
             {/* Account Actions */}
             <View className="gap-4">
-               <Text
-                  variant="h4"
-                  color={theme.text}
-                  style={[styles.sectionTitle, isRTL && styles.rtlText]}
-               >
+               <Text className="text-2xl font-bold text-success">
                   {t('accountActions')}
                </Text>
 
                <Pressable
-                  className="rounded-xl border-3 border-primary shadow-shadow shadow-lg active:scale-95 bg-danger"
+                  className="rounded-xl border-3 border-primary shadow-shadow shadow-lg active:scale-95 bg-error overflow-hidden"
                   onPress={signOut}
                >
-                  <View style={styles.actionContent}>
-                     <View
-                        style={[
-                           styles.actionIcon,
-                           { backgroundColor: 'rgba(255,255,255,0.2)' },
-                        ]}
-                     >
+                  <View className="flex-row items-center justify-center gap-4 py-5 px-8 border-4 border-primary overflow-hidden">
+                     <View className="w-10 h-10 rounded-xl items-center justify-center mr-3 bg-white/10 border border-white/20">
                         <Ionicons name="log-out" size={20} color="#FFFFFF" />
                      </View>
-                     <Text
-                        variant="button"
-                        color="#FFFFFF"
-                        style={[styles.actionText, isRTL && styles.rtlText]}
-                     >
+                     <Text className="text-base text-white">
                         {t('signOut')}
                      </Text>
                   </View>

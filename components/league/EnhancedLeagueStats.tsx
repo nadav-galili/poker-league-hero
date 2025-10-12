@@ -90,6 +90,29 @@ export default function EnhancedLeagueStatsScreen() {
       };
    }, [isLoading, league, stats, headerAnim, contentAnim]);
 
+   // Memoize expensive stats calculations to prevent unnecessary re-renders
+   // Note: These must be called before any early returns to comply with React Hooks rules
+   const transformedStats = useMemo(() => ({
+      totalGames: stats?.totalGames || 0,
+      totalPlayers: stats?.totalPlayers || 0,
+      totalBuyIns: stats?.totalBuyIns || 0,
+      averageBuyIn: stats?.averageBuyIn || 0,
+      totalProfit: stats?.totalProfit || 0,
+      averageGameDuration: stats?.averageGameDuration || 0,
+      winRate: stats?.winRate || 0,
+      biggestPot: stats?.biggestPot || 0,
+   }), [stats]);
+
+   const playerComparisonData = useMemo(() => {
+      if (!stats?.playerStats || stats.playerStats.length === 0) return [];
+
+      return [
+         { label: 'Most Wins', value: Math.max(...stats.playerStats.map(p => p.wins || 0)), color: theme.success },
+         { label: 'Best Profit', value: Math.max(...stats.playerStats.map(p => p.totalProfit || 0)), color: theme.primary },
+         { label: 'Games Played', value: Math.max(...stats.playerStats.map(p => p.gamesPlayed || 0)), color: theme.accent },
+      ];
+   }, [stats?.playerStats, theme]);
+
    if (isLoading) {
       return <LoadingState message="Loading league statistics..." />;
    }
@@ -126,28 +149,6 @@ export default function EnhancedLeagueStatsScreen() {
          </View>
       );
    }
-
-   // Memoize expensive stats calculations to prevent unnecessary re-renders
-   const transformedStats = useMemo(() => ({
-      totalGames: stats?.totalGames || 0,
-      totalPlayers: stats?.totalPlayers || 0,
-      totalBuyIns: stats?.totalBuyIns || 0,
-      averageBuyIn: stats?.averageBuyIn || 0,
-      totalProfit: stats?.totalProfit || 0,
-      averageGameDuration: stats?.averageGameDuration || 0,
-      winRate: stats?.winRate || 0,
-      biggestPot: stats?.biggestPot || 0,
-   }), [stats]);
-
-   const playerComparisonData = useMemo(() => {
-      if (!stats?.playerStats || stats.playerStats.length === 0) return [];
-
-      return [
-         { label: 'Most Wins', value: Math.max(...stats.playerStats.map(p => p.wins || 0)), color: theme.success },
-         { label: 'Best Profit', value: Math.max(...stats.playerStats.map(p => p.totalProfit || 0)), color: theme.primary },
-         { label: 'Games Played', value: Math.max(...stats.playerStats.map(p => p.gamesPlayed || 0)), color: theme.accent },
-      ];
-   }, [stats?.playerStats, theme]);
 
    return (
       <View style={{ flex: 1, backgroundColor: theme.background }}>

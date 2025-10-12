@@ -28,7 +28,7 @@ const PlayerCard: React.FC<PlayerCardProps> = ({
    const { t } = useLocalization();
 
    return (
-      <View className="p-4 rounded-xl  shadow-sm elevation-4 border-2 border-primary bg-[#60A5FA]">
+      <View className="p-4 rounded-xl  shadow-sm elevation-4 border-2 border-primary bg-primary">
          {/* Player Info */}
          <View className="flex-row items-center mb-3">
             <Image

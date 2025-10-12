@@ -80,6 +80,7 @@ export interface Translations {
    backToLeagues: string;
    leagueImage: string;
    selectImage: string;
+   uploadingImage: string;
 
    // New Screens
    games: string;
@@ -272,6 +273,7 @@ const enTranslations: Translations = {
    backToLeagues: 'Back to Leagues',
    leagueImage: 'League Image',
    selectImage: 'Select Image',
+   uploadingImage: 'Uploading Image',
 
    // New Screens
    games: 'GAMES',
@@ -467,6 +469,7 @@ const heTranslations: Translations = {
    backToLeagues: 'חזור לליגות',
    leagueImage: 'תמונת הליגה',
    selectImage: 'בחר תמונה',
+   uploadingImage: 'מעלה תמונה',
 
    // New Screens
    games: 'משחקים',

@@ -1,4 +1,5 @@
-import { getGeneralLeagueStats } from '@/services/leagueStatsApiService';
+import { getDb, games, leagueMembers, gamePlayers, cashIns } from '@/db';
+import { and, eq, gte, lte, sql, sum } from 'drizzle-orm';
 import { getLeagueDetails } from '@/services/leagueUtils';
 import { llmClient } from '@/services/llmClient';
 import {
@@ -15,16 +16,16 @@ import {
 } from '@/utils/rateLimiting';
 import { validateDatabaseId } from '@/utils/validation';
 import dayjs from 'dayjs';
-import { readFileSync } from 'fs';
-import { join } from 'path';
 
-const template = readFileSync(
-   join(process.cwd(), 'app/api/llm/prompts/summarize-leagues.txt'),
-   'utf-8'
-);
+// Template for AI summary generation
+const template = `Analyze the following home poker league stats into a short paragraph highlighting key insights:
+
+{{leagues_stats}}`;
 
 export const POST = withAuth(
    withRateLimit(async (request: Request, user) => {
+      let validatedLeagueId: number | null | undefined;
+      let targetYear: number | undefined;
       try {
          const securityCheck = validateRequestSecurity(request);
          if (!securityCheck.valid) {
@@ -57,7 +58,7 @@ export const POST = withAuth(
             );
          }
 
-         const validatedLeagueId = validateDatabaseId(leagueId);
+         validatedLeagueId = validateDatabaseId(leagueId);
          if (!validatedLeagueId) {
             return secureResponse(
                { error: 'Invalid league ID format' },
@@ -92,7 +93,7 @@ export const POST = withAuth(
                year = parsedYear;
             }
          }
-         const targetYear = year || dayjs().year();
+         targetYear = year || dayjs().year();
 
          const body = await request?.json();
          if (body.createSummary) {
@@ -104,37 +105,174 @@ export const POST = withAuth(
             return Response.json({ summary: existingSummary });
          }
 
-         const statsResponse = await getGeneralLeagueStats(
-            validatedLeagueId.toString(),
-            targetYear
-         );
-         const stats = await statsResponse.json();
+         // Fetch league statistics directly from database (avoid HTTP subrequests)
+         let stats;
+         try {
+            const db = getDb();
+            const yearStart = dayjs().year(targetYear).startOf('year').toDate();
+            const yearEnd = dayjs().year(targetYear).endOf('year').toDate();
+
+            console.log('📊 Fetching league stats directly from database...');
+
+            const totalGamesResult = await db
+               .select({ count: sql<number>`count(*)` })
+               .from(games)
+               .where(
+                  and(
+                     eq(games.leagueId, validatedLeagueId),
+                     gte(games.startedAt, yearStart),
+                     lte(games.startedAt, yearEnd)
+                  )
+               );
+
+            const completedGamesResult = await db
+               .select({ count: sql<number>`count(*)` })
+               .from(games)
+               .where(
+                  and(
+                     eq(games.leagueId, validatedLeagueId),
+                     eq(games.status, 'completed'),
+                     gte(games.startedAt, yearStart),
+                     lte(games.startedAt, yearEnd)
+                  )
+               );
+
+            const totalPlayersResult = await db
+               .select({ count: sql<number>`count(*)` })
+               .from(leagueMembers)
+               .where(
+                  and(
+                     eq(leagueMembers.leagueId, validatedLeagueId),
+                     eq(leagueMembers.isActive, true)
+                  )
+               );
+
+            const profitResult = await db
+               .select({
+                  totalBuyIns: sum(cashIns.amount).as('total_buy_ins'),
+                  totalBuyOuts:
+                     sql<number>`sum(case when ${cashIns.type} = 'buy_out' then ${cashIns.amount} else 0 end)`.as(
+                        'total_buy_outs'
+                     ),
+               })
+               .from(cashIns)
+               .innerJoin(gamePlayers, eq(cashIns.gamePlayerId, gamePlayers.id))
+               .innerJoin(games, eq(gamePlayers.gameId, games.id))
+               .where(
+                  and(
+                     eq(games.leagueId, validatedLeagueId),
+                     eq(games.status, 'completed'),
+                     gte(games.endedAt, yearStart),
+                     lte(games.endedAt, yearEnd)
+                  )
+               );
+
+            stats = {
+               stats: {
+                  totalGames: totalGamesResult[0]?.count || 0,
+                  completedGames: completedGamesResult[0]?.count || 0,
+                  totalPlayers: totalPlayersResult[0]?.count || 0,
+                  totalProfit:
+                     (profitResult[0]?.totalBuyOuts || 0) -
+                     (profitResult[0]?.totalBuyIns || 0),
+                  totalBuyIns: profitResult[0]?.totalBuyIns || 0,
+                  totalBuyOuts: profitResult[0]?.totalBuyOuts || 0,
+               },
+            };
+
+            console.log('📊 Stats fetched successfully:', {
+               hasStats: !!stats,
+               totalGames: stats?.stats?.totalGames,
+            });
+         } catch (error) {
+            console.error('❌ Error fetching league stats:', error);
+            return Response.json(
+               {
+                  error: 'Failed to fetch league statistics',
+                  details:
+                     error instanceof Error ? error.message : 'Unknown error',
+               },
+               { status: 500 }
+            );
+         }
+
          if (!stats?.stats?.totalGames) {
+            console.log(
+               '⚠️ No games found for league:',
+               validatedLeagueId,
+               'year:',
+               targetYear
+            );
             return Response.json(
                { error: 'No games played in this year' },
                { status: 400 }
             );
          }
 
-         const prompt = template.replace(
-            '{{leagues_stats}}',
-            JSON.stringify(stats)
-         );
+         // Generate AI summary using OpenAI (with direct database stats, no HTTP subrequests)
+         let summary;
+         try {
+            const prompt = template.replace(
+               '{{leagues_stats}}',
+               JSON.stringify(stats)
+            );
 
-         const { text: summary } = await llmClient.generateText({
-            model: 'gpt-4o-mini',
-            prompt,
-            temperature: 0.2,
-            maxTokens: 500,
-         });
+            console.log('🤖 Generating AI summary with OpenAI...');
+            const result = await llmClient.generateText({
+               model: 'gpt-4o-mini',
+               prompt,
+               temperature: 0.2,
+               maxTokens: 500,
+            });
+            summary = result.text;
+            console.log('✅ AI summary generated successfully:', {
+               length: summary.length,
+            });
+         } catch (error) {
+            console.error('❌ Error generating AI summary:', error);
+            return Response.json(
+               {
+                  error: 'Failed to generate AI summary',
+                  details:
+                     error instanceof Error ? error.message : 'Unknown error',
+               },
+               { status: 500 }
+            );
+         }
 
-         await storeLeagueStatsSummary(validatedLeagueId.toString(), summary);
+         // Store summary in database
+         try {
+            await storeLeagueStatsSummary(
+               validatedLeagueId.toString(),
+               summary
+            );
+            console.log('💾 Summary stored successfully');
+         } catch (error) {
+            console.error('❌ Error storing summary:', error);
+            // Continue anyway - we can still return the summary even if storage fails
+         }
+
          return Response.json({ summary: summary });
       } catch (error) {
-         console.error('Error fetching league stats summary:', error);
+         console.error('❌ Unexpected error in AI summary endpoint:', error);
+         const errorMessage =
+            error instanceof Error ? error.message : 'Unknown error';
+         const errorStack = error instanceof Error ? error.stack : '';
+
+         console.error('Error details:', {
+            message: errorMessage,
+            stack: errorStack,
+            leagueId: validatedLeagueId,
+            year: targetYear,
+         });
+
          return secureResponse(
-            { error: 'Failed to fetch league statistics summary' },
-            { status: 400 }
+            {
+               error: 'Failed to fetch league statistics summary',
+               details: errorMessage,
+               timestamp: new Date().toISOString(),
+            },
+            { status: 500 }
          );
       }
    }, 'general')

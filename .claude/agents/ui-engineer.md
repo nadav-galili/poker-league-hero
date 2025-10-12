@@ -1,7 +1,7 @@
 ---
 name: ui-engineer
 description: use this agent for design ui ux tasks
-model: sonnet
+model: haiku
 color: cyan
 ---
 

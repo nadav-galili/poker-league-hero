@@ -196,13 +196,19 @@ export async function fetchUserLeagues(
    abortSignal?: AbortSignal
 ): Promise<League[]> {
    try {
-      const response = await fetchWithAuth(`${BASE_URL}/api/leagues/user`, {
+      const options: RequestInit = {
          method: 'GET',
          headers: {
             'Content-Type': 'application/json',
          },
-         signal: abortSignal,
-      });
+      };
+      if (abortSignal) {
+         options.signal = abortSignal;
+      }
+      const response = await fetchWithAuth(
+         `${BASE_URL}/api/leagues/user`,
+         options
+      );
 
       if (!response.ok) {
          const errorData = await response.json();
