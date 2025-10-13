@@ -12,6 +12,8 @@ import {
 } from '@/constants';
 
 import * as jose from 'jose';
+import { getDb, users } from '@/db';
+import { eq } from 'drizzle-orm';
 
 export async function POST(request: Request) {
    try {
@@ -51,10 +53,6 @@ export async function POST(request: Request) {
       // Insert/update user in database
       let dbUserId: number | null = null;
       try {
-         // Import database functions directly
-         const { getDb, users } = await import('../../../db');
-         const { eq } = await import('drizzle-orm');
-
          const db = getDb();
 
          // Check if user exists

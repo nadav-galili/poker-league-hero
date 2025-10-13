@@ -7,16 +7,23 @@ import {
 import { LoadingState } from '@/components/shared/LoadingState';
 import { Text } from '@/components/Text';
 import { AppButton } from '@/components/ui/AppButton';
-import { BASE_URL } from '@/constants';
+// BASE_URL import removed - using relative URLs with fetchWithAuth
 import { useAuth } from '@/context/auth';
 import { useLocalization } from '@/context/localization';
 import { captureException } from '@/utils/sentry';
 import { Ionicons } from '@expo/vector-icons';
+import * as FileSystem from 'expo-file-system';
 import { Image } from 'expo-image';
 import * as ImagePicker from 'expo-image-picker';
 import { router } from 'expo-router';
 import React, { useCallback, useState } from 'react';
-import { ScrollView, StyleSheet, TouchableOpacity, View } from 'react-native';
+import {
+   Platform,
+   ScrollView,
+   StyleSheet,
+   TouchableOpacity,
+   View,
+} from 'react-native';
 import Toast from 'react-native-toast-message';
 
 export default function CreateLeague() {
@@ -91,8 +98,15 @@ export default function CreateLeague() {
    }, [formData.name, validateLeagueName]);
    const handleCreateLeague = async () => {
       try {
+         console.log('🏆 Starting league creation...');
          setIsLoading(true);
+
          if (!user) {
+            console.log('❌ No user found');
+            captureException(new Error('No user found when creating league'), {
+               function: 'handleCreateLeague',
+               screen: 'CreateLeague',
+            });
             Toast.show({
                type: 'error',
                text1: t('error'),
@@ -101,8 +115,17 @@ export default function CreateLeague() {
             return;
          }
 
+         console.log('✅ User found:', { email: user.email, id: user.id });
+
          // Validate form before submission
          if (!validateForm()) {
+            console.log('❌ Form validation failed');
+            captureException(new Error('Form validation failed'), {
+               function: 'handleCreateLeague',
+               screen: 'CreateLeague',
+               formData: { name: formData.name, hasImage: !!formData.image },
+               errors,
+            });
             Toast.show({
                type: 'error',
                text1: t('error'),
@@ -111,50 +134,139 @@ export default function CreateLeague() {
             return;
          }
 
+         console.log('✅ Form validation passed');
          formData.adminUserEmail = user.email;
 
          // Upload image to R2 if it's a local file path
          let imageUrl = formData.image;
+         console.log('🖼️ Image handling:', { originalImage: imageUrl });
+
          if (imageUrl && imageUrl.startsWith('file://')) {
             try {
+               console.log('📤 Starting image upload...');
                Toast.show({
                   type: 'info',
                   text1: t('uploadingImage'),
                   text2: 'Please wait...',
                });
 
-               // Create FormData for image upload
+               // Convert URI to blob for EAS Hosting compatibility
                const uploadFormData = new FormData();
-               uploadFormData.append('file', {
-                  uri: imageUrl,
-                  type: 'image/jpeg',
-                  name: 'league-image.jpg',
-               } as any);
+               console.log('📤 Preparing file upload for:', imageUrl);
+               console.log('📱 Platform:', Platform.OS);
+
+               try {
+                  let fileBlob: Blob;
+
+                  // Android/iOS: Use FileSystem to read file
+                  if (Platform.OS === 'android' || Platform.OS === 'ios') {
+                     console.log(
+                        '📱 Reading file using FileSystem (Mobile)...'
+                     );
+
+                     // Use the new FileSystem API with File class
+                     const file = new FileSystem.File(imageUrl);
+
+                     console.log('📱 Reading file as ArrayBuffer...');
+
+                     // Read file as ArrayBuffer and convert to Blob
+                     const arrayBuffer = await file.arrayBuffer();
+                     fileBlob = new Blob([arrayBuffer], { type: 'image/jpeg' });
+
+                     console.log('📱 Blob created:', {
+                        size: fileBlob.size,
+                        type: fileBlob.type,
+                     });
+                  } else {
+                     // Web: Use fetch
+                     console.log('🌐 Reading file using fetch (Web)...');
+                     const fileResponse = await fetch(imageUrl);
+                     if (!fileResponse.ok) {
+                        throw new Error(
+                           `Failed to read file: ${fileResponse.status}`
+                        );
+                     }
+                     fileBlob = await fileResponse.blob();
+                     console.log('🌐 Blob created:', {
+                        size: fileBlob.size,
+                        type: fileBlob.type,
+                     });
+                  }
+
+                  // Validate blob size
+                  if (fileBlob.size === 0) {
+                     throw new Error('File is empty after reading');
+                  }
+
+                  // Append the actual file content as a blob
+                  uploadFormData.append('file', fileBlob, 'league-image.jpg');
+                  console.log('📤 FormData prepared with blob content');
+               } catch (fileReadError) {
+                  console.error(
+                     '❌ Failed to read file content:',
+                     fileReadError
+                  );
+                  captureException(fileReadError as Error, {
+                     function: 'handleCreateLeague',
+                     screen: 'CreateLeague',
+                     step: 'file_read',
+                     platform: Platform.OS,
+                     originalImageUri: imageUrl,
+                  });
+                  throw new Error(
+                     `Cannot read selected image: ${fileReadError instanceof Error ? fileReadError.message : 'Unknown error'}`
+                  );
+               }
+
+               console.log('📤 Uploading to: /api/upload/image');
 
                // Upload image to R2
-               const uploadResponse = await fetchWithAuth(
-                  `${BASE_URL}/api/upload/image`,
-                  {
-                     method: 'POST',
-                     body: uploadFormData,
-                     headers: {
-                        'Content-Type': 'multipart/form-data',
-                     },
-                  }
-               );
+               const uploadResponse = await fetchWithAuth('/api/upload/image', {
+                  method: 'POST',
+                  body: uploadFormData,
+                  // Don't set Content-Type for FormData - let the browser/RN handle it
+                  // headers: { 'Content-Type': 'multipart/form-data' }, // This can cause issues in RN
+               });
+
+               console.log('📤 Upload response status:', uploadResponse.status);
 
                if (!uploadResponse.ok) {
-                  throw new Error('Failed to upload image');
+                  const uploadErrorData = await uploadResponse
+                     .json()
+                     .catch(() => ({}));
+                  console.error('❌ Image upload failed:', {
+                     status: uploadResponse.status,
+                     error: uploadErrorData,
+                  });
+                  captureException(new Error('Image upload failed'), {
+                     function: 'handleCreateLeague',
+                     screen: 'CreateLeague',
+                     step: 'image_upload',
+                     status: uploadResponse.status,
+                     error: uploadErrorData,
+                     platform: Platform.OS,
+                  });
+                  throw new Error(
+                     `Failed to upload image: ${uploadErrorData.error || uploadResponse.statusText}`
+                  );
                }
 
                const uploadData = await uploadResponse.json();
                imageUrl = uploadData.url; // Use the R2 URL
+               console.log('✅ Image uploaded successfully:', imageUrl);
             } catch (uploadError) {
-               console.error('Image upload failed:', uploadError);
+               console.error('❌ Image upload error:', uploadError);
+               captureException(uploadError as Error, {
+                  function: 'handleCreateLeague',
+                  screen: 'CreateLeague',
+                  step: 'image_upload',
+                  originalImageUri: formData.image,
+                  platform: Platform.OS,
+               });
                Toast.show({
                   type: 'error',
                   text1: t('error'),
-                  text2: 'Failed to upload image',
+                  text2: `Failed to upload image: ${uploadError instanceof Error ? uploadError.message : 'Unknown error'}`,
                });
                throw uploadError;
             }
@@ -166,24 +278,41 @@ export default function CreateLeague() {
             image: imageUrl && imageUrl.trim() ? imageUrl : undefined,
          };
 
+         console.log('🚀 Sending league creation request:', {
+            name: cleanFormData.name,
+            hasImage: !!cleanFormData.image,
+            adminUserEmail: cleanFormData.adminUserEmail,
+         });
+
          //send data to backend using authenticated fetch
-         const response = await fetchWithAuth(
-            `${BASE_URL}/api/leagues/create`,
-            {
-               method: 'POST',
-               headers: {
-                  'Content-Type': 'application/json',
-               },
-               body: JSON.stringify(cleanFormData),
-            }
-         );
+         const response = await fetchWithAuth('/api/leagues/create', {
+            method: 'POST',
+            headers: {
+               'Content-Type': 'application/json',
+            },
+            body: JSON.stringify(cleanFormData),
+         });
+
+         console.log('🚀 League creation response status:', response.status);
 
          if (!response.ok) {
             const errorData = await response.json().catch(() => ({}));
-            console.error('League creation failed:', {
+            console.error('❌ League creation failed:', {
                status: response.status,
                statusText: response.statusText,
                error: errorData,
+            });
+            captureException(new Error('League creation API failed'), {
+               function: 'handleCreateLeague',
+               screen: 'CreateLeague',
+               step: 'api_call',
+               status: response.status,
+               error: errorData,
+               requestData: {
+                  name: cleanFormData.name,
+                  hasImage: !!cleanFormData.image,
+                  adminUserEmail: cleanFormData.adminUserEmail,
+               },
             });
             Toast.show({
                type: 'error',
@@ -196,7 +325,14 @@ export default function CreateLeague() {
          }
 
          const data = await response.json();
-         console.log('League created:', data);
+         console.log('✅ League created successfully:', data);
+         captureException(new Error('League created successfully'), {
+            function: 'handleCreateLeague',
+            screen: 'CreateLeague',
+            step: 'success',
+            leagueId: data.league?.id,
+            level: 'info',
+         });
          Toast.show({
             type: 'success',
             text1: t('success'),
@@ -204,14 +340,24 @@ export default function CreateLeague() {
          });
          router.back();
       } catch (error) {
+         console.error('❌ Create league error:', error);
          captureException(error as Error, {
             function: 'handleCreateLeague',
             screen: 'CreateLeague',
+            step: 'general_error',
+            errorMessage:
+               error instanceof Error ? error.message : 'Unknown error',
+            errorStack: error instanceof Error ? error.stack : undefined,
+            formData: {
+               name: formData.name,
+               hasImage: !!formData.image,
+               adminUserEmail: formData.adminUserEmail,
+            },
          });
          Toast.show({
             type: 'error',
             text1: t('error'),
-            text2: 'Failed to create league',
+            text2: `Failed to create league: ${error instanceof Error ? error.message : 'Unknown error'}`,
          });
       } finally {
          setIsLoading(false);
@@ -224,25 +370,70 @@ export default function CreateLeague() {
 
    const pickImage = async () => {
       try {
+         console.log('🖼️ Starting image picker...');
+
+         // According to Expo docs: "No permissions request is necessary for launching the image library"
+
          const result = await ImagePicker.launchImageLibraryAsync({
-            mediaTypes: ImagePicker.MediaTypeOptions.Images,
+            mediaTypes: ['images'], // Use the modern format from docs
             allowsEditing: true,
-            aspect: [1, 1],
-            quality: 0.8,
+            aspect: [4, 3],
+            quality: 1,
+         });
+
+         console.log('📸 Image picker result:', {
+            canceled: result.canceled,
+            assetsLength: result.assets?.length,
+            firstAssetUri: result.assets?.[0]?.uri,
          });
 
          if (!result.canceled && result.assets[0]) {
-            setFormData({ ...formData, image: result.assets[0].uri });
+            const imageUri = result.assets[0].uri;
+            console.log('✅ Image selected:', imageUri);
+            setFormData({ ...formData, image: imageUri });
+
+            // Log successful image selection to Sentry
+            captureException(new Error('Image selected successfully'), {
+               function: 'pickImage',
+               screen: 'CreateLeague',
+               imageUri,
+               level: 'info',
+            });
+         } else {
+            console.log('📸 Image picker canceled or no assets');
          }
       } catch (error) {
+         console.error('❌ Error in pickImage:', error);
+
+         // Check if this is the common simulator gallery issue
+         const isSimulatorGalleryIssue =
+            error instanceof Error &&
+            error.message.includes('ActivityNotFoundException') &&
+            error.message.includes('android.provider.action.PICK_IMAGES');
+
+         if (isSimulatorGalleryIssue) {
+            console.log('🔍 Detected simulator gallery issue');
+            Toast.show({
+               type: 'info',
+               text1: 'Simulator Limitation',
+               text2: 'Image picker requires a real device or emulator with Google Play Store',
+               visibilityTime: 5000,
+            });
+         } else {
+            Toast.show({
+               type: 'error',
+               text1: t('error'),
+               text2: `Failed to pick image: ${error instanceof Error ? error.message : 'Unknown error'}`,
+            });
+         }
+
          captureException(error as Error, {
             function: 'pickImage',
             screen: 'CreateLeague',
-         });
-         Toast.show({
-            type: 'error',
-            text1: t('error'),
-            text2: 'Failed to pick image',
+            errorMessage:
+               error instanceof Error ? error.message : 'Unknown error',
+            errorStack: error instanceof Error ? error.stack : undefined,
+            isSimulatorIssue: isSimulatorGalleryIssue,
          });
       }
    };

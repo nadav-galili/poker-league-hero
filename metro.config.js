@@ -11,20 +11,29 @@ const isMobileBuild =
    process.env.EAS_BUILD_PLATFORM === 'android' ||
    process.env.EAS_BUILD_PLATFORM === 'ios';
 
+// Check if we're in server export mode (needed for EAS builds)
+const isServerExport =
+   process.env.EXPO_ROUTER_APP_ROOT ||
+   process.argv.some(
+      (arg) => arg.includes('getServerManifest') || arg.includes('export:embed')
+   );
+
 console.log(
    'Metro Config - Platform:',
    platform,
    'EAS Platform:',
    process.env.EAS_BUILD_PLATFORM,
    'Is Mobile:',
-   isMobileBuild
+   isMobileBuild,
+   'Is Server Export:',
+   isServerExport
 );
 
 // Custom resolver function to redirect database imports for mobile builds
 const path = require('path');
 const customResolver = (context, moduleName, platform) => {
-   // Only redirect for mobile platforms
-   if (isMobileBuild) {
+   // Only redirect for mobile platforms, but not during server export
+   if (isMobileBuild && !isServerExport) {
       // Redirect database imports to mobile stubs
       if (
          moduleName.includes('./db/connection') ||
@@ -71,7 +80,8 @@ const customResolver = (context, moduleName, platform) => {
 // Create platform-specific block list
 const createBlockList = () => {
    // For mobile platforms, block server-only dependencies and API routes
-   if (isMobileBuild) {
+   // BUT allow API routes during server export (needed for EAS builds)
+   if (isMobileBuild && !isServerExport) {
       return [
          // Block server-only node modules from mobile client bundles
          /node_modules\/@aws-sdk\/.*/,
@@ -86,7 +96,7 @@ const createBlockList = () => {
       ];
    }
 
-   // For web builds (especially server output), allow database dependencies and API routes
+   // For web builds or server export, allow database dependencies and API routes
    // Only block development-only tools
    return [
       /node_modules\/drizzle-kit\/.*/, // Only block the CLI tool, not the ORM
