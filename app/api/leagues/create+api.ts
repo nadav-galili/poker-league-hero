@@ -8,6 +8,7 @@ import {
 import { captureException } from '@/utils/sentry';
 import {
    createLeagueSchema,
+   sanitizeNameString,
    sanitizeString,
    validateEmail,
    validateRequest,
@@ -71,7 +72,7 @@ export const POST = withAuth(
 
          // Sanitize inputs
          const sanitizedData = {
-            name: sanitizeString(validatedData.name),
+            name: sanitizeNameString(validatedData.name),
             image: validatedData.image
                ? sanitizeString(validatedData.image)
                : undefined,
@@ -85,8 +86,6 @@ export const POST = withAuth(
                { status: 400 }
             );
          }
-
-         console.log('Creating league with data:', sanitizedData);
 
          // Create league with sanitized data
          const league = await createLeague(sanitizedData);
