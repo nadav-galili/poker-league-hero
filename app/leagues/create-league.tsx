@@ -12,7 +12,6 @@ import { useAuth } from '@/context/auth';
 import { useLocalization } from '@/context/localization';
 import { captureException } from '@/utils/sentry';
 import { Ionicons } from '@expo/vector-icons';
-import * as FileSystem from 'expo-file-system';
 import { Image } from 'expo-image';
 import * as ImagePicker from 'expo-image-picker';
 import { router } from 'expo-router';
@@ -150,72 +149,38 @@ export default function CreateLeague() {
                   text2: 'Please wait...',
                });
 
-               // Convert URI to blob for EAS Hosting compatibility
                const uploadFormData = new FormData();
-               console.log('📤 Preparing file upload for:', imageUrl);
-               console.log('📱 Platform:', Platform.OS);
+               const filename = imageUrl.split('/').pop() || 'league-image.jpg';
+               const match = /\.(\w+)$/.exec(filename);
+               const type = match ? `image/${match[1]}` : `image/jpeg`;
 
-               try {
-                  let fileBlob: Blob;
-
-                  // Android/iOS: Use FileSystem to read file
-                  if (Platform.OS === 'android' || Platform.OS === 'ios') {
-                     console.log(
-                        '📱 Reading file using FileSystem (Mobile)...'
+               // On mobile, React Native's fetch can handle file URIs directly
+               // when passed in this specific object format.
+               if (Platform.OS === 'android' || Platform.OS === 'ios') {
+                  const fileData = {
+                     uri: imageUrl,
+                     name: filename,
+                     type,
+                  };
+                  // The type assertion is necessary because the default FormData type
+                  // doesn't account for React Native's file upload object.
+                  uploadFormData.append('file', fileData as any);
+                  console.log(
+                     '📱 Preparing FormData for React Native with file object:',
+                     fileData
+                  );
+               } else {
+                  // On web, we fetch the URI to get a Blob, which is the standard way.
+                  console.log('🌐 Reading file using fetch (Web)...');
+                  const response = await fetch(imageUrl);
+                  if (!response.ok) {
+                     throw new Error(
+                        `Failed to read file for web: ${response.status}`
                      );
-
-                     // Use the new FileSystem API with File class
-                     const file = new FileSystem.File(imageUrl);
-
-                     console.log('📱 Reading file as ArrayBuffer...');
-
-                     // Read file as ArrayBuffer and convert to Blob
-                     const arrayBuffer = await file.arrayBuffer();
-                     fileBlob = new Blob([arrayBuffer], { type: 'image/jpeg' });
-
-                     console.log('📱 Blob created:', {
-                        size: fileBlob.size,
-                        type: fileBlob.type,
-                     });
-                  } else {
-                     // Web: Use fetch
-                     console.log('🌐 Reading file using fetch (Web)...');
-                     const fileResponse = await fetch(imageUrl);
-                     if (!fileResponse.ok) {
-                        throw new Error(
-                           `Failed to read file: ${fileResponse.status}`
-                        );
-                     }
-                     fileBlob = await fileResponse.blob();
-                     console.log('🌐 Blob created:', {
-                        size: fileBlob.size,
-                        type: fileBlob.type,
-                     });
                   }
-
-                  // Validate blob size
-                  if (fileBlob.size === 0) {
-                     throw new Error('File is empty after reading');
-                  }
-
-                  // Append the actual file content as a blob
-                  uploadFormData.append('file', fileBlob, 'league-image.jpg');
-                  console.log('📤 FormData prepared with blob content');
-               } catch (fileReadError) {
-                  console.error(
-                     '❌ Failed to read file content:',
-                     fileReadError
-                  );
-                  captureException(fileReadError as Error, {
-                     function: 'handleCreateLeague',
-                     screen: 'CreateLeague',
-                     step: 'file_read',
-                     platform: Platform.OS,
-                     originalImageUri: imageUrl,
-                  });
-                  throw new Error(
-                     `Cannot read selected image: ${fileReadError instanceof Error ? fileReadError.message : 'Unknown error'}`
-                  );
+                  const blob = await response.blob();
+                  uploadFormData.append('file', blob, filename);
+                  console.log('🌐 FormData prepared with blob for web');
                }
 
                console.log('📤 Uploading to: /api/upload/image');
