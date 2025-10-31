@@ -10,6 +10,7 @@
    "ios": {
       "supportsTablet": true,
       "bundleIdentifier": "com.pokeraihomestack.app",
+      "usesAppleSignIn": true,
       "infoPlist": {
          "ITSAppUsesNonExemptEncryption": false,
          "NSPhotoLibraryUsageDescription": "This app needs access to your photo library to let you select league images.",
@@ -38,7 +39,10 @@
                   "scheme": "pokeraihomestack"
                }
             ],
-            "category": ["android.intent.category.BROWSABLE", "android.intent.category.DEFAULT"]
+            "category": [
+               "android.intent.category.BROWSABLE",
+               "android.intent.category.DEFAULT"
+            ]
          }
       ]
    },
@@ -63,6 +67,8 @@
          }
       ],
       "expo-font",
+      "expo-secure-store",
+      ["expo-apple-authentication"],
       "expo-web-browser",
       [
          "expo-image-picker",

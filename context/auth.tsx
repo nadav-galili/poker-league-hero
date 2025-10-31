@@ -1,6 +1,7 @@
 import { BASE_URL } from '@/constants';
 import { tokenCache } from '@/utils/cache';
 import { captureException } from '@/utils/sentry';
+import * as AppleAuthentication from 'expo-apple-authentication';
 import {
    AuthError,
    AuthRequestConfig,
@@ -8,13 +9,13 @@ import {
    makeRedirectUri,
    useAuthRequest,
 } from 'expo-auth-session';
+import { randomUUID } from 'expo-crypto';
 import { router } from 'expo-router';
 import * as SecureStore from 'expo-secure-store';
 import * as WebBrowser from 'expo-web-browser';
 import * as jose from 'jose';
 import * as React from 'react';
 import { Platform } from 'react-native';
-
 WebBrowser.maybeCompleteAuthSession();
 
 // 🔧 DEV: Set to true to force onboarding to show during testing
@@ -37,7 +38,8 @@ const AuthContext = React.createContext({
    user: null as AuthUser | null,
    signIn: () => {},
    signOut: () => {},
-
+   signInWithApple: () => {},
+   signInWithAppleWebBrowser: () => {},
    fetchWithAuth: (url: string, options: RequestInit = {}) =>
       Promise.resolve(new Response()),
    isLoading: false,
@@ -129,9 +131,8 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
          setIsLoading(true);
          try {
             // Restore onboarding flag first
-            const storedOnboarding = await SecureStore.getItemAsync(
-               'hasSeenOnboarding'
-            );
+            const storedOnboarding =
+               await SecureStore.getItemAsync('hasSeenOnboarding');
             if (storedOnboarding === 'true' && !DEV_FORCE_ONBOARDING) {
                setHasSeenOnboarding(true);
             } else if (DEV_FORCE_ONBOARDING) {
@@ -682,12 +683,68 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
       }
    };
 
+   const signInWithAppleWebBrowser = async () => {};
+
+   const signInWithApple = async () => {
+      try {
+         const rawNonce = randomUUID();
+         const credential = await AppleAuthentication.signInAsync({
+            requestedScopes: [
+               AppleAuthentication.AppleAuthenticationScope.FULL_NAME,
+               AppleAuthentication.AppleAuthenticationScope.EMAIL,
+            ],
+            nonce: rawNonce,
+         });
+         console.log('🍎 credential', JSON.stringify(credential, null, 2));
+
+         if (credential.fullName?.givenName && credential.email) {
+            // This is the first sign in
+            // This is our only chance to get the user's name and email
+            // We need to store this info in our database
+            // You can handle this on the server side as well, just keep in mind that
+            // Apple only provides name and email on the first sign in
+            // On subsequent sign ins, these fields will be null
+            console.log('🍎 first sign in');
+         }
+
+         // Send both the identity token and authorization code to server
+         const appleResponse = await fetch(
+            `${BASE_URL}/api/auth/apple/apple-native`,
+            {
+               method: 'POST',
+               headers: {
+                  'Content-Type': 'application/json',
+               },
+               body: JSON.stringify({
+                  identityToken: credential.identityToken,
+                  rawNonce, // Use the rawNonce we generated and passed to Apple
+
+                  // IMPORTANT:
+                  // Apple only provides name and email on the first sign in
+                  // On subsequent sign ins, these fields will be null
+                  // We need to store the user info from the first sign in in our database
+                  // And retrieve it on subsequent sign ins using the stable user ID
+                  givenName: credential.fullName?.givenName,
+                  familyName: credential.fullName?.familyName,
+                  email: credential.email,
+               }),
+            }
+         );
+
+         const tokens = await appleResponse.json();
+         await handleNativeTokens(tokens);
+      } catch (error) {
+         console.error('Error during sign in with Apple:', error);
+      }
+   };
    return (
       <AuthContext.Provider
          value={{
             user,
             signIn,
             signOut,
+            signInWithAppleWebBrowser,
+            signInWithApple,
 
             isLoading,
             error,

@@ -1,14 +1,14 @@
-import { colors } from '@/colors';
 import { useAuth } from '@/context/auth';
 import { useLocalization } from '@/context/localization';
-import { Ionicons } from '@expo/vector-icons';
 import { BlurView } from 'expo-blur';
 import { LinearGradient } from 'expo-linear-gradient';
 import { useRouter } from 'expo-router';
 import { Image, Pressable, StatusBar, Text, View } from 'react-native';
+import { SignInWithAppleButton } from '../SignInWithAppleButton';
+import SignInWithGoogleButton from '../SigninWithGoogleButton';
 
 export default function LoginForm() {
-   const { signIn, resetOnboarding } = useAuth();
+   const { signIn, resetOnboarding, isLoading } = useAuth();
    const { t } = useLocalization();
    const router = useRouter();
 
@@ -92,9 +92,9 @@ export default function LoginForm() {
                </View>
 
                {/* Action buttons - Glassmorphism style */}
-               <View className="w-full max-w-sm ">
+               <View className="w-3/4 gap-12 ">
                   {/* Google Sign In Button */}
-                  <Pressable
+                  {/* <Pressable
                      onPress={signIn}
                      className="mb-6 relative"
                      style={({ pressed }) => ({
@@ -127,100 +127,15 @@ export default function LoginForm() {
                            {t('signInWithGoogle')}
                         </Text>
                      </View>
-                  </Pressable>
-
-                  {/* Guest Button */}
-                  {/* <Pressable
-                     onPress={handleGuest}
-                     className="mb-8 relative"
-                     style={({ pressed }) => ({
-                        transform: pressed
-                           ? [{ translateX: 4 }, { translateY: 4 }]
-                           : [],
-                     })}
-                  >
-                     <View
-                        className="flex-row items-center justify-center py-6 px-8 rounded-2xl border-4"
-                        style={{
-                           backgroundColor: colors.secondary,
-                           borderColor: colors.border,
-                           shadowColor: colors.shadow,
-                           shadowOffset: { width: 6, height: 6 },
-                           shadowOpacity: 1,
-                           shadowRadius: 0,
-                           elevation: 6,
-                        }}
-                     >
-                        <View
-                           className="w-8 h-8 rounded-xl items-center justify-center mr-4 border-3"
-                           style={{
-                              backgroundColor: colors.text,
-                              borderColor: colors.border,
-                           }}
-                        >
-                           <Ionicons
-                              name="person-outline"
-                              size={20}
-                              color={colors.secondary}
-                           />
-                        </View>
-                        <Text className="font-black text-xl tracking-wider uppercase">
-                           {t('continueAsGuest')}
-                        </Text>
-                     </View>
                   </Pressable> */}
-
-                  {/* Divider - Neo-brutalist style */}
-                  {/* <View className="flex-row items-center mb-8">
-                     <View
-                        className="flex-1 h-1"
-                        style={{ backgroundColor: colors.border }}
-                     />
-                     <View
-                        className="mx-6 px-4 py-2 rounded-xl border-3"
-                        style={{
-                           backgroundColor: colors.accent,
-                           borderColor: colors.border,
-                        }}
-                     >
-                        <Text
-                           className="font-black text-sm tracking-widest"
-                           style={{ color: colors.border }}
-                        >
-                           OR
-                        </Text>
-                     </View>
-                     <View
-                        className="flex-1 h-1"
-                        style={{ backgroundColor: colors.border }}
-                     />
-                  </View> */}
+                  <SignInWithGoogleButton
+                     onPress={signIn}
+                     disabled={isLoading}
+                  />
+                  <SignInWithAppleButton />
 
                   {/* Additional Options */}
                   <View className="items-center mt-8">
-                     {/* <Pressable
-                        className="mb-6"
-                        style={({ pressed }) => ({
-                           transform: pressed
-                              ? [{ scale: 0.95 }]
-                              : [{ scale: 1 }],
-                        })}
-                     >
-                        <BlurView
-                           intensity={60}
-                           tint="dark"
-                           className="py-3 px-6 rounded-2xl overflow-hidden border"
-                           style={{
-                              backgroundColor: 'rgba(30, 41, 59, 0.4)',
-                              borderColor: 'rgba(255, 255, 255, 0.1)',
-                           }}
-                        >
-                           <Text className="font-semibold text-white/80 text-sm tracking-wide">
-                              NEED HELP?
-                           </Text>
-                        </BlurView>
-                     </Pressable> */}
-
                      {/* View Onboarding Again Button */}
                      <Pressable
                         onPress={async () => {

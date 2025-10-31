@@ -448,7 +448,7 @@ const enTranslations: Translations = {
    onboardingSkipButton: 'Skip',
    onboardingNextButton: 'Next',
    onboardingCompleteButton: 'Complete',
-   onboardingViewAgain: ' View On בהדרכהboarding Again',
+   onboardingViewAgain: ' View Onboarding Again',
 
    // Deep linking / Join League
    joinLeagueRequiresLogin: 'You need to be signed in to join a league.',
