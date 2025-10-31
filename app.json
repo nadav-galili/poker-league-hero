@@ -27,13 +27,18 @@
       "intentFilters": [
          {
             "autoVerify": true,
-            "action": "VIEW",
+            "action": "android.intent.action.VIEW",
             "data": [
+               {
+                  "scheme": "https",
+                  "host": "poker-ai-homestack.expo.app",
+                  "pathPrefix": "/join-league"
+               },
                {
                   "scheme": "pokeraihomestack"
                }
             ],
-            "category": ["BROWSABLE", "DEFAULT"]
+            "category": ["android.intent.category.BROWSABLE", "android.intent.category.DEFAULT"]
          }
       ]
    },

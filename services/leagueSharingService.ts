@@ -3,7 +3,6 @@
  */
 
 import { Share } from 'react-native';
-import * as Linking from 'expo-linking';
 import {
    addBreadcrumb,
    captureException,
@@ -38,13 +37,11 @@ export async function shareLeague(
          leagueCode: league.code,
       });
 
-      // Create deep link URL for joining the league
-      const deepLinkUrl = Linking.createURL(`/join-league/${league.code}`, {
-         queryParams: {
-            name: league.name,
-            id: league.id,
-         },
-      });
+      // Create deep link URL using the expo.app domain for production
+      const baseUrl =
+         process.env.EXPO_PUBLIC_BASE_URL ||
+         'https://poker-ai-homestack.expo.app';
+      const deepLinkUrl = `${baseUrl}/join-league/${league.code}?name=${encodeURIComponent(league.name)}&id=${league.id}`;
 
       const shareMessage = `${t('joinMyLeague')} "${league.name}"\n\n${t(
          'leagueCode'
@@ -54,7 +51,7 @@ export async function shareLeague(
       await Share.share(
          {
             message: shareMessage,
-            url: deepLinkUrl, // iOS will use this
+            url: deepLinkUrl,
             title: `${t('joinLeague')} ${league.name}`,
          },
          {

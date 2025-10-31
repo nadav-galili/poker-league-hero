@@ -229,6 +229,9 @@ export interface Translations {
    onboardingNextButton: string;
    onboardingCompleteButton: string;
    onboardingViewAgain: string;
+
+   // Deep linking / Join League
+   joinLeagueRequiresLogin: string;
 }
 
 // English translations
@@ -446,6 +449,9 @@ const enTranslations: Translations = {
    onboardingNextButton: 'Next',
    onboardingCompleteButton: 'Complete',
    onboardingViewAgain: ' View On בהדרכהboarding Again',
+
+   // Deep linking / Join League
+   joinLeagueRequiresLogin: 'You need to be signed in to join a league.',
 };
 
 // Hebrew translations
@@ -659,6 +665,9 @@ const heTranslations: Translations = {
    onboardingNextButton: 'הבא',
    onboardingCompleteButton: 'סיים',
    onboardingViewAgain: ' צפה שוב בהדרכה',
+
+   // Deep linking / Join League
+   joinLeagueRequiresLogin: 'עליך להירשם כדי להצטרף לליגה.',
 };
 
 const translations = {
