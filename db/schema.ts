@@ -21,6 +21,7 @@ export const users = pgTable('users', {
    lastName: varchar('last_name', { length: 100 }),
    profileImageUrl: text('profile_image_url'),
    googleId: varchar('google_id', { length: 50 }).unique(),
+   appleId: varchar('apple_id', { length: 200 }).unique(),
    provider: varchar('provider', { length: 20 }).notNull().default('google'),
    isDeleted: boolean('is_deleted').notNull().default(false),
    createdAt: timestamp('created_at').defaultNow().notNull(),
