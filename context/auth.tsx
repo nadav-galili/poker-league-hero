@@ -55,6 +55,11 @@ const config: AuthRequestConfig = {
    redirectUri: makeRedirectUri(),
 };
 
+const appleConfig: AuthRequestConfig = {
+   clientId: 'apple',
+   scopes: ['name', 'email'],
+   redirectUri: makeRedirectUri(),
+};
 const discovery: DiscoveryDocument = {
    authorizationEndpoint: `${BASE_URL}/api/auth/authorize`,
    tokenEndpoint: `${BASE_URL}/api/auth/token`,

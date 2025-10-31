@@ -71,6 +71,8 @@ export async function POST(req: Request) {
                         : 'Apple User',
                   appleId: appleUserId,
                   provider: 'apple',
+                  profileImageUrl:
+                     'https://pub-6908906fe4c24b7b82ff61e803190c28.r2.dev/user-images/Gemini%20Generated%20Image%20(3).png',
                   lastLoginAt: new Date(),
                })
                .returning();
@@ -82,10 +84,13 @@ export async function POST(req: Request) {
 
       // Create new tokens with userId included
       const issuedAt = Math.floor(Date.now() / 1000);
+      const profileImageUrl =
+         'https://pub-6908906fe4c24b7b82ff61e803190c28.r2.dev/user-images/Gemini%20Generated%20Image%20(3).png';
 
       const enhancedAccessToken = await new jose.SignJWT({
          ...tokenPayload,
          userId: dbUserId, // Add the database user ID
+         picture: profileImageUrl,
       })
          .setProtectedHeader({ alg: 'HS256' })
          .setExpirationTime(issuedAt + 3600) // 1 hour
@@ -96,6 +101,7 @@ export async function POST(req: Request) {
       const enhancedRefreshToken = await new jose.SignJWT({
          ...tokenPayload,
          userId: dbUserId,
+         picture: profileImageUrl,
          jti: crypto.randomUUID(),
          type: 'refresh',
       })
