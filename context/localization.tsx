@@ -213,6 +213,22 @@ export interface Translations {
    uniquePlayers: string;
    perGame: string;
    avgGameDuration: string;
+
+   // Onboarding
+   onboardingSlide1Title: string;
+   onboardingSlide1Description: string;
+   onboardingSlide2Title: string;
+   onboardingSlide2Description: string;
+   onboardingSlide3Title: string;
+   onboardingSlide3Description: string;
+   onboardingSlide4Title: string;
+   onboardingSlide4Description: string;
+   onboardingSlide5Title: string;
+   onboardingSlide5Description: string;
+   onboardingSkipButton: string;
+   onboardingNextButton: string;
+   onboardingCompleteButton: string;
+   onboardingViewAgain: string;
 }
 
 // English translations
@@ -410,6 +426,26 @@ const enTranslations: Translations = {
    uniquePlayers: 'Unique Players',
    perGame: 'Per Game',
    avgGameDuration: 'AVG GAME DURATION',
+
+   // Onboarding
+   onboardingSlide1Title: 'Welcome to Poker League Hero!',
+   onboardingSlide1Description:
+      'Create and manage your poker leagues with ease.',
+   onboardingSlide2Title: 'Join Existing Leagues',
+   onboardingSlide2Description:
+      'Connect with friends and compete in existing leagues.',
+   onboardingSlide3Title: 'Track Your Performance',
+   onboardingSlide3Description:
+      'Monitor your wins, losses, and overall performance.',
+   onboardingSlide4Title: 'Get AI Analysis for your games',
+   onboardingSlide4Description:
+      'Get AI analysis for your games to improve your skills.',
+   onboardingSlide5Title: 'Get Started',
+   onboardingSlide5Description: 'Start creating your first poker league today!',
+   onboardingSkipButton: 'Skip',
+   onboardingNextButton: 'Next',
+   onboardingCompleteButton: 'Complete',
+   onboardingViewAgain: ' View On בהדרכהboarding Again',
 };
 
 // Hebrew translations
@@ -530,6 +566,7 @@ const heTranslations: Translations = {
 
    // Game Setup Modal
    gameSetup: 'הגדרת משחק',
+   gameSummary: 'סיכום המשחק',
    league: 'ליגה',
    buyInPerPlayer: 'סכום כניסה לשחקן',
    totalPlayers: 'סה״כ שחקנים',
@@ -543,7 +580,6 @@ const heTranslations: Translations = {
    creatingGame: 'יוצר משחק...',
    gameCreatedSuccess: 'המשחק נוצר בהצלחה! השחקנים יכולים להצטרף כעת.',
    validBuyInRequired: 'אנא הכנס סכום כניסה תקין',
-   gameSummary: 'סיכום המשחק',
 
    // Game Screen
    gameDetails: 'פרטי המשחק',
@@ -605,6 +641,24 @@ const heTranslations: Translations = {
    uniquePlayers: 'שחקנים ייחודיים',
    perGame: 'למשחק',
    avgGameDuration: 'משך משחק ממוצע',
+
+   // Onboarding
+   onboardingSlide1Title: 'ברוכים הבאים לHOMESTACK!',
+   onboardingSlide1Description:
+      'אפליקציית ניהול משחקי הפוקר הביתיים שלך בקלות וביעילות.',
+   onboardingSlide2Title: 'הצטרף לליגות קיימות',
+   onboardingSlide2Description: 'התחבר עם חברים והתחרו בליגות קיימות.',
+   onboardingSlide3Title: 'עקוב אחר הביצועים שלך',
+   onboardingSlide3Description: 'צפה בניצחונות, הפסדים והביצועים הכוללים שלך.',
+   onboardingSlide4Title: 'קבל ניתוח AI למשחקים',
+   onboardingSlide4Description:
+      'קבל ניתוח AI למשחקים שלך כדי לשפר את הביצועים שלך.',
+   onboardingSlide5Title: 'התחל עכשיו',
+   onboardingSlide5Description: 'התחל ביצירת הליגה הראשונה שלך היום!',
+   onboardingSkipButton: 'דלג',
+   onboardingNextButton: 'הבא',
+   onboardingCompleteButton: 'סיים',
+   onboardingViewAgain: ' צפה שוב בהדרכה',
 };
 
 const translations = {

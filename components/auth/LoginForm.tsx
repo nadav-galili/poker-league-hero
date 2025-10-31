@@ -1,13 +1,14 @@
+import { colors } from '@/colors';
 import { useAuth } from '@/context/auth';
 import { useLocalization } from '@/context/localization';
 import { Ionicons } from '@expo/vector-icons';
-import { useRouter } from 'expo-router';
 import { BlurView } from 'expo-blur';
 import { LinearGradient } from 'expo-linear-gradient';
+import { useRouter } from 'expo-router';
 import { Image, Pressable, StatusBar, Text, View } from 'react-native';
 
 export default function LoginForm() {
-   const { signIn } = useAuth();
+   const { signIn, resetOnboarding } = useAuth();
    const { t } = useLocalization();
    const router = useRouter();
 
@@ -95,44 +96,37 @@ export default function LoginForm() {
                   {/* Google Sign In Button */}
                   <Pressable
                      onPress={signIn}
-                     className="mb-6 relative "
+                     className="mb-6 relative"
                      style={({ pressed }) => ({
                         transform: pressed ? [{ scale: 0.98 }] : [{ scale: 1 }],
                      })}
                   >
-                     <LinearGradient
-                        colors={['#ec4899', '#f43f5e']}
-                        start={{ x: 0, y: 0 }}
-                        end={{ x: 1, y: 0 }}
-                        className="p-[1px] overflow-hidden rounded-full"
+                     <View
+                        className="flex-row items-center justify-center py-3 px-6 rounded-lg overflow-hidden border-[1px]"
                         style={{
-                           shadowColor: '#ec4899',
-                           shadowOffset: { width: 0, height: 8 },
-                           shadowOpacity: 0.4,
-                           shadowRadius: 16,
-                           elevation: 10,
+                           backgroundColor: '#ffffff',
+                           borderColor: '#dadce0',
+                           shadowColor: '#000000',
+                           shadowOffset: { width: 0, height: 1 },
+                           shadowOpacity: 0.12,
+                           shadowRadius: 2,
+                           elevation: 2,
                         }}
                      >
-                        <BlurView
-                           intensity={30}
-                           tint="dark"
-                           className="flex-row items-center justify-center py-5 px-8 rounded-full overflow-hidden"
-                           style={{
-                              backgroundColor: 'rgba(236, 72, 153, 0.15)',
-                           }}
+                        <View className="w-5 h-5 rounded items-center justify-center mr-3">
+                           <Ionicons
+                              name="logo-google"
+                              size={20}
+                              color={colors.primary}
+                           />
+                        </View>
+                        <Text
+                           className="font-medium text-base"
+                           style={{ color: colors.primary }}
                         >
-                           <View className="w-10 h-10 rounded-xl items-center justify-center mr-3 bg-white/10 border border-white/20">
-                              <Ionicons
-                                 name="logo-google"
-                                 size={24}
-                                 color="#ffffff"
-                              />
-                           </View>
-                           <Text className="font-bold text-lg text-white uppercase tracking-wide">
-                              {t('signInWithGoogle')}
-                           </Text>
-                        </BlurView>
-                     </LinearGradient>
+                           {t('signInWithGoogle')}
+                        </Text>
+                     </View>
                   </Pressable>
 
                   {/* Guest Button */}
@@ -204,7 +198,7 @@ export default function LoginForm() {
 
                   {/* Additional Options */}
                   <View className="items-center mt-8">
-                     <Pressable
+                     {/* <Pressable
                         className="mb-6"
                         style={({ pressed }) => ({
                            transform: pressed
@@ -225,6 +219,34 @@ export default function LoginForm() {
                               NEED HELP?
                            </Text>
                         </BlurView>
+                     </Pressable> */}
+
+                     {/* View Onboarding Again Button */}
+                     <Pressable
+                        onPress={async () => {
+                           await resetOnboarding();
+                           router.replace('/');
+                        }}
+                        className="mb-6"
+                        style={({ pressed }) => ({
+                           transform: pressed
+                              ? [{ scale: 0.95 }]
+                              : [{ scale: 1 }],
+                        })}
+                     >
+                        <BlurView
+                           intensity={60}
+                           tint="dark"
+                           className="py-3 px-6 rounded-2xl overflow-hidden border"
+                           style={{
+                              backgroundColor: 'rgba(30, 41, 59, 0.4)',
+                              borderColor: 'rgba(255, 255, 255, 0.1)',
+                           }}
+                        >
+                           <Text className="font-semibold text-white/80 text-sm tracking-wide">
+                              {t('onboardingViewAgain')}
+                           </Text>
+                        </BlurView>
                      </Pressable>
 
                      <BlurView
@@ -241,11 +263,16 @@ export default function LoginForm() {
                            <Text
                               className="text-cyan-400"
                               onPress={() => router.push('/terms')}
-                           >Terms</Text> and{' '}
+                           >
+                              Terms
+                           </Text>{' '}
+                           and{' '}
                            <Text
                               className="text-cyan-400"
                               onPress={() => router.push('/privacy')}
-                           >Privacy Policy</Text>
+                           >
+                              Privacy Policy
+                           </Text>
                         </Text>
                      </BlurView>
                   </View>

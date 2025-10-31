@@ -16,6 +16,9 @@ import * as React from 'react';
 import { Platform } from 'react-native';
 
 WebBrowser.maybeCompleteAuthSession();
+
+// 🔧 DEV: Set to true to force onboarding to show during testing
+const DEV_FORCE_ONBOARDING = false;
 export type AuthUser = {
    id: string;
    email: string;
@@ -39,6 +42,9 @@ const AuthContext = React.createContext({
       Promise.resolve(new Response()),
    isLoading: false,
    error: null as AuthError | null,
+   hasSeenOnboarding: false,
+   markOnboardingComplete: async () => {},
+   resetOnboarding: async () => {},
 });
 
 const config: AuthRequestConfig = {
@@ -56,6 +62,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
    const [user, setUser] = React.useState<AuthUser | null>(null);
    const [accessToken, setAccessToken] = React.useState<string | null>(null);
    const [refreshToken, setRefreshToken] = React.useState<string | null>(null);
+   const [hasSeenOnboarding, setHasSeenOnboarding] = React.useState(false);
    const [request, response, promptAsync] = useAuthRequest(config, discovery);
 
    // Function to completely reset the auth session
@@ -121,6 +128,17 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
       const restoreSession = async () => {
          setIsLoading(true);
          try {
+            // Restore onboarding flag first
+            const storedOnboarding = await SecureStore.getItemAsync(
+               'hasSeenOnboarding'
+            );
+            if (storedOnboarding === 'true' && !DEV_FORCE_ONBOARDING) {
+               setHasSeenOnboarding(true);
+            } else if (DEV_FORCE_ONBOARDING) {
+               // Force show onboarding in dev mode
+               setHasSeenOnboarding(false);
+            }
+
             if (isWeb) {
                // For web: Check if we have a session cookie by making a request to a session endpoint
                const sessionResponse = await fetch(
@@ -639,6 +657,31 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
       router.replace('/');
    };
 
+   const markOnboardingComplete = async () => {
+      try {
+         console.log('Marking onboarding as complete');
+         await SecureStore.setItemAsync('hasSeenOnboarding', 'true');
+         setHasSeenOnboarding(true);
+      } catch (error) {
+         console.error('Error marking onboarding complete:', error);
+         captureException(error as Error, {
+            function: 'markOnboardingComplete',
+            screen: 'Auth',
+            error: error as Error,
+         });
+      }
+   };
+
+   const resetOnboarding = async () => {
+      try {
+         console.log('Resetting onboarding (dev only)');
+         await SecureStore.deleteItemAsync('hasSeenOnboarding');
+         setHasSeenOnboarding(false);
+      } catch (error) {
+         console.error('Error resetting onboarding:', error);
+      }
+   };
+
    return (
       <AuthContext.Provider
          value={{
@@ -649,6 +692,9 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
             isLoading,
             error,
             fetchWithAuth,
+            hasSeenOnboarding,
+            markOnboardingComplete,
+            resetOnboarding,
          }}
       >
          {children}
