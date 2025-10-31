@@ -1,91 +1,103 @@
 {
-  "name": "HomeStack",
-  "slug": "poker-ai-homestack",
-  "version": "1.0.0",
-  "orientation": "portrait",
-  "icon": "./assets/images/icon.png",
-  "scheme": "pokeraihomestack",
-  "userInterfaceStyle": "automatic",
-  "newArchEnabled": true,
-  "ios": {
-    "supportsTablet": true,
-    "bundleIdentifier": "com.pokeraihomestack.app",
-    "infoPlist": {
-      "ITSAppUsesNonExemptEncryption": false
-    }
-  },
-  "android": {
-    "adaptiveIcon": {
-      "foregroundImage": "./assets/images/icon.png",
-      "backgroundColor": "#ffffff"
-    },
-    "edgeToEdgeEnabled": true,
-    "package": "com.pokeraihomestack.app",
-    "intentFilters": [
-      {
-        "autoVerify": true,
-        "action": "VIEW",
-        "data": [
-          {
-            "scheme": "pokeraihomestack"
-          }
-        ],
-        "category": [
-          "BROWSABLE",
-          "DEFAULT"
-        ]
+   "name": "HomeStack",
+   "slug": "poker-ai-homestack",
+   "version": "1.0.6",
+   "orientation": "portrait",
+   "icon": "./assets/images/icon.png",
+   "scheme": "pokeraihomestack",
+   "userInterfaceStyle": "automatic",
+   "newArchEnabled": true,
+   "ios": {
+      "supportsTablet": true,
+      "bundleIdentifier": "com.pokeraihomestack.app",
+      "infoPlist": {
+         "ITSAppUsesNonExemptEncryption": false,
+         "NSPhotoLibraryUsageDescription": "This app needs access to your photo library to let you select league images.",
+         "NSCameraUsageDescription": "This app needs access to your camera to let you take photos for league images."
       }
-    ]
-  },
-  "plugins": [
-    [
-      "expo-router",
-      {
-        "origin": "https://poker-ai-homestack.expo.app",
-        "asyncRoutes": {
-          "web": true,
-          "default": false
-        }
+   },
+   "android": {
+      "adaptiveIcon": {
+         "foregroundImage": "./assets/images/icon.png",
+         "backgroundColor": "#ffffff"
+      },
+      "edgeToEdgeEnabled": true,
+      "package": "com.pokeraihomestack.app",
+      "permissions": ["READ_EXTERNAL_STORAGE", "READ_MEDIA_IMAGES", "CAMERA"],
+      "intentFilters": [
+         {
+            "autoVerify": true,
+            "action": "android.intent.action.VIEW",
+            "data": [
+               {
+                  "scheme": "https",
+                  "host": "poker-ai-homestack.expo.app",
+                  "pathPrefix": "/join-league"
+               },
+               {
+                  "scheme": "pokeraihomestack"
+               }
+            ],
+            "category": ["android.intent.category.BROWSABLE", "android.intent.category.DEFAULT"]
+         }
+      ]
+   },
+   "plugins": [
+      [
+         "expo-router",
+         {
+            "origin": "https://poker-ai-homestack.expo.app",
+            "asyncRoutes": {
+               "web": true,
+               "default": false
+            }
+         }
+      ],
+      [
+         "expo-splash-screen",
+         {
+            "image": "./assets/images/icon.png",
+            "imageWidth": 200,
+            "resizeMode": "contain",
+            "backgroundColor": "#ffffff"
+         }
+      ],
+      "expo-font",
+      "expo-web-browser",
+      [
+         "expo-image-picker",
+         {
+            "photosPermission": "The app accesses your photos to let you select league images.",
+            "cameraPermission": "The app accesses your camera to let you take photos for league images."
+         }
+      ],
+      [
+         "@sentry/react-native/expo",
+         {
+            "url": "https://sentry.io/",
+            "project": "poker-league-hero",
+            "organization": "nadav-g"
+         }
+      ]
+   ],
+   "experiments": {
+      "typedRoutes": true
+   },
+   "extra": {
+      "router": {
+         "origin": "https://poker-ai-homestack.expo.app",
+         "asyncRoutes": {
+            "web": true,
+            "default": false
+         }
+      },
+      "eas": {
+         "projectId": "43b198a0-4fc4-46b7-a540-4550da1b1e45"
       }
-    ],
-    [
-      "expo-splash-screen",
-      {
-        "image": "./assets/images/icon.png",
-        "imageWidth": 200,
-        "resizeMode": "contain",
-        "backgroundColor": "#ffffff"
-      }
-    ],
-    "expo-font",
-    "expo-web-browser",
-    [
-      "@sentry/react-native/expo",
-      {
-        "url": "https://sentry.io/",
-        "project": "poker-league-hero",
-        "organization": "nadav-g"
-      }
-    ]
-  ],
-  "experiments": {
-    "typedRoutes": true
-  },
-  "extra": {
-    "router": {
-      "origin": "https://poker-ai-homestack.expo.app",
-      "asyncRoutes": {
-        "web": true,
-        "default": false
-      }
-    },
-    "eas": {
-      "projectId": "43b198a0-4fc4-46b7-a540-4550da1b1e45"
-    }
-  },
-  "web": {
-    "bundler": "metro",
-    "output": "server",
-    "favicon": "./assets/images/icon.png"
-  }
+   },
+   "web": {
+      "bundler": "metro",
+      "output": "server",
+      "favicon": "./assets/images/icon.png"
+   }
 }

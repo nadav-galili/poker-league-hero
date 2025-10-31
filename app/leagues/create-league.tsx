@@ -7,7 +7,7 @@ import {
 import { LoadingState } from '@/components/shared/LoadingState';
 import { Text } from '@/components/Text';
 import { AppButton } from '@/components/ui/AppButton';
-import { BASE_URL } from '@/constants';
+// BASE_URL import removed - using relative URLs with fetchWithAuth
 import { useAuth } from '@/context/auth';
 import { useLocalization } from '@/context/localization';
 import { captureException } from '@/utils/sentry';
@@ -16,7 +16,13 @@ import { Image } from 'expo-image';
 import * as ImagePicker from 'expo-image-picker';
 import { router } from 'expo-router';
 import React, { useCallback, useState } from 'react';
-import { ScrollView, StyleSheet, TouchableOpacity, View } from 'react-native';
+import {
+   Platform,
+   ScrollView,
+   StyleSheet,
+   TouchableOpacity,
+   View,
+} from 'react-native';
 import Toast from 'react-native-toast-message';
 
 export default function CreateLeague() {
@@ -41,16 +47,18 @@ export default function CreateLeague() {
 
    // Validation functions
    const validateLeagueName = useCallback((name: string): string | null => {
-      if (!name.trim()) {
+      if (!name || !name.trim()) {
          return 'League name is required';
       }
-      if (name.trim().length < 3) {
+      const trimmedName = name.trim();
+      if (trimmedName.length < 3) {
          return 'League name must be at least 3 characters';
       }
-      if (name.trim().length > 50) {
+      if (trimmedName.length > 50) {
          return 'League name must be less than 50 characters';
       }
-      if (!/^[a-zA-Z0-9\s\-_']+$/.test(name.trim())) {
+      // Allow letters, numbers, spaces, hyphens, underscores, periods, commas, apostrophes, ampersands, and parentheses
+      if (!/^[a-zA-Z0-9 \-_.,'&()]+$/.test(trimmedName)) {
          return 'League name contains invalid characters';
       }
       return null;
@@ -61,16 +69,19 @@ export default function CreateLeague() {
          setFormData((prev) => ({ ...prev, name: text }));
 
          // Real-time validation
-         const error = validateLeagueName(text);
-         if (text.length === 0) {
+         // Only validate if the trimmed text has content (don't validate intermediate states like single space)
+         if (text.trim().length === 0) {
             setValidationStates((prev) => ({ ...prev, name: 'idle' }));
             setErrors((prev) => ({ ...prev, name: undefined }));
-         } else if (error) {
-            setValidationStates((prev) => ({ ...prev, name: 'error' }));
-            setErrors((prev) => ({ ...prev, name: error }));
          } else {
-            setValidationStates((prev) => ({ ...prev, name: 'valid' }));
-            setErrors((prev) => ({ ...prev, name: undefined }));
+            const error = validateLeagueName(text);
+            if (error) {
+               setValidationStates((prev) => ({ ...prev, name: 'error' }));
+               setErrors((prev) => ({ ...prev, name: error }));
+            } else {
+               setValidationStates((prev) => ({ ...prev, name: 'valid' }));
+               setErrors((prev) => ({ ...prev, name: undefined }));
+            }
          }
       },
       [validateLeagueName]
@@ -91,8 +102,15 @@ export default function CreateLeague() {
    }, [formData.name, validateLeagueName]);
    const handleCreateLeague = async () => {
       try {
+         console.log('🏆 Starting league creation...');
          setIsLoading(true);
+
          if (!user) {
+            console.log('❌ No user found');
+            captureException(new Error('No user found when creating league'), {
+               function: 'handleCreateLeague',
+               screen: 'CreateLeague',
+            });
             Toast.show({
                type: 'error',
                text1: t('error'),
@@ -101,8 +119,17 @@ export default function CreateLeague() {
             return;
          }
 
+         console.log('✅ User found:', { email: user.email, id: user.id });
+
          // Validate form before submission
          if (!validateForm()) {
+            console.log('❌ Form validation failed');
+            captureException(new Error('Form validation failed'), {
+               function: 'handleCreateLeague',
+               screen: 'CreateLeague',
+               formData: { name: formData.name, hasImage: !!formData.image },
+               errors,
+            });
             Toast.show({
                type: 'error',
                text1: t('error'),
@@ -111,50 +138,105 @@ export default function CreateLeague() {
             return;
          }
 
+         console.log('✅ Form validation passed');
          formData.adminUserEmail = user.email;
 
          // Upload image to R2 if it's a local file path
          let imageUrl = formData.image;
+         console.log('🖼️ Image handling:', { originalImage: imageUrl });
+
          if (imageUrl && imageUrl.startsWith('file://')) {
             try {
+               console.log('📤 Starting image upload...');
                Toast.show({
                   type: 'info',
                   text1: t('uploadingImage'),
                   text2: 'Please wait...',
                });
 
-               // Create FormData for image upload
                const uploadFormData = new FormData();
-               uploadFormData.append('file', {
-                  uri: imageUrl,
-                  type: 'image/jpeg',
-                  name: 'league-image.jpg',
-               } as any);
+               const filename = imageUrl.split('/').pop() || 'league-image.jpg';
+               const match = /\.(\w+)$/.exec(filename);
+               const type = match ? `image/${match[1]}` : `image/jpeg`;
+
+               // On mobile, React Native's fetch can handle file URIs directly
+               // when passed in this specific object format.
+               if (Platform.OS === 'android' || Platform.OS === 'ios') {
+                  const fileData = {
+                     uri: imageUrl,
+                     name: filename,
+                     type,
+                  };
+                  // The type assertion is necessary because the default FormData type
+                  // doesn't account for React Native's file upload object.
+                  uploadFormData.append('file', fileData as any);
+                  console.log(
+                     '📱 Preparing FormData for React Native with file object:',
+                     fileData
+                  );
+               } else {
+                  // On web, we fetch the URI to get a Blob, which is the standard way.
+                  console.log('🌐 Reading file using fetch (Web)...');
+                  const response = await fetch(imageUrl);
+                  if (!response.ok) {
+                     throw new Error(
+                        `Failed to read file for web: ${response.status}`
+                     );
+                  }
+                  const blob = await response.blob();
+                  uploadFormData.append('file', blob, filename);
+                  console.log('🌐 FormData prepared with blob for web');
+               }
+
+               console.log('📤 Uploading to: /api/upload/image');
 
                // Upload image to R2
-               const uploadResponse = await fetchWithAuth(
-                  `${BASE_URL}/api/upload/image`,
-                  {
-                     method: 'POST',
-                     body: uploadFormData,
-                     headers: {
-                        'Content-Type': 'multipart/form-data',
-                     },
-                  }
-               );
+               const uploadResponse = await fetchWithAuth('/api/upload/image', {
+                  method: 'POST',
+                  body: uploadFormData,
+                  // Don't set Content-Type for FormData - let the browser/RN handle it
+                  // headers: { 'Content-Type': 'multipart/form-data' }, // This can cause issues in RN
+               });
+
+               console.log('📤 Upload response status:', uploadResponse.status);
 
                if (!uploadResponse.ok) {
-                  throw new Error('Failed to upload image');
+                  const uploadErrorData = await uploadResponse
+                     .json()
+                     .catch(() => ({}));
+                  console.error('❌ Image upload failed:', {
+                     status: uploadResponse.status,
+                     error: uploadErrorData,
+                  });
+                  captureException(new Error('Image upload failed'), {
+                     function: 'handleCreateLeague',
+                     screen: 'CreateLeague',
+                     step: 'image_upload',
+                     status: uploadResponse.status,
+                     error: uploadErrorData,
+                     platform: Platform.OS,
+                  });
+                  throw new Error(
+                     `Failed to upload image: ${uploadErrorData.error || uploadResponse.statusText}`
+                  );
                }
 
                const uploadData = await uploadResponse.json();
                imageUrl = uploadData.url; // Use the R2 URL
+               console.log('✅ Image uploaded successfully:', imageUrl);
             } catch (uploadError) {
-               console.error('Image upload failed:', uploadError);
+               console.error('❌ Image upload error:', uploadError);
+               captureException(uploadError as Error, {
+                  function: 'handleCreateLeague',
+                  screen: 'CreateLeague',
+                  step: 'image_upload',
+                  originalImageUri: formData.image,
+                  platform: Platform.OS,
+               });
                Toast.show({
                   type: 'error',
                   text1: t('error'),
-                  text2: 'Failed to upload image',
+                  text2: `Failed to upload image: ${uploadError instanceof Error ? uploadError.message : 'Unknown error'}`,
                });
                throw uploadError;
             }
@@ -166,24 +248,41 @@ export default function CreateLeague() {
             image: imageUrl && imageUrl.trim() ? imageUrl : undefined,
          };
 
+         console.log('🚀 Sending league creation request:', {
+            name: cleanFormData.name,
+            hasImage: !!cleanFormData.image,
+            adminUserEmail: cleanFormData.adminUserEmail,
+         });
+
          //send data to backend using authenticated fetch
-         const response = await fetchWithAuth(
-            `${BASE_URL}/api/leagues/create`,
-            {
-               method: 'POST',
-               headers: {
-                  'Content-Type': 'application/json',
-               },
-               body: JSON.stringify(cleanFormData),
-            }
-         );
+         const response = await fetchWithAuth('/api/leagues/create', {
+            method: 'POST',
+            headers: {
+               'Content-Type': 'application/json',
+            },
+            body: JSON.stringify(cleanFormData),
+         });
+
+         console.log('🚀 League creation response status:', response.status);
 
          if (!response.ok) {
             const errorData = await response.json().catch(() => ({}));
-            console.error('League creation failed:', {
+            console.error('❌ League creation failed:', {
                status: response.status,
                statusText: response.statusText,
                error: errorData,
+            });
+            captureException(new Error('League creation API failed'), {
+               function: 'handleCreateLeague',
+               screen: 'CreateLeague',
+               step: 'api_call',
+               status: response.status,
+               error: errorData,
+               requestData: {
+                  name: cleanFormData.name,
+                  hasImage: !!cleanFormData.image,
+                  adminUserEmail: cleanFormData.adminUserEmail,
+               },
             });
             Toast.show({
                type: 'error',
@@ -196,7 +295,14 @@ export default function CreateLeague() {
          }
 
          const data = await response.json();
-         console.log('League created:', data);
+         console.log('✅ League created successfully:', data);
+         captureException(new Error('League created successfully'), {
+            function: 'handleCreateLeague',
+            screen: 'CreateLeague',
+            step: 'success',
+            leagueId: data.league?.id,
+            level: 'info',
+         });
          Toast.show({
             type: 'success',
             text1: t('success'),
@@ -204,14 +310,24 @@ export default function CreateLeague() {
          });
          router.back();
       } catch (error) {
+         console.error('❌ Create league error:', error);
          captureException(error as Error, {
             function: 'handleCreateLeague',
             screen: 'CreateLeague',
+            step: 'general_error',
+            errorMessage:
+               error instanceof Error ? error.message : 'Unknown error',
+            errorStack: error instanceof Error ? error.stack : undefined,
+            formData: {
+               name: formData.name,
+               hasImage: !!formData.image,
+               adminUserEmail: formData.adminUserEmail,
+            },
          });
          Toast.show({
             type: 'error',
             text1: t('error'),
-            text2: 'Failed to create league',
+            text2: `Failed to create league: ${error instanceof Error ? error.message : 'Unknown error'}`,
          });
       } finally {
          setIsLoading(false);
@@ -224,25 +340,70 @@ export default function CreateLeague() {
 
    const pickImage = async () => {
       try {
+         console.log('🖼️ Starting image picker...');
+
+         // According to Expo docs: "No permissions request is necessary for launching the image library"
+
          const result = await ImagePicker.launchImageLibraryAsync({
-            mediaTypes: ImagePicker.MediaTypeOptions.Images,
+            mediaTypes: ['images'], // Use the modern format from docs
             allowsEditing: true,
-            aspect: [1, 1],
-            quality: 0.8,
+            aspect: [4, 3],
+            quality: 1,
+         });
+
+         console.log('📸 Image picker result:', {
+            canceled: result.canceled,
+            assetsLength: result.assets?.length,
+            firstAssetUri: result.assets?.[0]?.uri,
          });
 
          if (!result.canceled && result.assets[0]) {
-            setFormData({ ...formData, image: result.assets[0].uri });
+            const imageUri = result.assets[0].uri;
+            console.log('✅ Image selected:', imageUri);
+            setFormData({ ...formData, image: imageUri });
+
+            // Log successful image selection to Sentry
+            captureException(new Error('Image selected successfully'), {
+               function: 'pickImage',
+               screen: 'CreateLeague',
+               imageUri,
+               level: 'info',
+            });
+         } else {
+            console.log('📸 Image picker canceled or no assets');
          }
       } catch (error) {
+         console.error('❌ Error in pickImage:', error);
+
+         // Check if this is the common simulator gallery issue
+         const isSimulatorGalleryIssue =
+            error instanceof Error &&
+            error.message.includes('ActivityNotFoundException') &&
+            error.message.includes('android.provider.action.PICK_IMAGES');
+
+         if (isSimulatorGalleryIssue) {
+            console.log('🔍 Detected simulator gallery issue');
+            Toast.show({
+               type: 'info',
+               text1: 'Simulator Limitation',
+               text2: 'Image picker requires a real device or emulator with Google Play Store',
+               visibilityTime: 5000,
+            });
+         } else {
+            Toast.show({
+               type: 'error',
+               text1: t('error'),
+               text2: `Failed to pick image: ${error instanceof Error ? error.message : 'Unknown error'}`,
+            });
+         }
+
          captureException(error as Error, {
             function: 'pickImage',
             screen: 'CreateLeague',
-         });
-         Toast.show({
-            type: 'error',
-            text1: t('error'),
-            text2: 'Failed to pick image',
+            errorMessage:
+               error instanceof Error ? error.message : 'Unknown error',
+            errorStack: error instanceof Error ? error.stack : undefined,
+            isSimulatorIssue: isSimulatorGalleryIssue,
          });
       }
    };

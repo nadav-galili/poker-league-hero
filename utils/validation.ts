@@ -27,13 +27,43 @@ export function sanitizeString(input: string): string {
       .trim();
 }
 
+// Sanitization for name fields that allows international characters
+export function sanitizeNameString(input: string): string {
+   if (typeof input !== 'string') return '';
+
+   // Remove potential XSS vectors while preserving Unicode letters and internal spaces
+   return input
+      .replace(/<script\b[^<]*(?:(?!<\/script>)<[^<]*)*<\/script>/gi, '')
+      .replace(/<[^>]*>/g, '') // Remove HTML tags
+      .replace(/[<>&"']/g, (char) => {
+         switch (char) {
+            case '<':
+               return '&lt;';
+            case '>':
+               return '&gt;';
+            case '&':
+               return '&amp;';
+            case '"':
+               return '&quot;';
+            case "'":
+               return '&#x27;';
+            default:
+               return char;
+         }
+      });
+   // Note: NOT trimming here to preserve spaces - validation handles trimming
+}
+
 // Validation schemas
 export const createLeagueSchema = z.object({
    name: z
       .string()
       .min(1, 'League name is required')
       .max(100, 'League name must be less than 100 characters')
-      .regex(/^[a-zA-Z0-9\s\-_.]+$/, 'League name contains invalid characters'),
+      .regex(
+         /^[\p{L}\p{N}\s\-_.]+$/u,
+         'League name contains invalid characters'
+      ),
    image: z
       .union([
          z.string().url('Invalid image URL'),
