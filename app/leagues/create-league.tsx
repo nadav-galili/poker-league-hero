@@ -47,16 +47,18 @@ export default function CreateLeague() {
 
    // Validation functions
    const validateLeagueName = useCallback((name: string): string | null => {
-      if (!name.trim()) {
+      if (!name || !name.trim()) {
          return 'League name is required';
       }
-      if (name.trim().length < 3) {
+      const trimmedName = name.trim();
+      if (trimmedName.length < 3) {
          return 'League name must be at least 3 characters';
       }
-      if (name.trim().length > 50) {
+      if (trimmedName.length > 50) {
          return 'League name must be less than 50 characters';
       }
-      if (!/^[a-zA-Z0-9\s\-_']+$/.test(name.trim())) {
+      // Allow letters, numbers, spaces, hyphens, underscores, periods, commas, apostrophes, ampersands, and parentheses
+      if (!/^[a-zA-Z0-9 \-_.,'&()]+$/.test(trimmedName)) {
          return 'League name contains invalid characters';
       }
       return null;
@@ -67,16 +69,19 @@ export default function CreateLeague() {
          setFormData((prev) => ({ ...prev, name: text }));
 
          // Real-time validation
-         const error = validateLeagueName(text);
-         if (text.length === 0) {
+         // Only validate if the trimmed text has content (don't validate intermediate states like single space)
+         if (text.trim().length === 0) {
             setValidationStates((prev) => ({ ...prev, name: 'idle' }));
             setErrors((prev) => ({ ...prev, name: undefined }));
-         } else if (error) {
-            setValidationStates((prev) => ({ ...prev, name: 'error' }));
-            setErrors((prev) => ({ ...prev, name: error }));
          } else {
-            setValidationStates((prev) => ({ ...prev, name: 'valid' }));
-            setErrors((prev) => ({ ...prev, name: undefined }));
+            const error = validateLeagueName(text);
+            if (error) {
+               setValidationStates((prev) => ({ ...prev, name: 'error' }));
+               setErrors((prev) => ({ ...prev, name: error }));
+            } else {
+               setValidationStates((prev) => ({ ...prev, name: 'valid' }));
+               setErrors((prev) => ({ ...prev, name: undefined }));
+            }
          }
       },
       [validateLeagueName]

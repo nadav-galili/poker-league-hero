@@ -31,7 +31,7 @@ export function sanitizeString(input: string): string {
 export function sanitizeNameString(input: string): string {
    if (typeof input !== 'string') return '';
 
-   // Remove potential XSS vectors while preserving Unicode letters
+   // Remove potential XSS vectors while preserving Unicode letters and internal spaces
    return input
       .replace(/<script\b[^<]*(?:(?!<\/script>)<[^<]*)*<\/script>/gi, '')
       .replace(/<[^>]*>/g, '') // Remove HTML tags
@@ -50,8 +50,8 @@ export function sanitizeNameString(input: string): string {
             default:
                return char;
          }
-      })
-      .trim();
+      });
+   // Note: NOT trimming here to preserve spaces - validation handles trimming
 }
 
 // Validation schemas

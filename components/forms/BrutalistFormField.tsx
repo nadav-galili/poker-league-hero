@@ -5,7 +5,7 @@
 
 import { getTheme } from '@/colors';
 import { Text } from '@/components/Text';
-import { sanitizeString } from '@/utils/validation';
+import { sanitizeNameString } from '@/utils/validation';
 import { Ionicons } from '@expo/vector-icons';
 import * as Haptics from 'expo-haptics';
 import React, { useCallback, useEffect, useRef, useState } from 'react';
@@ -206,7 +206,7 @@ export function BrutalistFormField({
    const handleChangeText = useCallback(
       (text: string) => {
          // Sanitize input to prevent XSS attacks
-         const sanitizedText = sanitizeString(text);
+         const sanitizedText = sanitizeNameString(text);
          onChangeText?.(sanitizedText);
       },
       [onChangeText]
