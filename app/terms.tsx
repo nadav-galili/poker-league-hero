@@ -27,11 +27,11 @@ export default function TermsOfService() {
                   />
                </View>
 
-               <View className="mb-6">
-                  <Text className="text-xl font-semibold text-white/90 mb-4 text-right">
+               <View className="mb-6 items-start">
+                  <Text className="text-xl font-semibold text-white/90 mb-4">
                      1. Acceptance of Terms
                   </Text>
-                  <Text className="text-white/80 mb-4 text-right">
+                  <Text className="text-white/80 mb-4 ">
                      By accessing or using HomeStack (&quot;the App&quot;), you
                      agree to these Terms of Service. If you do not agree, do
                      not use the App.
@@ -39,10 +39,10 @@ export default function TermsOfService() {
                </View>
 
                <View className="mb-6">
-                  <Text className="text-xl font-semibold text-white/90 mb-4 text-right">
+                  <Text className="text-xl font-semibold text-white/90 mb-4 ">
                      2. About HomeStack
                   </Text>
-                  <Text className="text-white/80 mb-4 text-right">
+                  <Text className="text-white/80 mb-4 ">
                      HomeStack is a statistical tracking application for home
                      poker games. It is NOT a gambling application. Users track
                      game results, player statistics, and league information for
@@ -51,10 +51,10 @@ export default function TermsOfService() {
                </View>
 
                <View className="mb-6">
-                  <Text className="text-xl font-semibold text-white/90 mb-4 text-right">
+                  <Text className="text-xl font-semibold text-white/90 mb-4 ">
                      3. User Eligibility
                   </Text>
-                  <Text className="text-white/80 mb-4 text-right">
+                  <Text className="text-white/80 mb-4 ">
                      - Users must be at least 18 years old - You may not use
                      this App for any illegal activities - Each user is
                      responsible for their own game tracking and statistical
@@ -63,10 +63,10 @@ export default function TermsOfService() {
                </View>
 
                <View className="mb-6">
-                  <Text className="text-xl font-semibold text-white/90 mb-4 text-right">
+                  <Text className="text-xl font-semibold text-white/90 mb-4 ">
                      4. Data and Privacy
                   </Text>
-                  <Text className="text-white/80 mb-4 text-right">
+                  <Text className="text-white/80 mb-4 ">
                      We collect minimal user data required to provide the
                      App&apos;s services. Detailed information is available in
                      our Privacy Policy. By using HomeStack, you consent to our
@@ -75,10 +75,10 @@ export default function TermsOfService() {
                </View>
 
                <View className="mb-6">
-                  <Text className="text-xl font-semibold text-white/90 mb-4 text-right">
+                  <Text className="text-xl font-semibold text-white/90 mb-4 ">
                      5. Prohibited Activities
                   </Text>
-                  <Text className="text-white/80 mb-4 text-right">
+                  <Text className="text-white/80 mb-4 ">
                      Users may NOT: - Use the App for actual gambling purposes -
                      Create false or misleading game records - Harass or
                      intimidate other users - Violate local laws or regulations
@@ -86,10 +86,10 @@ export default function TermsOfService() {
                </View>
 
                <View className="mb-6">
-                  <Text className="text-xl font-semibold text-white/90 mb-4 text-right">
+                  <Text className="text-xl font-semibold text-white/90 mb-4 ">
                      6. Intellectual Property
                   </Text>
-                  <Text className="text-white/80 mb-4 text-right">
+                  <Text className="text-white/80 mb-4 ">
                      All content, design, and functionality of HomeStack are
                      owned by the developers. Users grant a limited,
                      non-exclusive license to use their game data within the
@@ -98,10 +98,10 @@ export default function TermsOfService() {
                </View>
 
                <View className="mb-6">
-                  <Text className="text-xl font-semibold text-white/90 mb-4 text-right">
+                  <Text className="text-xl font-semibold text-white/90 mb-4 ">
                      7. Limitation of Liability
                   </Text>
-                  <Text className="text-white/80 mb-4 text-right">
+                  <Text className="text-white/80 mb-4 ">
                      HomeStack is provided &quot;as is&quot; without warranties.
                      We are not responsible for any disputes arising from game
                      tracking or user interactions.
@@ -109,16 +109,16 @@ export default function TermsOfService() {
                </View>
 
                <View className="mb-6">
-                  <Text className="text-xl font-semibold text-white/90 mb-4 text-right">
+                  <Text className="text-xl font-semibold text-white/90 mb-4 ">
                      8. Modifications
                   </Text>
-                  <Text className="text-white/80 mb-4 text-right">
+                  <Text className="text-white/80 mb-4 ">
                      We may update these Terms of Service. Continued use of the
                      App after changes constitutes acceptance of new terms.
                   </Text>
                </View>
 
-               <Text className="text-white/60 italic text-right mt-6">
+               <Text className="text-white/60 italic  mt-6">
                   Last Updated: October 2025
                </Text>
             </ScrollView>

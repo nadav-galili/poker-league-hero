@@ -27,10 +27,10 @@ export default function PrivacyPolicy() {
                </View>
 
                <View className="mb-6">
-                  <Text className="text-xl font-semibold text-white/90 mb-4 text-right">
+                  <Text className="text-xl font-semibold text-white/90 mb-4 ">
                      1. Information We Collect
                   </Text>
-                  <Text className="text-white/80 mb-4 text-right">
+                  <Text className="text-white/80 mb-4 ">
                      HomeStack collects the following data: - Google OAuth user
                      profile information (email, name, profile picture) - Game
                      statistics and league data you create - Device and usage
@@ -39,10 +39,10 @@ export default function PrivacyPolicy() {
                </View>
 
                <View className="mb-6">
-                  <Text className="text-xl font-semibold text-white/90 mb-4 text-right">
+                  <Text className="text-xl font-semibold text-white/90 mb-4 ">
                      2. How We Use Your Data
                   </Text>
-                  <Text className="text-white/80 mb-4 text-right">
+                  <Text className="text-white/80 mb-4 ">
                      We use collected data to: - Provide and improve the
                      HomeStack service - Personalize user experience - Send
                      optional app-related communications - Track anonymous usage
@@ -51,10 +51,10 @@ export default function PrivacyPolicy() {
                </View>
 
                <View className="mb-6">
-                  <Text className="text-xl font-semibold text-white/90 mb-4 text-right">
+                  <Text className="text-xl font-semibold text-white/90 mb-4 ">
                      3. Data Sharing and Disclosure
                   </Text>
-                  <Text className="text-white/80 mb-4 text-right">
+                  <Text className="text-white/80 mb-4 ">
                      We do NOT sell your personal data. We may share data with:
                      - Google OAuth for authentication - Mixpanel for anonymous
                      usage analytics - Sentry for error tracking - Legal
@@ -63,10 +63,10 @@ export default function PrivacyPolicy() {
                </View>
 
                <View className="mb-6">
-                  <Text className="text-xl font-semibold text-white/90 mb-4 text-right">
+                  <Text className="text-xl font-semibold text-white/90 mb-4 ">
                      4. User Rights (GDPR)
                   </Text>
-                  <Text className="text-white/80 mb-4 text-right">
+                  <Text className="text-white/80 mb-4 ">
                      EU users have the right to: - Access your personal data -
                      Request data deletion - Opt-out of analytics tracking -
                      Correct inaccurate information
@@ -74,10 +74,10 @@ export default function PrivacyPolicy() {
                </View>
 
                <View className="mb-6">
-                  <Text className="text-xl font-semibold text-white/90 mb-4 text-right">
+                  <Text className="text-xl font-semibold text-white/90 mb-4 ">
                      5. Data Security
                   </Text>
-                  <Text className="text-white/80 mb-4 text-right">
+                  <Text className="text-white/80 mb-4 ">
                      We implement industry-standard security measures: -
                      Encrypted data transmission - Secure cloud storage -
                      Regular security audits - OAuth token management
@@ -85,10 +85,10 @@ export default function PrivacyPolicy() {
                </View>
 
                <View className="mb-6">
-                  <Text className="text-xl font-semibold text-white/90 mb-4 text-right">
+                  <Text className="text-xl font-semibold text-white/90 mb-4 ">
                      6. Cookies and Tracking
                   </Text>
-                  <Text className="text-white/80 mb-4 text-right">
+                  <Text className="text-white/80 mb-4 ">
                      We use minimal tracking: - Anonymous usage analytics -
                      Performance monitoring - No third-party advertising
                      trackers
@@ -96,20 +96,20 @@ export default function PrivacyPolicy() {
                </View>
 
                <View className="mb-6">
-                  <Text className="text-xl font-semibold text-white/90 mb-4 text-right">
+                  <Text className="text-xl font-semibold text-white/90 mb-4 ">
                      7. Children&apos;s Privacy
                   </Text>
-                  <Text className="text-white/80 mb-4 text-right">
+                  <Text className="text-white/80 mb-4 ">
                      HomeStack is not intended for children under 18. We do not
                      knowingly collect data from minors.
                   </Text>
                </View>
 
                <View className="mb-6">
-                  <Text className="text-xl font-semibold text-white/90 mb-4 text-right">
+                  <Text className="text-xl font-semibold text-white/90 mb-4 ">
                      8. International Data Transfers
                   </Text>
-                  <Text className="text-white/80 mb-4 text-right">
+                  <Text className="text-white/80 mb-4 ">
                      User data may be transferred and processed in the United
                      States, ensuring GDPR and international privacy standards
                      compliance.
@@ -117,15 +117,15 @@ export default function PrivacyPolicy() {
                </View>
 
                <View className="mb-6">
-                  <Text className="text-xl font-semibold text-white/90 mb-4 text-right">
+                  <Text className="text-xl font-semibold text-white/90 mb-4 ">
                      9. Contact Information
                   </Text>
-                  <Text className="text-white/80 mb-4 text-right">
+                  <Text className="text-white/80 mb-4 ">
                      For privacy concerns, contact: nadavg1000@gmail.com
                   </Text>
                </View>
 
-               <Text className="text-white/60 italic text-right mt-6">
+               <Text className="text-white/60 italic  mt-6">
                   Last Updated: October 2025
                </Text>
             </ScrollView>

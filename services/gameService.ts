@@ -18,6 +18,13 @@ export class GameService {
       gameName?: string;
    }): Promise<{ gameId: string }> {
       try {
+         console.log('🎮 [GameService] Creating game with data:', {
+            leagueId: data.leagueId,
+            selectedPlayerIds: data.selectedPlayerIds,
+            buyIn: data.buyIn,
+            playerCount: data.selectedPlayerIds.length,
+         });
+
          const response = await this.deps.fetchWithAuth(
             `${BASE_URL}/api/games/create`,
             {
@@ -31,16 +38,32 @@ export class GameService {
             }
          );
 
+         console.log('🎮 [GameService] Response status:', response.status);
+
          if (!response.ok) {
+            console.error(
+               '🎮 [GameService] Response not OK, status:',
+               response.status
+            );
             const errorData = await response.json();
+            console.error('🎮 [GameService] Error response data:', errorData);
             throw new Error(
                errorData.message || errorData.error || 'Failed to create game'
             );
          }
 
          const result = await response.json();
+         console.log(
+            '🎮 [GameService] Game created successfully, gameId:',
+            result.gameId
+         );
          return { gameId: result.gameId };
       } catch (error) {
+         console.error('🎮 [GameService] Exception caught:', error);
+         console.error('🎮 [GameService] Error details:', {
+            message: error instanceof Error ? error.message : String(error),
+            stack: error instanceof Error ? error.stack : undefined,
+         });
          captureException(error as Error, {
             function: 'createGame',
             screen: 'GameCreation',

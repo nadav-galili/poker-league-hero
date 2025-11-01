@@ -6,6 +6,7 @@ import {
    AuthError,
    AuthRequestConfig,
    DiscoveryDocument,
+   exchangeCodeAsync,
    makeRedirectUri,
    useAuthRequest,
 } from 'expo-auth-session';
@@ -64,10 +65,18 @@ const discovery: DiscoveryDocument = {
    authorizationEndpoint: `${BASE_URL}/api/auth/authorize`,
    tokenEndpoint: `${BASE_URL}/api/auth/token`,
 };
+const appleDiscovery: DiscoveryDocument = {
+   authorizationEndpoint: `${BASE_URL}/api/auth/apple/authorize`,
+   tokenEndpoint: `${BASE_URL}/api/auth/apple/token`,
+};
 
 export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
    const [user, setUser] = React.useState<AuthUser | null>(null);
    const [accessToken, setAccessToken] = React.useState<string | null>(null);
+   const [appleRequest, appleResponse, promptAppleAsync] = useAuthRequest(
+      appleConfig,
+      appleDiscovery
+   );
    const [refreshToken, setRefreshToken] = React.useState<string | null>(null);
    const [hasSeenOnboarding, setHasSeenOnboarding] = React.useState(false);
    const [request, response, promptAsync] = useAuthRequest(config, discovery);
@@ -90,6 +99,10 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
    React.useEffect(() => {
       handleResponse();
    }, [response]);
+
+   React.useEffect(() => {
+      handleAppleResponse();
+   }, [appleResponse]);
 
    // Check if user is authenticated
    React.useEffect(() => {
@@ -419,6 +432,54 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
          refreshInProgressRef.current = false;
       }
    };
+   const handleAppleResponse = async () => {
+      if (appleResponse?.type === 'success') {
+         try {
+            const { code } = appleResponse.params;
+            const response = await exchangeCodeAsync(
+               {
+                  clientId: 'apple',
+                  code,
+                  redirectUri: makeRedirectUri(),
+                  extraParams: {
+                     platform: Platform.OS,
+                  },
+               },
+               appleDiscovery
+            );
+            console.log('response', response);
+            if (isWeb) {
+               // For web: The server sets the tokens in HTTP-only cookies
+               // We just need to get the user data from the response
+               const sessionResponse = await fetch(
+                  `${BASE_URL}/api/auth/session`,
+                  {
+                     method: 'GET',
+                     credentials: 'include',
+                  }
+               );
+
+               if (sessionResponse.ok) {
+                  const sessionData = await sessionResponse.json();
+                  setUser(sessionData as AuthUser);
+               }
+            } else {
+               // For native: The server returns both tokens in the response
+               // We need to store these tokens securely and decode the user data
+               await handleNativeTokens({
+                  accessToken: response.accessToken,
+                  refreshToken: response.refreshToken!,
+               });
+            }
+         } catch (e) {
+            console.log('Error exchanging code:', e);
+         }
+      } else if (appleResponse?.type === 'cancel') {
+         console.log('appleResponse cancelled');
+      } else if (appleResponse?.type === 'error') {
+         console.log('appleResponse error');
+      }
+   };
 
    const handleNativeTokens = async (tokens: {
       accessToken: string;
@@ -688,7 +749,17 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
       }
    };
 
-   const signInWithAppleWebBrowser = async () => {};
+   const signInWithAppleWebBrowser = async () => {
+      try {
+         if (!appleRequest) {
+            console.log('No appleRequest');
+            return;
+         }
+         await promptAppleAsync();
+      } catch (e) {
+         console.log(e);
+      }
+   };
 
    const signInWithApple = async () => {
       try {

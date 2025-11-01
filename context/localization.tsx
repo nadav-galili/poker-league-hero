@@ -229,7 +229,8 @@ export interface Translations {
    onboardingNextButton: string;
    onboardingCompleteButton: string;
    onboardingViewAgain: string;
-
+   termsOfService: string;
+   continueWithGoogle: string;
    // Deep linking / Join League
    joinLeagueRequiresLogin: string;
 }
@@ -449,7 +450,8 @@ const enTranslations: Translations = {
    onboardingNextButton: 'Next',
    onboardingCompleteButton: 'Complete',
    onboardingViewAgain: ' View Onboarding Again',
-
+   continueWithGoogle: 'Continue with Google',
+   termsOfService: 'Terms of Service',
    // Deep linking / Join League
    joinLeagueRequiresLogin: 'You need to be signed in to join a league.',
 };
@@ -665,6 +667,8 @@ const heTranslations: Translations = {
    onboardingNextButton: 'הבא',
    onboardingCompleteButton: 'סיים',
    onboardingViewAgain: ' צפה שוב בהדרכה',
+   continueWithGoogle: 'המשך עם גוגל',
+   termsOfService: 'תנאי שירות',
 
    // Deep linking / Join League
    joinLeagueRequiresLogin: 'עליך להירשם כדי להצטרף לליגה.',
