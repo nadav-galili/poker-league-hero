@@ -4,7 +4,7 @@ import { LoadingState } from '@/components/shared/LoadingState';
 import { Text } from '@/components/Text';
 import { useAuth } from '@/context/auth';
 import { useLocalization } from '@/context/localization';
-import useMixpanel from '@/hooks/useMixpanel';
+import { useMixpanel } from '@/hooks/useMixpanel';
 import { Ionicons } from '@expo/vector-icons';
 import { router, useLocalSearchParams } from 'expo-router';
 import React from 'react';
@@ -29,7 +29,7 @@ type getSummaryListResponse = {
 export default function GameScreen() {
    const theme = getTheme('light');
    const { t, isRTL } = useLocalization();
-   const { fetchWithAuth, user } = useAuth();
+   const { fetchWithAuth } = useAuth();
    const { gameId } = useLocalSearchParams<{ gameId: string }>();
    const { trackScreenView, trackGameEvent, trackError } = useMixpanel();
 

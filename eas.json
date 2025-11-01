@@ -27,9 +27,7 @@
       },
       "production": {
          "autoIncrement": true,
-         "android": {
-            "buildType": "apk"
-         },
+
          "env": {
             "SENTRY_DISABLE_AUTO_UPLOAD": "true",
             "DATABASE_URL": "@DATABASE_URL",
@@ -49,7 +47,11 @@
             "EXPO_PUBLIC_SCHEME": "@EXPO_PUBLIC_SCHEME",
             "EXPO_PUBLIC_MIXPANEL_TOKEN": "@EXPO_PUBLIC_MIXPANEL_TOKEN",
             "EXPO_PUBLIC_API_SECRET": "@EXPO_PUBLIC_API_SECRET",
-            "EXPO_PUBLIC_MIXPANEL_SERVER_URL": "@EXPO_PUBLIC_MIXPANEL_SERVER_URL"
+            "EXPO_PUBLIC_MIXPANEL_SERVER_URL": "@EXPO_PUBLIC_MIXPANEL_SERVER_URL",
+            "APPLE_CLIENT_SECRET": "@APPLE_CLIENT_SECRET",
+            "APPLE_CLIENT_ID": "@APPLE_CLIENT_ID",
+            "APPLE_REDIRECT_URI": "@APPLE_REDIRECT_URI",
+            "APPLE_AUTH_URL": "@APPLE_AUTH_URL"
          }
       }
    },

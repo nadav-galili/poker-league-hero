@@ -149,8 +149,17 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
          setIsLoading(true);
          try {
             // Restore onboarding flag first
-            const storedOnboarding =
-               await SecureStore.getItemAsync('hasSeenOnboarding');
+            let storedOnboarding: string | null = null;
+            if (isWeb) {
+               // For web: Use localStorage
+               if (typeof window !== 'undefined') {
+                  storedOnboarding = localStorage.getItem('hasSeenOnboarding');
+               }
+            } else {
+               // For native: Use SecureStore
+               storedOnboarding = await SecureStore.getItemAsync('hasSeenOnboarding');
+            }
+            
             if (storedOnboarding === 'true' && !DEV_FORCE_ONBOARDING) {
                setHasSeenOnboarding(true);
             } else if (DEV_FORCE_ONBOARDING) {
@@ -727,7 +736,15 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
    const markOnboardingComplete = async () => {
       try {
          console.log('Marking onboarding as complete');
-         await SecureStore.setItemAsync('hasSeenOnboarding', 'true');
+         if (isWeb) {
+            // For web: Use localStorage
+            if (typeof window !== 'undefined') {
+               localStorage.setItem('hasSeenOnboarding', 'true');
+            }
+         } else {
+            // For native: Use SecureStore
+            await SecureStore.setItemAsync('hasSeenOnboarding', 'true');
+         }
          setHasSeenOnboarding(true);
       } catch (error) {
          console.error('Error marking onboarding complete:', error);
@@ -742,7 +759,15 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
    const resetOnboarding = async () => {
       try {
          console.log('Resetting onboarding (dev only)');
-         await SecureStore.deleteItemAsync('hasSeenOnboarding');
+         if (isWeb) {
+            // For web: Use localStorage
+            if (typeof window !== 'undefined') {
+               localStorage.removeItem('hasSeenOnboarding');
+            }
+         } else {
+            // For native: Use SecureStore
+            await SecureStore.deleteItemAsync('hasSeenOnboarding');
+         }
          setHasSeenOnboarding(false);
       } catch (error) {
          console.error('Error resetting onboarding:', error);
