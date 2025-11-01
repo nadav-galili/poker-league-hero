@@ -180,12 +180,15 @@ export interface Translations {
    removePlayerMessage: string;
    playerRemoved: string;
    endGame: string;
+   cannotEndGame: string;
    confirmEndGame: string;
    endGameMessage: string;
-   cannotEndGame: string;
+   endGameConfirmationTitle: string;
+   endGameConfirmationMessage: string;
    gameEnded: string;
    loadingGame: string;
    gameNotFound: string;
+   gameEndedSuccessfully: string;
 
    // Top Profit Player Card
    topProfitPlayer: string;
@@ -400,9 +403,13 @@ const enTranslations: Translations = {
    confirmEndGame: 'End Game',
    endGameMessage:
       'Are you sure you want to end this game? This action cannot be undone.',
+   endGameConfirmationTitle: 'End Game',
+   endGameConfirmationMessage:
+      'Are you sure you want to end this game? All players have cashed out.',
    gameEnded: 'Game ended successfully',
    loadingGame: 'Loading game details...',
    gameNotFound: 'Game not found',
+   gameEndedSuccessfully: 'Game ended successfully',
 
    // Top Profit Player Card
    topProfitPlayer: 'TOP PROFIT PLAYER',
@@ -619,9 +626,13 @@ const heTranslations: Translations = {
    confirmEndGame: 'סיים משחק',
    endGameMessage:
       'האם אתה בטוח שברצונך לסיים את המשחק? פעולה זו לא ניתנת לביטול.',
+   endGameConfirmationTitle: 'סיים משחק',
+   endGameConfirmationMessage:
+      'האם אתה בטוח שברצונך לסיים את המשחק? כל השחקנים כבר משכו כסף.',
    gameEnded: 'המשחק הסתיים בהצלחה',
    loadingGame: 'טוען פרטי משחק...',
    gameNotFound: 'המשחק לא נמצא',
+   gameEndedSuccessfully: 'המשחק הסתיים בהצלחה',
 
    // Top Profit Player Card
    topProfitPlayer: 'שחקן עם הרווח הגבוה ביותר',

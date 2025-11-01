@@ -15,6 +15,7 @@ import AddPlayerModal from '@/components/game/AddPlayerModal';
 import CashOutModal from '@/components/game/CashOutModal';
 import GameSummary from '@/components/game/GameSummary';
 import PlayerCard from '@/components/game/PlayerCard';
+import { ConfirmationModal } from '@/components/modals';
 import { AppButton } from '@/components/ui/AppButton';
 import { BASE_URL } from '@/constants';
 import { GamePlayer, LeagueMember, useGameData } from '@/hooks/useGameData';
@@ -52,6 +53,8 @@ export default function GameScreen() {
    // Modal states
    const [showCashOutModal, setShowCashOutModal] = React.useState(false);
    const [showAddPlayerModal, setShowAddPlayerModal] = React.useState(false);
+   const [showEndGameConfirmation, setShowEndGameConfirmation] =
+      React.useState(false);
    const [selectedPlayer, setSelectedPlayer] =
       React.useState<GamePlayer | null>(null);
    const [cashOutAmount, setCashOutAmount] = React.useState('');
@@ -267,24 +270,29 @@ export default function GameScreen() {
       setShowAddPlayerModal(true);
    };
 
-   const handleEndGame = async () => {
+   const handleEndGame = () => {
+      const activePlayers = game?.players.filter((player) => player.isActive);
+
+      if (activePlayers && activePlayers.length > 0) {
+         const activePlayerNames = activePlayers
+            .map((p) => p.fullName)
+            .join(', ');
+         Toast.show({
+            type: 'error',
+            text1: t('cannotEndGame'),
+            text2: `${t('playersStillActive')}: ${activePlayerNames}`,
+         });
+         return;
+      }
+
+      // Show confirmation modal
+      setShowEndGameConfirmation(true);
+   };
+
+   const confirmEndGame = async () => {
       if (!game || !gameService) return;
 
       try {
-         const activePlayers = game.players.filter((player) => player.isActive);
-
-         if (activePlayers.length > 0) {
-            const activePlayerNames = activePlayers
-               .map((p) => p.fullName)
-               .join(', ');
-            Toast.show({
-               type: 'error',
-               text1: t('cannotEndGame'),
-               text2: `${t('playersStillActive')}: ${activePlayerNames}`,
-            });
-            return;
-         }
-
          setIsProcessing(true);
          await gameService.endGame();
 
@@ -318,6 +326,7 @@ export default function GameScreen() {
          });
       } finally {
          setIsProcessing(false);
+         setShowEndGameConfirmation(false);
       }
    };
 
@@ -480,6 +489,16 @@ export default function GameScreen() {
             onClose={() => setShowCashOutModal(false)}
             onCashOutAmountChange={handleCashOutAmountChange}
             onConfirm={processCashOut}
+         />
+
+         {/* End Game Confirmation Modal */}
+         <ConfirmationModal
+            visible={showEndGameConfirmation}
+            title={t('endGameConfirmationTitle')}
+            message={t('endGameConfirmationMessage')}
+            onConfirm={confirmEndGame}
+            onCancel={() => setShowEndGameConfirmation(false)}
+            isProcessing={isProcessing}
          />
       </View>
    );
