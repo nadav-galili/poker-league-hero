@@ -321,6 +321,12 @@ export default function GameScreen() {
       }
    };
 
+   // Check if all players are cashed out
+   const allPlayersCashedOut =
+      game?.players && game.players.length > 0
+         ? game.players.every((player) => !player.isActive)
+         : false;
+
    const renderPlayerCard = ({ item }: { item: GamePlayer }) => (
       <PlayerCard
          player={item}
@@ -412,7 +418,7 @@ export default function GameScreen() {
                {game?.status === 'active' && (
                   <TouchableOpacity
                      onPress={handleEndGame}
-                     className="p-2 rounded-lg border-2 border-gray-600"
+                     className="p-2 rounded-lg border-2 border-gray-600 flex-row items-center gap-2"
                      style={{ backgroundColor: colors.errorGradientEnd }}
                   >
                      <Ionicons
@@ -420,6 +426,11 @@ export default function GameScreen() {
                         size={24}
                         color={colors.text}
                      />
+                     {allPlayersCashedOut && (
+                        <Text className="text-sm font-bold text-white">
+                           {t('endGame')}
+                        </Text>
+                     )}
                   </TouchableOpacity>
                )}
             </View>

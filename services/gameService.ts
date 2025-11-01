@@ -18,13 +18,6 @@ export class GameService {
       gameName?: string;
    }): Promise<{ gameId: string }> {
       try {
-         console.log('🎮 [GameService] Creating game with data:', {
-            leagueId: data.leagueId,
-            selectedPlayerIds: data.selectedPlayerIds,
-            buyIn: data.buyIn,
-            playerCount: data.selectedPlayerIds.length,
-         });
-
          const response = await this.deps.fetchWithAuth(
             `${BASE_URL}/api/games/create`,
             {
@@ -37,8 +30,6 @@ export class GameService {
                }),
             }
          );
-
-         console.log('🎮 [GameService] Response status:', response.status);
 
          if (!response.ok) {
             console.error(
@@ -53,10 +44,7 @@ export class GameService {
          }
 
          const result = await response.json();
-         console.log(
-            '🎮 [GameService] Game created successfully, gameId:',
-            result.gameId
-         );
+
          return { gameId: result.gameId };
       } catch (error) {
          console.error('🎮 [GameService] Exception caught:', error);

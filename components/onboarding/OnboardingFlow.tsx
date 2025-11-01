@@ -1,6 +1,7 @@
 import { ONBOARDING_SLIDES } from '@/constants/onboarding';
 import { useAuth } from '@/context/auth';
 import { useLocalization } from '@/context/localization';
+import useMixpanel from '@/hooks/useMixpanel';
 import { LinearGradient } from 'expo-linear-gradient';
 import { router } from 'expo-router';
 import React, { useRef, useState } from 'react';
@@ -21,11 +22,17 @@ const { width: screenWidth, height: screenHeight } = Dimensions.get('window');
 export default function OnboardingFlow() {
    const { markOnboardingComplete } = useAuth();
    const { t } = useLocalization();
+   const { track } = useMixpanel();
    const [currentIndex, setCurrentIndex] = useState(0);
    const scrollViewRef = useRef<ScrollView>(null);
    const isLastSlide = currentIndex === ONBOARDING_SLIDES.length - 1;
 
    React.useEffect(() => {
+      // Track onboarding started
+      track('onboarding_started', {
+         total_slides: ONBOARDING_SLIDES.length,
+      });
+
       // Initialize to first slide
       setTimeout(() => {
          if (scrollViewRef.current) {
@@ -46,7 +53,18 @@ export default function OnboardingFlow() {
             animated: false,
          });
       }
-   }, [currentIndex]);
+
+      // Track slide view when slide index changes
+      const slide = ONBOARDING_SLIDES[currentIndex];
+      if (slide) {
+         track('onboarding_slide_viewed', {
+            slide_index: currentIndex,
+            slide_id: slide.id,
+            slide_title: t(slide.titleKey),
+            total_slides: ONBOARDING_SLIDES.length,
+         });
+      }
+   }, [currentIndex, t, track]);
 
    const handleNext = () => {
       if (isLastSlide) {
@@ -62,11 +80,24 @@ export default function OnboardingFlow() {
    };
 
    const handleSkip = async () => {
+      // Track onboarding skipped
+      track('onboarding_skipped', {
+         slide_index: currentIndex,
+         slide_id: ONBOARDING_SLIDES[currentIndex]?.id,
+         total_slides: ONBOARDING_SLIDES.length,
+      });
+
       await markOnboardingComplete();
       router.replace('/');
    };
 
    const handleComplete = async () => {
+      // Track onboarding completed
+      track('onboarding_completed', {
+         total_slides: ONBOARDING_SLIDES.length,
+         completed_all_slides: true,
+      });
+
       await markOnboardingComplete();
       router.replace('/');
    };
