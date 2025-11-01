@@ -32,15 +32,26 @@ export class GameService {
          );
 
          if (!response.ok) {
+            console.error(
+               '🎮 [GameService] Response not OK, status:',
+               response.status
+            );
             const errorData = await response.json();
+            console.error('🎮 [GameService] Error response data:', errorData);
             throw new Error(
                errorData.message || errorData.error || 'Failed to create game'
             );
          }
 
          const result = await response.json();
+
          return { gameId: result.gameId };
       } catch (error) {
+         console.error('🎮 [GameService] Exception caught:', error);
+         console.error('🎮 [GameService] Error details:', {
+            message: error instanceof Error ? error.message : String(error),
+            stack: error instanceof Error ? error.stack : undefined,
+         });
          captureException(error as Error, {
             function: 'createGame',
             screen: 'GameCreation',

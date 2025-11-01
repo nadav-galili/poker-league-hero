@@ -1,7 +1,7 @@
 {
    "name": "HomeStack",
    "slug": "poker-ai-homestack",
-   "version": "1.0.6",
+   "version": "1.0.0",
    "orientation": "portrait",
    "icon": "./assets/images/icon.png",
    "scheme": "pokeraihomestack",
@@ -9,7 +9,9 @@
    "newArchEnabled": true,
    "ios": {
       "supportsTablet": true,
+      "buildNumber": "1",
       "bundleIdentifier": "com.pokeraihomestack.app",
+      "usesAppleSignIn": true,
       "infoPlist": {
          "ITSAppUsesNonExemptEncryption": false,
          "NSPhotoLibraryUsageDescription": "This app needs access to your photo library to let you select league images.",
@@ -38,7 +40,10 @@
                   "scheme": "pokeraihomestack"
                }
             ],
-            "category": ["android.intent.category.BROWSABLE", "android.intent.category.DEFAULT"]
+            "category": [
+               "android.intent.category.BROWSABLE",
+               "android.intent.category.DEFAULT"
+            ]
          }
       ]
    },
@@ -63,6 +68,8 @@
          }
       ],
       "expo-font",
+      "expo-secure-store",
+      ["expo-apple-authentication"],
       "expo-web-browser",
       [
          "expo-image-picker",

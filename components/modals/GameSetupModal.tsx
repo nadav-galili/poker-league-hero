@@ -74,14 +74,9 @@ export function GameSetupModal({
                   onPress={onClose}
                   style={styles.modalBackButton}
                >
-                  <Ionicons name="close" size={24} color={colors.textInverse} />
+                  <Ionicons name="close" size={24} color={colors.text} />
                </TouchableOpacity>
-               <Text
-                  style={[
-                     styles.modalHeaderTitle,
-                     { color: colors.textInverse },
-                  ]}
-               >
+               <Text style={[styles.modalHeaderTitle, { color: colors.text }]}>
                   {t('gameSetup')}
                </Text>
                <View style={styles.placeholder} />
@@ -233,10 +228,10 @@ export function GameSetupModal({
                   onPress={() => {
                      onCreateGame();
                   }}
-                  textColor={colors.text}
-                  bgColor={colors.success}
+                  color="success"
                   disabled={isCreatingGame}
-                  width="80%"
+                  size="large"
+                  icon="play-circle-outline"
                />
             </View>
          </View>
@@ -325,7 +320,7 @@ const styles = StyleSheet.create({
    selectedPlayerItem: {
       flexDirection: 'row',
       alignItems: 'center',
-      backgroundColor: colors.primaryTint,
+      backgroundColor: colors.primaryLight,
       paddingHorizontal: 12,
       paddingVertical: 8,
       borderRadius: 20,

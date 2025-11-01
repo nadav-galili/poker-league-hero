@@ -85,7 +85,19 @@ export function useGameCreation({
             buyIn,
          };
 
+         console.log(
+            '🎮 [useGameCreation] About to create game with request:',
+            {
+               leagueId: request.leagueId,
+               selectedPlayerIds: request.selectedPlayerIds,
+               buyIn: request.buyIn,
+               playerCount: selectedCount,
+            }
+         );
+
          const result = await gameService.createGame(request);
+
+         console.log('🎮 [useGameCreation] Game creation result:', result);
 
          addBreadcrumb('Game created successfully', 'info', {
             gameId: result.gameId,

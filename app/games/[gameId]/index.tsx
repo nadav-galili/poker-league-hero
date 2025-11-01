@@ -4,7 +4,7 @@ import { LoadingState } from '@/components/shared/LoadingState';
 import { Text } from '@/components/Text';
 import { useAuth } from '@/context/auth';
 import { useLocalization } from '@/context/localization';
-import useMixpanel from '@/hooks/useMixpanel';
+import { useMixpanel } from '@/hooks/useMixpanel';
 import { Ionicons } from '@expo/vector-icons';
 import { router, useLocalSearchParams } from 'expo-router';
 import React from 'react';
@@ -15,6 +15,7 @@ import AddPlayerModal from '@/components/game/AddPlayerModal';
 import CashOutModal from '@/components/game/CashOutModal';
 import GameSummary from '@/components/game/GameSummary';
 import PlayerCard from '@/components/game/PlayerCard';
+import { ConfirmationModal } from '@/components/modals';
 import { AppButton } from '@/components/ui/AppButton';
 import { BASE_URL } from '@/constants';
 import { GamePlayer, LeagueMember, useGameData } from '@/hooks/useGameData';
@@ -28,7 +29,7 @@ type getSummaryListResponse = {
 export default function GameScreen() {
    const theme = getTheme('light');
    const { t, isRTL } = useLocalization();
-   const { fetchWithAuth, user } = useAuth();
+   const { fetchWithAuth } = useAuth();
    const { gameId } = useLocalSearchParams<{ gameId: string }>();
    const { trackScreenView, trackGameEvent, trackError } = useMixpanel();
 
@@ -52,6 +53,8 @@ export default function GameScreen() {
    // Modal states
    const [showCashOutModal, setShowCashOutModal] = React.useState(false);
    const [showAddPlayerModal, setShowAddPlayerModal] = React.useState(false);
+   const [showEndGameConfirmation, setShowEndGameConfirmation] =
+      React.useState(false);
    const [selectedPlayer, setSelectedPlayer] =
       React.useState<GamePlayer | null>(null);
    const [cashOutAmount, setCashOutAmount] = React.useState('');
@@ -267,24 +270,29 @@ export default function GameScreen() {
       setShowAddPlayerModal(true);
    };
 
-   const handleEndGame = async () => {
+   const handleEndGame = () => {
+      const activePlayers = game?.players.filter((player) => player.isActive);
+
+      if (activePlayers && activePlayers.length > 0) {
+         const activePlayerNames = activePlayers
+            .map((p) => p.fullName)
+            .join(', ');
+         Toast.show({
+            type: 'error',
+            text1: t('cannotEndGame'),
+            text2: `${t('playersStillActive')}: ${activePlayerNames}`,
+         });
+         return;
+      }
+
+      // Show confirmation modal
+      setShowEndGameConfirmation(true);
+   };
+
+   const confirmEndGame = async () => {
       if (!game || !gameService) return;
 
       try {
-         const activePlayers = game.players.filter((player) => player.isActive);
-
-         if (activePlayers.length > 0) {
-            const activePlayerNames = activePlayers
-               .map((p) => p.fullName)
-               .join(', ');
-            Toast.show({
-               type: 'error',
-               text1: t('cannotEndGame'),
-               text2: `${t('playersStillActive')}: ${activePlayerNames}`,
-            });
-            return;
-         }
-
          setIsProcessing(true);
          await gameService.endGame();
 
@@ -318,8 +326,15 @@ export default function GameScreen() {
          });
       } finally {
          setIsProcessing(false);
+         setShowEndGameConfirmation(false);
       }
    };
+
+   // Check if all players are cashed out
+   const allPlayersCashedOut =
+      game?.players && game.players.length > 0
+         ? game.players.every((player) => !player.isActive)
+         : false;
 
    const renderPlayerCard = ({ item }: { item: GamePlayer }) => (
       <PlayerCard
@@ -412,7 +427,7 @@ export default function GameScreen() {
                {game?.status === 'active' && (
                   <TouchableOpacity
                      onPress={handleEndGame}
-                     className="p-2 rounded-lg border-2 border-gray-600"
+                     className="p-2 rounded-lg border-2 border-gray-600 flex-row items-center gap-2"
                      style={{ backgroundColor: colors.errorGradientEnd }}
                   >
                      <Ionicons
@@ -420,6 +435,11 @@ export default function GameScreen() {
                         size={24}
                         color={colors.text}
                      />
+                     {allPlayersCashedOut && (
+                        <Text className="text-sm font-bold text-white">
+                           {t('endGame')}
+                        </Text>
+                     )}
                   </TouchableOpacity>
                )}
             </View>
@@ -469,6 +489,16 @@ export default function GameScreen() {
             onClose={() => setShowCashOutModal(false)}
             onCashOutAmountChange={handleCashOutAmountChange}
             onConfirm={processCashOut}
+         />
+
+         {/* End Game Confirmation Modal */}
+         <ConfirmationModal
+            visible={showEndGameConfirmation}
+            title={t('endGameConfirmationTitle')}
+            message={t('endGameConfirmationMessage')}
+            onConfirm={confirmEndGame}
+            onCancel={() => setShowEndGameConfirmation(false)}
+            isProcessing={isProcessing}
          />
       </View>
    );

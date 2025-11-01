@@ -7,7 +7,7 @@ import { Ionicons } from '@expo/vector-icons';
 
 import { Image } from 'expo-image';
 import { LinearGradient } from 'expo-linear-gradient';
-import { router, useLocalSearchParams } from 'expo-router';
+import { router, useFocusEffect, useLocalSearchParams } from 'expo-router';
 import React from 'react';
 import type { ViewStyle } from 'react-native';
 import {
@@ -365,6 +365,22 @@ function LeagueStatsComponent() {
          abortController.abort();
       };
    }, [league, checkActiveGame]);
+
+   // Refresh active game state when screen comes into focus (bypasses cache)
+   useFocusEffect(
+      React.useCallback(() => {
+         if (!league) return;
+
+         const abortController = new AbortController();
+         // Force a fresh check by clearing cache and retrying
+         cache.delete(`active_game_${league.id}`);
+         checkActiveGame(abortController.signal);
+
+         return () => {
+            abortController.abort();
+         };
+      }, [league, checkActiveGame])
+   );
 
    // Memoize all callback functions to prevent unnecessary re-renders
    const handleBack = React.useCallback(() => {

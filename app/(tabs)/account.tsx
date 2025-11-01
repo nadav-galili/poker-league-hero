@@ -194,6 +194,23 @@ export default function Account() {
                      style={[styles.actionBorder, { borderColor: colors.text }]}
                   />
                </Pressable>
+
+               <Pressable
+                  className="rounded-xl border-3 border-primary shadow-shadow shadow-lg active:scale-95 bg-info overflow-hidden"
+                  onPress={() => router.push('/onboarding')}
+               >
+                  <View className="flex-row items-center justify-center gap-4 py-5 px-8 border-4 border-primary overflow-hidden">
+                     <View className="w-10 h-10 rounded-xl items-center justify-center mr-3 bg-white/10 border border-white/20">
+                        <Ionicons name="play-circle" size={20} color="#FFFFFF" />
+                     </View>
+                     <Text className="text-base text-white">
+                        Re-watch Onboarding
+                     </Text>
+                  </View>
+                  <View
+                     style={[styles.actionBorder, { borderColor: colors.text }]}
+                  />
+               </Pressable>
             </View>
 
             {/* Legal Links */}
