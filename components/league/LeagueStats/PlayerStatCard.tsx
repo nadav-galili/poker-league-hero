@@ -282,7 +282,7 @@ export default function PlayerStatCard({
 const getCardWidth = () => {
    const padding = 48; // Total horizontal padding
    const gap = 16; // Gap between cards
-   const cardsPerRow = screenWidth > 768 ? 3 : 2; // 3 cards on tablets, 2 on phones
+   const cardsPerRow = screenWidth > 1200 ? 3 : 2; // 3 cards only on very large tablets, 2 on phones
    return (screenWidth - padding - gap * (cardsPerRow - 1)) / cardsPerRow;
 };
 

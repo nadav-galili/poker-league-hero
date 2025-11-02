@@ -6,6 +6,7 @@ import { Image } from 'expo-image';
 import { Alert, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { useRouter } from 'expo-router';
 import { useState } from 'react';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 export default function Account() {
    const theme = getTheme('light');
@@ -13,6 +14,7 @@ export default function Account() {
    const { t } = useLocalization();
    const router = useRouter();
    const [isDeletingData, setIsDeletingData] = useState(false);
+   const insets = useSafeAreaInsets();
 
    const handleDeleteData = () => {
       Alert.alert(
@@ -100,11 +102,15 @@ export default function Account() {
             </Text>
          </View>
 
-         <ScrollView
-            className="flex-1"
-            contentContainerStyle={styles.content}
-            showsVerticalScrollIndicator={false}
-         >
+        <ScrollView
+           className="flex-1"
+           contentContainerStyle={[
+              styles.content,
+              // Ensure content is not obscured by the floating tab bar (height ~75, marginBottom ~24)
+              { paddingBottom: insets.bottom + 140 },
+           ]}
+           showsVerticalScrollIndicator={false}
+        >
             {/* User Profile Card */}
             <View
                style={[
