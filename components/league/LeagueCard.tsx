@@ -84,12 +84,12 @@ const LeagueCardComponent = ({ league, onPress, onShare }: LeagueCardProps) => {
                      </Text>
                   </View>
 
-                  <Pressable
+                  {/* <Pressable
                      className="bg-gray-700/50 p-2 rounded-full"
                      onPress={handleShare}
                   >
                      <Ionicons name="share-outline" size={16} color="#FFFFFF" />
-                  </Pressable>
+                  </Pressable> */}
                </View>
 
                {/* Statistics Row */}
