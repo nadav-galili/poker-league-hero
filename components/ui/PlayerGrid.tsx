@@ -94,7 +94,11 @@ export function PlayerGrid({
          key={variant} // Force re-render when variant changes
          columnWrapperStyle={
             variant === 'grid' && numColumns > 1
-               ? { justifyContent: 'space-between', paddingHorizontal: 8 }
+               ? { 
+                    flex: 1,
+                    gap: 8,
+                    paddingHorizontal: 4,
+                 }
                : undefined
          }
          contentContainerStyle={[

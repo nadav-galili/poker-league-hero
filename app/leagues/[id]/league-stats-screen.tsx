@@ -253,7 +253,7 @@ export default function LeagueStatsScreen() {
                   </Text>
                </View>
 
-               <View className="flex-row flex-wrap justify-center items-start w-full gap-4">
+               <View className="flex-row flex-wrap justify-between items-start w-full gap-4">
                   <TopProfitPlayerCard leagueId={leagueId!} t={t} />
                   <PlayerStatCard
                      leagueId={leagueId!}

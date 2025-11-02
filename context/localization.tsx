@@ -439,7 +439,7 @@ const enTranslations: Translations = {
    avgGameDuration: 'AVG GAME DURATION',
 
    // Onboarding
-   onboardingSlide1Title: 'Welcome to Poker League Hero!',
+   onboardingSlide1Title: 'Welcome to Poker AI HomeStack!',
    onboardingSlide1Description:
       'Create and manage your poker leagues with ease.',
    onboardingSlide2Title: 'Join Existing Leagues',

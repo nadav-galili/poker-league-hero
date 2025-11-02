@@ -50,7 +50,7 @@ export function PlayerCard({
          return {
             flex: 1,
             height: 128,
-            margin: 4,
+            margin: 0,
          };
       } else if (variant === 'list') {
          return {

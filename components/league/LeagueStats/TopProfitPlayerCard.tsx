@@ -187,6 +187,5 @@ const styles = StyleSheet.create({
    card: {
       width: getCardWidth(),
       minWidth: 160,
-      maxWidth: 220,
    },
 });

@@ -9,3 +9,5 @@ initial submition
 
 1.0.1
 initial
+1.0.2
+fix issues

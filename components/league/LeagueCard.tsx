@@ -72,6 +72,9 @@ const LeagueCardComponent = ({ league, onPress, onShare }: LeagueCardProps) => {
 
                {/* League Code Badge and Share Button */}
                <View className="flex-row items-center gap-3 mb-3">
+                  <Text variant="labelSmall" color={league.themeColor}>
+                     {t('leagueCode')}
+                  </Text>
                   <View
                      className="px-3 py-1 rounded-full"
                      style={{ backgroundColor: league.themeColor || '#6366F1' }}
