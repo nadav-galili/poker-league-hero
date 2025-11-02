@@ -95,28 +95,20 @@ export const POST = withAuth(async (request: Request, user) => {
 
       console.log('📡 [GameAPI] Creating cash-in records...');
       // Create initial buy-ins for all players
-      const cashInPromises = gamePlayersResults.map(
-         (gamePlayerResult, index) => {
-            const gamePlayer = gamePlayerResult[0];
-            const playerId = selectedPlayerIds[index];
-            const userIdNum = parseInt(playerId, 10);
-            console.log('📡 [GameAPI] Creating cash-in for playerId:', {
-               original: playerId,
-               converted: userIdNum,
-            });
+      const cashInPromises = gamePlayersResults.map((gamePlayerResult) => {
+         const gamePlayer = gamePlayerResult[0];
 
-            return db
-               .insert(cashIns)
-               .values({
-                  gameId,
-                  userId: userIdNum,
-                  gamePlayerId: gamePlayer.id,
-                  amount: parseFloat(buyIn).toFixed(2),
-                  type: 'buy_in',
-               })
-               .returning();
-         }
-      );
+         return db
+            .insert(cashIns)
+            .values({
+               gameId,
+               userId: gamePlayer.userId,
+               gamePlayerId: gamePlayer.id,
+               amount: parseFloat(buyIn).toFixed(2),
+               type: 'buy_in',
+            })
+            .returning();
+      });
 
       await Promise.all(cashInPromises);
       console.log('📡 [GameAPI] Cash-in records created');
