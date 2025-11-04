@@ -80,6 +80,19 @@ export async function POST(req: Request) {
          }
       } catch (error) {
          console.error('Error saving user to database:', error);
+         return Response.json(
+            { error: 'Failed to save user to database' },
+            { status: 500 }
+         );
+      }
+
+      // Ensure we have a valid userId before creating tokens
+      if (!dbUserId) {
+         console.error('User ID not found after database operation');
+         return Response.json(
+            { error: 'Failed to retrieve user ID' },
+            { status: 500 }
+         );
       }
 
       // Create new tokens with userId included
