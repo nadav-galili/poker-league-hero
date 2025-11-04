@@ -4,6 +4,7 @@
  */
 
 import { Mixpanel } from 'mixpanel-react-native';
+import * as TrackingTransparency from 'expo-tracking-transparency';
 
 // Get Mixpanel token and server URL from environment variables
 const MIXPANEL_TOKEN = process.env.EXPO_PUBLIC_MIXPANEL_TOKEN || '';
@@ -72,6 +73,7 @@ class MixpanelService {
 
    /**
     * Initialize Mixpanel with token
+    * Requests App Tracking Transparency permission before initializing on iOS
     */
    async init(): Promise<void> {
       if (this.isInitialized || !MIXPANEL_TOKEN) {
@@ -87,6 +89,23 @@ class MixpanelService {
             return;
          }
 
+         // Request tracking permission on iOS before initializing Mixpanel
+         let trackingPermissionGranted = true;
+         try {
+            const { status } =
+               await TrackingTransparency.requestTrackingPermissionsAsync();
+            trackingPermissionGranted = status === 'granted';
+
+            if (!trackingPermissionGranted) {
+               console.log(
+                  'User declined tracking permission. Mixpanel will still initialize but tracking may be limited.'
+               );
+            }
+         } catch (error) {
+            // If tracking transparency is not available (e.g., on Android or older iOS), continue
+            console.log('Tracking transparency not available:', error);
+         }
+
          this.mixpanel = new Mixpanel(MIXPANEL_TOKEN, false);
          await this.mixpanel.init();
 
@@ -96,7 +115,14 @@ class MixpanelService {
          }
 
          this.isInitialized = true;
-         this.mixpanel.optInTracking();
+
+         // Only opt in to tracking if permission was granted
+         if (trackingPermissionGranted) {
+            this.mixpanel.optInTracking();
+         } else {
+            // Opt out if permission was denied
+            this.mixpanel.optOutTracking();
+         }
 
          console.log('Mixpanel initialized successfully');
       } catch (error) {
