@@ -5,6 +5,7 @@ import {
 } from '@/constants';
 import crypto from 'crypto';
 import * as jose from 'jose';
+import { v4 as uuidv4 } from 'uuid';
 
 interface AppleAuthResult {
    accessToken: string;
@@ -77,7 +78,7 @@ export async function verifyAndCreateTokens({
       const issuedAt = Math.floor(Date.now() / 1000);
 
       // Generate a unique jti (JWT ID) for the refresh token
-      const jti = crypto.randomUUID();
+      const jti = uuidv4();
 
       // Create access token (short-lived)
       const accessToken = await new jose.SignJWT({

@@ -14,6 +14,7 @@ import {
 import * as jose from 'jose';
 import { getDb, users } from '@/db';
 import { eq } from 'drizzle-orm';
+import { v4 as uuidv4 } from 'uuid';
 
 export async function POST(request: Request) {
    try {
@@ -118,7 +119,7 @@ export async function POST(request: Request) {
       // create refresh token (rotated by /api/auth/refresh)
       const refreshToken = await new jose.SignJWT({
          ...enhancedUserInfo,
-         jti: crypto.randomUUID(),
+         jti: uuidv4(),
          type: 'refresh',
       })
          .setProtectedHeader({ alg: 'HS256' })

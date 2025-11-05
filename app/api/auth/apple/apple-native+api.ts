@@ -3,6 +3,7 @@ import { getDb, users } from '@/db';
 import { verifyAndCreateTokens } from '@/utils/apple-auth';
 import { eq } from 'drizzle-orm';
 import * as jose from 'jose';
+import { v4 as uuidv4 } from 'uuid';
 
 /**
  * To verify the identity token, your app server must:
@@ -115,7 +116,7 @@ export async function POST(req: Request) {
          ...tokenPayload,
          userId: dbUserId,
          picture: profileImageUrl,
-         jti: crypto.randomUUID(),
+         jti: uuidv4(),
          type: 'refresh',
       })
          .setProtectedHeader({ alg: 'HS256' })

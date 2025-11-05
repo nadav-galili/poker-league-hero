@@ -10,6 +10,7 @@ import {
 } from '@/constants';
 import { addBreadcrumb } from '@/utils/sentry';
 import * as jose from 'jose';
+import { v4 as uuidv4 } from 'uuid';
 
 /**
  * Refresh API endpoint
@@ -133,7 +134,7 @@ export async function POST(request: Request) {
                // Also (re)issue a refresh token to bootstrap clients missing it
                const newRefreshToken = await new jose.SignJWT({
                   ...userInfo,
-                  jti: crypto.randomUUID(),
+                  jti: uuidv4(),
                   type: 'refresh',
                })
                   .setProtectedHeader({ alg: 'HS256' })
@@ -252,7 +253,7 @@ export async function POST(request: Request) {
       const issuedAt = Math.floor(Date.now() / 1000);
 
       // Generate a unique jti (JWT ID) for the new refresh token
-      const jti = crypto.randomUUID();
+      const jti = uuidv4();
 
       // Get the user info from the token
       const userInfo = decoded.payload;
