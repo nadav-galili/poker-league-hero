@@ -11,6 +11,7 @@ import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { Stack } from 'expo-router';
 import * as SplashScreen from 'expo-splash-screen';
 import { useEffect, useState } from 'react';
+import { Image, StyleSheet, View } from 'react-native';
 import { SafeAreaProvider, SafeAreaView } from 'react-native-safe-area-context';
 import Toast, {
    BaseToast,
@@ -172,7 +173,16 @@ export default Sentry.wrap(function RootLayout() {
    };
 
    if (!fontsLoaded) {
-      return null;
+      // Show visual splash screen while loading
+      return (
+         <View style={styles.splashContainer}>
+            <Image
+               source={require('../assets/images/icon.png')}
+               style={styles.splashImage}
+               resizeMode="contain"
+            />
+         </View>
+      );
    }
 
    return (
@@ -201,4 +211,17 @@ export default Sentry.wrap(function RootLayout() {
          <Toast config={toastConfig} />
       </SafeAreaView>
    );
+});
+
+const styles = StyleSheet.create({
+   splashContainer: {
+      flex: 1,
+      backgroundColor: '#ffffff', // White background as per app.json config
+      justifyContent: 'center',
+      alignItems: 'center',
+   },
+   splashImage: {
+      width: 200, // imageWidth from app.json
+      height: 200,
+   },
 });
