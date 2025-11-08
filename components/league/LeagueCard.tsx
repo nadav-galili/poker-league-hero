@@ -72,6 +72,9 @@ const LeagueCardComponent = ({ league, onPress, onShare }: LeagueCardProps) => {
 
                {/* League Code Badge and Share Button */}
                <View className="flex-row items-center gap-3 mb-3">
+                  <Text className="text-white text-sm font-semibold">
+                     {t('leagueCode')}
+                  </Text>
                   <View
                      className="px-3 py-1 rounded-full"
                      style={{ backgroundColor: league.themeColor || '#6366F1' }}
@@ -80,13 +83,13 @@ const LeagueCardComponent = ({ league, onPress, onShare }: LeagueCardProps) => {
                         {league.code}
                      </Text>
                   </View>
-
+                  {/* 
                   <Pressable
                      className="bg-gray-700/50 p-2 rounded-full"
                      onPress={handleShare}
                   >
                      <Ionicons name="share-outline" size={16} color="#FFFFFF" />
-                  </Pressable>
+                  </Pressable> */}
                </View>
 
                {/* Statistics Row */}

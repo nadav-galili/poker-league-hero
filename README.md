@@ -10,6 +10,8 @@ upload after fixes with new screen shots
 fix reject issues
 1.0.8
 fixed 2 reject-- mostly layout
+1.0.10
+fixed analytics after launch
 
 # ANDROID
 

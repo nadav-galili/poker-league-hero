@@ -1,7 +1,7 @@
 {
    "name": "HomeStack",
    "slug": "poker-ai-homestack",
-   "version": "1.0.9",
+   "version": "1.0.10",
    "orientation": "portrait",
    "icon": "./assets/images/icon.png",
    "scheme": "pokeraihomestack",
@@ -9,7 +9,7 @@
    "newArchEnabled": true,
    "ios": {
       "supportsTablet": false,
-      "buildNumber": "8",
+      "buildNumber": "9",
       "bundleIdentifier": "com.pokeraihomestack.app",
       "usesAppleSignIn": true,
       "infoPlist": {
