@@ -109,16 +109,17 @@ export default function OnboardingFlow() {
 
    const renderSlide = (slide: (typeof ONBOARDING_SLIDES)[0]) => {
       const colors = [slide.color, slide.colorEnd];
+      // Responsive image size - max 60% of screen width or 320px, whichever is smaller
+      const imageSize = Math.min(screenWidth * 0.6, 320);
 
       return (
          <View
             key={slide.id}
             style={{
                width: screenWidth,
-               height: screenHeight - 160, // Account for bottom controls - increased space
+               height: screenHeight - 160,
                justifyContent: 'center',
                alignItems: 'center',
-               paddingHorizontal: 20,
             }}
          >
             <LinearGradient
@@ -140,31 +141,53 @@ export default function OnboardingFlow() {
                   flex: 1,
                   justifyContent: 'center',
                   alignItems: 'center',
-                  paddingHorizontal: 24,
+                  paddingHorizontal: 32,
+                  paddingVertical: 40,
                }}
             >
-               {/* Image */}
-               <View style={{ marginBottom: 48 }}>
-                  <Image
-                     source={slide.image}
+               {/* Image Container - Professional styling */}
+               <View
+                  style={{
+                     marginBottom: 48,
+                     shadowColor: 'rgba(0, 0, 0, 0.3)',
+                     shadowOffset: { width: 0, height: 12 },
+                     shadowOpacity: 0.5,
+                     shadowRadius: 24,
+                     elevation: 12,
+                  }}
+               >
+                  <View
                      style={{
-                        width: 350,
-                        height: 350,
-                        borderRadius: 24,
-                        resizeMode: 'contain',
+                        borderRadius: 28,
+                        overflow: 'hidden',
+                        backgroundColor: 'rgba(255, 255, 255, 0.1)',
+                        padding: 8,
+                        borderWidth: 1,
+                        borderColor: 'rgba(255, 255, 255, 0.2)',
                      }}
-                  />
+                  >
+                     <Image
+                        source={slide.image}
+                        style={{
+                           width: imageSize,
+                           height: imageSize,
+                           borderRadius: 24,
+                           resizeMode: 'cover',
+                        }}
+                     />
+                  </View>
                </View>
 
                {/* Title */}
                <Text
                   style={{
-                     fontSize: 32,
+                     fontSize: 36,
                      fontWeight: '900',
                      color: 'white',
                      textAlign: 'center',
-                     marginBottom: 24,
-                     letterSpacing: 0.5,
+                     marginBottom: 16,
+                     letterSpacing: -0.5,
+                     lineHeight: 42,
                   }}
                >
                   {t(slide.titleKey)}
@@ -173,10 +196,11 @@ export default function OnboardingFlow() {
                {/* Description */}
                <Text
                   style={{
-                     fontSize: 18,
-                     color: 'rgba(255, 255, 255, 0.9)',
+                     fontSize: 17,
+                     color: 'rgba(255, 255, 255, 0.85)',
                      textAlign: 'center',
-                     lineHeight: 28,
+                     lineHeight: 26,
+                     fontWeight: '500',
                   }}
                >
                   {t(slide.descriptionKey)}
@@ -185,13 +209,13 @@ export default function OnboardingFlow() {
 
             {/* Bottom gradient accent */}
             <LinearGradient
-               colors={['transparent', 'rgba(0, 0, 0, 0.2)']}
+               colors={['transparent', 'rgba(0, 0, 0, 0.3)']}
                style={{
                   position: 'absolute',
                   bottom: 0,
                   left: 0,
                   right: 0,
-                  height: 80,
+                  height: 100,
                   pointerEvents: 'none',
                }}
             />
