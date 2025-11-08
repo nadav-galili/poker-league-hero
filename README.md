@@ -21,3 +21,5 @@ fix issues
 fixed layout
 1.0.5
 account layout , league stats
+1.0.7
+just fixing google play reject on app release

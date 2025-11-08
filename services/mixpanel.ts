@@ -3,8 +3,8 @@
  * Provides centralized event tracking for the Poker League Hero app
  */
 
-import { Mixpanel } from 'mixpanel-react-native';
 import * as TrackingTransparency from 'expo-tracking-transparency';
+import { Mixpanel } from 'mixpanel-react-native';
 
 // Get Mixpanel token and server URL from environment variables
 const MIXPANEL_TOKEN = process.env.EXPO_PUBLIC_MIXPANEL_TOKEN || '';
@@ -108,6 +108,17 @@ class MixpanelService {
 
          this.mixpanel = new Mixpanel(MIXPANEL_TOKEN, false);
          await this.mixpanel.init();
+
+         // Disable advertising ID collection to comply with Google Play policies
+         // This ensures we don't collect Android Advertising ID (AAID) or iOS IDFA
+         try {
+            const mixpanelAny = this.mixpanel as any;
+            if (mixpanelAny.setUseAdvertisingId) {
+               mixpanelAny.setUseAdvertisingId(false);
+            }
+         } catch (error) {
+            console.log('Could not disable advertising ID in Mixpanel:', error);
+         }
 
          // Configure server URL if specified (for EU/India data residency)
          if (MIXPANEL_SERVER_URL) {
