@@ -90,17 +90,14 @@ class MixpanelService {
          }
 
          // Request tracking permission on iOS before initializing Mixpanel
-         let trackingPermissionGranted = true;
+         // This is required by Apple's ATT policy - we ask permission even though
+         // we only disable IDFA collection, allowing functional analytics to continue
          try {
             const { status } =
                await TrackingTransparency.requestTrackingPermissionsAsync();
-            trackingPermissionGranted = status === 'granted';
-
-            if (!trackingPermissionGranted) {
-               console.log(
-                  'User declined tracking permission. Mixpanel will still initialize but tracking may be limited.'
-               );
-            }
+            console.log(
+               `ATT permission status: ${status}. Functional tracking will continue regardless.`
+            );
          } catch (error) {
             // If tracking transparency is not available (e.g., on Android or older iOS), continue
             console.log('Tracking transparency not available:', error);
@@ -109,8 +106,9 @@ class MixpanelService {
          this.mixpanel = new Mixpanel(MIXPANEL_TOKEN, false);
          await this.mixpanel.init();
 
-         // Disable advertising ID collection to comply with Google Play policies
-         // This ensures we don't collect Android Advertising ID (AAID) or iOS IDFA
+         // Disable advertising ID collection to comply with Apple's ATT policy
+         // This ensures we don't collect IDFA (iOS) or AAID (Android)
+         // Functional analytics (events, crashes, performance) can still be tracked
          try {
             const mixpanelAny = this.mixpanel as any;
             if (mixpanelAny.setUseAdvertisingId) {
@@ -127,13 +125,9 @@ class MixpanelService {
 
          this.isInitialized = true;
 
-         // Only opt in to tracking if permission was granted
-         if (trackingPermissionGranted) {
-            this.mixpanel.optInTracking();
-         } else {
-            // Opt out if permission was denied
-            this.mixpanel.optOutTracking();
-         }
+         // Always opt in to functional analytics tracking
+         // We disabled advertising ID collection above, so we're compliant with ATT
+         this.mixpanel.optInTracking();
 
          console.log('Mixpanel initialized successfully');
       } catch (error) {
