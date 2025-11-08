@@ -79,7 +79,7 @@ export function PlayerGrid({
       </View>
    );
 
-   const renderSeparator = () => <View className="h-2" />;
+   const renderSeparator = () => <View className="h-1.5" />;
 
    if (error) {
       return renderErrorState();
@@ -94,13 +94,13 @@ export function PlayerGrid({
          key={variant} // Force re-render when variant changes
          columnWrapperStyle={
             variant === 'grid' && numColumns > 1
-               ? { justifyContent: 'space-between', paddingHorizontal: 8 }
+               ? { justifyContent: 'flex-start', paddingHorizontal: 12 }
                : undefined
          }
          contentContainerStyle={[
             variant === 'grid'
                ? {
-                    padding: 16,
+                    padding: 12,
                     paddingBottom: 120,
                     flexGrow: members.length === 0 ? 1 : 0,
                     justifyContent:

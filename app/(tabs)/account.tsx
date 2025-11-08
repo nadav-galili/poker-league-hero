@@ -3,9 +3,19 @@ import { useAuth } from '@/context/auth';
 import { useLocalization } from '@/context/localization';
 import { Ionicons } from '@expo/vector-icons';
 import { Image } from 'expo-image';
-import { Alert, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { useRouter } from 'expo-router';
 import { useState } from 'react';
+import {
+   Alert,
+   Dimensions,
+   Platform,
+   Pressable,
+   ScrollView,
+   StyleSheet,
+   Text,
+   View,
+} from 'react-native';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 export default function Account() {
    const theme = getTheme('light');
@@ -13,6 +23,10 @@ export default function Account() {
    const { t } = useLocalization();
    const router = useRouter();
    const [isDeletingData, setIsDeletingData] = useState(false);
+   const insets = useSafeAreaInsets();
+   const { width } = Dimensions.get('window');
+   const isIPad =
+      Platform.OS === 'ios' && ((Platform as any).isPad || width >= 768);
 
    const handleDeleteData = () => {
       Alert.alert(
@@ -102,7 +116,11 @@ export default function Account() {
 
          <ScrollView
             className="flex-1"
-            contentContainerStyle={styles.content}
+            contentContainerStyle={[
+               styles.content,
+               { paddingBottom: Math.max(insets.bottom + 100, 120) },
+               isIPad && styles.ipadContent,
+            ]}
             showsVerticalScrollIndicator={false}
          >
             {/* User Profile Card */}
@@ -119,7 +137,7 @@ export default function Account() {
                      source={{
                         uri:
                            user.picture ||
-                           'https://via.placeholder.com/120x120/3057FF/FFFFFF?text=?',
+                           'https://via.placeholder.com/80x80/3057FF/FFFFFF?text=?',
                      }}
                      style={styles.profileImage}
                      contentFit="cover"
@@ -141,7 +159,7 @@ export default function Account() {
                {/* User Info */}
                <View style={styles.userInfo}>
                   <View style={styles.nameContainer}>
-                     <Text className="text-xl font-bold text-success">
+                     <Text className="text-lg font-bold text-success">
                         {user.name || 'Unknown User'}
                      </Text>
                      <View
@@ -153,8 +171,8 @@ export default function Account() {
                   </View>
 
                   <View style={styles.emailContainer}>
-                     <Ionicons name="mail" size={16} color={colors.info} />
-                     <Text className="text-base text-white">
+                     <Ionicons name="mail" size={14} color={colors.info} />
+                     <Text className="text-sm text-white">
                         {user.email || 'No email'}
                      </Text>
                   </View>
@@ -163,17 +181,17 @@ export default function Account() {
                      <View style={styles.verifiedBadge}>
                         <Ionicons
                            name="checkmark-circle"
-                           size={16}
+                           size={14}
                            color={colors.primary}
                         />
-                        <Text className="text-sm text-white">VERIFIED</Text>
+                        <Text className="text-xs text-white">VERIFIED</Text>
                      </View>
                   )}
                </View>
             </View>
 
             {/* Account Actions */}
-            <View className="gap-4">
+            <View className="gap-2">
                <Text className="text-2xl font-bold text-success">
                   {t('accountActions')}
                </Text>
@@ -182,13 +200,11 @@ export default function Account() {
                   className="rounded-xl border-3 border-primary shadow-shadow shadow-lg active:scale-95 bg-error overflow-hidden"
                   onPress={signOut}
                >
-                  <View className="flex-row items-center justify-center gap-4 py-5 px-8 border-4 border-primary overflow-hidden">
-                     <View className="w-10 h-10 rounded-xl items-center justify-center mr-3 bg-white/10 border border-white/20">
-                        <Ionicons name="log-out" size={20} color="#FFFFFF" />
+                  <View className="flex-row items-center justify-center gap-2 py-3 px-4 border-4 border-primary overflow-hidden">
+                     <View className="w-8 h-8 rounded-xl items-center justify-center mr-2 bg-white/10 border border-white/20">
+                        <Ionicons name="log-out" size={16} color="#FFFFFF" />
                      </View>
-                     <Text className="text-base text-white">
-                        {t('signOut')}
-                     </Text>
+                     <Text className="text-sm text-white">{t('signOut')}</Text>
                   </View>
                   <View
                      style={[styles.actionBorder, { borderColor: colors.text }]}
@@ -199,11 +215,15 @@ export default function Account() {
                   className="rounded-xl border-3 border-primary shadow-shadow shadow-lg active:scale-95 bg-info overflow-hidden"
                   onPress={() => router.push('/onboarding')}
                >
-                  <View className="flex-row items-center justify-center gap-4 py-5 px-8 border-4 border-primary overflow-hidden">
-                     <View className="w-10 h-10 rounded-xl items-center justify-center mr-3 bg-white/10 border border-white/20">
-                        <Ionicons name="play-circle" size={20} color="#FFFFFF" />
+                  <View className="flex-row items-center justify-center gap-2 py-3 px-4 border-4 border-primary overflow-hidden">
+                     <View className="w-8 h-8 rounded-xl items-center justify-center mr-2 bg-white/10 border border-white/20">
+                        <Ionicons
+                           name="play-circle"
+                           size={16}
+                           color="#FFFFFF"
+                        />
                      </View>
-                     <Text className="text-base text-white">
+                     <Text className="text-sm text-white">
                         Re-watch Onboarding
                      </Text>
                   </View>
@@ -215,9 +235,7 @@ export default function Account() {
 
             {/* Legal Links */}
             <View className="gap-4">
-               <Text className="text-2xl font-bold text-success">
-                  Legal
-               </Text>
+               <Text className="text-2xl font-bold text-success">Legal</Text>
 
                <View className="gap-2">
                   <Pressable
@@ -241,7 +259,7 @@ export default function Account() {
                   <Pressable
                      onPress={handleDeleteData}
                      disabled={isDeletingData}
-                     className="rounded-xl border-2 border-error p-3 active:opacity-70 mt-4"
+                     className="rounded-xl border-2 border-error p-3 active:opacity-70 mt-2"
                      style={{ opacity: isDeletingData ? 0.6 : 1 }}
                   >
                      <View className="flex-row items-center justify-center gap-2">
@@ -251,7 +269,9 @@ export default function Account() {
                            color="#ef4444"
                         />
                         <Text className="text-sm text-error font-semibold">
-                           {isDeletingData ? 'Deleting Data...' : 'Delete My Data'}
+                           {isDeletingData
+                              ? 'Deleting Data...'
+                              : 'Delete My Data'}
                         </Text>
                      </View>
                   </Pressable>
@@ -388,6 +408,13 @@ const styles = StyleSheet.create({
       gap: 24,
    },
 
+   ipadContent: {
+      maxWidth: 800,
+      alignSelf: 'center',
+      width: '100%',
+      paddingHorizontal: 40,
+   },
+
    placeholder: {
       textAlign: 'center',
       marginTop: 40,
@@ -397,9 +424,9 @@ const styles = StyleSheet.create({
    profileCard: {
       flexDirection: 'row',
       alignItems: 'center',
-      padding: 20,
-      borderRadius: 20,
-      borderWidth: 4,
+      padding: 12,
+      borderRadius: 16,
+      borderWidth: 3,
    },
 
    brutalistShadow: {
@@ -412,42 +439,42 @@ const styles = StyleSheet.create({
 
    imageContainer: {
       position: 'relative',
-      marginRight: 20,
+      marginRight: 12,
    },
 
    profileImage: {
-      width: 120,
-      height: 120,
-      borderRadius: 28,
-      borderWidth: 4,
+      width: 80,
+      height: 80,
+      borderRadius: 20,
+      borderWidth: 3,
       borderColor: '#FFFFFF',
    },
 
    imageFrame: {
       position: 'absolute',
-      top: -8,
-      left: -8,
-      right: -8,
-      bottom: -8,
-      borderWidth: 4,
-      borderRadius: 36,
+      top: -6,
+      left: -6,
+      right: -6,
+      bottom: -6,
+      borderWidth: 3,
+      borderRadius: 24,
       opacity: 0.8,
    },
 
    imageCornerAccent: {
       position: 'absolute',
-      top: -4,
-      right: -4,
-      width: 24,
-      height: 24,
-      borderRadius: 12,
-      borderWidth: 3,
+      top: -3,
+      right: -3,
+      width: 18,
+      height: 18,
+      borderRadius: 9,
+      borderWidth: 2,
       borderColor: '#FFFFFF',
    },
 
    userInfo: {
       flex: 1,
-      gap: 12,
+      gap: 8,
    },
 
    nameContainer: {

@@ -116,17 +116,17 @@ export default function PlayerStatCard({
    if (isLoading) {
       return (
          <View
-            className={`${config.bgColor} backdrop-blur-xl ${config.borderColor} rounded-3xl p-6 mb-4`}
+            className={`${config.bgColor} backdrop-blur-xl ${config.borderColor} rounded-3xl p-4 mb-4`}
             style={[styles.card, cardStyle]}
          >
-            <View className="items-center justify-center py-8">
+            <View className="items-center justify-center py-6">
                <View
-                  className="w-12 h-12 bg-white/10 border border-white/20 rounded-2xl items-center justify-center mb-3"
+                  className="w-10 h-10 bg-white/10 border border-white/20 rounded-xl items-center justify-center mb-3"
                   style={iconContainerStyle}
                >
                   <ActivityIndicator size="small" color={config.color} />
                </View>
-               <Text className="text-white/70 text-sm font-medium">
+               <Text className="text-white/70 text-xs font-medium">
                   {t('loading')}...
                </Text>
             </View>
@@ -137,7 +137,7 @@ export default function PlayerStatCard({
    if (error || !data) {
       return (
          <View
-            className="bg-red-500/10 backdrop-blur-xl border-red-400/30 rounded-3xl p-6 mb-4"
+            className="bg-red-500/10 backdrop-blur-xl border-red-400/30 rounded-3xl p-4 mb-4"
             style={[
                styles.card,
                {
@@ -149,9 +149,9 @@ export default function PlayerStatCard({
                },
             ]}
          >
-            <View className="items-center justify-center py-8">
+            <View className="items-center justify-center py-6">
                <View
-                  className="w-12 h-12 bg-red-500/20 border border-red-400/40 rounded-2xl items-center justify-center mb-3"
+                  className="w-10 h-10 bg-red-500/20 border border-red-400/40 rounded-xl items-center justify-center mb-3"
                   style={{
                      shadowColor: '#F87171',
                      shadowOffset: { width: 0, height: 4 },
@@ -162,11 +162,11 @@ export default function PlayerStatCard({
                >
                   <Ionicons
                      name={config.icon as any}
-                     size={24}
+                     size={18}
                      color="#F87171"
                   />
                </View>
-               <Text className="text-red-400 text-sm font-medium text-center">
+               <Text className="text-red-400 text-xs font-medium text-center">
                   {error || t('noCompletedGames')}
                </Text>
             </View>
@@ -176,13 +176,13 @@ export default function PlayerStatCard({
 
    return (
       <View
-         className={`${config.bgColor} backdrop-blur-xl ${config.borderColor} rounded-3xl p-6 mb-4`}
+         className={`${config.bgColor} backdrop-blur-xl ${config.borderColor} rounded-3xl p-4 mb-4`}
          style={[styles.card, cardStyle]}
       >
          {/* Header with Icon */}
-         <View className="flex-row items-center justify-between mb-4">
+         <View className="flex-row items-center justify-between mb-3">
             <View
-               className="w-12 h-12 border border-white/30 rounded-2xl items-center justify-center"
+               className="w-10 h-10 border border-white/30 rounded-xl items-center justify-center"
                style={[
                   {
                      backgroundColor: `${config.color}20`,
@@ -192,12 +192,12 @@ export default function PlayerStatCard({
             >
                <Ionicons
                   name={config.icon as any}
-                  size={20}
+                  size={18}
                   color={config.color}
                />
             </View>
             <Text
-               className="text-white/90 text-sm font-semibold flex-1 text-right"
+               className="text-white/90 text-xs font-semibold flex-1 text-right"
                numberOfLines={2}
             >
                {t(config.title)}
@@ -205,14 +205,14 @@ export default function PlayerStatCard({
          </View>
 
          {/* Player Avatar */}
-         <View className="items-center mb-4">
+         <View className="items-center mb-3">
             {data.profileImageUrl ? (
                <Image
                   source={{ uri: data.profileImageUrl }}
                   style={{
-                     width: 64,
-                     height: 64,
-                     borderRadius: 32,
+                     width: 56,
+                     height: 56,
+                     borderRadius: 28,
                      shadowColor: '#FFFFFF',
                      shadowOffset: { width: 0, height: 4 },
                      shadowOpacity: 0.2,
@@ -223,7 +223,7 @@ export default function PlayerStatCard({
                />
             ) : (
                <View
-                  className="w-16 h-16 bg-white/10 border border-white/20 rounded-full items-center justify-center"
+                  className="w-14 h-14 bg-white/10 border border-white/20 rounded-full items-center justify-center"
                   style={{
                      shadowColor: config.color,
                      shadowOffset: { width: 0, height: 4 },
@@ -232,7 +232,7 @@ export default function PlayerStatCard({
                      elevation: 8,
                   }}
                >
-                  <Ionicons name="person" size={28} color={config.color} />
+                  <Ionicons name="person" size={24} color={config.color} />
                </View>
             )}
          </View>
@@ -240,13 +240,13 @@ export default function PlayerStatCard({
          {/* Player Info */}
          <View className="items-center">
             <Text
-               className="text-white text-lg font-semibold text-center mb-2"
+               className="text-white text-base font-semibold text-center mb-1"
                numberOfLines={1}
             >
                {data.fullName}
             </Text>
             <Text
-               className="text-2xl font-bold mb-3"
+               className="text-xl font-bold mb-2"
                style={{ color: config.color }}
             >
                {config.formatValue(data.value)}
@@ -257,16 +257,16 @@ export default function PlayerStatCard({
                <View className="items-center">
                   {data.additionalData.gamesPlayed && (
                      <View
-                        className="px-4 py-2 rounded-2xl mb-2 border border-white/20"
+                        className="px-3 py-1.5 rounded-xl mb-1.5 border border-white/20"
                         style={{ backgroundColor: `${config.color}20` }}
                      >
-                        <Text className="text-white font-medium text-sm">
+                        <Text className="text-white font-medium text-xs">
                            {data.additionalData.gamesPlayed} {t('gamesPlayed')}
                         </Text>
                      </View>
                   )}
                   {data.additionalData.totalProfit !== undefined && (
-                     <Text className="text-white/70 text-sm font-medium text-center">
+                     <Text className="text-white/70 text-xs font-medium text-center">
                         {t('totalProfit')}:{' '}
                         {formatCurrency(data.additionalData.totalProfit)}
                      </Text>
@@ -282,14 +282,14 @@ export default function PlayerStatCard({
 const getCardWidth = () => {
    const padding = 48; // Total horizontal padding
    const gap = 16; // Gap between cards
-   const cardsPerRow = screenWidth > 768 ? 3 : 2; // 3 cards on tablets, 2 on phones
+   const cardsPerRow = 2; // Always 2 columns
    return (screenWidth - padding - gap * (cardsPerRow - 1)) / cardsPerRow;
 };
 
 const styles = StyleSheet.create({
    card: {
       width: getCardWidth(),
-      minWidth: 160,
-      maxWidth: 220,
+      minWidth: 140,
+      maxWidth: 170,
    },
 });

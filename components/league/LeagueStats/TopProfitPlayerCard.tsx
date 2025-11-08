@@ -43,17 +43,17 @@ export default function TopProfitPlayerCard({
    if (isLoading) {
       return (
          <View
-            className="bg-green-500/10 backdrop-blur-xl border-green-400/30 rounded-3xl p-6 mb-4"
+            className="bg-green-500/10 backdrop-blur-xl border-green-400/30 rounded-3xl p-4 mb-4"
             style={[styles.card, cardStyle]}
          >
-            <View className="items-center justify-center py-8">
+            <View className="items-center justify-center py-6">
                <View
-                  className="w-12 h-12 bg-green-500/20 border border-green-400/40 rounded-2xl items-center justify-center mb-3"
+                  className="w-10 h-10 bg-green-500/20 border border-green-400/40 rounded-xl items-center justify-center mb-3"
                   style={iconContainerStyle}
                >
                   <ActivityIndicator size="small" color="#4ADE80" />
                </View>
-               <Text className="text-white/70 text-sm font-medium">
+               <Text className="text-white/70 text-xs font-medium">
                   {t('loading')}...
                </Text>
             </View>
@@ -64,7 +64,7 @@ export default function TopProfitPlayerCard({
    if (error || !data) {
       return (
          <View
-            className="bg-red-500/10 backdrop-blur-xl border-red-400/30 rounded-3xl p-6 mb-4"
+            className="bg-red-500/10 backdrop-blur-xl border-red-400/30 rounded-3xl p-4 mb-4"
             style={[
                styles.card,
                {
@@ -76,9 +76,9 @@ export default function TopProfitPlayerCard({
                },
             ]}
          >
-            <View className="items-center justify-center py-8">
+            <View className="items-center justify-center py-6">
                <View
-                  className="w-12 h-12 bg-red-500/20 border border-red-400/40 rounded-2xl items-center justify-center mb-3"
+                  className="w-10 h-10 bg-red-500/20 border border-red-400/40 rounded-xl items-center justify-center mb-3"
                   style={{
                      shadowColor: '#F87171',
                      shadowOffset: { width: 0, height: 4 },
@@ -87,9 +87,9 @@ export default function TopProfitPlayerCard({
                      elevation: 8,
                   }}
                >
-                  <Ionicons name="trophy-outline" size={24} color="#F87171" />
+                  <Ionicons name="trophy-outline" size={18} color="#F87171" />
                </View>
-               <Text className="text-red-400 text-sm font-medium text-center">
+               <Text className="text-red-400 text-xs font-medium text-center">
                   {error || t('noCompletedGames')}
                </Text>
             </View>
@@ -99,19 +99,19 @@ export default function TopProfitPlayerCard({
 
    return (
       <View
-         className="bg-green-500/10 backdrop-blur-xl border-green-400/30 rounded-3xl p-6 mb-4"
+         className="bg-green-500/10 backdrop-blur-xl border-green-400/30 rounded-3xl p-4 mb-4"
          style={[styles.card, cardStyle]}
       >
          {/* Header with Icon */}
-         <View className="flex-row items-center justify-between mb-4">
+         <View className="flex-row items-center justify-between mb-3">
             <View
-               className="w-12 h-12 bg-green-500/20 border border-green-400/40 rounded-2xl items-center justify-center"
+               className="w-10 h-10 bg-green-500/20 border border-green-400/40 rounded-xl items-center justify-center"
                style={iconContainerStyle}
             >
-               <Ionicons name="trophy" size={20} color="#4ADE80" />
+               <Ionicons name="trophy" size={18} color="#4ADE80" />
             </View>
             <Text
-               className="text-white/90 text-sm font-semibold flex-1 text-right"
+               className="text-white/90 text-xs font-semibold flex-1 text-right"
                numberOfLines={2}
             >
                {t('topProfitPlayer')}
@@ -119,14 +119,14 @@ export default function TopProfitPlayerCard({
          </View>
 
          {/* Player Avatar */}
-         <View className="items-center mb-4">
+         <View className="items-center mb-3">
             {data.profileImageUrl ? (
                <Image
                   source={{ uri: data.profileImageUrl }}
                   style={{
-                     width: 64,
-                     height: 64,
-                     borderRadius: 32,
+                     width: 56,
+                     height: 56,
+                     borderRadius: 28,
                      shadowColor: '#FFFFFF',
                      shadowOffset: { width: 0, height: 4 },
                      shadowOpacity: 0.2,
@@ -137,7 +137,7 @@ export default function TopProfitPlayerCard({
                />
             ) : (
                <View
-                  className="w-16 h-16 bg-white/10 border border-white/20 rounded-full items-center justify-center"
+                  className="w-14 h-14 bg-white/10 border border-white/20 rounded-full items-center justify-center"
                   style={{
                      shadowColor: '#4ADE80',
                      shadowOffset: { width: 0, height: 4 },
@@ -146,7 +146,7 @@ export default function TopProfitPlayerCard({
                      elevation: 8,
                   }}
                >
-                  <Ionicons name="person" size={28} color="#4ADE80" />
+                  <Ionicons name="person" size={24} color="#4ADE80" />
                </View>
             )}
          </View>
@@ -154,19 +154,19 @@ export default function TopProfitPlayerCard({
          {/* Player Info */}
          <View className="items-center">
             <Text
-               className="text-white text-lg font-semibold text-center mb-2"
+               className="text-white text-base font-semibold text-center mb-1"
                numberOfLines={1}
             >
                {data.fullName}
             </Text>
-            <Text className="text-green-400 text-2xl font-bold mb-3">
+            <Text className="text-green-400 text-xl font-bold mb-2">
                {formatCurrency(data.totalProfit)}
             </Text>
             <View
-               className="px-4 py-2 rounded-2xl border border-green-400/40"
+               className="px-3 py-1.5 rounded-xl border border-green-400/40"
                style={{ backgroundColor: '#4ADE8020' }}
             >
-               <Text className="text-green-300 font-medium text-sm">
+               <Text className="text-green-300 font-medium text-xs">
                   {data.gamesPlayed} {t('gamesPlayed')}
                </Text>
             </View>
@@ -179,14 +179,14 @@ export default function TopProfitPlayerCard({
 const getCardWidth = () => {
    const padding = 48; // Total horizontal padding
    const gap = 16; // Gap between cards
-   const cardsPerRow = screenWidth > 768 ? 3 : 2; // 3 cards on tablets, 2 on phones
+   const cardsPerRow = 2; // Always 2 columns
    return (screenWidth - padding - gap * (cardsPerRow - 1)) / cardsPerRow;
 };
 
 const styles = StyleSheet.create({
    card: {
       width: getCardWidth(),
-      minWidth: 160,
-      maxWidth: 220,
+      minWidth: 140,
+      maxWidth: 170,
    },
 });

@@ -10,7 +10,9 @@ import { captureException } from '@/utils/sentry';
 import { Ionicons } from '@expo/vector-icons';
 import { Image } from 'expo-image';
 import React from 'react';
-import { View } from 'react-native';
+import { Dimensions, View } from 'react-native';
+
+const { width: screenWidth } = Dimensions.get('window');
 
 interface PlayerCardProps {
    player: LeagueMember;
@@ -39,18 +41,27 @@ export function PlayerCard({
 
    const getCardSize = () => {
       switch (variant) {
-         case 'compact': return 'small';
-         case 'list': return 'medium';
-         default: return 'medium';
+         case 'compact':
+            return 'small';
+         case 'list':
+            return 'medium';
+         default:
+            return 'medium';
       }
    };
 
    const getContainerStyle = () => {
       if (variant === 'grid') {
+         const padding = 24; // Total horizontal padding (12 * 2)
+         const gap = 4; // Gap between cards
+         const numColumns = 3;
+         const cardWidth =
+            (screenWidth - padding - gap * (numColumns - 1)) / numColumns;
          return {
-            flex: 1,
-            height: 128,
-            margin: 4,
+            width: cardWidth,
+            maxWidth: 120,
+            height: 110,
+            margin: 2,
          };
       } else if (variant === 'list') {
          return {
@@ -79,7 +90,7 @@ export function PlayerCard({
    const getImageSize = () => {
       switch (variant) {
          case 'grid':
-            return { width: 50, height: 50 };
+            return { width: 42, height: 42 };
          case 'list':
             return { width: 48, height: 48 };
          case 'compact':
@@ -94,7 +105,9 @@ export function PlayerCard({
          variant={isSelected ? 'elevated' : 'default'}
          size={getCardSize()}
          customBorderColor={isSelected ? colors.primary : theme.border}
-         customBackgroundColor={isSelected ? colors.primaryTint : theme.surfaceElevated}
+         customBackgroundColor={
+            isSelected ? colors.primary : theme.surfaceElevated
+         }
          shadowIntensity="medium"
          pressAnimation={!disabled}
          glowOnPress={isSelected}
@@ -103,84 +116,85 @@ export function PlayerCard({
          style={getContainerStyle()}
       >
          <View className={getContentContainerClass()}>
-         {/* Selection Indicator */}
-         {showSelectionIndicator && variant === 'grid' && (
-            <View
-               className="absolute top-2 right-2 w-6 h-6 rounded-full border-2 items-center justify-center z-10"
-               style={{
-                  backgroundColor: isSelected ? colors.primary : 'transparent',
-                  borderColor: isSelected ? colors.primary : theme.border,
-               }}
-            >
-               {isSelected && (
-                  <Ionicons
-                     name="checkmark"
-                     size={16}
-                     color={colors.textInverse}
-                  />
-               )}
-            </View>
-         )}
-
-         {/* Player Image */}
-         <View className={variant === 'grid' ? 'mt-2 mb-2' : 'mr-3'}>
-            <Image
-               source={{
-                  uri:
-                     player.profileImageUrl ||
-                     'https://via.placeholder.com/80x80/cccccc/666666?text=?',
-               }}
-               className="rounded-lg border-2"
-               style={[getImageSize(), { borderColor: colors.border }]}
-               contentFit="cover"
-               onError={(error) => {
-                  captureException(new Error('Player image loading failed'), {
-                     function: 'PlayerCard.Image.onError',
-                     playerId: player.id,
-                     imageUri: player.profileImageUrl,
-                     error: error.toString(),
-                  });
-               }}
-            />
-         </View>
-
-         {/* Player Info */}
-         <View
-            className={
-               variant === 'list' ? 'flex-1 justify-center' : 'items-center'
-            }
-         >
-            <Text
-               variant={variant === 'compact' ? 'captionSmall' : 'caption'}
-               color={isSelected ? colors.primary : theme.text}
-               className="text-center tracking-wide mt-2 mb-1 leading-4 px-1 font-semibold"
-               numberOfLines={2}
-               ellipsizeMode="tail"
-            >
-               {player.fullName}
-            </Text>
-
-            {variant === 'list' && (
-               <Text
-                  variant="captionSmall"
-                  color={theme.textMuted}
-                  className="mt-0.5 font-medium"
+            {/* Selection Indicator */}
+            {showSelectionIndicator && variant === 'grid' && (
+               <View
+                  className="absolute top-1 right-1 w-5 h-5 rounded-full border-2 items-center justify-center z-10"
+                  style={{
+                     backgroundColor: isSelected
+                        ? colors.primary
+                        : 'transparent',
+                     borderColor: isSelected ? colors.primary : theme.border,
+                  }}
                >
-                  {player.role === 'admin' ? '👑 Admin' : 'Member'}
-               </Text>
+                  {isSelected && (
+                     <Ionicons name="checkmark" size={12} color={colors.text} />
+                  )}
+               </View>
             )}
-         </View>
 
-         {/* List Selection Indicator */}
-         {showSelectionIndicator && variant === 'list' && isSelected && (
-            <View className="ml-2">
-               <Ionicons
-                  name="checkmark-circle"
-                  size={24}
-                  color={colors.primary}
+            {/* Player Image */}
+            <View className={variant === 'grid' ? 'mt-1 mb-1' : 'mr-3'}>
+               <Image
+                  source={{
+                     uri:
+                        player.profileImageUrl ||
+                        'https://via.placeholder.com/80x80/cccccc/666666?text=?',
+                  }}
+                  className="rounded-lg border-2"
+                  style={[getImageSize(), { borderColor: colors.border }]}
+                  contentFit="cover"
+                  onError={(error) => {
+                     captureException(
+                        new Error('Player image loading failed'),
+                        {
+                           function: 'PlayerCard.Image.onError',
+                           playerId: player.id,
+                           imageUri: player.profileImageUrl,
+                           error: error.toString(),
+                        }
+                     );
+                  }}
                />
             </View>
-         )}
+
+            {/* Player Info */}
+            <View
+               className={
+                  variant === 'list' ? 'flex-1 justify-center' : 'items-center'
+               }
+            >
+               <Text
+                  variant={variant === 'compact' ? 'captionSmall' : 'caption'}
+                  color={isSelected ? colors.primary : theme.text}
+                  className="text-center tracking-wide mt-1 mb-0.5 leading-3 px-0.5 text-xs font-semibold"
+                  numberOfLines={2}
+                  ellipsizeMode="tail"
+               >
+                  {player.fullName}
+               </Text>
+
+               {variant === 'list' && (
+                  <Text
+                     variant="captionSmall"
+                     color={theme.textMuted}
+                     className="mt-0.5 font-medium"
+                  >
+                     {player.role === 'admin' ? '👑 Admin' : 'Member'}
+                  </Text>
+               )}
+            </View>
+
+            {/* List Selection Indicator */}
+            {showSelectionIndicator && variant === 'list' && isSelected && (
+               <View className="ml-2">
+                  <Ionicons
+                     name="checkmark-circle"
+                     size={24}
+                     color={colors.primary}
+                  />
+               </View>
+            )}
          </View>
       </BrutalistCard>
    );

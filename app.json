@@ -1,24 +1,27 @@
 {
    "name": "HomeStack",
    "slug": "poker-ai-homestack",
-   "version": "1.0.1",
+   "version": "1.0.9",
    "orientation": "portrait",
    "icon": "./assets/images/icon.png",
    "scheme": "pokeraihomestack",
    "userInterfaceStyle": "automatic",
    "newArchEnabled": true,
    "ios": {
-      "supportsTablet": true,
-      "buildNumber": "1",
+      "supportsTablet": false,
+      "buildNumber": "8",
       "bundleIdentifier": "com.pokeraihomestack.app",
       "usesAppleSignIn": true,
       "infoPlist": {
          "ITSAppUsesNonExemptEncryption": false,
          "NSPhotoLibraryUsageDescription": "This app needs access to your photo library to let you select league images.",
-         "NSCameraUsageDescription": "This app needs access to your camera to let you take photos for league images."
+         "NSCameraUsageDescription": "This app needs access to your camera to let you take photos for league images.",
+         "NSUserTrackingUsageDescription": "This allows us to provide you with personalized analytics and improve your app experience.",
+         "UIDeviceFamily": [1]
       }
    },
    "android": {
+      "versionCode": 54,
       "adaptiveIcon": {
          "foregroundImage": "./assets/images/icon.png",
          "backgroundColor": "#ffffff"
@@ -26,6 +29,7 @@
       "edgeToEdgeEnabled": true,
       "package": "com.pokeraihomestack.app",
       "permissions": ["READ_EXTERNAL_STORAGE", "READ_MEDIA_IMAGES", "CAMERA"],
+      "blockedPermissions": ["com.google.android.gms.permission.AD_ID"],
       "intentFilters": [
          {
             "autoVerify": true,
@@ -70,6 +74,7 @@
       "expo-font",
       "expo-secure-store",
       ["expo-apple-authentication"],
+      "expo-tracking-transparency",
       "expo-web-browser",
       [
          "expo-image-picker",

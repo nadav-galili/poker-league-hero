@@ -12,6 +12,7 @@ import {
    REFRESH_TOKEN_EXPIRY,
 } from '@/constants';
 import * as jose from 'jose';
+import { v4 as uuidv4 } from 'uuid';
 
 export async function POST(request: Request) {
    const body = await request.formData();
@@ -52,7 +53,7 @@ export async function POST(request: Request) {
 
       const issuedAt = Math.floor(Date.now() / 1000);
 
-      const jti = crypto.randomUUID();
+      const jti = uuidv4();
 
       const sub = (userInfo as { sub: string }).sub;
 
