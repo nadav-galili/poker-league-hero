@@ -62,7 +62,7 @@ export const POST = withAuth(async (request: Request, user) => {
          .values({
             leagueId,
             createdBy: user.userId,
-            buyIn: parseFloat(buyIn).toFixed(2),
+            buyIn: parseFloat(buyIn),
             status: 'active',
          })
          .returning();
@@ -95,6 +95,7 @@ export const POST = withAuth(async (request: Request, user) => {
 
       console.log('📡 [GameAPI] Creating cash-in records...');
       // Create initial buy-ins for all players
+      const buyInAmount = parseFloat(buyIn); // Convert once, use as number
       const cashInPromises = gamePlayersResults.map(
          (gamePlayerResult, index) => {
             const gamePlayer = gamePlayerResult[0];
@@ -111,7 +112,7 @@ export const POST = withAuth(async (request: Request, user) => {
                   gameId,
                   userId: userIdNum,
                   gamePlayerId: gamePlayer.id,
-                  amount: parseFloat(buyIn).toFixed(2),
+                  amount: buyInAmount,
                   type: 'buy_in',
                })
                .returning();

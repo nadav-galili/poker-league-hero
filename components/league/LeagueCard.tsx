@@ -9,7 +9,7 @@ import { captureException } from '@/utils/sentry';
 import { Ionicons } from '@expo/vector-icons';
 import { Image } from 'expo-image';
 import React from 'react';
-import { Alert, Pressable, View } from 'react-native';
+import { Pressable, View } from 'react-native';
 
 interface LeagueCardProps {
    league: LeagueWithTheme;
@@ -32,18 +32,18 @@ const LeagueCardComponent = ({ league, onPress, onShare }: LeagueCardProps) => {
       }
    };
 
-   const handleShare = () => {
-      try {
-         onShare(league);
-      } catch (error) {
-         captureException(error as Error, {
-            function: 'LeagueCard.onShare',
-            screen: 'MyLeagues',
-            leagueId: league.id,
-         });
-         Alert.alert(t('error'), 'Failed to initiate share');
-      }
-   };
+   // const handleShare = () => {
+   //    try {
+   //       onShare(league);
+   //    } catch (error) {
+   //       captureException(error as Error, {
+   //          function: 'LeagueCard.onShare',
+   //          screen: 'MyLeagues',
+   //          leagueId: league.id,
+   //       });
+   //       Alert.alert(t('error'), 'Failed to initiate share');
+   //    }
+   // };
 
    // Mock data for statistics - you can replace with actual data from league object
    const stats = {

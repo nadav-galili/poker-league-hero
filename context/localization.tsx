@@ -130,6 +130,7 @@ export interface Translations {
    loadingPlayers: string;
    selectPlayersInstruction: string;
    playersSelected: string;
+   playerSelected: string;
    noPlayersFound: string;
    noPlayersMessage: string;
    startGame: string;
@@ -348,6 +349,7 @@ const enTranslations: Translations = {
    loadingPlayers: 'Loading players...',
    selectPlayersInstruction: 'Choose players for the new game',
    playersSelected: 'PLAYERS SELECTED',
+   playerSelected: 'PLAYER SELECTED',
    noPlayersFound: 'NO PLAYERS FOUND',
    noPlayersMessage: 'This league has no members yet',
    startGame: 'START GAME',
@@ -572,6 +574,7 @@ const heTranslations: Translations = {
    loadingPlayers: 'טוען שחקנים...',
    selectPlayersInstruction: 'בחר שחקנים למשחק החדש',
    playersSelected: 'שחקנים נבחרו',
+   playerSelected: 'שחקן נבחר',
    noPlayersFound: 'לא נמצאו שחקנים',
    noPlayersMessage: 'בליגה הזו אין עדיין חברים',
    startGame: 'התחל משחק',

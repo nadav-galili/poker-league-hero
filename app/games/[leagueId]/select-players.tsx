@@ -241,13 +241,7 @@ export default function SelectPlayers() {
          style={{ flex: 1 }}
       >
          {/* Modern Header with Glass-morphism */}
-         <View
-            className="flex-row items-center justify-between px-5 pt-16 pb-4"
-            style={{
-               backgroundColor: 'rgba(255, 255, 255, 0.1)',
-               backdropFilter: 'blur(20px)',
-            }}
-         >
+         <View className="flex-row items-center justify-between px-5 pt-16 pb-4 bg-primary">
             <TouchableOpacity
                onPress={handleBack}
                className="p-2"

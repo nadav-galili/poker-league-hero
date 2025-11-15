@@ -166,7 +166,7 @@ export function PlayerCard({
             >
                <Text
                   variant={variant === 'compact' ? 'captionSmall' : 'caption'}
-                  color={isSelected ? colors.primary : theme.text}
+                  color={colors.text}
                   className="text-center tracking-wide mt-1 mb-0.5 leading-3 px-0.5 text-xs font-semibold"
                   numberOfLines={2}
                   ellipsizeMode="tail"

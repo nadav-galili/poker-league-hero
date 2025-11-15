@@ -4,7 +4,13 @@
 
 import { colors } from '@/colors';
 import React, { useEffect, useRef } from 'react';
-import { ActivityIndicator, Animated, StyleSheet, Text, View } from 'react-native';
+import {
+   ActivityIndicator,
+   Animated,
+   StyleSheet,
+   Text,
+   View,
+} from 'react-native';
 
 interface LoadingStateProps {
    message?: string;
@@ -93,9 +99,7 @@ export function LoadingState({
 
          {/* Loading message */}
          <View style={styles.messageContainer}>
-            <Text style={styles.messageText}>
-               {message}
-            </Text>
+            <Text style={styles.messageText}>{message}</Text>
          </View>
 
          {/* Decorative dots */}
@@ -143,7 +147,7 @@ const styles = StyleSheet.create({
       paddingVertical: 16,
       borderWidth: 4,
       borderColor: colors.primary,
-      backgroundColor: colors.primaryTint,
+      backgroundColor: colors.primary,
       borderRadius: 16,
       shadowColor: colors.shadow,
       shadowOffset: { width: 6, height: 6 },
