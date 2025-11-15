@@ -12,6 +12,8 @@ fix reject issues
 fixed 2 reject-- mostly layout
 1.0.10
 fixed analytics after launch
+1.1.0
+changed icon , refactored some ui
 
 # ANDROID
 
