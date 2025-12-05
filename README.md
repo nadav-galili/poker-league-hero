@@ -29,3 +29,8 @@ account layout , league stats
 just fixing google play reject on app release
 1.0.9
 changed icon , refactored some ui
+
+## Deploy to expo routes
+
+npx expo export —platform web -c
+Eas deploy —prod

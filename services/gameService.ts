@@ -14,6 +14,7 @@ export class GameService {
    async createGame(data: {
       leagueId: string;
       selectedPlayerIds: number[];
+      anonymousPlayers?: { name: string }[];
       buyIn: string;
       gameName?: string;
    }): Promise<{ gameId: string }> {
@@ -26,6 +27,7 @@ export class GameService {
                body: JSON.stringify({
                   leagueId: data.leagueId,
                   selectedPlayerIds: data.selectedPlayerIds,
+                  anonymousPlayers: data.anonymousPlayers,
                   buyIn: data.buyIn,
                }),
             }

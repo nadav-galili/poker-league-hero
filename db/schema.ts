@@ -42,6 +42,15 @@ export const leagues = pgTable('leagues', {
    updatedAt: timestamp('updated_at').defaultNow().notNull(),
 });
 
+export const anonymousPlayers = pgTable('anonymous_players', {
+   id: integer('id').generatedAlwaysAsIdentity().primaryKey(),
+   leagueId: integer('league_id')
+      .notNull()
+      .references(() => leagues.id, { onDelete: 'cascade' }),
+   name: varchar('name', { length: 50 }).notNull(),
+   createdAt: timestamp('created_at').defaultNow().notNull(),
+});
+
 export const leagueMembers = pgTable('league_members', {
    id: integer('id').generatedAlwaysAsIdentity().primaryKey(),
    leagueId: integer('league_id')
@@ -78,9 +87,13 @@ export const gamePlayers = pgTable('game_players', {
    gameId: integer('game_id')
       .notNull()
       .references(() => games.id, { onDelete: 'cascade' }),
-   userId: integer('user_id')
-      .notNull()
-      .references(() => users.id, { onDelete: 'cascade' }),
+   userId: integer('user_id').references(() => users.id, {
+      onDelete: 'cascade',
+   }),
+   anonymousPlayerId: integer('anonymous_player_id').references(
+      () => anonymousPlayers.id,
+      { onDelete: 'cascade' }
+   ),
    finalAmount: decimal('final_amount', { precision: 10, scale: 2 }), // Final chip amount when game ends
    profit: decimal('profit', { precision: 10, scale: 2 }), // Total profit/loss (calculated: finalAmount - totalCashIns)
    isActive: boolean('is_active').notNull().default(true),
@@ -94,9 +107,9 @@ export const cashIns = pgTable('cash_ins', {
    gameId: integer('game_id')
       .notNull()
       .references(() => games.id, { onDelete: 'cascade' }),
-   userId: integer('user_id')
-      .notNull()
-      .references(() => users.id, { onDelete: 'cascade' }),
+   userId: integer('user_id').references(() => users.id, {
+      onDelete: 'cascade',
+   }),
    gamePlayerId: integer('game_player_id')
       .notNull()
       .references(() => gamePlayers.id, { onDelete: 'cascade' }),
@@ -135,7 +148,19 @@ export const leaguesRelations = relations(leagues, ({ one, many }) => ({
    }),
    members: many(leagueMembers),
    games: many(games),
+   anonymousPlayers: many(anonymousPlayers),
 }));
+
+export const anonymousPlayersRelations = relations(
+   anonymousPlayers,
+   ({ one, many }) => ({
+      league: one(leagues, {
+         fields: [anonymousPlayers.leagueId],
+         references: [leagues.id],
+      }),
+      gamePlayers: many(gamePlayers),
+   })
+);
 
 export const summariesRelations = relations(summaries, ({ one }) => ({
    league: one(leagues, {
@@ -177,6 +202,10 @@ export const gamePlayersRelations = relations(gamePlayers, ({ one, many }) => ({
       fields: [gamePlayers.userId],
       references: [users.id],
    }),
+   anonymousPlayer: one(anonymousPlayers, {
+      fields: [gamePlayers.anonymousPlayerId],
+      references: [anonymousPlayers.id],
+   }),
    cashIns: many(cashIns),
 }));
 
@@ -201,6 +230,8 @@ export type League = typeof leagues.$inferSelect;
 export type NewLeague = typeof leagues.$inferInsert;
 export type LeagueMember = typeof leagueMembers.$inferSelect;
 export type NewLeagueMember = typeof leagueMembers.$inferInsert;
+export type AnonymousPlayer = typeof anonymousPlayers.$inferSelect;
+export type NewAnonymousPlayer = typeof anonymousPlayers.$inferInsert;
 export type Game = typeof games.$inferSelect;
 export type NewGame = typeof games.$inferInsert;
 export type GamePlayer = typeof gamePlayers.$inferSelect;

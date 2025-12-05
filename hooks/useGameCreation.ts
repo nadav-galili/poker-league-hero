@@ -28,6 +28,7 @@ interface UseGameCreationProps {
    selectedPlayerIds: string[];
    selectedCount: number;
    minPlayers?: number;
+   anonymousPlayers?: { name: string }[];
 }
 
 export function useGameCreation({
@@ -35,6 +36,7 @@ export function useGameCreation({
    selectedPlayerIds,
    selectedCount,
    minPlayers = 2,
+   anonymousPlayers,
 }: UseGameCreationProps): UseGameCreationResult {
    const { fetchWithAuth } = useAuth();
    const { t } = useLocalization();
@@ -82,6 +84,7 @@ export function useGameCreation({
          const request: CreateGameRequest = {
             leagueId,
             selectedPlayerIds: selectedPlayerIds.map((id) => parseInt(id, 10)),
+            anonymousPlayers,
             buyIn,
          };
 
@@ -90,6 +93,7 @@ export function useGameCreation({
             {
                leagueId: request.leagueId,
                selectedPlayerIds: request.selectedPlayerIds,
+               anonymousPlayers: request.anonymousPlayers,
                buyIn: request.buyIn,
                playerCount: selectedCount,
             }

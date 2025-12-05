@@ -4,6 +4,11 @@
 
 import { Player } from './player';
 
+export interface AnonymousPlayer {
+   id?: string;
+   name: string;
+}
+
 export interface Game {
    id: string;
    leagueId: string;
@@ -21,8 +26,10 @@ export interface Game {
 export interface GamePlayer {
    id: string;
    gameId: string;
-   playerId: string;
-   player: Player;
+   playerId?: string;
+   player?: Player;
+   anonymousPlayerId?: string;
+   anonymousPlayer?: AnonymousPlayer;
    buyIn: number;
    currentChips: number;
    position?: number;
@@ -52,6 +59,7 @@ export interface BlindLevel {
 export interface CreateGameRequest {
    leagueId: string;
    selectedPlayerIds: number[];
+   anonymousPlayers?: { name: string }[];
    buyIn: string;
    name?: string;
    settings?: Partial<GameSettings>;

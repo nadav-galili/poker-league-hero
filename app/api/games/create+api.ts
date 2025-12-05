@@ -3,11 +3,13 @@ import { withAuth } from '@/utils/middleware';
 export const POST = withAuth(async (request: Request, user) => {
    try {
       console.log('📡 [GameAPI] Received game creation request');
-      const { leagueId, selectedPlayerIds, buyIn } = await request.json();
+      const { leagueId, selectedPlayerIds, anonymousPlayers, buyIn } =
+         await request.json();
 
       console.log('📡 [GameAPI] Request data parsed:', {
          leagueId,
          selectedPlayerIds,
+         anonymousPlayers,
          buyIn,
          userId: user.userId,
       });
@@ -20,19 +22,23 @@ export const POST = withAuth(async (request: Request, user) => {
          );
       }
 
-      if (!leagueId || !selectedPlayerIds || selectedPlayerIds.length < 2) {
+      const regularPlayerCount = selectedPlayerIds?.length || 0;
+      const anonymousPlayerCount = anonymousPlayers?.length || 0;
+      const totalPlayers = regularPlayerCount + anonymousPlayerCount;
+
+      if (!leagueId || totalPlayers < 2) {
          console.warn(
             '📡 [GameAPI] Validation failed - missing or invalid data:',
             {
                leagueId: !!leagueId,
                selectedPlayerIds: !!selectedPlayerIds,
-               playerCount: selectedPlayerIds?.length || 0,
+               playerCount: totalPlayers,
             }
          );
          return Response.json(
             {
                success: false,
-               message: 'League ID and at least 2 players are required',
+               message: 'League ID and at least 2 players (total) are required',
             },
             { status: 400 }
          );
@@ -50,9 +56,13 @@ export const POST = withAuth(async (request: Request, user) => {
          '📡 [GameAPI] Validation passed, importing database modules...'
       );
       // Import database modules
-      const { getDb, games, gamePlayers, cashIns } = await import(
-         '../../../db'
-      );
+      const {
+         getDb,
+         games,
+         gamePlayers,
+         cashIns,
+         anonymousPlayers: anonymousPlayersTable,
+      } = await import('../../../db');
       const db = getDb();
 
       console.log('📡 [GameAPI] Creating game in database...');
@@ -60,7 +70,7 @@ export const POST = withAuth(async (request: Request, user) => {
       const newGame = await db
          .insert(games)
          .values({
-            leagueId,
+            leagueId: parseInt(leagueId),
             createdBy: user.userId,
             buyIn: parseFloat(buyIn),
             status: 'active',
@@ -70,57 +80,76 @@ export const POST = withAuth(async (request: Request, user) => {
       const gameId = newGame[0].id;
       console.log('📡 [GameAPI] Game created with ID:', gameId);
 
-      console.log('📡 [GameAPI] Adding players to game...');
-      // Add all selected players to the game
-      const gamePlayerPromises = selectedPlayerIds.map((playerId: string) => {
-         const userIdNum = parseInt(playerId, 10);
-         console.log('📡 [GameAPI] Converting playerId:', {
-            original: playerId,
-            converted: userIdNum,
-            type: typeof userIdNum,
-         });
-
-         return db
-            .insert(gamePlayers)
-            .values({
-               gameId,
-               userId: userIdNum,
-               isActive: true,
-            })
-            .returning();
-      });
-
-      const gamePlayersResults = await Promise.all(gamePlayerPromises);
-      console.log('📡 [GameAPI] Players added:', gamePlayersResults.length);
-
-      console.log('📡 [GameAPI] Creating cash-in records...');
-      // Create initial buy-ins for all players
-      const buyInAmount = parseFloat(buyIn); // Convert once, use as number
-      const cashInPromises = gamePlayersResults.map(
-         (gamePlayerResult, index) => {
-            const gamePlayer = gamePlayerResult[0];
-            const playerId = selectedPlayerIds[index];
-            const userIdNum = parseInt(playerId, 10);
-            console.log('📡 [GameAPI] Creating cash-in for playerId:', {
-               original: playerId,
-               converted: userIdNum,
-            });
-
-            return db
-               .insert(cashIns)
+      // 1. Create Anonymous Players if any
+      const createdAnonymousPlayers = [];
+      if (anonymousPlayerCount > 0) {
+         console.log('📡 [GameAPI] Creating anonymous players...');
+         for (const player of anonymousPlayers) {
+            const [newPlayer] = await db
+               .insert(anonymousPlayersTable)
                .values({
-                  gameId,
-                  userId: userIdNum,
-                  gamePlayerId: gamePlayer.id,
-                  amount: buyInAmount,
-                  type: 'buy_in',
+                  leagueId: parseInt(leagueId),
+                  name: player.name,
                })
                .returning();
+            createdAnonymousPlayers.push(newPlayer);
          }
-      );
+         console.log(
+            `📡 [GameAPI] Created ${createdAnonymousPlayers.length} anonymous players`
+         );
+      }
 
-      await Promise.all(cashInPromises);
-      console.log('📡 [GameAPI] Cash-in records created');
+      console.log('📡 [GameAPI] Adding players to game...');
+
+      const gamePlayersData = [];
+      const buyInAmount = parseFloat(buyIn).toString();
+
+      // Prepare Regular Players
+      if (selectedPlayerIds && selectedPlayerIds.length > 0) {
+         selectedPlayerIds.forEach((pid: string) => {
+            gamePlayersData.push({
+               gameId,
+               userId: parseInt(pid, 10),
+               isActive: true,
+            });
+         });
+      }
+
+      // Prepare Anonymous Players
+      createdAnonymousPlayers.forEach((ap) => {
+         gamePlayersData.push({
+            gameId,
+            anonymousPlayerId: ap.id,
+            isActive: true,
+         });
+      });
+
+      // Insert all game players
+      if (gamePlayersData.length > 0) {
+         const insertedGamePlayers = await db
+            .insert(gamePlayers)
+            .values(gamePlayersData)
+            .returning();
+
+         console.log(
+            `📡 [GameAPI] Inserted ${insertedGamePlayers.length} game players`
+         );
+
+         // Prepare Cash Ins
+         const cashInsData = insertedGamePlayers.map((gp) => ({
+            gameId,
+            userId: gp.userId, // Will be null for anonymous, which is fine
+            gamePlayerId: gp.id,
+            amount: buyInAmount,
+            type: 'buy_in',
+         }));
+
+         // Insert all cash ins
+         await db.insert(cashIns).values(cashInsData);
+         console.log(
+            `📡 [GameAPI] Inserted ${cashInsData.length} cash-in records`
+         );
+      }
 
       console.log('📡 [GameAPI] Game creation successful, returning response');
       return Response.json(
@@ -138,17 +167,11 @@ export const POST = withAuth(async (request: Request, user) => {
          '📡 [GameAPI] Error stack:',
          error instanceof Error ? error.stack : 'N/A'
       );
-      console.error('📡 [GameAPI] Full error object:', {
-         message: error instanceof Error ? error.message : String(error),
-         name: error instanceof Error ? error.name : 'Unknown',
-         cause: error instanceof Error ? (error as any).cause : undefined,
-      });
       return Response.json(
          {
             success: false,
             message: 'Failed to create game',
             error: error instanceof Error ? error.message : String(error),
-            details: error instanceof Error ? error.stack : undefined,
          },
          { status: 500 }
       );

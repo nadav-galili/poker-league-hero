@@ -14,12 +14,27 @@ interface UsePlayerSelectionResult {
    selectedCount: number;
    selectMultiple: (playerIds: string[]) => void;
    deselectMultiple: (playerIds: string[]) => void;
+   anonymousPlayers: { name: string }[];
+   addAnonymousPlayer: (name: string) => void;
+   removeAnonymousPlayer: (index: number) => void;
+   totalSelectedCount: number;
 }
 
 export function usePlayerSelection(leagueId: string): UsePlayerSelectionResult {
    const [selectedPlayers, setSelectedPlayers] = React.useState<Set<string>>(
       new Set()
    );
+   const [anonymousPlayers, setAnonymousPlayers] = React.useState<
+      { name: string }[]
+   >([]);
+
+   const addAnonymousPlayer = React.useCallback((name: string) => {
+      setAnonymousPlayers((prev) => [...prev, { name }]);
+   }, []);
+
+   const removeAnonymousPlayer = React.useCallback((index: number) => {
+      setAnonymousPlayers((prev) => prev.filter((_, i) => i !== index));
+   }, []);
 
    const togglePlayerSelection = React.useCallback(
       (playerId: string) => {
@@ -48,6 +63,7 @@ export function usePlayerSelection(leagueId: string): UsePlayerSelectionResult {
 
    const clearSelection = React.useCallback(() => {
       setSelectedPlayers(new Set());
+      setAnonymousPlayers([]);
       addBreadcrumb('Player selection cleared', 'user_action', {
          leagueId,
       });
@@ -97,6 +113,7 @@ export function usePlayerSelection(leagueId: string): UsePlayerSelectionResult {
    }, [selectedPlayers]);
 
    const selectedCount = selectedPlayers.size;
+   const totalSelectedCount = selectedCount + anonymousPlayers.length;
 
    return {
       selectedPlayers,
@@ -107,5 +124,9 @@ export function usePlayerSelection(leagueId: string): UsePlayerSelectionResult {
       selectedCount,
       selectMultiple,
       deselectMultiple,
+      anonymousPlayers,
+      addAnonymousPlayer,
+      removeAnonymousPlayer,
+      totalSelectedCount,
    };
 }

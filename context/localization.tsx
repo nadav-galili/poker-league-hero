@@ -237,6 +237,15 @@ export interface Translations {
    continueWithGoogle: string;
    // Deep linking / Join League
    joinLeagueRequiresLogin: string;
+
+   // Anonymous Players
+   anonymousPlayer: string;
+   addAnonymousPlayer: string;
+   anonymousPlayerName: string;
+   enterPlayerName: string;
+   removeAnonymousPlayer: string;
+   anonymousPlayersSection: string;
+   remove: string;
 }
 
 // English translations
@@ -463,6 +472,15 @@ const enTranslations: Translations = {
    termsOfService: 'Terms of Service',
    // Deep linking / Join League
    joinLeagueRequiresLogin: 'You need to be signed in to join a league.',
+
+   // Anonymous Players
+   anonymousPlayer: 'Anonymous Player',
+   addAnonymousPlayer: 'Add Anonymous Player',
+   anonymousPlayerName: 'Player Name',
+   enterPlayerName: 'Enter player name',
+   removeAnonymousPlayer: 'Remove',
+   anonymousPlayersSection: 'Anonymous Players',
+   remove: 'Remove',
 };
 
 // Hebrew translations
@@ -686,6 +704,15 @@ const heTranslations: Translations = {
 
    // Deep linking / Join League
    joinLeagueRequiresLogin: 'עליך להירשם כדי להצטרף לליגה.',
+
+   // Anonymous Players
+   anonymousPlayer: 'שחקן אנונימי',
+   addAnonymousPlayer: 'הוסף שחקן אנונימי',
+   anonymousPlayerName: 'שם השחקן',
+   enterPlayerName: 'הזן שם שחקן',
+   removeAnonymousPlayer: 'הסר',
+   anonymousPlayersSection: 'שחקנים אנונימיים',
+   remove: 'הסר',
 };
 
 const translations = {

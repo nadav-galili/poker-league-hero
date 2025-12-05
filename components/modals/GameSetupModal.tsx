@@ -29,6 +29,7 @@ interface GameSetupModalProps {
    onCreateGame: () => void;
    onBuyInChange: (value: string) => void;
    leagueName?: string;
+   anonymousPlayers?: { name: string }[];
    theme?: 'light' | 'dark';
 }
 
@@ -42,6 +43,7 @@ export function GameSetupModal({
    onCreateGame,
    onBuyInChange,
    leagueName,
+   anonymousPlayers = [],
    theme: themeProp = 'light',
 }: GameSetupModalProps) {
    const theme = getTheme(themeProp);
@@ -119,7 +121,8 @@ export function GameSetupModal({
                      color={theme.text}
                      style={styles.summaryTitle}
                   >
-                     {t('selectedPlayers')} ({selectedPlayers.length})
+                     {t('selectedPlayers')} (
+                     {selectedPlayers.length + anonymousPlayers.length})
                   </Text>
                   <View style={styles.selectedPlayersList}>
                      {selectedPlayers.map((member) => (
@@ -139,6 +142,32 @@ export function GameSetupModal({
                               style={styles.selectedPlayerName}
                            >
                               {member.fullName}
+                           </Text>
+                        </View>
+                     ))}
+                     {anonymousPlayers.map((player, index) => (
+                        <View
+                           key={`anon-${index}`}
+                           style={styles.selectedPlayerItem}
+                        >
+                           <View
+                              style={[
+                                 styles.selectedPlayerImage,
+                                 {
+                                    backgroundColor: colors.secondary,
+                                    justifyContent: 'center',
+                                    alignItems: 'center',
+                                 },
+                              ]}
+                           >
+                              <Ionicons name="person" size={14} color="white" />
+                           </View>
+                           <Text
+                              variant="body"
+                              color={theme.text}
+                              style={styles.selectedPlayerName}
+                           >
+                              {player.name}
                            </Text>
                         </View>
                      ))}
@@ -191,7 +220,7 @@ export function GameSetupModal({
                         color={theme.text}
                         style={styles.summaryValue}
                      >
-                        {selectedPlayers.length}
+                        {selectedPlayers.length + anonymousPlayers.length}
                      </Text>
                   </View>
                   <View style={styles.summaryRow}>
@@ -215,7 +244,9 @@ export function GameSetupModal({
                         color={colors.primary}
                         style={styles.summaryValue}
                      >
-                        ₪{parseInt(buyIn) * selectedPlayers.length}
+                        ₪
+                        {parseInt(buyIn) *
+                           (selectedPlayers.length + anonymousPlayers.length)}
                      </Text>
                   </View>
                </View>

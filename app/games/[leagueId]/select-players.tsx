@@ -4,12 +4,13 @@
  */
 
 import { GameSetupModal } from '@/components/modals';
+import { AnonymousPlayerModal } from '@/components/modals/AnonymousPlayerModal';
 import { Text } from '@/components/Text';
 import { PlayerGrid } from '@/components/ui';
 import { AppButton } from '@/components/ui/AppButton';
 import { useLocalization } from '@/context/localization';
 import { useGameCreation, useLeagueMembers, usePlayerSelection } from '@/hooks';
-import useMixpanel from '@/hooks/useMixpanel';
+import { useMixpanel } from '@/hooks/useMixpanel';
 import { Ionicons } from '@expo/vector-icons';
 import { LinearGradient } from 'expo-linear-gradient';
 import { router, useLocalSearchParams } from 'expo-router';
@@ -19,7 +20,8 @@ import { Animated, TouchableOpacity, View } from 'react-native';
 export default function SelectPlayers() {
    const { t } = useLocalization();
    const { leagueId } = useLocalSearchParams<{ leagueId: string }>();
-   const { track, trackScreenView, trackGameEvent } = useMixpanel();
+   const { track, trackScreenView } = useMixpanel();
+   const [showAnonymousModal, setShowAnonymousModal] = React.useState(false);
 
    // Custom hooks for clean separation of concerns
    const { league, isLoading, error, refetch } = useLeagueMembers(leagueId!);
@@ -28,6 +30,10 @@ export default function SelectPlayers() {
       selectedCount,
       togglePlayerSelection,
       clearSelection,
+      anonymousPlayers,
+      addAnonymousPlayer,
+      removeAnonymousPlayer,
+      totalSelectedCount,
    } = usePlayerSelection(leagueId!);
 
    const {
@@ -42,11 +48,12 @@ export default function SelectPlayers() {
    } = useGameCreation({
       leagueId: leagueId!,
       selectedPlayerIds,
-      selectedCount,
+      selectedCount: totalSelectedCount,
+      anonymousPlayers,
    });
 
    const handleBack = () => {
-      if (selectedCount > 0) {
+      if (totalSelectedCount > 0) {
          clearSelection();
       }
       router.back();
@@ -70,14 +77,23 @@ export default function SelectPlayers() {
 
    // Track player selection changes
    React.useEffect(() => {
-      if (selectedCount > 0) {
+      if (totalSelectedCount > 0) {
          track('players_selected', {
             league_id: leagueId,
-            selected_count: selectedCount,
+            selected_count: totalSelectedCount,
+            regular_count: selectedCount,
+            anonymous_count: anonymousPlayers.length,
             player_ids: selectedPlayerIds,
          });
       }
-   }, [selectedCount, selectedPlayerIds, leagueId, track]);
+   }, [
+      totalSelectedCount,
+      selectedCount,
+      anonymousPlayers.length,
+      selectedPlayerIds,
+      leagueId,
+      track,
+   ]);
 
    // Modern loading state with gradient background
    if (isLoading) {
@@ -293,7 +309,7 @@ export default function SelectPlayers() {
          )}
 
          {/* Modern Selection Summary with Glass-morphism */}
-         {selectedCount > 0 && (
+         {totalSelectedCount > 0 && (
             <View
                className="mx-5 mb-4 px-5 py-4 rounded-2xl"
                style={{
@@ -303,15 +319,15 @@ export default function SelectPlayers() {
                   borderColor: 'rgba(138, 43, 226, 0.3)',
                }}
                accessibilityRole="text"
-               accessibilityLabel={`${selectedCount} ${selectedCount === 1 ? t('playerSelected') : t('playersSelected')}`}
+               accessibilityLabel={`${totalSelectedCount} ${totalSelectedCount === 1 ? t('playerSelected') : t('playersSelected')}`}
             >
                <Text
                   variant="h4"
                   color="rgba(255, 255, 255, 0.9)"
                   className="text-center font-semibold"
                >
-                  {selectedCount}{' '}
-                  {selectedCount === 1
+                  {totalSelectedCount}{' '}
+                  {totalSelectedCount === 1
                      ? t('playerSelected')
                      : t('playersSelected')}
                </Text>
@@ -330,8 +346,65 @@ export default function SelectPlayers() {
             theme="dark"
          />
 
+         {/* Anonymous Players List */}
+         {anonymousPlayers.length > 0 && (
+            <View className="mx-5 mt-4">
+               <Text
+                  variant="h4"
+                  color="rgba(255, 255, 255, 0.9)"
+                  className="font-semibold mb-2"
+               >
+                  {t('anonymousPlayersSection')} ({anonymousPlayers.length})
+               </Text>
+               <View className="flex-row flex-wrap gap-2">
+                  {anonymousPlayers.map((player, index) => (
+                     <TouchableOpacity
+                        key={`anon-${index}`}
+                        onPress={() => removeAnonymousPlayer(index)}
+                        className="flex-row items-center px-3 py-2 rounded-full"
+                        style={{
+                           backgroundColor: 'rgba(138, 43, 226, 0.3)',
+                           borderWidth: 1,
+                           borderColor: 'rgba(138, 43, 226, 0.5)',
+                        }}
+                     >
+                        <Ionicons
+                           name="person"
+                           size={16}
+                           color="rgba(255, 255, 255, 0.9)"
+                           style={{ marginRight: 6 }}
+                        />
+                        <Text
+                           variant="body"
+                           color="rgba(255, 255, 255, 0.9)"
+                           className="font-medium mr-2"
+                        >
+                           {player.name}
+                        </Text>
+                        <Ionicons
+                           name="close-circle"
+                           size={16}
+                           color="rgba(255, 255, 255, 0.6)"
+                        />
+                     </TouchableOpacity>
+                  ))}
+               </View>
+            </View>
+         )}
+
+         {/* Add Anonymous Button */}
+         <View className="mx-5 mt-4 mb-32">
+            <AppButton
+               title={t('addAnonymousPlayer')}
+               onPress={() => setShowAnonymousModal(true)}
+               variant="outline"
+               icon="person-add-outline"
+               size="medium"
+            />
+         </View>
+
          {/* Modern Start Game Button */}
-         {selectedCount > 0 && (
+         {totalSelectedCount > 0 && (
             <View className="absolute bottom-0 left-0 right-0 p-6 pb-10">
                <AppButton
                   title={t('startGame')}
@@ -348,6 +421,7 @@ export default function SelectPlayers() {
          <GameSetupModal
             visible={showGameSetup}
             selectedPlayers={selectedPlayers}
+            anonymousPlayers={anonymousPlayers}
             buyIn={buyIn}
             isCreatingGame={isCreatingGame}
             availableBuyIns={availableBuyIns}
@@ -355,6 +429,14 @@ export default function SelectPlayers() {
             onCreateGame={handleCreateGame}
             onBuyInChange={setBuyIn}
             leagueName={league?.name}
+            theme="dark"
+         />
+
+         {/* Anonymous Player Modal */}
+         <AnonymousPlayerModal
+            visible={showAnonymousModal}
+            onClose={() => setShowAnonymousModal(false)}
+            onAdd={addAnonymousPlayer}
             theme="dark"
          />
       </LinearGradient>

@@ -8,8 +8,20 @@ import {
 } from '@/utils/rateLimiting';
 import { sanitizeString, validateDatabaseId } from '@/utils/validation';
 import dayjs from 'dayjs';
-import { and, avg, desc, eq, gte, lte, max, sql, sum } from 'drizzle-orm';
 import {
+   and,
+   avg,
+   desc,
+   eq,
+   gte,
+   isNotNull,
+   lte,
+   max,
+   sql,
+   sum,
+} from 'drizzle-orm';
+import {
+   anonymousPlayers as anonymousPlayersTable,
    gamePlayers,
    games,
    getDb,
@@ -186,6 +198,7 @@ export const GET = withAuth(
                games,
                leagueMembers,
                users,
+               anonymousPlayersTable,
                and,
                desc,
                eq,
@@ -195,6 +208,7 @@ export const GET = withAuth(
                sum,
                avg,
                max,
+               isNotNull,
             }
          );
 
@@ -236,6 +250,7 @@ async function calculateStat(
       games,
       leagueMembers,
       users,
+      anonymousPlayersTable,
       and,
       desc,
       eq,
@@ -245,6 +260,7 @@ async function calculateStat(
       sum,
       avg,
       max,
+      isNotNull,
    } = modules;
 
    const parsedLeagueId = parseInt(leagueId);
@@ -252,17 +268,30 @@ async function calculateStat(
       throw new Error('Invalid league ID');
    }
 
-   const baseWhere = and(
+   const gameConditions = and(
       eq(games.leagueId, parsedLeagueId),
       eq(games.status, 'completed'),
       gte(games.endedAt, yearStart),
-      lte(games.endedAt, yearEnd),
-      eq(leagueMembers.isActive, true)
+      lte(games.endedAt, yearEnd)
    );
+
+   const userWhere = and(gameConditions, eq(leagueMembers.isActive, true));
+
+   const anonWhere = and(
+      gameConditions,
+      isNotNull(gamePlayers.anonymousPlayerId)
+   );
+
+   const anonymousPlayerProfile = {
+      userId: -1,
+      fullName: 'Anonymous Players',
+      profileImageUrl: null,
+   };
 
    switch (statType) {
       case 'top-profit-player': {
-         const result = await db
+         // Regular User Query
+         const userResult = await db
             .select({
                userId: users.id,
                fullName: users.fullName,
@@ -283,28 +312,56 @@ async function calculateStat(
                   eq(leagueMembers.leagueId, parsedLeagueId)
                )
             )
-            .where(baseWhere)
+            .where(userWhere)
             .groupBy(users.id, users.fullName, users.profileImageUrl)
             .having(sql`sum(${gamePlayers.profit}) IS NOT NULL`)
             .orderBy(desc(sum(gamePlayers.profit)))
             .limit(1);
 
-         if (!result.length) return null;
+         // Anonymous Query
+         const anonResult = await db
+            .select({
+               value: sum(gamePlayers.profit).as('total_profit'),
+               gamesPlayed:
+                  sql<number>`count(distinct ${gamePlayers.gameId})`.as(
+                     'games_played'
+                  ),
+            })
+            .from(gamePlayers)
+            .innerJoin(games, eq(gamePlayers.gameId, games.id))
+            .where(anonWhere);
+
+         const userVal = parseFloat(userResult[0]?.value || '0');
+         const anonVal = parseFloat(anonResult[0]?.value || '0');
+
+         if (anonResult[0] && anonVal > userVal) {
+            return {
+               ...anonymousPlayerProfile,
+               value: anonVal,
+               additionalData: {
+                  gamesPlayed: anonResult[0].gamesPlayed,
+                  label: 'Total Profit',
+                  isAnonymous: true,
+               },
+            };
+         }
+
+         if (!userResult.length) return null;
 
          return {
-            userId: result[0].userId,
-            fullName: result[0].fullName,
-            profileImageUrl: result[0].profileImageUrl,
-            value: parseFloat(result[0].value || '0'),
+            userId: userResult[0].userId,
+            fullName: userResult[0].fullName,
+            profileImageUrl: userResult[0].profileImageUrl,
+            value: userVal,
             additionalData: {
-               gamesPlayed: result[0].gamesPlayed,
+               gamesPlayed: userResult[0].gamesPlayed,
                label: 'Total Profit',
             },
          };
       }
 
       case 'most-active-player': {
-         const result = await db
+         const userResult = await db
             .select({
                userId: users.id,
                fullName: users.fullName,
@@ -324,27 +381,53 @@ async function calculateStat(
                   eq(leagueMembers.leagueId, parsedLeagueId)
                )
             )
-            .where(baseWhere)
+            .where(userWhere)
             .groupBy(users.id, users.fullName, users.profileImageUrl)
             .orderBy(desc(sql<number>`count(distinct ${gamePlayers.gameId})`))
             .limit(1);
 
-         if (!result.length) return null;
+         const anonResult = await db
+            .select({
+               value: sql<number>`count(distinct ${gamePlayers.gameId})`.as(
+                  'games_played'
+               ),
+               totalProfit: sum(gamePlayers.profit).as('total_profit'),
+            })
+            .from(gamePlayers)
+            .innerJoin(games, eq(gamePlayers.gameId, games.id))
+            .where(anonWhere);
+
+         const userVal = parseInt(userResult[0]?.value || '0', 10);
+         const anonVal = parseInt(anonResult[0]?.value || '0', 10);
+
+         if (anonResult[0] && anonVal > userVal) {
+            return {
+               ...anonymousPlayerProfile,
+               value: anonVal,
+               additionalData: {
+                  totalProfit: parseFloat(anonResult[0].totalProfit || '0'),
+                  label: 'Games Played',
+                  isAnonymous: true,
+               },
+            };
+         }
+
+         if (!userResult.length) return null;
 
          return {
-            userId: result[0].userId,
-            fullName: result[0].fullName,
-            profileImageUrl: result[0].profileImageUrl,
-            value: result[0].value,
+            userId: userResult[0].userId,
+            fullName: userResult[0].fullName,
+            profileImageUrl: userResult[0].profileImageUrl,
+            value: userVal,
             additionalData: {
-               totalProfit: parseFloat(result[0].totalProfit || '0'),
+               totalProfit: parseFloat(userResult[0].totalProfit || '0'),
                label: 'Games Played',
             },
          };
       }
 
       case 'highest-single-game-profit': {
-         const result = await db
+         const userResult = await db
             .select({
                userId: users.id,
                fullName: users.fullName,
@@ -365,21 +448,48 @@ async function calculateStat(
                   eq(leagueMembers.leagueId, parsedLeagueId)
                )
             )
-            .where(baseWhere)
+            .where(userWhere)
             .groupBy(users.id, users.fullName, users.profileImageUrl)
             .having(sql`max(${gamePlayers.profit}) IS NOT NULL`)
             .orderBy(desc(max(gamePlayers.profit)))
             .limit(1);
 
-         if (!result.length) return null;
+         const anonResult = await db
+            .select({
+               value: max(gamePlayers.profit).as('highest_profit'),
+               gamesPlayed:
+                  sql<number>`count(distinct ${gamePlayers.gameId})`.as(
+                     'games_played'
+                  ),
+            })
+            .from(gamePlayers)
+            .innerJoin(games, eq(gamePlayers.gameId, games.id))
+            .where(anonWhere);
+
+         const userVal = parseFloat(userResult[0]?.value || '0');
+         const anonVal = parseFloat(anonResult[0]?.value || '0');
+
+         if (anonResult[0] && anonVal > userVal) {
+            return {
+               ...anonymousPlayerProfile,
+               value: anonVal,
+               additionalData: {
+                  gamesPlayed: anonResult[0].gamesPlayed,
+                  label: 'Best Single Game',
+                  isAnonymous: true,
+               },
+            };
+         }
+
+         if (!userResult.length) return null;
 
          return {
-            userId: result[0].userId,
-            fullName: result[0].fullName,
-            profileImageUrl: result[0].profileImageUrl,
-            value: parseFloat(result[0].value || '0'),
+            userId: userResult[0].userId,
+            fullName: userResult[0].fullName,
+            profileImageUrl: userResult[0].profileImageUrl,
+            value: userVal,
             additionalData: {
-               gamesPlayed: result[0].gamesPlayed,
+               gamesPlayed: userResult[0].gamesPlayed,
                label: 'Best Single Game',
             },
          };
@@ -387,7 +497,7 @@ async function calculateStat(
 
       case 'most-consistent-player': {
          // Calculate consistency as lowest standard deviation of profits
-         const result = await db
+         const userResult = await db
             .select({
                userId: users.id,
                fullName: users.fullName,
@@ -411,29 +521,67 @@ async function calculateStat(
                   eq(leagueMembers.leagueId, parsedLeagueId)
                )
             )
-            .where(baseWhere)
+            .where(userWhere)
             .groupBy(users.id, users.fullName, users.profileImageUrl)
             .having(sql`count(distinct ${gamePlayers.gameId}) >= 3`) // At least 3 games for consistency
             .orderBy(sql`stddev(${gamePlayers.profit}) ASC`) // Lower stddev = more consistent
             .limit(1);
 
-         if (!result.length) return null;
+         const anonResult = await db
+            .select({
+               value: sql<number>`stddev(${gamePlayers.profit})`.as(
+                  'consistency_score'
+               ),
+               avgProfit: avg(gamePlayers.profit).as('avg_profit'),
+               gamesPlayed:
+                  sql<number>`count(distinct ${gamePlayers.gameId})`.as(
+                     'games_played'
+                  ),
+            })
+            .from(gamePlayers)
+            .innerJoin(games, eq(gamePlayers.gameId, games.id))
+            .where(anonWhere)
+            .having(sql`count(distinct ${gamePlayers.gameId}) >= 3`);
+
+         const userVal = parseFloat(userResult[0]?.value || '0');
+         const anonVal = parseFloat(anonResult[0]?.value || '0');
+
+         // Lower is better, but handle 0 or nulls.
+         // If userVal is 0 and exists, it's very consistent.
+         // If anonVal exists and is lower than userVal (or userVal doesn't exist)
+         const hasUser = userResult.length > 0;
+         const hasAnon = anonResult.length > 0;
+
+         if (hasAnon && (!hasUser || anonVal < userVal)) {
+            return {
+               ...anonymousPlayerProfile,
+               value: anonVal,
+               additionalData: {
+                  avgProfit: parseFloat(anonResult[0].avgProfit || '0'),
+                  gamesPlayed: anonResult[0].gamesPlayed,
+                  label: 'Consistency Score',
+                  isAnonymous: true,
+               },
+            };
+         }
+
+         if (!hasUser) return null;
 
          return {
-            userId: result[0].userId,
-            fullName: result[0].fullName,
-            profileImageUrl: result[0].profileImageUrl,
-            value: parseFloat(result[0].value || '0'),
+            userId: userResult[0].userId,
+            fullName: userResult[0].fullName,
+            profileImageUrl: userResult[0].profileImageUrl,
+            value: userVal,
             additionalData: {
-               avgProfit: parseFloat(result[0].avgProfit || '0'),
-               gamesPlayed: result[0].gamesPlayed,
+               avgProfit: parseFloat(userResult[0].avgProfit || '0'),
+               gamesPlayed: userResult[0].gamesPlayed,
                label: 'Consistency Score',
             },
          };
       }
 
       case 'biggest-loser': {
-         const result = await db
+         const userResult = await db
             .select({
                userId: users.id,
                fullName: users.fullName,
@@ -454,22 +602,51 @@ async function calculateStat(
                   eq(leagueMembers.leagueId, parsedLeagueId)
                )
             )
-            .where(baseWhere)
+            .where(userWhere)
             .groupBy(users.id, users.fullName, users.profileImageUrl)
             .having(sql`sum(${gamePlayers.profit}) IS NOT NULL`)
             .orderBy(sum(gamePlayers.profit)) // ASC for biggest loss (most negative)
             .limit(1);
 
-         if (!result.length) return null;
+         const anonResult = await db
+            .select({
+               value: sum(gamePlayers.profit).as('total_loss'),
+               gamesPlayed:
+                  sql<number>`count(distinct ${gamePlayers.gameId})`.as(
+                     'games_played'
+                  ),
+            })
+            .from(gamePlayers)
+            .innerJoin(games, eq(gamePlayers.gameId, games.id))
+            .where(anonWhere);
+
+         const userVal = parseFloat(userResult[0]?.value || '0');
+         const anonVal = parseFloat(anonResult[0]?.value || '0');
+
+         // Lower is "better" for biggest loser (more negative)
+         if (anonResult[0] && anonVal < userVal) {
+            return {
+               ...anonymousPlayerProfile,
+               value: Math.abs(anonVal),
+               additionalData: {
+                  gamesPlayed: anonResult[0].gamesPlayed,
+                  actualLoss: anonVal,
+                  label: 'Total Loss',
+                  isAnonymous: true,
+               },
+            };
+         }
+
+         if (!userResult.length) return null;
 
          return {
-            userId: result[0].userId,
-            fullName: result[0].fullName,
-            profileImageUrl: result[0].profileImageUrl,
-            value: Math.abs(parseFloat(result[0].value || '0')), // Return absolute value
+            userId: userResult[0].userId,
+            fullName: userResult[0].fullName,
+            profileImageUrl: userResult[0].profileImageUrl,
+            value: Math.abs(userVal), // Return absolute value
             additionalData: {
-               gamesPlayed: result[0].gamesPlayed,
-               actualLoss: parseFloat(result[0].value || '0'), // Keep the actual negative value
+               gamesPlayed: userResult[0].gamesPlayed,
+               actualLoss: userVal, // Keep the actual negative value
                label: 'Total Loss',
             },
          };
