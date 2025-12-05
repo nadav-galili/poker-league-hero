@@ -15,7 +15,7 @@ export interface CashIn {
 
 export interface GamePlayer {
    id: string;
-   userId: number;
+   userId: number | null;
    fullName: string;
    profileImageUrl?: string;
    isActive: boolean;

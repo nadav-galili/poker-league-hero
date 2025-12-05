@@ -32,11 +32,15 @@ const PlayerCard: React.FC<PlayerCardProps> = ({
          {/* Player Info */}
          <View className="flex-row items-center mb-2 gap-1.5">
             <Image
-               source={{
-                  uri:
-                     player.profileImageUrl ||
-                     'https://via.placeholder.com/50x50/cccccc/666666?text=?',
-               }}
+               source={
+                  !player.userId
+                     ? require('@/assets/images/anonymous.webp')
+                     : {
+                          uri:
+                             player.profileImageUrl ||
+                             'https://via.placeholder.com/50x50/cccccc/666666?text=?',
+                       }
+               }
                style={{
                   borderColor: colors.primary,
                   backgroundColor: '#cccccc',
