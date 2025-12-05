@@ -51,7 +51,7 @@ const GameSummary: React.FC<GameSummaryProps> = ({ game }) => {
                   {game.totals.activePlayers}
                </Text>
                <Text variant="captionSmall" color={theme.textMuted}>
-                  Active Players
+                  {t('activePlayersLabel')}
                </Text>
             </View>
          </View>

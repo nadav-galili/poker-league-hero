@@ -12,6 +12,7 @@ import { useLocalization } from '@/context/localization';
 import { useGameCreation, useLeagueMembers, usePlayerSelection } from '@/hooks';
 import { useMixpanel } from '@/hooks/useMixpanel';
 import { Ionicons } from '@expo/vector-icons';
+import { Image } from 'expo-image';
 import { LinearGradient } from 'expo-linear-gradient';
 import { router, useLocalSearchParams } from 'expo-router';
 import React from 'react';
@@ -368,11 +369,15 @@ export default function SelectPlayers() {
                            borderColor: 'rgba(138, 43, 226, 0.5)',
                         }}
                      >
-                        <Ionicons
-                           name="person"
-                           size={16}
-                           color="rgba(255, 255, 255, 0.9)"
-                           style={{ marginRight: 6 }}
+                        <Image
+                           source={require('@/assets/images/anonymous.webp')}
+                           style={{
+                              width: 20,
+                              height: 20,
+                              borderRadius: 10,
+                              marginRight: 6,
+                           }}
+                           contentFit="cover"
                         />
                         <Text
                            variant="body"

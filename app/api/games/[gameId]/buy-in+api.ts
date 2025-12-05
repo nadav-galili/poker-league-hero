@@ -4,7 +4,7 @@ export const POST = withAuth(async (request: Request, user) => {
    try {
       const url = new URL(request.url);
       const gameId = url.pathname.split('/')[3]; // Extract gameId from /api/games/[gameId]/buy-in
-      const { playerId, amount } = await request.json();
+      const { gamePlayerId, amount } = await request.json();
 
       if (!user.userId) {
          return Response.json(
@@ -13,9 +13,9 @@ export const POST = withAuth(async (request: Request, user) => {
          );
       }
 
-      if (!gameId || !playerId || !amount) {
+      if (!gameId || !gamePlayerId || !amount) {
          return Response.json(
-            { error: 'Game ID, player ID, and amount are required' },
+            { error: 'Game ID, game player ID, and amount are required' },
             { status: 400 }
          );
       }
@@ -52,12 +52,12 @@ export const POST = withAuth(async (request: Request, user) => {
 
       // Find the game player record
       const gamePlayerResult = await db
-         .select({ id: gamePlayers.id })
+         .select({ id: gamePlayers.id, userId: gamePlayers.userId })
          .from(gamePlayers)
          .where(
             and(
                eq(gamePlayers.gameId, parseInt(gameId)),
-               eq(gamePlayers.userId, playerId)
+               eq(gamePlayers.id, parseInt(gamePlayerId))
             )
          )
          .limit(1);
@@ -69,15 +69,15 @@ export const POST = withAuth(async (request: Request, user) => {
          );
       }
 
-      const gamePlayerId = gamePlayerResult[0].id;
+      const { id: actualGamePlayerId, userId } = gamePlayerResult[0];
 
       // Create buy-in record
       const newCashIn = await db
          .insert(cashIns)
          .values({
-            gameId,
-            userId: playerId,
-            gamePlayerId,
+            gameId: parseInt(gameId),
+            userId: userId,
+            gamePlayerId: actualGamePlayerId,
             amount: buyInAmount.toFixed(2),
             type: 'buy_in',
          })

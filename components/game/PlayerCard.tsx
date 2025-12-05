@@ -15,6 +15,7 @@ interface PlayerCardProps {
    onBuyIn: (player: GamePlayer) => void;
    onCashOut: (player: GamePlayer) => void;
    onRemovePlayer: (player: GamePlayer) => void;
+   onUndoBuyIn: (player: GamePlayer) => void;
 }
 
 const PlayerCard: React.FC<PlayerCardProps> = ({
@@ -24,6 +25,7 @@ const PlayerCard: React.FC<PlayerCardProps> = ({
    onBuyIn,
    onCashOut,
    onRemovePlayer,
+   onUndoBuyIn,
 }) => {
    const { t } = useLocalization();
 
@@ -149,24 +151,42 @@ const PlayerCard: React.FC<PlayerCardProps> = ({
          {/* Action Buttons */}
          {player.isActive && (
             <View className="flex-row gap-1.5 items-center justify-between w-full">
-               <AppButton
-                  title={t('buyIn')}
-                  onPress={() => onBuyIn(player)}
-                  color="success"
-                  disabled={isProcessing}
-                  width="100%"
-                  icon="add-circle"
-                  size="small"
-               />
-               <AppButton
-                  title={t('cashOut')}
-                  onPress={() => onCashOut(player)}
-                  color="error"
-                  disabled={isProcessing}
-                  width="100%"
-                  icon="cash-outline"
-                  size="small"
-               />
+               <View className="flex-1">
+                  <AppButton
+                     title={t('buyIn')}
+                     onPress={() => onBuyIn(player)}
+                     color="success"
+                     disabled={isProcessing}
+                     width="100%"
+                     icon="add-circle"
+                     size="small"
+                  />
+               </View>
+
+               <View className="flex-1">
+                  <AppButton
+                     title={t('cancelBuyIn')}
+                     onPress={() => onUndoBuyIn(player)}
+                     variant="outline"
+                     color="warning"
+                     disabled={isProcessing || player.totalBuyIns <= 0}
+                     width="100%"
+                     icon="arrow-undo"
+                     size="small"
+                  />
+               </View>
+
+               <View className="flex-1">
+                  <AppButton
+                     title={t('cashOut')}
+                     onPress={() => onCashOut(player)}
+                     color="error"
+                     disabled={isProcessing}
+                     width="100%"
+                     icon="cash-outline"
+                     size="small"
+                  />
+               </View>
             </View>
          )}
       </View>

@@ -72,7 +72,7 @@ export class GameService {
                method: 'POST',
                headers: { 'Content-Type': 'application/json' },
                body: JSON.stringify({
-                  playerId: player.userId,
+                  gamePlayerId: player.id,
                   amount: buyInAmount,
                }),
             }
@@ -85,6 +85,34 @@ export class GameService {
       } catch (error) {
          captureException(error as Error, {
             function: 'handleBuyIn',
+            screen: 'GameScreen',
+            gameId: this.deps.gameId,
+            playerId: player.userId,
+         });
+         throw error;
+      }
+   }
+
+   async undoBuyIn(player: GamePlayer): Promise<void> {
+      try {
+         const response = await this.deps.fetchWithAuth(
+            `${BASE_URL}/api/games/${this.deps.gameId}/undo-buy-in`,
+            {
+               method: 'POST',
+               headers: { 'Content-Type': 'application/json' },
+               body: JSON.stringify({
+                  gamePlayerId: player.id,
+               }),
+            }
+         );
+
+         if (!response.ok) {
+            const errorData = await response.json();
+            throw new Error(errorData.error || 'Failed to undo buy-in');
+         }
+      } catch (error) {
+         captureException(error as Error, {
+            function: 'undoBuyIn',
             screen: 'GameScreen',
             gameId: this.deps.gameId,
             playerId: player.userId,

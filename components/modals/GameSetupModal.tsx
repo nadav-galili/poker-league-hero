@@ -150,18 +150,11 @@ export function GameSetupModal({
                            key={`anon-${index}`}
                            style={styles.selectedPlayerItem}
                         >
-                           <View
-                              style={[
-                                 styles.selectedPlayerImage,
-                                 {
-                                    backgroundColor: colors.secondary,
-                                    justifyContent: 'center',
-                                    alignItems: 'center',
-                                 },
-                              ]}
-                           >
-                              <Ionicons name="person" size={14} color="white" />
-                           </View>
+                           <Image
+                              source={require('@/assets/images/anonymous.webp')}
+                              style={styles.selectedPlayerImage}
+                              contentFit="cover"
+                           />
                            <Text
                               variant="body"
                               color={theme.text}

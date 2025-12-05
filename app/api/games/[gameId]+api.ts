@@ -57,6 +57,7 @@ export const GET = withAuth(async (request: Request, user) => {
          .select({
             id: gamePlayers.id,
             userId: users.id,
+            anonymousPlayerId: anonymousPlayersTable.id,
             fullName: users.fullName,
             profileImageUrl: users.profileImageUrl,
             anonymousName: anonymousPlayersTable.name,

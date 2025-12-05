@@ -1,4 +1,4 @@
-import AppButton from '@/components/ui/AppButton';
+import { AppButton } from '@/components/ui/AppButton';
 import { useLocalization } from '@/context/localization';
 import { LinearGradient } from 'expo-linear-gradient';
 import React from 'react';
@@ -107,7 +107,7 @@ export default function Games() {
                         {activeGame.activePlayers}
                      </Text>
                      <Text className="text-white/70 text-sm mt-1">
-                        {t('activePlayers') || 'Active Players'}
+                        {t('activePlayersLabel') || 'Active Players'}
                      </Text>
                   </View>
                   <View className="items-center">

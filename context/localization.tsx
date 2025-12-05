@@ -110,7 +110,7 @@ export interface Translations {
    retry: string;
    quickStats: string;
    totalGames: string;
-   activePlayers: string;
+   activePlayersLabel: string;
    totalPot: string;
    lastGame: string;
    viewDetailedStats: string;
@@ -164,6 +164,7 @@ export interface Translations {
    playerName: string;
    initialBuyIn: string;
    buyIn: string;
+   cancelBuyIn: string;
    buyOut: string;
    profit: string;
    cashOut: string;
@@ -175,6 +176,7 @@ export interface Translations {
    invalidAmount: string;
    playerCashedOut: string;
    buyInSuccessful: string;
+   buyInUndone: string;
    selectPlayerToAdd: string;
    playerAdded: string;
    confirmRemovePlayer: string;
@@ -339,7 +341,7 @@ const enTranslations: Translations = {
    retry: 'Retry',
    quickStats: 'QUICK STATS',
    totalGames: 'TOTAL GAMES',
-   activePlayers: 'ACTIVE PLAYERS',
+   activePlayersLabel: 'ACTIVE PLAYERS',
    totalPot: 'TOTAL POT',
    lastGame: 'LAST GAME',
    viewDetailedStats: 'VIEW DETAILED STATS',
@@ -392,6 +394,7 @@ const enTranslations: Translations = {
    playerName: 'PLAYER NAME',
    initialBuyIn: 'INITIAL BUY-IN',
    buyIn: 'BUY IN',
+   cancelBuyIn: 'CANCEL BUY IN',
    buyOut: 'BUY OUT',
    profit: 'PROFIT',
    cashOut: 'CASH OUT',
@@ -403,6 +406,7 @@ const enTranslations: Translations = {
    invalidAmount: 'Please enter a valid amount',
    playerCashedOut: 'Player cashed out',
    buyInSuccessful: 'Buy-in successful',
+   buyInUndone: 'Buy-in undone',
    selectPlayerToAdd: 'Select a player to add to the game',
    playerAdded: 'Player added to the game',
    confirmRemovePlayer: 'Remove Player',
@@ -574,7 +578,7 @@ const heTranslations: Translations = {
    retry: 'נסה שוב',
    quickStats: 'סטטיסטיקות מהירות',
    totalGames: 'סה״כ משחקים',
-   activePlayers: 'שחקנים פעילים',
+   activePlayersLabel: 'שחקנים פעילים',
    totalPot: 'סה״כ קופה',
    lastGame: 'משחק אחרון',
    viewDetailedStats: 'צפה בסטטיסטיקות מפורטות',
@@ -626,6 +630,7 @@ const heTranslations: Translations = {
    playerName: 'שם השחקן',
    initialBuyIn: 'כניסה ראשונית',
    buyIn: 'כניסה',
+   cancelBuyIn: 'בטל כניסה',
    buyOut: 'יציאה',
    profit: 'רווח',
    cashOut: 'משיכת כסף',
@@ -637,6 +642,7 @@ const heTranslations: Translations = {
    invalidAmount: 'אנא הכנס סכום תקף',
    playerCashedOut: 'השחקן משך כסף',
    buyInSuccessful: 'כניסה בוצעה בהצלחה',
+   buyInUndone: 'ביטול כניסה בוצע בהצלחה',
    selectPlayerToAdd: 'בחר שחקן להוסיף למשחק',
    playerAdded: 'השחקן נוסף למשחק',
    confirmRemovePlayer: 'הסר שחקן',
