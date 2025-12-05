@@ -4,13 +4,13 @@
 
 import { useAuth } from '@/context/auth';
 import { useLocalization } from '@/context/localization';
+import useMixpanel from '@/hooks/useMixpanel';
 import { createGameService } from '@/services';
 import { CreateGameRequest } from '@/types';
 import { addBreadcrumb, captureException } from '@/utils/sentry';
 import { router } from 'expo-router';
 import React from 'react';
 import { Alert } from 'react-native';
-import useMixpanel from '@/hooks/useMixpanel';
 
 interface UseGameCreationResult {
    showGameSetup: boolean;
@@ -178,6 +178,7 @@ export function useGameCreation({
       gameService,
       t,
       trackGameEvent,
+      anonymousPlayers,
    ]);
 
    const handleCancelGameSetup = React.useCallback(() => {

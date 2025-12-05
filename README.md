@@ -32,5 +32,5 @@ changed icon , refactored some ui
 
 ## Deploy to expo routes
 
-npx expo export —platform web -c
-Eas deploy —prod
+npx expo export --platform web -c
+eas deploy --prod

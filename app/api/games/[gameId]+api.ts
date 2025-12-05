@@ -20,9 +20,14 @@ export const GET = withAuth(async (request: Request, user) => {
       }
 
       // Import database modules
-      const { getDb, games, gamePlayers, users, cashIns } = await import(
-         '../../../db'
-      );
+      const {
+         getDb,
+         games,
+         gamePlayers,
+         users,
+         cashIns,
+         anonymousPlayers: anonymousPlayersTable,
+      } = await import('../../../db');
       const { eq } = await import('drizzle-orm');
       const db = getDb();
 
@@ -54,6 +59,7 @@ export const GET = withAuth(async (request: Request, user) => {
             userId: users.id,
             fullName: users.fullName,
             profileImageUrl: users.profileImageUrl,
+            anonymousName: anonymousPlayersTable.name,
             isActive: gamePlayers.isActive,
             joinedAt: gamePlayers.joinedAt,
             leftAt: gamePlayers.leftAt,
@@ -61,7 +67,11 @@ export const GET = withAuth(async (request: Request, user) => {
             profit: gamePlayers.profit,
          })
          .from(gamePlayers)
-         .innerJoin(users, eq(gamePlayers.userId, users.id))
+         .leftJoin(users, eq(gamePlayers.userId, users.id))
+         .leftJoin(
+            anonymousPlayersTable,
+            eq(gamePlayers.anonymousPlayerId, anonymousPlayersTable.id)
+         )
          .where(eq(gamePlayers.gameId, gameId));
 
       // Fetch all cash-ins and cash-outs for each player
@@ -113,8 +123,13 @@ export const GET = withAuth(async (request: Request, user) => {
                   0
                );
 
+            // Use anonymous name if user name is missing
+            const displayFullName =
+               player.fullName || player.anonymousName || 'Unknown Player';
+
             return {
                ...player,
+               fullName: displayFullName, // Normalize name field for frontend
                cashIns: playerCashInsList,
                totalBuyIns,
                totalBuyOuts,

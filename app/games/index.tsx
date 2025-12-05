@@ -179,8 +179,11 @@ export default function Games() {
                            <Text className="text-white/50 text-xs mb-1">
                               {t('profit') || 'רווח נוכחי'}
                            </Text>
-                           <Text className={`font-bold text-lg ${player.profit >= 0 ? 'text-green-400' : 'text-red-400'}`}>
-                              ₪{Math.abs(player.profit)}{player.profit < 0 ? '-' : ''}
+                           <Text
+                              className={`font-bold text-lg ${player.profit >= 0 ? 'text-green-400' : 'text-red-400'}`}
+                           >
+                              ₪{Math.abs(player.profit)}
+                              {player.profit < 0 ? '-' : ''}
                            </Text>
                         </View>
                         <View className="flex-1 mr-2">
