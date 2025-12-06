@@ -33,6 +33,8 @@ account layout , league stats
 just fixing google play reject on app release
 1.0.9
 changed icon , refactored some ui
+1.2.0
+Add anonymouse player and Fix mixpanel tracking for opt out users
 
 ## Deploy to expo routes
 

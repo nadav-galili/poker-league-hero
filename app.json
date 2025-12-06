@@ -1,7 +1,7 @@
 {
    "name": "HomeStack",
    "slug": "poker-ai-homestack",
-   "version": "1.1.4",
+   "version": "1.2.0",
    "orientation": "portrait",
    "icon": "./assets/images/icon.png",
    "scheme": "pokeraihomestack",
@@ -22,6 +22,7 @@
       }
    },
    "android": {
+      "autoIncrement": true,
       "versionCode": 54,
       "adaptiveIcon": {
          "foregroundImage": "./assets/images/icon.png",
