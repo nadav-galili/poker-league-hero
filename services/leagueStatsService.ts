@@ -27,7 +27,8 @@ export type StatType =
    | 'top-profit-player'
    | 'most-active-player'
    | 'highest-single-game-profit'
-   | 'biggest-loser';
+   | 'biggest-loser'
+   | 'best-winning-streak';
 
 // Legacy interface for backward compatibility
 export interface TopProfitPlayer {
@@ -131,6 +132,13 @@ export class LeagueStatsService {
       year?: number
    ): Promise<StatResponse> {
       return this.getPlayerStat(leagueId, 'biggest-loser', year);
+   }
+
+   async getBestWinningStreak(
+      leagueId: string,
+      year?: number
+   ): Promise<StatResponse> {
+      return this.getPlayerStat(leagueId, 'best-winning-streak', year);
    }
 
    // Get full rankings for a stat type

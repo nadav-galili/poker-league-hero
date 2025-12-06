@@ -63,6 +63,17 @@ const STAT_CONFIGS = {
       formatValue: (value: number | string | undefined | null) =>
          formatCurrency(value),
    },
+   'best-winning-streak': {
+      title: 'bestWinningStreak',
+      icon: 'flame',
+      color: '#F59E0B', // Amber
+      bgColor: 'bg-amber-500/10',
+      borderColor: 'border-amber-400/30',
+      formatValue: (value: number | string | undefined | null) => {
+         if (value === null || value === undefined) return 'N/A';
+         return value.toString();
+      },
+   },
 } as const;
 
 export default function PlayerStatCard({

@@ -60,6 +60,17 @@ const STAT_CONFIGS = {
       formatValue: (value: number | string | undefined | null) =>
          formatCurrency(value),
    },
+   'best-winning-streak': {
+      title: 'bestWinningStreak',
+      icon: 'flame',
+      color: '#F59E0B', // Amber
+      bgColor: 'rgba(245, 158, 11, 0.1)',
+      borderColor: 'rgba(245, 158, 11, 0.3)',
+      formatValue: (value: number | string | undefined | null) => {
+         if (value === null || value === undefined) return 'N/A';
+         return value.toString();
+      },
+   },
 } as const;
 
 export default function StatsLeaderboardHero({

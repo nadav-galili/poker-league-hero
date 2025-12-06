@@ -40,6 +40,13 @@ const STAT_CONFIGS = {
       formatValue: (value: number | string | undefined | null) =>
          formatCurrency(value),
    },
+   'best-winning-streak': {
+      color: '#F59E0B', // Amber
+      formatValue: (value: number | string | undefined | null) => {
+         if (value === null || value === undefined) return 'N/A';
+         return value.toString();
+      },
+   },
 } as const;
 
 export default function StatsLeaderboardRow({

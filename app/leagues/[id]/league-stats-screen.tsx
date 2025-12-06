@@ -313,6 +313,15 @@ export default function LeagueStatsScreen() {
                         t={t}
                      />
                   </PressableStatCard>
+                  <PressableStatCard
+                     onPress={() => handleStatPress('best-winning-streak')}
+                  >
+                     <PlayerStatCard
+                        leagueId={leagueId!}
+                        statType="best-winning-streak"
+                        t={t}
+                     />
+                  </PressableStatCard>
                </View>
             </View>
 

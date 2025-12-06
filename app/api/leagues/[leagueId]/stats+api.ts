@@ -19,6 +19,7 @@ import {
    max,
    sql,
    sum,
+   asc,
 } from 'drizzle-orm';
 import {
    anonymousPlayers as anonymousPlayersTable,
@@ -42,7 +43,8 @@ type StatType =
    | 'top-profit-player'
    | 'most-active-player'
    | 'highest-single-game-profit'
-   | 'biggest-loser';
+   | 'biggest-loser'
+   | 'best-winning-streak';
 
 export const GET = withAuth(
    withRateLimit(async (request: Request, user) => {
@@ -112,6 +114,7 @@ export const GET = withAuth(
                'most-active-player',
                'highest-single-game-profit',
                'biggest-loser',
+               'best-winning-streak',
             ];
             if (!validTypes.includes(typeParam)) {
                return secureResponse(
@@ -561,6 +564,117 @@ async function calculateStat(
                gamesPlayed: userResult[0].gamesPlayed,
                actualLoss: userVal, // Keep the actual negative value
                label: 'Total Loss',
+            },
+         };
+      }
+
+      case 'best-winning-streak': {
+         // Fetch all game history for all players
+         const allHistory = await db
+            .select({
+               userId: gamePlayers.userId,
+               anonId: gamePlayers.anonymousPlayerId,
+               profit: gamePlayers.profit,
+               endedAt: games.endedAt,
+               fullName: users.fullName,
+               profileImageUrl: users.profileImageUrl,
+            })
+            .from(gamePlayers)
+            .innerJoin(games, eq(gamePlayers.gameId, games.id))
+            .leftJoin(users, eq(gamePlayers.userId, users.id))
+            .leftJoin(
+               leagueMembers,
+               and(
+                  eq(leagueMembers.userId, users.id),
+                  eq(leagueMembers.leagueId, parsedLeagueId)
+               )
+            )
+            .where(
+               and(
+                  gameConditions,
+                  // Include both regular users (who are league members) AND anonymous players
+                  sql`(${leagueMembers.isActive} = true OR ${gamePlayers.anonymousPlayerId} IS NOT NULL)`
+               )
+            )
+            .orderBy(asc(games.endedAt));
+
+         // Calculate streaks per player/anon
+         const playerStreaks = new Map<
+            string,
+            {
+               maxStreak: number;
+               currentStreak: number;
+               totalProfit: number;
+               gamesPlayed: number;
+               info: any;
+            }
+         >();
+
+         for (const record of allHistory) {
+            const isAnon = !!record.anonId;
+            const key = isAnon ? 'anon' : record.userId?.toString();
+            if (!key) continue;
+
+            if (!playerStreaks.has(key)) {
+               playerStreaks.set(key, {
+                  maxStreak: 0,
+                  currentStreak: 0,
+                  totalProfit: 0,
+                  gamesPlayed: 0,
+                  info: isAnon
+                     ? anonymousPlayerProfile
+                     : {
+                          userId: record.userId,
+                          fullName: record.fullName,
+                          profileImageUrl: record.profileImageUrl,
+                       },
+               });
+            }
+
+            const stats = playerStreaks.get(key)!;
+            const profit = parseFloat(record.profit || '0');
+            stats.gamesPlayed++;
+            stats.totalProfit += profit;
+
+            if (profit > 0) {
+               stats.currentStreak++;
+               if (stats.currentStreak > stats.maxStreak) {
+                  stats.maxStreak = stats.currentStreak;
+               }
+            } else {
+               stats.currentStreak = 0;
+            }
+         }
+
+         // Find best streak
+         let bestPlayer: any = null;
+         let maxStreak = 0;
+
+         playerStreaks.forEach((stats, key) => {
+            // Prioritize higher streak, then higher total profit
+            if (
+               stats.maxStreak > maxStreak ||
+               (stats.maxStreak === maxStreak &&
+                  bestPlayer &&
+                  stats.totalProfit > bestPlayer.totalProfit)
+            ) {
+               maxStreak = stats.maxStreak;
+               bestPlayer = stats;
+            }
+         });
+
+         if (!bestPlayer || maxStreak === 0) return null;
+
+         const isAnon = bestPlayer.info.fullName === 'Anonymous Players';
+
+         return {
+            ...bestPlayer.info,
+            value: maxStreak,
+            additionalData: {
+               gamesPlayed: bestPlayer.gamesPlayed,
+               totalProfit: bestPlayer.totalProfit,
+               label: 'Winning Streak',
+               isAnonymous: isAnon,
             },
          };
       }
