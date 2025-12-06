@@ -227,11 +227,6 @@ export const GET = withAuth(
          const topPlayer =
             sanitizedRankings.length > 0 ? sanitizedRankings[0] : null;
 
-         // Remove top player from the list if desired, or keep them.
-         // For a leaderboard, usually we send the whole list and let FE handle display.
-         // However, the plan says: "Hero section - Top player in larger, prominent card... FlashList - Remaining players"
-         // I'll return the full list in `data` and also `topPlayer` separately for convenience.
-
          return secureResponse({
             type: statType,
             year: targetYear,
@@ -288,6 +283,16 @@ async function calculateRankings(
    );
 
    const userWhere = and(gameConditions, eq(leagueMembers.isActive, true));
+   const anonWhere = and(
+      gameConditions,
+      isNotNull(gamePlayers.anonymousPlayerId)
+   );
+
+   const anonymousPlayerProfile = {
+      userId: -1,
+      fullName: 'Anonymous Players',
+      profileImageUrl: null,
+   };
 
    switch (statType) {
       case 'top-profit-player': {
@@ -315,21 +320,51 @@ async function calculateRankings(
             )
             .where(userWhere)
             .groupBy(users.id, users.fullName, users.profileImageUrl)
-            .having(sql`sum(${gamePlayers.profit}) IS NOT NULL`)
-            .orderBy(desc(sum(gamePlayers.profit)));
+            .having(sql`sum(${gamePlayers.profit}) IS NOT NULL`);
 
-         // Process results
-         return userResults.map((player: any, index: number) => ({
+         // Anonymous Query
+         const anonResult = await db
+            .select({
+               value: sum(gamePlayers.profit).as('total_profit'),
+               gamesPlayed:
+                  sql<number>`count(distinct ${gamePlayers.gameId})`.as(
+                     'games_played'
+                  ),
+            })
+            .from(gamePlayers)
+            .innerJoin(games, eq(gamePlayers.gameId, games.id))
+            .where(anonWhere);
+
+         // Combine and sort
+         let allResults = userResults.map((player: any) => ({
             userId: player.userId,
             fullName: player.fullName,
             profileImageUrl: player.profileImageUrl,
             value: parseFloat(player.value || '0'),
-            rank: index + 1,
             additionalData: {
                gamesPlayed: player.gamesPlayed,
                label: 'Total Profit',
             },
          }));
+
+         if (anonResult[0] && anonResult[0].value) {
+            allResults.push({
+               ...anonymousPlayerProfile,
+               value: parseFloat(anonResult[0].value || '0'),
+               additionalData: {
+                  gamesPlayed: anonResult[0].gamesPlayed,
+                  label: 'Total Profit',
+                  isAnonymous: true,
+               },
+            });
+         }
+
+         return allResults
+            .sort((a: any, b: any) => b.value - a.value)
+            .map((player: any, index: number) => ({
+               ...player,
+               rank: index + 1,
+            }));
       }
 
       case 'most-active-player': {
@@ -354,20 +389,48 @@ async function calculateRankings(
                )
             )
             .where(userWhere)
-            .groupBy(users.id, users.fullName, users.profileImageUrl)
-            .orderBy(desc(sql<number>`count(distinct ${gamePlayers.gameId})`));
+            .groupBy(users.id, users.fullName, users.profileImageUrl);
 
-         return userResults.map((player: any, index: number) => ({
+         const anonResult = await db
+            .select({
+               value: sql<number>`count(distinct ${gamePlayers.gameId})`.as(
+                  'games_played'
+               ),
+               totalProfit: sum(gamePlayers.profit).as('total_profit'),
+            })
+            .from(gamePlayers)
+            .innerJoin(games, eq(gamePlayers.gameId, games.id))
+            .where(anonWhere);
+
+         let allResults = userResults.map((player: any) => ({
             userId: player.userId,
             fullName: player.fullName,
             profileImageUrl: player.profileImageUrl,
             value: parseInt(player.value || '0', 10),
-            rank: index + 1,
             additionalData: {
                totalProfit: parseFloat(player.totalProfit || '0'),
                label: 'Games Played',
             },
          }));
+
+         if (anonResult[0] && anonResult[0].value > 0) {
+            allResults.push({
+               ...anonymousPlayerProfile,
+               value: parseInt(anonResult[0].value || '0', 10),
+               additionalData: {
+                  totalProfit: parseFloat(anonResult[0].totalProfit || '0'),
+                  label: 'Games Played',
+                  isAnonymous: true,
+               },
+            });
+         }
+
+         return allResults
+            .sort((a: any, b: any) => b.value - a.value)
+            .map((player: any, index: number) => ({
+               ...player,
+               rank: index + 1,
+            }));
       }
 
       case 'highest-single-game-profit': {
@@ -394,24 +457,52 @@ async function calculateRankings(
             )
             .where(userWhere)
             .groupBy(users.id, users.fullName, users.profileImageUrl)
-            .having(sql`max(${gamePlayers.profit}) IS NOT NULL`)
-            .orderBy(desc(max(gamePlayers.profit)));
+            .having(sql`max(${gamePlayers.profit}) IS NOT NULL`);
 
-         return userResults.map((player: any, index: number) => ({
+         const anonResult = await db
+            .select({
+               value: max(gamePlayers.profit).as('highest_profit'),
+               gamesPlayed:
+                  sql<number>`count(distinct ${gamePlayers.gameId})`.as(
+                     'games_played'
+                  ),
+            })
+            .from(gamePlayers)
+            .innerJoin(games, eq(gamePlayers.gameId, games.id))
+            .where(anonWhere);
+
+         let allResults = userResults.map((player: any) => ({
             userId: player.userId,
             fullName: player.fullName,
             profileImageUrl: player.profileImageUrl,
             value: parseFloat(player.value || '0'),
-            rank: index + 1,
             additionalData: {
                gamesPlayed: player.gamesPlayed,
                label: 'Best Single Game',
             },
          }));
+
+         if (anonResult[0] && anonResult[0].value) {
+            allResults.push({
+               ...anonymousPlayerProfile,
+               value: parseFloat(anonResult[0].value || '0'),
+               additionalData: {
+                  gamesPlayed: anonResult[0].gamesPlayed,
+                  label: 'Best Single Game',
+                  isAnonymous: true,
+               },
+            });
+         }
+
+         return allResults
+            .sort((a: any, b: any) => b.value - a.value)
+            .map((player: any, index: number) => ({
+               ...player,
+               rank: index + 1,
+            }));
       }
 
       case 'most-consistent-player': {
-         // Calculate consistency as lowest standard deviation of profits
          const userResults = await db
             .select({
                userId: users.id,
@@ -438,21 +529,55 @@ async function calculateRankings(
             )
             .where(userWhere)
             .groupBy(users.id, users.fullName, users.profileImageUrl)
-            .having(sql`count(distinct ${gamePlayers.gameId}) >= 3`) // At least 3 games for consistency
-            .orderBy(sql`stddev(${gamePlayers.profit}) ASC`); // Lower stddev = more consistent
+            .having(sql`count(distinct ${gamePlayers.gameId}) >= 3`);
 
-         return userResults.map((player: any, index: number) => ({
+         const anonResult = await db
+            .select({
+               value: sql<number>`stddev(${gamePlayers.profit})`.as(
+                  'consistency_score'
+               ),
+               avgProfit: avg(gamePlayers.profit).as('avg_profit'),
+               gamesPlayed:
+                  sql<number>`count(distinct ${gamePlayers.gameId})`.as(
+                     'games_played'
+                  ),
+            })
+            .from(gamePlayers)
+            .innerJoin(games, eq(gamePlayers.gameId, games.id))
+            .where(anonWhere)
+            .having(sql`count(distinct ${gamePlayers.gameId}) >= 3`);
+
+         let allResults = userResults.map((player: any) => ({
             userId: player.userId,
             fullName: player.fullName,
             profileImageUrl: player.profileImageUrl,
             value: parseFloat(player.value || '0'),
-            rank: index + 1,
             additionalData: {
                avgProfit: parseFloat(player.avgProfit || '0'),
                gamesPlayed: player.gamesPlayed,
                label: 'Consistency Score',
             },
          }));
+
+         if (anonResult[0] && anonResult[0].value) {
+            allResults.push({
+               ...anonymousPlayerProfile,
+               value: parseFloat(anonResult[0].value || '0'),
+               additionalData: {
+                  avgProfit: parseFloat(anonResult[0].avgProfit || '0'),
+                  gamesPlayed: anonResult[0].gamesPlayed,
+                  label: 'Consistency Score',
+                  isAnonymous: true,
+               },
+            });
+         }
+
+         return allResults
+            .sort((a: any, b: any) => a.value - b.value) // Lower is better for consistency
+            .map((player: any, index: number) => ({
+               ...player,
+               rank: index + 1,
+            }));
       }
 
       case 'biggest-loser': {
@@ -479,24 +604,62 @@ async function calculateRankings(
             )
             .where(userWhere)
             .groupBy(users.id, users.fullName, users.profileImageUrl)
-            .having(sql`sum(${gamePlayers.profit}) IS NOT NULL`)
-            .orderBy(sum(gamePlayers.profit)); // ASC for biggest loss (most negative)
+            .having(sql`sum(${gamePlayers.profit}) IS NOT NULL`);
 
-         return userResults.map((player: any, index: number) => {
+         const anonResult = await db
+            .select({
+               value: sum(gamePlayers.profit).as('total_loss'),
+               gamesPlayed:
+                  sql<number>`count(distinct ${gamePlayers.gameId})`.as(
+                     'games_played'
+                  ),
+            })
+            .from(gamePlayers)
+            .innerJoin(games, eq(gamePlayers.gameId, games.id))
+            .where(anonWhere);
+
+         let allResults = userResults.map((player: any) => {
             const val = parseFloat(player.value || '0');
             return {
                userId: player.userId,
                fullName: player.fullName,
                profileImageUrl: player.profileImageUrl,
-               value: Math.abs(val), // Return absolute value for display
-               rank: index + 1,
+               value: Math.abs(val),
+               // Store the actual signed value for sorting comparison
+               rawValue: val,
                additionalData: {
                   gamesPlayed: player.gamesPlayed,
-                  actualLoss: val, // Keep the actual negative value
+                  actualLoss: val,
                   label: 'Total Loss',
                },
             };
          });
+
+         if (anonResult[0] && anonResult[0].value) {
+            const val = parseFloat(anonResult[0].value || '0');
+            allResults.push({
+               ...anonymousPlayerProfile,
+               value: Math.abs(val),
+               rawValue: val,
+               additionalData: {
+                  gamesPlayed: anonResult[0].gamesPlayed,
+                  actualLoss: val,
+                  label: 'Total Loss',
+                  isAnonymous: true,
+               },
+            });
+         }
+
+         // Sort by rawValue ascending (most negative is biggest loser)
+         return allResults
+            .sort((a: any, b: any) => a.rawValue - b.rawValue)
+            .map((player: any, index: number) => {
+               const { rawValue, ...rest } = player;
+               return {
+                  ...rest,
+                  rank: index + 1,
+               };
+            });
       }
 
       default:

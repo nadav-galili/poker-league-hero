@@ -11,6 +11,9 @@ import Animated, {
    withTiming,
 } from 'react-native-reanimated';
 
+// @ts-ignore - local image import
+import anonymousImage from '@/assets/images/anonymous.webp';
+
 interface StatsLeaderboardHeroProps {
    player: PlayerStat;
    statType: StatType;
@@ -124,26 +127,25 @@ export default function StatsLeaderboardHero({
                         },
                      ]}
                   />
-                  {player.profileImageUrl ? (
+                  {player.profileImageUrl ||
+                  player.additionalData?.isAnonymous ? (
                      <Image
-                        source={{ uri: player.profileImageUrl }}
+                        source={
+                           player.profileImageUrl
+                              ? { uri: player.profileImageUrl }
+                              : anonymousImage
+                        }
                         style={styles.avatar}
                         contentFit="cover"
                         transition={200}
                      />
                   ) : (
-                     <View
-                        style={[
-                           styles.avatarPlaceholder,
-                           { borderColor: config.color },
-                        ]}
-                     >
-                        <Ionicons
-                           name="person"
-                           size={32}
-                           color={config.color}
-                        />
-                     </View>
+                     <Image
+                        source={anonymousImage}
+                        style={styles.avatar}
+                        contentFit="cover"
+                        transition={200}
+                     />
                   )}
                </View>
 

@@ -6,6 +6,9 @@ import React from 'react';
 import { StyleSheet, Text, View } from 'react-native';
 import Animated, { FadeInRight } from 'react-native-reanimated';
 
+// @ts-ignore - local image import
+import anonymousImage from '@/assets/images/anonymous.webp';
+
 interface StatsLeaderboardRowProps {
    player: PlayerStat;
    statType: StatType;
@@ -64,8 +67,6 @@ export default function StatsLeaderboardRow({
             return '#FFD700'; // Gold
          case 2:
             return '#C0C0C0'; // Silver
-         case 3:
-            return '#CD7F32'; // Bronze
          default:
             return 'rgba(255, 255, 255, 0.5)';
       }
@@ -84,16 +85,22 @@ export default function StatsLeaderboardRow({
          </View>
 
          {/* Avatar */}
-         {player.profileImageUrl ? (
+         {player.profileImageUrl || player.additionalData?.isAnonymous ? (
             <Image
-               source={{ uri: player.profileImageUrl }}
+               source={
+                  player.profileImageUrl
+                     ? { uri: player.profileImageUrl }
+                     : anonymousImage
+               }
                style={styles.avatar}
                contentFit="cover"
             />
          ) : (
-            <View style={styles.avatarPlaceholder}>
-               <Ionicons name="person" size={20} color="rgba(255, 255, 255, 0.5)" />
-            </View>
+            <Image
+               source={anonymousImage}
+               style={styles.avatar}
+               contentFit="cover"
+            />
          )}
 
          {/* Player Name */}
@@ -184,4 +191,3 @@ const styles = StyleSheet.create({
       fontWeight: 'bold',
    },
 });
-
