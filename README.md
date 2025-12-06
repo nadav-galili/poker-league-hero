@@ -16,6 +16,8 @@ fixed analytics after launch
 changed icon , refactored some ui
 1.1.2
 Add anonymouse player
+1.1.4
+Fix mixpanel tracking for opt out users
 
 # ANDROID
 
