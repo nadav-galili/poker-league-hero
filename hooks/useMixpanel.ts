@@ -76,9 +76,8 @@ export const useMixpanel = () => {
                );
 
                await mixpanel.identify(identificationUserId, userIdentifyData);
-            } else {
-               console.warn('No user available for Mixpanel identification');
             }
+            // No need to warn if user is missing - they might just be not logged in yet
          } catch (error) {
             console.error(
                'Failed to initialize or identify in Mixpanel:',

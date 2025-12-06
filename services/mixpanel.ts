@@ -4,6 +4,7 @@
  */
 
 import * as TrackingTransparency from 'expo-tracking-transparency';
+import Constants from 'expo-constants';
 import { Mixpanel } from 'mixpanel-react-native';
 
 // Get Mixpanel token and server URL from environment variables
@@ -70,6 +71,7 @@ class MixpanelService {
    private mixpanel: Mixpanel | null = null;
    private isInitialized = false;
    private userId: string | null = null;
+   private trackingStatus: TrackingTransparency.PermissionStatus | null = null;
 
    /**
     * Initialize Mixpanel with token
@@ -95,11 +97,14 @@ class MixpanelService {
          try {
             const { status } =
                await TrackingTransparency.requestTrackingPermissionsAsync();
+            this.trackingStatus = status;
             console.log(
                `ATT permission status: ${status}. Functional tracking will continue regardless.`
             );
          } catch (error) {
             // If tracking transparency is not available (e.g., on Android or older iOS), continue
+            // Default to granted behavior on Android where ATT doesn't exist
+            this.trackingStatus = TrackingTransparency.PermissionStatus.GRANTED;
             console.log('Tracking transparency not available:', error);
          }
 
@@ -174,11 +179,25 @@ class MixpanelService {
          this.userId = userIdString;
          this.mixpanel.identify(userIdString);
 
-         // Ensure we have the userId in the properties
-         const finalProperties: MixpanelUserProperties = {
+         // Handle tracking opt-out: Only send PII if tracking is granted
+         let finalProperties: MixpanelUserProperties = {
             ...properties,
             userId: userIdString,
          };
+
+         // If tracking is NOT granted, strip PII fields
+         if (
+            this.trackingStatus !==
+            TrackingTransparency.PermissionStatus.GRANTED
+         ) {
+            console.log(
+               'Tracking permission denied. Stripping PII from user properties.'
+            );
+            delete finalProperties.name;
+            delete finalProperties.email;
+            delete finalProperties.picture;
+            // Keep generic properties like gamesPlayed, etc.
+         }
 
          // Remove any undefined properties
          Object.keys(finalProperties).forEach(
@@ -190,11 +209,18 @@ class MixpanelService {
             this.mixpanel.getPeople().set(finalProperties);
          }
 
+         // Get app version dynamically
+         const appVersion =
+            Constants.expoConfig?.version ||
+            Constants.manifest?.version ||
+            '1.0.0';
+
          // Set super properties that will be sent with every event
          this.mixpanel.registerSuperProperties({
             userId: userIdString,
             platform: 'mobile',
-            appVersion: '1.0.0',
+            appVersion: appVersion,
+            trackingStatus: this.trackingStatus,
          });
       } catch (error) {
          console.error('Failed to identify user in Mixpanel:', error);
@@ -281,7 +307,19 @@ class MixpanelService {
       }
 
       try {
-         this.mixpanel.getPeople().set(properties);
+         const safeProperties = { ...properties };
+
+         // If tracking is NOT granted, strip PII fields
+         if (
+            this.trackingStatus !==
+            TrackingTransparency.PermissionStatus.GRANTED
+         ) {
+            delete safeProperties.name;
+            delete safeProperties.email;
+            delete safeProperties.picture;
+         }
+
+         this.mixpanel.getPeople().set(safeProperties);
       } catch (error) {
          console.error('Failed to update user properties in Mixpanel:', error);
       }
