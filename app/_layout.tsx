@@ -12,6 +12,7 @@ import { Stack } from 'expo-router';
 import * as SplashScreen from 'expo-splash-screen';
 import { useEffect, useState } from 'react';
 import { Image, StyleSheet, View } from 'react-native';
+import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import { SafeAreaProvider, SafeAreaView } from 'react-native-safe-area-context';
 import Toast, {
    BaseToast,
@@ -186,9 +187,10 @@ export default Sentry.wrap(function RootLayout() {
    }
 
    return (
-      <SafeAreaView style={{ flex: 1 }}>
-         <SafeAreaProvider>
-            <QueryClientProvider client={queryClient}>
+      <GestureHandlerRootView style={{ flex: 1 }}>
+         <SafeAreaView style={{ flex: 1 }}>
+            <SafeAreaProvider>
+               <QueryClientProvider client={queryClient}>
                <LocalizationProvider>
                   <NavigationProvider>
                      <ErrorBoundary
@@ -209,7 +211,8 @@ export default Sentry.wrap(function RootLayout() {
             </QueryClientProvider>
          </SafeAreaProvider>
          <Toast config={toastConfig} />
-      </SafeAreaView>
+         </SafeAreaView>
+      </GestureHandlerRootView>
    );
 });
 

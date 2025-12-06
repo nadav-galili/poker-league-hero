@@ -6,11 +6,7 @@ import dayjs from 'dayjs';
 import { Image } from 'expo-image';
 import React, { useEffect, useState } from 'react';
 import { Dimensions, Text, View } from 'react-native';
-import {
-   Gesture,
-   GestureDetector,
-   GestureHandlerRootView,
-} from 'react-native-gesture-handler';
+import { Gesture, GestureDetector } from 'react-native-gesture-handler';
 import Animated, {
    runOnJS,
    useAnimatedStyle,
@@ -36,13 +32,16 @@ const PlayerRow = ({
    item: GameResult['players'][0];
    index: number;
 }) => {
-   const { t } = useLocalization();
+   const { t, isRTL } = useLocalization();
    return (
       <View
          className="flex-row items-center justify-between py-3 border-b border-white/5"
          style={{ opacity: index < 3 ? 1 : 0.7 }}
       >
-         <View className="flex-row items-center flex-1">
+         <View
+            className="flex-row items-center flex-1"
+            style={{ marginEnd: 16 }}
+         >
             <Image
                source={
                   item.profileImageUrl
@@ -53,23 +52,35 @@ const PlayerRow = ({
                   width: 32,
                   height: 32,
                   borderRadius: 16,
-                  marginRight: 12,
+                  [isRTL ? 'marginLeft' : 'marginRight']: 12,
                   borderWidth: 1,
                   borderColor: 'rgba(255,255,255,0.2)',
                }}
                contentFit="cover"
             />
-            <View>
-               <Text className="text-white font-medium text-sm">
+            <View
+               style={{
+                  alignItems: isRTL ? 'flex-end' : 'flex-start',
+                  flex: 1,
+               }}
+            >
+               <Text
+                  className="text-white font-medium text-sm"
+                  style={{ textAlign: isRTL ? 'right' : 'left' }}
+                  numberOfLines={1}
+               >
                   {item.fullName}
                </Text>
-               <Text className="text-white/50 text-xs">
+               <Text
+                  className="text-white/50 text-xs"
+                  style={{ textAlign: isRTL ? 'right' : 'left' }}
+               >
                   {t('buyIn')}: {t('currency')}
                   {item.totalBuyIns}
                </Text>
             </View>
          </View>
-         <View>
+         <View style={{ minWidth: 80, alignItems: 'flex-end' }}>
             <Text
                className={`font-bold text-sm ${
                   item.profit > 0
@@ -194,7 +205,7 @@ export default function RecentGameResults({
       if (games.length > 0 && currentIndex >= games.length) {
          setCurrentIndex(games.length - 1);
       }
-   }, [games.length]);
+   }, [games.length, currentIndex]);
 
    // If the user swiped next to trigger a load, and games grew, we can auto-advance
    // For now, let's keep it manual to avoid jarring jumps, or user can swipe again.
@@ -252,13 +263,13 @@ export default function RecentGameResults({
          </View>
 
          {/* Swipeable Content */}
-         <GestureHandlerRootView>
+         <View style={{ flex: 1 }}>
             <GestureDetector gesture={pan}>
                <Animated.View style={animatedStyle}>
                   <GameCard game={games[currentIndex]} />
                </Animated.View>
             </GestureDetector>
-         </GestureHandlerRootView>
+         </View>
 
          {/* Pagination Dots */}
          <View className="flex-row justify-center items-center mt-4 space-x-2 gap-2">
