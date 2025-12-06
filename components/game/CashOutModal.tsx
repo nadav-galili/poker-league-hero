@@ -65,11 +65,15 @@ const CashOutModal: React.FC<CashOutModalProps> = ({
                         style={{ backgroundColor: theme.surfaceElevated }}
                      >
                         <Image
-                           source={{
-                              uri:
-                                 selectedPlayer.profileImageUrl ||
-                                 'https://via.placeholder.com/50x50/cccccc/666666?text=?',
-                           }}
+                           source={
+                              !selectedPlayer.userId
+                                 ? require('@/assets/images/anonymous.webp')
+                                 : {
+                                      uri:
+                                         selectedPlayer.profileImageUrl ||
+                                         'https://via.placeholder.com/50x50/cccccc/666666?text=?',
+                                   }
+                           }
                            className="rounded-lg border-2 border-primary mb-2 w-24 h-24"
                         />
                         <Text className="text-xl tracking-wide text-text">

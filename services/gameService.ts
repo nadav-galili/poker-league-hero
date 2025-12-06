@@ -132,7 +132,7 @@ export class GameService {
                method: 'POST',
                headers: { 'Content-Type': 'application/json' },
                body: JSON.stringify({
-                  playerId: player.userId,
+                  gamePlayerId: player.id,
                   amount: amount,
                }),
             }

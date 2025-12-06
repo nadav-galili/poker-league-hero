@@ -4,18 +4,23 @@ export const POST = withAuth(async (request: Request, user) => {
    try {
       const url = new URL(request.url);
       const gameId = url.pathname.split('/')[3]; // Extract gameId from /api/games/[gameId]/buy-out
-      const { playerId, amount } = await request.json();
+      const { gamePlayerId, amount } = await request.json();
+
+      console.log(
+         `[BuyOut] Request received for game ${gameId}, player ${gamePlayerId}, amount ${amount}`
+      );
 
       if (!user.userId) {
+         console.error('[BuyOut] User not authenticated');
          return Response.json(
             { error: 'User not authenticated' },
             { status: 401 }
          );
       }
 
-      if (!gameId || !playerId || !amount) {
+      if (!gameId || !gamePlayerId || !amount) {
          return Response.json(
-            { error: 'Game ID, player ID, and amount are required' },
+            { error: 'Game ID, game player ID, and amount are required' },
             { status: 400 }
          );
       }
@@ -39,7 +44,7 @@ export const POST = withAuth(async (request: Request, user) => {
       const gameResult = await db
          .select({ id: games.id, status: games.status })
          .from(games)
-         .where(eq(games.id, gameId))
+         .where(eq(games.id, parseInt(gameId)))
          .limit(1);
 
       if (gameResult.length === 0) {
@@ -52,12 +57,12 @@ export const POST = withAuth(async (request: Request, user) => {
 
       // Find the game player record
       const gamePlayerResult = await db
-         .select({ id: gamePlayers.id })
+         .select({ id: gamePlayers.id, userId: gamePlayers.userId })
          .from(gamePlayers)
          .where(
             and(
-               eq(gamePlayers.gameId, gameId),
-               eq(gamePlayers.userId, playerId)
+               eq(gamePlayers.gameId, parseInt(gameId)),
+               eq(gamePlayers.id, parseInt(gamePlayerId))
             )
          )
          .limit(1);
@@ -69,15 +74,18 @@ export const POST = withAuth(async (request: Request, user) => {
          );
       }
 
-      const gamePlayerId = gamePlayerResult[0].id;
+      const { id: actualGamePlayerId, userId } = gamePlayerResult[0];
+      console.log(
+         `[BuyOut] Found player record. ID: ${actualGamePlayerId}, UserId: ${userId}`
+      );
 
       // Create buy-out record
       const newCashOut = await db
          .insert(cashIns)
          .values({
-            gameId,
-            userId: playerId,
-            gamePlayerId,
+            gameId: parseInt(gameId),
+            userId: userId,
+            gamePlayerId: actualGamePlayerId,
             amount: buyOutAmount.toFixed(2),
             type: 'buy_out',
          })
@@ -89,7 +97,7 @@ export const POST = withAuth(async (request: Request, user) => {
          .from(cashIns)
          .where(
             and(
-               eq(cashIns.gamePlayerId, gamePlayerId),
+               eq(cashIns.gamePlayerId, actualGamePlayerId),
                eq(cashIns.type, 'buy_in')
             )
          );
@@ -99,7 +107,7 @@ export const POST = withAuth(async (request: Request, user) => {
          .from(cashIns)
          .where(
             and(
-               eq(cashIns.gamePlayerId, gamePlayerId),
+               eq(cashIns.gamePlayerId, actualGamePlayerId),
                eq(cashIns.type, 'buy_out')
             )
          );
@@ -122,7 +130,7 @@ export const POST = withAuth(async (request: Request, user) => {
             isActive: false, // Mark player as inactive when they cash out
             leftAt: new Date(), // Record when they left the game
          })
-         .where(eq(gamePlayers.id, gamePlayerId));
+         .where(eq(gamePlayers.id, actualGamePlayerId));
 
       return Response.json({
          success: true,

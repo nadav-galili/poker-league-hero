@@ -180,11 +180,7 @@ export default function GameScreen() {
                ? error.message
                : 'Failed to process cash out';
          trackError(error as Error, 'game_screen_cash_out');
-         Toast.show({
-            type: 'error',
-            text1: t('error'),
-            text2: errorMessage,
-         });
+         setCashOutError(errorMessage);
       } finally {
          setIsProcessing(false);
       }
