@@ -1,3 +1,4 @@
+import RecentGameResults from '@/components/game/RecentGameResults';
 import {
    PlayerStatCard,
    StatCard,
@@ -5,6 +6,7 @@ import {
 } from '@/components/league/LeagueStats';
 import Summary from '@/components/summary/summary';
 import { useLocalization } from '@/context/localization';
+import { useLeagueGames } from '@/hooks/useLeagueGames';
 import { useLeagueStats } from '@/hooks/useLeagueStats';
 import { createStatCards } from '@/services/leagueStatsHelpers';
 import { StatType } from '@/services/leagueStatsService';
@@ -87,12 +89,33 @@ export default function LeagueStatsScreen() {
       error,
       refreshing,
       loadLeagueData,
-      handleRefresh,
+      handleRefresh: refreshStats,
    } = useLeagueStats(leagueId);
+
+   const {
+      games,
+      isLoading: gamesLoading,
+      error: gamesError,
+      loadGames,
+      hasMore: gamesHasMore,
+   } = useLeagueGames(leagueId);
 
    const handleBack = React.useCallback(() => {
       router.back();
    }, []);
+
+   const handleRefresh = React.useCallback(() => {
+      refreshStats();
+      loadGames(1); // Reset to page 1
+   }, [refreshStats, loadGames]);
+
+   const handleLoadMoreGames = React.useCallback(() => {
+      if (!gamesLoading && gamesHasMore) {
+         // Calculate next page based on current length and limit (default 3)
+         const nextPage = Math.ceil(games.length / 3) + 1;
+         loadGames(nextPage);
+      }
+   }, [gamesLoading, gamesHasMore, games.length, loadGames]);
 
    const handleStatPress = React.useCallback(
       (statType: StatType) => {
@@ -136,6 +159,7 @@ export default function LeagueStatsScreen() {
          shadowOffset: { width: 0, height: 4 },
          shadowOpacity: 0.2,
          shadowRadius: 8,
+         elevation: 8,
       }),
       []
    );
@@ -338,6 +362,17 @@ export default function LeagueStatsScreen() {
                      <StatCard key={index} card={card} />
                   ))}
                </View>
+            </View>
+
+            {/* Recent Game Results */}
+            <View className="px-6">
+               <RecentGameResults
+                  games={games}
+                  isLoading={gamesLoading}
+                  error={gamesError}
+                  hasMore={gamesHasMore}
+                  loadMore={handleLoadMoreGames}
+               />
             </View>
          </ScrollView>
       </LinearGradient>

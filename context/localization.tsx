@@ -123,6 +123,13 @@ export interface Translations {
    continueGameDescription: string;
    playerStats: string;
    leagueOverview: string;
+   recentGameResults: string;
+   gameManager: string;
+   gameDate: string;
+   startTime: string;
+   endTime: string;
+   noGamesYet: string;
+   swipeForMore: string;
 
    // Select Players Screen
    selectPlayers: string;
@@ -360,6 +367,13 @@ const enTranslations: Translations = {
    checkingGamesDescription: 'Looking for active games in this league',
    continueGame: 'CONTINUE GAME',
    continueGameDescription: 'Resume the currently active game',
+   recentGameResults: 'RECENT GAMES',
+   gameManager: 'Manager',
+   gameDate: 'Date',
+   startTime: 'Start',
+   endTime: 'End',
+   noGamesYet: 'No completed games yet',
+   swipeForMore: 'Swipe for more',
 
    // Select Players Screen
    selectPlayersToStartGame: 'Select players to start a new game',
@@ -603,6 +617,13 @@ const heTranslations: Translations = {
    checkingGamesDescription: 'מחפש משחקים פעילים בליגה הזו',
    continueGame: 'המשך משחק',
    continueGameDescription: 'חזור למשחק הפעיל הנוכחי',
+   recentGameResults: 'משחקים אחרונים',
+   gameManager: 'מנהל',
+   gameDate: 'תאריך',
+   startTime: 'התחלה',
+   endTime: 'סיום',
+   noGamesYet: 'אין משחקים שהושלמו עדיין',
+   swipeForMore: 'החלק לעוד',
 
    // Select Players Screen
    selectPlayersToStartGame: 'בחר שחקנים להתחיל משחק חדש',
