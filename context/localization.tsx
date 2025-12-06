@@ -204,7 +204,6 @@ export interface Translations {
    loadingPlayerStat: string;
    mostActivePlayer: string;
    highestSingleGameProfit: string;
-   mostConsistentPlayer: string;
    biggestLoser: string;
    totalProfit: string;
    avgProfit: string;
@@ -443,7 +442,6 @@ const enTranslations: Translations = {
    loadingPlayerStat: 'Loading player stat...',
    mostActivePlayer: 'MOST ACTIVE PLAYER',
    highestSingleGameProfit: 'HIGHEST SINGLE GAME',
-   mostConsistentPlayer: 'MOST CONSISTENT PLAYER',
    biggestLoser: 'BIGGEST LOSER',
    totalProfit: 'Total Profit',
    avgProfit: 'Avg Profit',
@@ -684,7 +682,6 @@ const heTranslations: Translations = {
    loadingPlayerStat: 'טוען סטטיסטיקת שחקן...',
    mostActivePlayer: 'השחקן הכי פעיל',
    highestSingleGameProfit: 'הרווח הגבוה במשחק בודד',
-   mostConsistentPlayer: 'השחקן הכי עקבי',
    biggestLoser: 'המפסיד הכי גדול',
    totalProfit: 'סך הרווח',
    avgProfit: 'ממוצע רווח',

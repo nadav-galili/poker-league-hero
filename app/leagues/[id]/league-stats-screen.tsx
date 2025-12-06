@@ -313,15 +313,6 @@ export default function LeagueStatsScreen() {
                         t={t}
                      />
                   </PressableStatCard>
-                  <PressableStatCard
-                     onPress={() => handleStatPress('most-consistent-player')}
-                  >
-                     <PlayerStatCard
-                        leagueId={leagueId!}
-                        statType="most-consistent-player"
-                        t={t}
-                     />
-                  </PressableStatCard>
                </View>
             </View>
 

@@ -54,23 +54,6 @@ const STAT_CONFIGS = {
       formatValue: (value: number | string | undefined | null) =>
          formatCurrency(value),
    },
-   'most-consistent-player': {
-      title: 'mostConsistentPlayer',
-      icon: 'checkmark-circle',
-      color: '#A78BFA', // Purple
-      bgColor: 'bg-purple-500/10',
-      borderColor: 'border-purple-400/30',
-      formatValue: (value: number | string | undefined | null) => {
-         if (value === null || value === undefined) {
-            return 'N/A';
-         }
-         const numValue = typeof value === 'string' ? parseFloat(value) : value;
-         if (isNaN(numValue)) {
-            return 'N/A';
-         }
-         return numValue.toFixed(2);
-      },
-   },
    'biggest-loser': {
       title: 'biggestLoser',
       icon: 'sad',

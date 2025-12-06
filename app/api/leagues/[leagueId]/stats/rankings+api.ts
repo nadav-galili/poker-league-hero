@@ -44,7 +44,6 @@ type StatType =
    | 'top-profit-player'
    | 'most-active-player'
    | 'highest-single-game-profit'
-   | 'most-consistent-player'
    | 'biggest-loser';
 
 export const GET = withAuth(
@@ -118,7 +117,6 @@ export const GET = withAuth(
                'top-profit-player',
                'most-active-player',
                'highest-single-game-profit',
-               'most-consistent-player',
                'biggest-loser',
             ];
             if (!validTypes.includes(typeParam)) {
@@ -496,84 +494,6 @@ async function calculateRankings(
 
          return allResults
             .sort((a: any, b: any) => b.value - a.value)
-            .map((player: any, index: number) => ({
-               ...player,
-               rank: index + 1,
-            }));
-      }
-
-      case 'most-consistent-player': {
-         const userResults = await db
-            .select({
-               userId: users.id,
-               fullName: users.fullName,
-               profileImageUrl: users.profileImageUrl,
-               value: sql<number>`stddev(${gamePlayers.profit})`.as(
-                  'consistency_score'
-               ),
-               avgProfit: avg(gamePlayers.profit).as('avg_profit'),
-               gamesPlayed:
-                  sql<number>`count(distinct ${gamePlayers.gameId})`.as(
-                     'games_played'
-                  ),
-            })
-            .from(gamePlayers)
-            .innerJoin(games, eq(gamePlayers.gameId, games.id))
-            .innerJoin(users, eq(gamePlayers.userId, users.id))
-            .innerJoin(
-               leagueMembers,
-               and(
-                  eq(leagueMembers.userId, users.id),
-                  eq(leagueMembers.leagueId, parsedLeagueId)
-               )
-            )
-            .where(userWhere)
-            .groupBy(users.id, users.fullName, users.profileImageUrl)
-            .having(sql`count(distinct ${gamePlayers.gameId}) >= 3`);
-
-         const anonResult = await db
-            .select({
-               value: sql<number>`stddev(${gamePlayers.profit})`.as(
-                  'consistency_score'
-               ),
-               avgProfit: avg(gamePlayers.profit).as('avg_profit'),
-               gamesPlayed:
-                  sql<number>`count(distinct ${gamePlayers.gameId})`.as(
-                     'games_played'
-                  ),
-            })
-            .from(gamePlayers)
-            .innerJoin(games, eq(gamePlayers.gameId, games.id))
-            .where(anonWhere)
-            .having(sql`count(distinct ${gamePlayers.gameId}) >= 3`);
-
-         let allResults = userResults.map((player: any) => ({
-            userId: player.userId,
-            fullName: player.fullName,
-            profileImageUrl: player.profileImageUrl,
-            value: parseFloat(player.value || '0'),
-            additionalData: {
-               avgProfit: parseFloat(player.avgProfit || '0'),
-               gamesPlayed: player.gamesPlayed,
-               label: 'Consistency Score',
-            },
-         }));
-
-         if (anonResult[0] && anonResult[0].value) {
-            allResults.push({
-               ...anonymousPlayerProfile,
-               value: parseFloat(anonResult[0].value || '0'),
-               additionalData: {
-                  avgProfit: parseFloat(anonResult[0].avgProfit || '0'),
-                  gamesPlayed: anonResult[0].gamesPlayed,
-                  label: 'Consistency Score',
-                  isAnonymous: true,
-               },
-            });
-         }
-
-         return allResults
-            .sort((a: any, b: any) => a.value - b.value) // Lower is better for consistency
             .map((player: any, index: number) => ({
                ...player,
                rank: index + 1,

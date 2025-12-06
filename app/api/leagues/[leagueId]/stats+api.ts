@@ -42,7 +42,6 @@ type StatType =
    | 'top-profit-player'
    | 'most-active-player'
    | 'highest-single-game-profit'
-   | 'most-consistent-player'
    | 'biggest-loser';
 
 export const GET = withAuth(
@@ -112,7 +111,6 @@ export const GET = withAuth(
                'top-profit-player',
                'most-active-player',
                'highest-single-game-profit',
-               'most-consistent-player',
                'biggest-loser',
             ];
             if (!validTypes.includes(typeParam)) {
@@ -491,91 +489,6 @@ async function calculateStat(
             additionalData: {
                gamesPlayed: userResult[0].gamesPlayed,
                label: 'Best Single Game',
-            },
-         };
-      }
-
-      case 'most-consistent-player': {
-         // Calculate consistency as lowest standard deviation of profits
-         const userResult = await db
-            .select({
-               userId: users.id,
-               fullName: users.fullName,
-               profileImageUrl: users.profileImageUrl,
-               value: sql<number>`stddev(${gamePlayers.profit})`.as(
-                  'consistency_score'
-               ),
-               avgProfit: avg(gamePlayers.profit).as('avg_profit'),
-               gamesPlayed:
-                  sql<number>`count(distinct ${gamePlayers.gameId})`.as(
-                     'games_played'
-                  ),
-            })
-            .from(gamePlayers)
-            .innerJoin(games, eq(gamePlayers.gameId, games.id))
-            .innerJoin(users, eq(gamePlayers.userId, users.id))
-            .innerJoin(
-               leagueMembers,
-               and(
-                  eq(leagueMembers.userId, users.id),
-                  eq(leagueMembers.leagueId, parsedLeagueId)
-               )
-            )
-            .where(userWhere)
-            .groupBy(users.id, users.fullName, users.profileImageUrl)
-            .having(sql`count(distinct ${gamePlayers.gameId}) >= 3`) // At least 3 games for consistency
-            .orderBy(sql`stddev(${gamePlayers.profit}) ASC`) // Lower stddev = more consistent
-            .limit(1);
-
-         const anonResult = await db
-            .select({
-               value: sql<number>`stddev(${gamePlayers.profit})`.as(
-                  'consistency_score'
-               ),
-               avgProfit: avg(gamePlayers.profit).as('avg_profit'),
-               gamesPlayed:
-                  sql<number>`count(distinct ${gamePlayers.gameId})`.as(
-                     'games_played'
-                  ),
-            })
-            .from(gamePlayers)
-            .innerJoin(games, eq(gamePlayers.gameId, games.id))
-            .where(anonWhere)
-            .having(sql`count(distinct ${gamePlayers.gameId}) >= 3`);
-
-         const userVal = parseFloat(userResult[0]?.value || '0');
-         const anonVal = parseFloat(anonResult[0]?.value || '0');
-
-         // Lower is better, but handle 0 or nulls.
-         // If userVal is 0 and exists, it's very consistent.
-         // If anonVal exists and is lower than userVal (or userVal doesn't exist)
-         const hasUser = userResult.length > 0;
-         const hasAnon = anonResult.length > 0;
-
-         if (hasAnon && (!hasUser || anonVal < userVal)) {
-            return {
-               ...anonymousPlayerProfile,
-               value: anonVal,
-               additionalData: {
-                  avgProfit: parseFloat(anonResult[0].avgProfit || '0'),
-                  gamesPlayed: anonResult[0].gamesPlayed,
-                  label: 'Consistency Score',
-                  isAnonymous: true,
-               },
-            };
-         }
-
-         if (!hasUser) return null;
-
-         return {
-            userId: userResult[0].userId,
-            fullName: userResult[0].fullName,
-            profileImageUrl: userResult[0].profileImageUrl,
-            value: userVal,
-            additionalData: {
-               avgProfit: parseFloat(userResult[0].avgProfit || '0'),
-               gamesPlayed: userResult[0].gamesPlayed,
-               label: 'Consistency Score',
             },
          };
       }

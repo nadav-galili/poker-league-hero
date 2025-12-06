@@ -27,7 +27,6 @@ export type StatType =
    | 'top-profit-player'
    | 'most-active-player'
    | 'highest-single-game-profit'
-   | 'most-consistent-player'
    | 'biggest-loser';
 
 // Legacy interface for backward compatibility
@@ -125,13 +124,6 @@ export class LeagueStatsService {
       year?: number
    ): Promise<StatResponse> {
       return this.getPlayerStat(leagueId, 'highest-single-game-profit', year);
-   }
-
-   async getMostConsistentPlayer(
-      leagueId: string,
-      year?: number
-   ): Promise<StatResponse> {
-      return this.getPlayerStat(leagueId, 'most-consistent-player', year);
    }
 
    async getBiggestLoser(
