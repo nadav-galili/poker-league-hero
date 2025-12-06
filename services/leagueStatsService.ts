@@ -14,6 +14,14 @@ export interface StatResponse {
    message?: string;
 }
 
+export interface RankingsResponse {
+   type: string;
+   year: number;
+   data: PlayerStat[];
+   topPlayer: PlayerStat | null;
+   message?: string;
+}
+
 // Available stat types
 export type StatType =
    | 'top-profit-player'
@@ -131,6 +139,34 @@ export class LeagueStatsService {
       year?: number
    ): Promise<StatResponse> {
       return this.getPlayerStat(leagueId, 'biggest-loser', year);
+   }
+
+   // Get full rankings for a stat type
+   async getRankings(
+      leagueId: string,
+      statType: StatType,
+      year?: number
+   ): Promise<RankingsResponse> {
+      try {
+         const params = new URLSearchParams([['type', statType]]);
+
+         if (year) params.append('year', year.toString());
+
+         const url = `/api/leagues/${leagueId}/stats/rankings?${params.toString()}`;
+
+         const response = await this.fetchWithAuth(url, {});
+
+         if (!response.ok) {
+            throw new Error(`HTTP error! status: ${response.status}`);
+         }
+
+         const result = await response.json();
+
+         return result;
+      } catch (error) {
+         console.error(`Error fetching ${statType} rankings:`, error);
+         throw error;
+      }
    }
 }
 

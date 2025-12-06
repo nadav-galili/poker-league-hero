@@ -248,6 +248,12 @@ export interface Translations {
    removeAnonymousPlayer: string;
    anonymousPlayersSection: string;
    remove: string;
+
+   // Stats Leaderboard
+   champion: string;
+   rank: string;
+   viewFullLeaderboard: string;
+   leaderboard: string;
 }
 
 // English translations
@@ -485,6 +491,12 @@ const enTranslations: Translations = {
    removeAnonymousPlayer: 'Remove',
    anonymousPlayersSection: 'Anonymous Players',
    remove: 'Remove',
+
+   // Stats Leaderboard
+   champion: 'Champion',
+   rank: 'Rank',
+   viewFullLeaderboard: 'View Full Leaderboard',
+   leaderboard: 'Leaderboard',
 };
 
 // Hebrew translations
@@ -719,6 +731,12 @@ const heTranslations: Translations = {
    removeAnonymousPlayer: 'הסר',
    anonymousPlayersSection: 'שחקנים אנונימיים',
    remove: 'הסר',
+
+   // Stats Leaderboard
+   champion: 'אלוף',
+   rank: 'דירוג',
+   viewFullLeaderboard: 'צפה בטבלת המובילים',
+   leaderboard: 'טבלת מובילים',
 };
 
 const translations = {

@@ -7,6 +7,7 @@ import Summary from '@/components/summary/summary';
 import { useLocalization } from '@/context/localization';
 import { useLeagueStats } from '@/hooks/useLeagueStats';
 import { createStatCards } from '@/services/leagueStatsHelpers';
+import { StatType } from '@/services/leagueStatsService';
 import { Ionicons } from '@expo/vector-icons';
 import { Image } from 'expo-image';
 import { LinearGradient } from 'expo-linear-gradient';
@@ -21,6 +22,38 @@ import {
    Text,
    View,
 } from 'react-native';
+import Animated, {
+   useAnimatedStyle,
+   useSharedValue,
+   withSpring,
+} from 'react-native-reanimated';
+
+const AnimatedPressable = Animated.createAnimatedComponent(Pressable);
+
+const PressableStatCard = ({
+   children,
+   onPress,
+}: {
+   children: React.ReactNode;
+   onPress: () => void;
+}) => {
+   const scale = useSharedValue(1);
+
+   const animatedStyle = useAnimatedStyle(() => ({
+      transform: [{ scale: scale.value }],
+   }));
+
+   return (
+      <AnimatedPressable
+         onPress={onPress}
+         onPressIn={() => (scale.value = withSpring(0.95))}
+         onPressOut={() => (scale.value = withSpring(1))}
+         style={animatedStyle}
+      >
+         {children}
+      </AnimatedPressable>
+   );
+};
 
 // GlassmorphismLoader component for consistent loading state
 const GlassmorphismLoader = React.memo<{ message?: string }>(
@@ -60,6 +93,16 @@ export default function LeagueStatsScreen() {
    const handleBack = React.useCallback(() => {
       router.back();
    }, []);
+
+   const handleStatPress = React.useCallback(
+      (statType: StatType) => {
+         router.push({
+            pathname: '/leagues/[id]/stats/[statType]',
+            params: { id: leagueId!, statType },
+         });
+      },
+      [leagueId]
+   );
 
    // Memoized style objects to prevent recreation on every render
    const headerButtonStyle = React.useMemo(
@@ -238,44 +281,47 @@ export default function LeagueStatsScreen() {
 
             {/* Player Stats Cards Grid */}
             <View className="mb-8 px-6">
-               <View
-                  className="bg-blue-500/10 backdrop-blur-xl border border-blue-400/30 rounded-3xl p-6 mb-6"
-                  // style={{
-                  //    shadowColor: '#3B82F6',
-                  //    shadowOffset: { width: 0, height: 8 },
-                  //    shadowOpacity: 0.2,
-                  //    shadowRadius: 16,
-                  //    elevation: 16,
-                  // }}
-               >
+               <View className="bg-blue-500/10 backdrop-blur-xl border border-blue-400/30 rounded-3xl p-6 mb-6">
                   <Text className="text-blue-300 text-center mb-4 text-xl font-semibold">
                      {t('playerStats')}
                   </Text>
                </View>
 
                <View className="flex-row flex-wrap justify-center items-start w-full gap-4">
-                  <TopProfitPlayerCard leagueId={leagueId!} t={t} />
-                  <PlayerStatCard
-                     leagueId={leagueId!}
-                     statType="most-active-player"
-                     t={t}
-                  />
-                  <PlayerStatCard
-                     leagueId={leagueId!}
-                     statType="highest-single-game-profit"
-                     t={t}
-                  />
-                  <PlayerStatCard
-                     leagueId={leagueId!}
-                     statType="most-consistent-player"
-                     t={t}
-                  />
-                  {/* Temporarily hidden */}
-                  {/* <PlayerStatCard
-                     leagueId={leagueId!}
-                     statType="biggest-loser"
-                     t={t}
-                  /> */}
+                  <PressableStatCard
+                     onPress={() => handleStatPress('top-profit-player')}
+                  >
+                     <TopProfitPlayerCard leagueId={leagueId!} t={t} />
+                  </PressableStatCard>
+                  <PressableStatCard
+                     onPress={() => handleStatPress('most-active-player')}
+                  >
+                     <PlayerStatCard
+                        leagueId={leagueId!}
+                        statType="most-active-player"
+                        t={t}
+                     />
+                  </PressableStatCard>
+                  <PressableStatCard
+                     onPress={() =>
+                        handleStatPress('highest-single-game-profit')
+                     }
+                  >
+                     <PlayerStatCard
+                        leagueId={leagueId!}
+                        statType="highest-single-game-profit"
+                        t={t}
+                     />
+                  </PressableStatCard>
+                  <PressableStatCard
+                     onPress={() => handleStatPress('most-consistent-player')}
+                  >
+                     <PlayerStatCard
+                        leagueId={leagueId!}
+                        statType="most-consistent-player"
+                        t={t}
+                     />
+                  </PressableStatCard>
                </View>
             </View>
 
