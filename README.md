@@ -14,6 +14,8 @@ fixed 2 reject-- mostly layout
 fixed analytics after launch
 1.1.0
 changed icon , refactored some ui
+1.1.2
+Add anonymouse player
 
 # ANDROID
 
