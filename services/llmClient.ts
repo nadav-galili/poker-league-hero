@@ -4,6 +4,7 @@ type GenerateTextOptions = {
    temperature?: number;
    instructions?: string;
    maxTokens?: number;
+   responseFormat?: { type: 'text' | 'json_object' };
 };
 
 type GenerateTextResult = {
@@ -19,13 +20,12 @@ export const llmClient = {
       instructions,
       temperature = 0.2,
       maxTokens = 500,
+      responseFormat,
    }: GenerateTextOptions): Promise<GenerateTextResult> {
       const apiKey = process.env.OPENAI_API_KEY;
       if (!apiKey) {
          throw new Error('OPENAI_API_KEY environment variable is required');
       }
-
-      console.log('🤖 Making OpenAI API request with native fetch...');
 
       const messages = [
          {
@@ -36,7 +36,7 @@ export const llmClient = {
 
       if (instructions) {
          messages.unshift({
-            role: 'system' as const,
+            role: 'user' as const,
             content: instructions,
          });
       }
@@ -55,6 +55,7 @@ export const llmClient = {
                   messages,
                   temperature,
                   max_tokens: maxTokens,
+                  response_format: responseFormat,
                }),
             }
          );

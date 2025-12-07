@@ -1,5 +1,14 @@
-import { and, count, eq, inArray } from 'drizzle-orm';
-import { getDb, leagueMembers, leagues, users } from '../db';
+import { and, count, desc, eq, gte, inArray, lte, sql, sum } from 'drizzle-orm';
+import {
+   cashIns,
+   gamePlayers,
+   games,
+   getDb,
+   leagueMembers,
+   leagues,
+   users,
+} from '../db';
+import dayjs from 'dayjs';
 
 /**
  * Generate a secure, unique 5-character invite code
@@ -333,5 +342,115 @@ export async function getLeagueDetails(leagueId: string): Promise<any> {
    return {
       ...league[0],
       members,
+   };
+}
+
+/**
+ * Get aggregated player stats for a league within a specific year
+ */
+export async function getLeaguePlayerStats(leagueId: number, year: number) {
+   const db = getDb();
+   const yearStart = dayjs().year(year).startOf('year').toDate();
+   const yearEnd = dayjs().year(year).endOf('year').toDate();
+
+   // Query for player stats: total profit, total buy-ins, game count
+   // Using query builder efficiently
+   const stats = await db
+      .select({
+         userId: users.id,
+         fullName: users.fullName,
+         totalProfit: sql<number>`sum(${gamePlayers.profit})`.mapWith(Number),
+         gamesCount: count(gamePlayers.id),
+      })
+      .from(gamePlayers)
+      .innerJoin(games, eq(gamePlayers.gameId, games.id))
+      .innerJoin(users, eq(gamePlayers.userId, users.id))
+      .where(
+         and(
+            eq(games.leagueId, leagueId),
+            eq(games.status, 'completed'),
+            gte(games.endedAt, yearStart),
+            lte(games.endedAt, yearEnd)
+         )
+      )
+      .groupBy(users.id, users.fullName);
+
+   const buyIns = await db
+      .select({
+         userId: users.id,
+         totalBuyIns: sum(cashIns.amount).mapWith(Number),
+      })
+      .from(cashIns)
+      .innerJoin(games, eq(cashIns.gameId, games.id))
+      .innerJoin(users, eq(cashIns.userId, users.id))
+      .where(
+         and(
+            eq(games.leagueId, leagueId),
+            eq(games.status, 'completed'),
+            gte(games.endedAt, yearStart),
+            lte(games.endedAt, yearEnd)
+         )
+      )
+      .groupBy(users.id);
+
+   // Merge results
+   const buyInsMap = new Map(buyIns.map((b) => [b.userId, b.totalBuyIns]));
+
+   return stats.map((s) => ({
+      ...s,
+      totalBuyIns: buyInsMap.get(s.userId) || 0,
+   }));
+}
+
+/**
+ * Get player with the highest profit in a single game
+ */
+export async function getHighestSingleGameProfit(
+   leagueId: number,
+   year: number
+) {
+   // Temporarily disabled to avoid NeonDbError issues from this query.
+   // Callers should treat `null` as “no highest single-game profit available”
+   // instead of failing the whole flow.
+   return null;
+}
+
+/**
+ * Get details of the last completed game
+ */
+export async function getLastGameDetails(leagueId: number) {
+   const db = getDb();
+
+   // Get last game
+   const lastGame = await db
+      .select()
+      .from(games)
+      .where(and(eq(games.leagueId, leagueId), eq(games.status, 'completed')))
+      .orderBy(desc(games.endedAt));
+
+   if (lastGame.length === 0) return null;
+
+   const game = lastGame[0];
+
+   // Get player results for this game
+   const playerResults = await db
+      .select({
+         userId: users.id,
+         fullName: users.fullName,
+         profit: gamePlayers.profit,
+         buyIn: sql<number>`(
+            SELECT SUM(amount) FROM ${cashIns}
+            WHERE ${cashIns.gamePlayerId} = ${gamePlayers.id}
+         )`.mapWith(Number),
+         cashOut: gamePlayers.finalAmount,
+      })
+      .from(gamePlayers)
+      .innerJoin(users, eq(gamePlayers.userId, users.id))
+      .where(eq(gamePlayers.gameId, game.id))
+      .orderBy(desc(gamePlayers.profit));
+
+   return {
+      game,
+      players: playerResults,
    };
 }

@@ -1,35 +1,66 @@
 import { colors } from '@/colors';
 import { BASE_URL } from '@/constants';
 import { useAuth } from '@/context/auth';
+import { useLocalization } from '@/context/localization';
 import { Ionicons } from '@expo/vector-icons';
 import { useQuery } from '@tanstack/react-query';
-import React, { useEffect } from 'react';
-import { Text, View } from 'react-native';
+import React, { useEffect, useState } from 'react';
+import { Text, View, TouchableOpacity } from 'react-native';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import { LeagueCardSkeleton } from '../shared/LeagueCardSkeleton';
 
 type Props = {
    leagueId: number;
 };
 
+type AISummaryType = {
+   financialSnapshot: string;
+   lastGameHighlights: string;
+   stats: {
+      totalProfit: number;
+      totalBuyIns: number;
+      totalGames: number;
+      highestSingleGameProfit: number;
+      highestSingleGamePlayer: string;
+   };
+};
+
 type getSummaryListResponse = {
-   summary: string;
+   summary: AISummaryType;
+   cached?: boolean; // True if loaded from DB
+   needsBackendCache?: boolean; // True if client should cache locally
 };
 
 const Summary = ({ leagueId }: Props) => {
    const { fetchWithAuth } = useAuth();
-   const [refreshKey, setRefreshKey] = React.useState(0);
+   const { t, language, isRTL } = useLocalization();
+   const [refreshKey, setRefreshKey] = useState(0);
+   const cacheKey = `ai_summary_${leagueId}`;
 
    useEffect(() => {
       setRefreshKey((prev) => prev + 1);
-   }, [leagueId]);
+   }, [leagueId, language]); // Refetch when language changes
 
    const {
       data: summary,
       isPending: isLoading,
       error,
+      refetch,
    } = useQuery<getSummaryListResponse, Error>({
-      queryKey: ['summary', leagueId, refreshKey],
+      queryKey: ['summary', leagueId, language, refreshKey],
       queryFn: async () => {
+         // Check for locally cached summary first
+         let cachedSummary: AISummaryType | null = null;
+         try {
+            const cached = await AsyncStorage.getItem(cacheKey);
+            if (cached) {
+               cachedSummary = JSON.parse(cached);
+               console.log('📦 Found locally cached summary, sending to backend');
+            }
+         } catch (error) {
+            console.error('⚠️ Failed to read cached summary:', error);
+         }
+
          const response = await fetchWithAuth(
             `${BASE_URL}/api/leagues/${leagueId}/ai-summary?t=${Date.now()}`,
             {
@@ -37,11 +68,51 @@ const Summary = ({ leagueId }: Props) => {
                headers: {
                   'Content-Type': 'application/json',
                },
-               body: JSON.stringify({ createSummary: false }),
+               body: JSON.stringify({ 
+                  createSummary: false, 
+                  language,
+                  cachedSummary // Send cached summary if available
+               }),
             }
          );
 
-         return response.json();
+         const data = await response.json();
+         console.log('AI Summary API Response:', data);
+
+         if (!response.ok) {
+            console.error('AI Summary API Error:', data);
+            const cause = data.cause
+               ? ` Cause: ${
+                    typeof data.cause === 'object'
+                       ? JSON.stringify(data.cause)
+                       : data.cause
+                 }`
+               : '';
+            throw new Error(
+               (data.details || data.error || 'Failed to fetch summary') + cause
+            );
+         }
+
+         // Handle caching logic
+         if (data.needsBackendCache && data.summary) {
+            // Backend couldn't cache, store locally
+            try {
+               await AsyncStorage.setItem(cacheKey, JSON.stringify(data.summary));
+               console.log('💾 Stored summary in local cache');
+            } catch (error) {
+               console.error('⚠️ Failed to store summary locally:', error);
+            }
+         } else if (data.cached) {
+            // Backend has it cached, clear local cache
+            try {
+               await AsyncStorage.removeItem(cacheKey);
+               console.log('🗑️ Cleared local cache (backend has it)');
+            } catch (error) {
+               console.error('⚠️ Failed to clear local cache:', error);
+            }
+         }
+
+         return data;
       },
       staleTime: 0,
       gcTime: 0,
@@ -65,28 +136,96 @@ const Summary = ({ leagueId }: Props) => {
 
    if (error)
       return (
-         <View className="bg-errorTint rounded-lg p-4">
-            <Text className="text-error">Failed to fetch AI summary</Text>
+         <View className="bg-errorTint rounded-lg p-4 items-center gap-2">
+            <Text className="text-error text-center font-bold">
+               {t('errorOccurred')}
+            </Text>
+            <Text className="text-error text-center text-sm">
+               {error.message}
+            </Text>
+            <TouchableOpacity
+               onPress={() => refetch()}
+               className="bg-error px-4 py-2 rounded mt-2"
+            >
+               <Text className="text-white font-bold">{t('retry')}</Text>
+            </TouchableOpacity>
          </View>
       );
 
    return (
       <View className="px-6 mb-8">
-         <Text className="text-primary text-center mb-6 text-2xl font-black uppercase tracking-[3px]">
-            <Ionicons
-               name="sparkles"
-               size={24}
-               color={colors.warningGradientEnd}
-            />
-            AI Summary
-         </Text>
-
-         <View className="bg-primaryTint rounded-lg p-4">
-            <Text className="text-blue-300  font-bold text-lg">
-               {summary?.summary ??
-                  'No games played in this year OR summary not generated yet'}
+         <View className="flex-row justify-center items-center mb-6 gap-2 relative">
+            <Text 
+               className="text-primary text-center text-2xl font-black uppercase tracking-[3px]"
+               style={{ writingDirection: isRTL ? 'rtl' : 'ltr' }}
+            >
+               <Ionicons
+                  name="sparkles"
+                  size={24}
+                  color={colors.warningGradientEnd}
+               />{' '}
+               {t('aiSummary')}
             </Text>
+            <TouchableOpacity
+               onPress={() => refetch()}
+               className={`absolute ${isRTL ? 'left-0' : 'right-0'}`}
+               hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
+            >
+               <Ionicons name="refresh" size={20} color={colors.primary} />
+            </TouchableOpacity>
          </View>
+
+         {summary?.summary ? (
+            <View className="gap-4">
+               <View className="bg-primaryTint rounded-lg p-4">
+                  <Text
+                     className="text-primary font-bold text-lg mb-2"
+                     style={{ 
+                        textAlign: isRTL ? 'right' : 'left',
+                        writingDirection: isRTL ? 'rtl' : 'ltr' 
+                     }}
+                  >
+                     {t('financialSnapshot')}
+                  </Text>
+                  <Text
+                     className="text-blue-300 font-medium text-base leading-6"
+                     style={{ 
+                        textAlign: isRTL ? 'right' : 'left',
+                        writingDirection: isRTL ? 'rtl' : 'ltr' 
+                     }}
+                  >
+                     {summary.summary.financialSnapshot}
+                  </Text>
+               </View>
+
+               <View className="bg-primaryTint rounded-lg p-4">
+                  <Text
+                     className="text-primary font-bold text-lg mb-2"
+                     style={{ 
+                        textAlign: isRTL ? 'right' : 'left',
+                        writingDirection: isRTL ? 'rtl' : 'ltr' 
+                     }}
+                  >
+                     {t('lastGameHighlights')}
+                  </Text>
+                  <Text
+                     className="text-blue-300 font-medium text-base leading-6"
+                     style={{ 
+                        textAlign: isRTL ? 'right' : 'left',
+                        writingDirection: isRTL ? 'rtl' : 'ltr' 
+                     }}
+                  >
+                     {summary.summary.lastGameHighlights}
+                  </Text>
+               </View>
+            </View>
+         ) : (
+            <View className="bg-primaryTint rounded-lg p-4">
+               <Text className="text-blue-300 font-bold text-lg text-center">
+                  {t('noSummaryYet')}
+               </Text>
+            </View>
+         )}
       </View>
    );
 };

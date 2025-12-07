@@ -1,10 +1,11 @@
 import { getDb, summaries } from '@/db';
 import dayjs from 'dayjs';
 import { and, eq, gt } from 'drizzle-orm';
+import { AISummary } from './aiSummarySchema';
 
 export async function storeLeagueStatsSummary(
    leagueId: string,
-   summary: string
+   summary: AISummary
 ) {
    const now = new Date();
    const expiresAt = dayjs().add(3, 'day').toDate();
@@ -29,7 +30,7 @@ export async function storeLeagueStatsSummary(
 
 export const getLeagueStatsSummary = async (
    leagueId: number
-): Promise<string | null> => {
+): Promise<AISummary | null> => {
    const db = getDb();
    const summary = await db
       .select({ content: summaries.content })
@@ -41,7 +42,7 @@ export const getLeagueStatsSummary = async (
          )
       )
       .limit(1);
-   return summary[0]?.content || null;
+   return (summary[0]?.content as AISummary) || null;
 };
 
 export const updateSummaryExpiresAt = async (leagueId: number) => {

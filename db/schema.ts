@@ -8,6 +8,7 @@ import {
    text,
    timestamp,
    varchar,
+   json,
 } from 'drizzle-orm/pg-core';
 
 // Enums
@@ -127,7 +128,7 @@ export const summaries = pgTable('summaries', {
       .unique()
       .notNull()
       .references(() => leagues.id, { onDelete: 'cascade' }),
-   content: text('content').notNull(),
+   content: json('content').notNull(),
    generatedAt: timestamp('generated_at').defaultNow().notNull(),
    expiresAt: timestamp('expires_at').notNull(),
 });

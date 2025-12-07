@@ -262,6 +262,13 @@ export interface Translations {
    rank: string;
    viewFullLeaderboard: string;
    leaderboard: string;
+
+   // AI Summary
+   aiSummary: string;
+   financialSnapshot: string;
+   lastGameHighlights: string;
+   generatingAnalysis: string;
+   noSummaryYet: string;
 }
 
 // English translations
@@ -513,6 +520,13 @@ const enTranslations: Translations = {
    rank: 'Rank',
    viewFullLeaderboard: 'View Full Leaderboard',
    leaderboard: 'Leaderboard',
+
+   // AI Summary
+   aiSummary: 'AI Summary',
+   financialSnapshot: 'Financial Snapshot',
+   lastGameHighlights: 'Last Game Highlights',
+   generatingAnalysis: 'Generating Analysis...',
+   noSummaryYet: 'No summary available yet',
 };
 
 // Hebrew translations
@@ -761,6 +775,13 @@ const heTranslations: Translations = {
    rank: 'דירוג',
    viewFullLeaderboard: 'צפה בטבלת המובילים',
    leaderboard: 'טבלת מובילים',
+
+   // AI Summary
+   aiSummary: 'סיכום AI',
+   financialSnapshot: 'מצב פיננסי',
+   lastGameHighlights: 'דגשי המשחק האחרון',
+   generatingAnalysis: 'מייצר ניתוח...',
+   noSummaryYet: 'אין סיכום זמין עדיין',
 };
 
 const translations = {

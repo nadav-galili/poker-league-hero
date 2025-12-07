@@ -1,5 +1,10 @@
 import { cashIns, gamePlayers, games, getDb, leagueMembers } from '@/db';
-import { getLeagueDetails } from '@/services/leagueUtils';
+import { aiSummarySchema } from '@/services/aiSummarySchema';
+import {
+   getLastGameDetails,
+   getLeagueDetails,
+   getLeaguePlayerStats,
+} from '@/services/leagueUtils';
 import { llmClient } from '@/services/llmClient';
 import {
    getLeagueStatsSummary,
@@ -16,19 +21,36 @@ import {
 import { captureException } from '@/utils/sentry';
 import { validateDatabaseId } from '@/utils/validation';
 import dayjs from 'dayjs';
-import { and, eq, gte, lte, sql, sum } from 'drizzle-orm';
+import { eq, sql } from 'drizzle-orm';
 
 // Template for AI summary generation
-const template = `You are an enthusiastic and friendly AI poker analyst. Your goal is to analyze the provided home poker league statistics and generate a concise, engaging, two-paragraph summary.
+const template = `You are an enthusiastic and friendly AI poker analyst. Your goal is to analyze the provided home poker league statistics and generate a concise, engaging summary in {{language}}.
+
+**Response Format**: Return ONLY valid JSON matching this structure:
+{
+  "financialSnapshot": "string (max 40 words)",
+  "lastGameHighlights": "string (max 40 words)",
+  "stats": {
+    "totalProfit": number,
+    "totalBuyIns": number,
+    "totalGames": number,
+    "highestSingleGameProfit": number,
+    "highestSingleGamePlayer": "string"
+  }
+}
 
 **Paragraph 1: Financial Snapshot**
-Summarize the league's overall financial health. Highlight the total number of games, the total money put in (Buy-Ins), and the total money taken out (Buy-Outs). State the **Total Profit/Loss** and comment on what it means for the league's pot or rake (e.g., "The league is down $X, which means the collective pot is X less than the buy-ins").
+Summarize the league's overall poker stats for total profit , total buy ins , and number of games played. highlight noticeable achievement by any of the players .
 
-**Paragraph 2: Engagement and Activity**
-Comment on the activity levels, noting the number of **total players** and **completed games**. Since 'averageGameDuration' is 0, mention that the duration data is not yet available and focus on the current player pool size.
+**Paragraph 2: Last Game Results**
+Highlight noticeable stats for the last game. Include winner name and standout performances.
 
 **Data to analyze:**
-{{leagues_stats}}`;
+{{leagues_stats}}
+
+**Language**: Respond in {{language}} (English or Hebrew).
+**Word Limit**: 40 words per paragraph maximum.
+**Include**: Player names for context and engagement.`;
 
 export const POST = withAuth(
    withRateLimit(async (request: Request, user) => {
@@ -143,86 +165,85 @@ export const POST = withAuth(
          targetYear = year || dayjs().year();
 
          const body = await request?.json();
+         const language = body.language || 'en'; // Default to English
+         const isHebrew = language === 'he';
+         const languageName = isHebrew ? 'Hebrew' : 'English';
+
+         // If client sends a cached summary that wasn't persisted, try to store it now
+         if (body.cachedSummary) {
+            try {
+               await storeLeagueStatsSummary(
+                  validatedLeagueId.toString(),
+                  body.cachedSummary
+               );
+               console.log(
+                  '✅ Successfully persisted client-cached summary to DB'
+               );
+            } catch (error) {
+               console.error(
+                  '⚠️ Still cannot persist client-cached summary:',
+                  error
+               );
+            }
+         }
+
          if (body.createSummary) {
             await updateSummaryExpiresAt(validatedLeagueId);
          }
          const existingSummary = await getLeagueStatsSummary(validatedLeagueId);
 
          if (existingSummary) {
-            return Response.json({ summary: existingSummary });
+            return Response.json({ summary: existingSummary, cached: true });
          }
 
-         // Fetch league statistics directly from database (avoid HTTP subrequests)
+         // Fetch league statistics (overall & per-player); last game is fetched
+         // separately so that a failure there doesn't kill the whole summary.
+         // CONSOLIDATED QUERIES to reduce Cloudflare Workers subrequest count.
          let stats;
          try {
             const db = getDb();
             const yearStart = dayjs().year(targetYear).startOf('year').toDate();
             const yearEnd = dayjs().year(targetYear).endOf('year').toDate();
 
-            const totalGamesResult = await db
-               .select({ count: sql<number>`count(*)` })
-               .from(games)
-               .where(
-                  and(
-                     eq(games.leagueId, validatedLeagueId),
-                     gte(games.startedAt, yearStart),
-                     lte(games.startedAt, yearEnd)
-                  )
-               );
-
-            const completedGamesResult = await db
-               .select({ count: sql<number>`count(*)` })
-               .from(games)
-               .where(
-                  and(
-                     eq(games.leagueId, validatedLeagueId),
-                     eq(games.status, 'completed'),
-                     gte(games.startedAt, yearStart),
-                     lte(games.startedAt, yearEnd)
-                  )
-               );
-
-            const totalPlayersResult = await db
-               .select({ count: sql<number>`count(*)` })
-               .from(leagueMembers)
-               .where(
-                  and(
-                     eq(leagueMembers.leagueId, validatedLeagueId),
-                     eq(leagueMembers.isActive, true)
-                  )
-               );
-
-            const profitResult = await db
+            // Consolidated stats query - combines all basic counts + profit in ONE query
+            const overallStats = await db
                .select({
-                  totalBuyIns: sum(cashIns.amount).as('total_buy_ins'),
-                  totalBuyOuts:
-                     sql<number>`sum(case when ${cashIns.type} = 'buy_out' then ${cashIns.amount} else 0 end)`.as(
-                        'total_buy_outs'
-                     ),
+                  totalGames: sql<number>`count(distinct case when ${games.startedAt} >= ${yearStart} and ${games.startedAt} <= ${yearEnd} then ${games.id} end)`,
+                  completedGames: sql<number>`count(distinct case when ${games.status} = 'completed' and ${games.startedAt} >= ${yearStart} and ${games.startedAt} <= ${yearEnd} then ${games.id} end)`,
+                  totalPlayers: sql<number>`(select count(*) from ${leagueMembers} where ${leagueMembers.leagueId} = ${validatedLeagueId} and ${leagueMembers.isActive} = true)`,
+                  totalBuyIns: sql<number>`coalesce(sum(case when ${games.status} = 'completed' and ${games.endedAt} >= ${yearStart} and ${games.endedAt} <= ${yearEnd} and ${cashIns.type} = 'buy_in' then ${cashIns.amount} else 0 end), 0)`,
+                  totalBuyOuts: sql<number>`coalesce(sum(case when ${games.status} = 'completed' and ${games.endedAt} >= ${yearStart} and ${games.endedAt} <= ${yearEnd} and ${cashIns.type} = 'buy_out' then ${cashIns.amount} else 0 end), 0)`,
                })
-               .from(cashIns)
-               .innerJoin(gamePlayers, eq(cashIns.gamePlayerId, gamePlayers.id))
-               .innerJoin(games, eq(gamePlayers.gameId, games.id))
-               .where(
-                  and(
-                     eq(games.leagueId, validatedLeagueId),
-                     eq(games.status, 'completed'),
-                     gte(games.endedAt, yearStart),
-                     lte(games.endedAt, yearEnd)
-                  )
-               );
+               .from(games)
+               .leftJoin(gamePlayers, eq(gamePlayers.gameId, games.id))
+               .leftJoin(cashIns, eq(cashIns.gamePlayerId, gamePlayers.id))
+               .where(eq(games.leagueId, validatedLeagueId));
+
+            const row = overallStats[0];
+            const totalGames = Number(row?.totalGames || 0);
+            const completedGames = Number(row?.completedGames || 0);
+            const totalPlayers = Number(row?.totalPlayers || 0);
+            const totalBuyIns = Number(row?.totalBuyIns || 0);
+            const totalBuyOuts = Number(row?.totalBuyOuts || 0);
+            const totalProfit = totalBuyOuts - totalBuyIns;
+
+            // Per-player stats (still separate for now, but could be optimized further)
+            const playerStats = await getLeaguePlayerStats(
+               validatedLeagueId,
+               targetYear
+            );
 
             stats = {
-               stats: {
-                  totalGames: totalGamesResult[0]?.count || 0,
-                  completedGames: completedGamesResult[0]?.count || 0,
-                  totalPlayers: totalPlayersResult[0]?.count || 0,
-                  totalProfit:
-                     (profitResult[0]?.totalBuyOuts || 0) -
-                     (profitResult[0]?.totalBuyIns || 0),
-                  totalBuyIns: profitResult[0]?.totalBuyIns || 0,
-                  totalBuyOuts: profitResult[0]?.totalBuyOuts || 0,
+               leagueOverall: {
+                  totalGames,
+                  completedGames,
+                  totalPlayers,
+                  totalProfit,
+                  totalBuyIns,
+                  totalBuyOuts,
                },
+               playerStats,
+               lastGame: null, // filled in best-effort below
             };
          } catch (error) {
             console.error('❌ Error fetching league stats:', error);
@@ -237,12 +258,36 @@ export const POST = withAuth(
                   error: 'Failed to fetch league statistics',
                   details:
                      error instanceof Error ? error.message : 'Unknown error',
+                  cause: (error as any).cause
+                     ? JSON.stringify((error as any).cause)
+                     : undefined,
                },
                { status: 500 }
             );
          }
 
-         if (!stats?.stats?.totalGames) {
+         // Best-effort: fetch last game, but don't fail the whole summary if this
+         // specific query has issues on Neon.
+         try {
+            const lastGame = await getLastGameDetails(validatedLeagueId);
+            if (stats) {
+               stats = { ...stats, lastGame };
+            }
+         } catch (error) {
+            console.error('❌ Error fetching last game for AI summary:', error);
+            captureException(
+               new Error('Failed to fetch last game for AI summary'),
+               {
+                  function: 'getLastGameDetails',
+                  screen: 'AiSummary',
+                  request: request,
+                  user: user,
+               }
+            );
+            // continue with stats.lastGame = null
+         }
+
+         if (!stats?.leagueOverall?.totalGames) {
             captureException(new Error('No games played in this year'), {
                function: 'getLeagueStatsSummary',
                screen: 'AiSummary',
@@ -255,47 +300,92 @@ export const POST = withAuth(
             );
          }
 
-         // Generate AI summary using OpenAI (with direct database stats, no HTTP subrequests)
+         // Generate AI summary using OpenAI. If the LLM call fails (including
+         // Workers/Neon “Too many subrequests” issues), fall back to a simple
+         // server-generated summary so the endpoint still returns 200.
          let summary;
          try {
-            const prompt = template.replace(
-               '{{leagues_stats}}',
-               JSON.stringify(stats)
-            );
+            const prompt = template
+               .replace('{{leagues_stats}}', JSON.stringify(stats))
+               .replaceAll('{{language}}', languageName);
 
             const result = await llmClient.generateText({
                model: 'gpt-4o-mini',
                prompt,
                temperature: 0.2,
-               maxTokens: 500,
+               maxTokens: 400,
             });
-            summary = result.text;
-         } catch (error) {
-            captureException(new Error('Failed to generate AI summary'), {
-               function: 'llmClient.generateText',
-               screen: 'AiSummary',
-               request: request,
-               user: user,
-            });
-            console.error('❌ Error generating AI summary:', error);
 
-            return Response.json(
-               {
-                  error: 'Failed to generate AI summary',
-                  details:
-                     error instanceof Error ? error.message : 'Unknown error',
-               },
-               { status: 500 }
+            // Parse and validate response
+            const parsed = JSON.parse(result.text);
+            summary = aiSummarySchema.parse(parsed);
+         } catch (error) {
+            console.error(
+               '❌ Error generating AI summary, using fallback:',
+               error
             );
+            captureException(
+               new Error(
+                  `Failed to generate AI summary: ${
+                     error instanceof Error ? error.message : String(error)
+                  }`
+               ),
+               {
+                  function: 'llmClient.generateText',
+                  screen: 'AiSummary',
+               }
+            );
+
+            // Fallback: build a short, localized summary from the stats we
+            // already have, so the user still sees something useful.
+            const totals = stats!.leagueOverall;
+            const totalGames = Number(
+               totals.completedGames || totals.totalGames || 0
+            );
+            const totalBuyIns = Number(totals.totalBuyIns || 0);
+            const totalProfit = Number(totals.totalProfit || 0);
+            const formatter = new Intl.NumberFormat(
+               isHebrew ? 'he-IL' : 'en-US',
+               { maximumFractionDigits: 2 }
+            );
+
+            const buyInsStr = formatter.format(totalBuyIns);
+            const profitStr = formatter.format(totalProfit);
+
+            const financialSnapshot = isHebrew
+               ? `הליגה שיחקה ${totalGames} משחקים שהושלמו השנה, עם סך קניות של ${buyInsStr} ורווח כולל של ${profitStr}.`
+               : `The league played ${totalGames} completed games this year with total buy-ins of ${buyInsStr} and overall profit of ${profitStr}.`;
+
+            const lastGameHighlights = isHebrew
+               ? 'ניתוח ה־AI אינו זמין כרגע בגלל מגבלות שרת.'
+               : 'AI analysis is temporarily unavailable due to server limits.';
+
+            summary = {
+               financialSnapshot,
+               lastGameHighlights,
+               stats: {
+                  totalProfit,
+                  totalBuyIns,
+                  totalGames,
+                  highestSingleGameProfit: 0,
+                  highestSingleGamePlayer: '',
+               },
+            } as any;
          }
 
-         // Store summary in database
+         // Try to store in DB; if it fails (subrequest limit), tell client to cache locally
+         let needsBackendCache = false;
          try {
             await storeLeagueStatsSummary(
                validatedLeagueId.toString(),
-               summary
+               summary as any
             );
+            console.log('✅ Successfully stored AI summary in cache');
          } catch (error) {
+            console.error(
+               '⚠️ Failed to store AI summary (likely subrequest limit):',
+               error
+            );
             captureException(new Error('Failed to store summary'), {
                function: 'storeLeagueStatsSummary',
                screen: 'AiSummary',
@@ -303,10 +393,14 @@ export const POST = withAuth(
                user: user,
                error: error instanceof Error ? error.message : 'Unknown error',
             });
-            // Continue anyway - we can still return the summary even if storage fails
+            needsBackendCache = true; // Signal to client to cache locally
          }
 
-         return Response.json({ summary: summary });
+         return Response.json({
+            summary,
+            cached: false,
+            needsBackendCache,
+         });
       } catch (error) {
          console.error('❌ Unexpected error in AI summary endpoint:', error);
          const errorMessage =
@@ -324,6 +418,9 @@ export const POST = withAuth(
             {
                error: 'Failed to fetch league statistics summary',
                details: errorMessage,
+               cause: (error as any).cause
+                  ? JSON.stringify((error as any).cause)
+                  : undefined,
                timestamp: new Date().toISOString(),
             },
             { status: 500 }
