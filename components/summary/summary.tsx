@@ -41,6 +41,30 @@ const Summary = ({ leagueId }: Props) => {
       setRefreshKey((prev) => prev + 1);
    }, [leagueId, language]); // Refetch when language changes
 
+   // Helper to persist summary via separate lightweight endpoint
+   const persistSummaryToBackend = async (summaryData: AISummaryType) => {
+      try {
+         const response = await fetchWithAuth(
+            `${BASE_URL}/api/leagues/${leagueId}/store-summary`,
+            {
+               method: 'POST',
+               headers: { 'Content-Type': 'application/json' },
+               body: JSON.stringify({ summary: summaryData }),
+            }
+         );
+         if (response.ok) {
+            console.log('✅ Successfully persisted summary to DB via separate endpoint');
+            await AsyncStorage.removeItem(cacheKey);
+            return true;
+         }
+         console.error('❌ Failed to persist summary:', await response.text());
+         return false;
+      } catch (error) {
+         console.error('❌ Error persisting summary:', error);
+         return false;
+      }
+   };
+
    const {
       data: summary,
       isPending: isLoading,
@@ -49,16 +73,16 @@ const Summary = ({ leagueId }: Props) => {
    } = useQuery<getSummaryListResponse, Error>({
       queryKey: ['summary', leagueId, language, refreshKey],
       queryFn: async () => {
-         // Check for locally cached summary first
-         let cachedSummary: AISummaryType | null = null;
+         // First, try to persist any locally cached summary via separate endpoint
          try {
             const cached = await AsyncStorage.getItem(cacheKey);
             if (cached) {
-               cachedSummary = JSON.parse(cached);
-               console.log('📦 Found locally cached summary, sending to backend');
+               console.log('📦 Found locally cached summary, trying to persist...');
+               const cachedSummary = JSON.parse(cached) as AISummaryType;
+               await persistSummaryToBackend(cachedSummary);
             }
          } catch (error) {
-            console.error('⚠️ Failed to read cached summary:', error);
+            console.error('⚠️ Failed to handle cached summary:', error);
          }
 
          const response = await fetchWithAuth(
@@ -68,11 +92,7 @@ const Summary = ({ leagueId }: Props) => {
                headers: {
                   'Content-Type': 'application/json',
                },
-               body: JSON.stringify({ 
-                  createSummary: false, 
-                  language,
-                  cachedSummary // Send cached summary if available
-               }),
+               body: JSON.stringify({ createSummary: false, language }),
             }
          );
 
@@ -95,10 +115,12 @@ const Summary = ({ leagueId }: Props) => {
 
          // Handle caching logic
          if (data.needsBackendCache && data.summary) {
-            // Backend couldn't cache, store locally
+            // Backend couldn't cache, store locally AND try separate endpoint
             try {
                await AsyncStorage.setItem(cacheKey, JSON.stringify(data.summary));
                console.log('💾 Stored summary in local cache');
+               // Try to persist via separate lightweight endpoint
+               persistSummaryToBackend(data.summary);
             } catch (error) {
                console.error('⚠️ Failed to store summary locally:', error);
             }

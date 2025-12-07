@@ -24,14 +24,16 @@ import dayjs from 'dayjs';
 import { eq, sql } from 'drizzle-orm';
 
 // Template for AI summary generation
-const template = `You are an enthusiastic and friendly AI poker analyst. Your goal is to analyze the provided home poker league statistics and generate a concise, engaging summary in {{language}}.
+const template = `You are an enthusiastic and friendly AI poker analyst analyzing a home poker league.
 
-**Response Format**: Return ONLY valid JSON matching this structure:
+**IMPORTANT**: Poker is a zero-sum game. Money won by one player = money lost by others. Do NOT report "league profit" - instead focus on INDIVIDUAL player performances.
+
+**Response Format**: Return ONLY valid JSON:
 {
-  "financialSnapshot": "string (max 40 words)",
-  "lastGameHighlights": "string (max 40 words)",
+  "financialSnapshot": "string (max 50 words)",
+  "lastGameHighlights": "string (max 50 words)",
   "stats": {
-    "totalProfit": number,
+    "totalProfit": 0,
     "totalBuyIns": number,
     "totalGames": number,
     "highestSingleGameProfit": number,
@@ -39,18 +41,30 @@ const template = `You are an enthusiastic and friendly AI poker analyst. Your go
   }
 }
 
-**Paragraph 1: Financial Snapshot**
-Summarize the league's overall poker stats for total profit , total buy ins , and number of games played. highlight noticeable achievement by any of the players .
+**Paragraph 1: Financial Snapshot (financialSnapshot)**
+- Report: total games played, total buy-ins amount, number of active players
+- Highlight the TOP WINNER (player with highest cumulative profit) and their profit amount
+- Mention the biggest loser if relevant
+- DO NOT say "the league profited" - individual players profit/lose, not the league
 
-**Paragraph 2: Last Game Results**
-Highlight noticeable stats for the last game. Include winner name and standout performances.
+**Paragraph 2: Last Game Results (lastGameHighlights)**
+- Who won the last game and how much they won
+- Notable performances (big wins/losses)
+- If no last game data, say "No recent game data available"
+
+**Stats object**:
+- totalProfit: ALWAYS set to 0 (poker is zero-sum)
+- totalBuyIns: sum of all buy-ins
+- totalGames: number of completed games
+- highestSingleGameProfit: biggest single-game win
+- highestSingleGamePlayer: name of that winner
 
 **Data to analyze:**
 {{leagues_stats}}
 
-**Language**: Respond in {{language}} (English or Hebrew).
-**Word Limit**: 40 words per paragraph maximum.
-**Include**: Player names for context and engagement.`;
+**Language**: {{language}}
+**Word Limit**: 50 words per paragraph.
+**Use player names for engagement.**`;
 
 export const POST = withAuth(
    withRateLimit(async (request: Request, user) => {
@@ -169,23 +183,8 @@ export const POST = withAuth(
          const isHebrew = language === 'he';
          const languageName = isHebrew ? 'Hebrew' : 'English';
 
-         // If client sends a cached summary that wasn't persisted, try to store it now
-         if (body.cachedSummary) {
-            try {
-               await storeLeagueStatsSummary(
-                  validatedLeagueId.toString(),
-                  body.cachedSummary
-               );
-               console.log(
-                  '✅ Successfully persisted client-cached summary to DB'
-               );
-            } catch (error) {
-               console.error(
-                  '⚠️ Still cannot persist client-cached summary:',
-                  error
-               );
-            }
-         }
+         // Note: cachedSummary is now handled via separate /store-summary endpoint
+         // to avoid hitting subrequest limits in this main endpoint
 
          if (body.createSummary) {
             await updateSummaryExpiresAt(validatedLeagueId);
@@ -318,7 +317,15 @@ export const POST = withAuth(
 
             // Parse and validate response
             const parsed = JSON.parse(result.text);
-            summary = aiSummarySchema.parse(parsed);
+            const validated = aiSummarySchema.parse(parsed);
+            // Enforce totalProfit = 0 (poker is zero-sum)
+            summary = {
+               ...validated,
+               stats: {
+                  ...validated.stats,
+                  totalProfit: 0,
+               },
+            };
          } catch (error) {
             console.error(
                '❌ Error generating AI summary, using fallback:',
