@@ -19,6 +19,8 @@ changed icon , refactored some ui
 Add anonymouse player
 1.1.4
 Fix mixpanel tracking for opt out users
+1.3.0
+Refactored ai , added detailed game stats, added games list
 
 # ANDROID
 
@@ -36,6 +38,8 @@ just fixing google play reject on app release
 changed icon , refactored some ui
 1.2.0
 Add anonymouse player and Fix mixpanel tracking for opt out users
+1.3.0
+Refactored ai , added detailed game stats, added games list
 
 ## Deploy to expo routes
 
