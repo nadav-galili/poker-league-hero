@@ -1,5 +1,5 @@
 import { getTheme } from '@/colors';
-import OnboardingFlow from '@/components/onboarding/OnboardingFlow';
+import OnboardingSwiper from '@/components/onboarding/OnboardingSwiper';
 import LoginForm from '@/components/auth/LoginForm';
 import { LoadingState } from '@/components/shared/LoadingState';
 import { useAuth } from '@/context/auth';
@@ -21,7 +21,7 @@ export default function Index() {
 
    // If user hasn't seen onboarding, show it
    if (!hasSeenOnboarding) {
-      return <OnboardingFlow />;
+      return <OnboardingSwiper />;
    }
 
    // User has seen onboarding but not authenticated, show login

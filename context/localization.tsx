@@ -229,20 +229,21 @@ export interface Translations {
    avgGameDuration: string;
 
    // Onboarding
-   onboardingSlide1Title: string;
-   onboardingSlide1Description: string;
-   onboardingSlide2Title: string;
-   onboardingSlide2Description: string;
-   onboardingSlide3Title: string;
-   onboardingSlide3Description: string;
-   onboardingSlide4Title: string;
-   onboardingSlide4Description: string;
-   onboardingSlide5Title: string;
-   onboardingSlide5Description: string;
-   onboardingSkipButton: string;
-   onboardingNextButton: string;
-   onboardingCompleteButton: string;
-   onboardingViewAgain: string;
+   onboardingWelcomeTitle: string;
+   onboardingWelcomeSubtitle: string;
+   onboardingLeaguesTitle: string;
+   onboardingLeaguesSubtitle: string;
+   onboardingStatsTitle: string;
+   onboardingStatsSubtitle: string;
+   onboardingGamesTitle: string;
+   onboardingGamesSubtitle: string;
+   onboardingAiTitle: string;
+   onboardingAiSubtitle: string;
+   onboardingGetStartedTitle: string;
+   onboardingGetStartedSubtitle: string;
+   onboardingSkip: string;
+   onboardingDone: string;
+   onboardingNext: string;
    termsOfService: string;
    continueWithGoogle: string;
    // Deep linking / Join League
@@ -483,24 +484,22 @@ const enTranslations: Translations = {
    avgGameDuration: 'AVG GAME DURATION',
 
    // Onboarding
-   onboardingSlide1Title: 'Welcome to Poker League Hero!',
-   onboardingSlide1Description:
-      'Create and manage your poker leagues with ease.',
-   onboardingSlide2Title: 'Join Existing Leagues',
-   onboardingSlide2Description:
-      'Connect with friends and compete in existing leagues.',
-   onboardingSlide3Title: 'Track Your Performance',
-   onboardingSlide3Description:
-      'Monitor your wins, losses, and overall performance.',
-   onboardingSlide4Title: 'Get AI Analysis for your games',
-   onboardingSlide4Description:
-      'Get AI analysis for your games to improve your skills.',
-   onboardingSlide5Title: 'Get Started',
-   onboardingSlide5Description: 'Start creating your first poker league today!',
-   onboardingSkipButton: 'Skip',
-   onboardingNextButton: 'Next',
-   onboardingCompleteButton: 'Complete',
-   onboardingViewAgain: ' View Onboarding Again',
+   onboardingWelcomeTitle: 'Welcome to Poker League Hero',
+   onboardingWelcomeSubtitle: 'The ultimate tool for managing your home poker games and leagues.',
+   onboardingLeaguesTitle: 'Manage Leagues',
+   onboardingLeaguesSubtitle: 'Create private leagues, invite friends, and keep track of who runs the table.',
+   onboardingStatsTitle: 'Track Statistics',
+   onboardingStatsSubtitle: 'Detailed player stats, ROI tracking, and performance history over time.',
+   onboardingGamesTitle: 'Live Game Tracking',
+   onboardingGamesSubtitle: 'Easy buy-ins, re-buys, and cash-outs. Handle the math while you handle the cards.',
+   onboardingAiTitle: 'AI Insights',
+   onboardingAiSubtitle: 'Get smart analysis of your league\'s performance and game trends.',
+   onboardingGetStartedTitle: 'Ready to Shuffle Up?',
+   onboardingGetStartedSubtitle: 'Start your league today and become a Poker League Hero.',
+   onboardingSkip: 'Skip',
+   onboardingNext: 'Next',
+   onboardingDone: 'Get Started',
+   onboardingViewAgain: 'View Onboarding Again',
    continueWithGoogle: 'Continue with Google',
    termsOfService: 'Terms of Service',
    // Deep linking / Join League
@@ -739,22 +738,22 @@ const heTranslations: Translations = {
    avgGameDuration: 'משך משחק ממוצע',
 
    // Onboarding
-   onboardingSlide1Title: 'ברוכים הבאים לHOMESTACK!',
-   onboardingSlide1Description:
-      'אפליקציית ניהול משחקי הפוקר הביתיים שלך בקלות וביעילות.',
-   onboardingSlide2Title: 'הצטרף לליגות קיימות',
-   onboardingSlide2Description: 'התחבר עם חברים והתחרו בליגות קיימות.',
-   onboardingSlide3Title: 'עקוב אחר הביצועים שלך',
-   onboardingSlide3Description: 'צפה בניצחונות, הפסדים והביצועים הכוללים שלך.',
-   onboardingSlide4Title: 'קבל ניתוח AI למשחקים',
-   onboardingSlide4Description:
-      'קבל ניתוח AI למשחקים שלך כדי לשפר את הביצועים שלך.',
-   onboardingSlide5Title: 'התחל עכשיו',
-   onboardingSlide5Description: 'התחל ביצירת הליגה הראשונה שלך היום!',
-   onboardingSkipButton: 'דלג',
-   onboardingNextButton: 'הבא',
-   onboardingCompleteButton: 'סיים',
-   onboardingViewAgain: ' צפה שוב בהדרכה',
+   onboardingWelcomeTitle: 'ברוכים הבאים ל-Poker League Hero',
+   onboardingWelcomeSubtitle: 'הכלי האולטימטיבי לניהול משחקי הפוקר והליגות הביתיות שלך.',
+   onboardingLeaguesTitle: 'ניהול ליגות',
+   onboardingLeaguesSubtitle: 'צור ליגות פרטיות, הזמן חברים ועקוב אחר מי ששולט בשולחן.',
+   onboardingStatsTitle: 'מעקב סטטיסטיקות',
+   onboardingStatsSubtitle: 'סטטיסטיקות שחקן מפורטות, מעקב ROI והיסטוריית ביצועים לאורך זמן.',
+   onboardingGamesTitle: 'מעקב משחק חי',
+   onboardingGamesSubtitle: 'כניסות קלות, כניסות חוזרות ומשיכות. תן לנו לטפל בחישובים בזמן שאתה משחק.',
+   onboardingAiTitle: 'תובנות AI',
+   onboardingAiSubtitle: 'קבל ניתוח חכם של ביצועי הליגה ומגמות המשחק שלך.',
+   onboardingGetStartedTitle: 'מוכנים להתחיל?',
+   onboardingGetStartedSubtitle: 'התחל את הליגה שלך היום והפוך לגיבור ליגת הפוקר.',
+   onboardingSkip: 'דלג',
+   onboardingNext: 'הבא',
+   onboardingDone: 'התחל',
+   onboardingViewAgain: 'צפה שוב בהדרכה',
    continueWithGoogle: 'המשך עם גוגל',
    termsOfService: 'תנאי שירות',
 

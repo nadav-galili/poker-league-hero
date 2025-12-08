@@ -1,14 +1,13 @@
-import OnboardingFlow from '@/components/onboarding/OnboardingFlow';
-import { useAuth } from '@/context/auth';
-import { Redirect } from 'expo-router';
+import OnboardingSwiper from '@/components/onboarding/OnboardingSwiper';
+import { Stack } from 'expo-router';
+import React from 'react';
 
 export default function OnboardingScreen() {
-   const { user } = useAuth();
-
-   // Only allow authenticated users to access this screen
-   if (!user) {
-      return <Redirect href="/" />;
-   }
-
-   return <OnboardingFlow />;
+   return (
+      <>
+         <Stack.Screen options={{ headerShown: false }} />
+         <OnboardingSwiper />
+      </>
+   );
 }
+
