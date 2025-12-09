@@ -1,5 +1,4 @@
-import { colors } from '@/colors';
-// import { Text } from '@/components/Text';
+import { colors, getTheme } from '@/colors';
 import { useLocalization } from '@/context/localization';
 import { GamePlayer } from '@/hooks/useGameData';
 import { Ionicons } from '@expo/vector-icons';
@@ -28,11 +27,15 @@ const PlayerCard: React.FC<PlayerCardProps> = ({
    onUndoBuyIn,
 }) => {
    const { t } = useLocalization();
+   const theme = getTheme();
 
    return (
-      <View className="p-2.5 rounded-lg shadow-sm elevation-3 border border-primary bg-primary">
+      <View 
+         className="p-3 rounded-xl shadow-lg elevation-5 border border-white/20"
+         style={{ backgroundColor: theme.surfaceElevated }}
+      >
          {/* Player Info */}
-         <View className="flex-row items-center mb-2 gap-1.5">
+         <View className="flex-row items-center mb-3 gap-1.5">
             <Image
                source={
                   !player.userId
@@ -44,65 +47,66 @@ const PlayerCard: React.FC<PlayerCardProps> = ({
                        }
                }
                style={{
-                  borderColor: colors.primary,
+                  borderColor: theme.primary,
                   backgroundColor: '#cccccc',
-                  borderRadius: 6,
-                  height: 32,
-                  width: 32,
-                  borderWidth: 1.5,
+                  borderRadius: 8,
+                  height: 36,
+                  width: 36,
+                  borderWidth: 2,
                }}
                contentFit="cover"
             />
             <TouchableOpacity
                onPress={() => onRemovePlayer(player)}
-               className="w-6 h-6 rounded-full items-center justify-center border border-black"
-               style={{ backgroundColor: colors.error }}
+               className="w-7 h-7 rounded-full items-center justify-center border border-black"
+               style={{ backgroundColor: theme.error }}
                disabled={isProcessing}
             >
-               <Ionicons name="remove-circle" size={14} color={colors.text} />
+               <Ionicons name="remove-circle" size={16} color={theme.text} />
             </TouchableOpacity>
             <View className="flex-1 min-w-0">
                <Text
-                  className="text-sm font-semibold text-text"
+                  className="text-base font-semibold"
+                  style={{ color: theme.text }}
                   numberOfLines={1}
                >
                   {player.fullName}
                </Text>
-               <Text className="text-xs text-text opacity-70" numberOfLines={1}>
+               <Text 
+                  className="text-xs font-medium" 
+                  style={{ color: theme.textSecondary }}
+                  numberOfLines={1}
+               >
                   {player.isActive ? t('gameInProgress') : 'Inactive'}
                </Text>
             </View>
             {!player.isActive && (
-               <View className="px-1 py-0.5 rounded border border-primary bg-red-500">
-                  <Text className="text-xs text-text font-bold">OUT</Text>
+               <View 
+                  className="px-2 py-1 rounded-lg border-2 border-black"
+                  style={{ backgroundColor: theme.error }}
+               >
+                  <Text className="text-xs font-bold" style={{ color: theme.text }}>
+                     OUT
+                  </Text>
                </View>
             )}
          </View>
 
          {/* Player Stats Grid */}
-         <View className="gap-2 mb-2">
+         <View className="gap-2 mb-3">
             {/* Stats Row 1 */}
             <View className="flex-row gap-2">
-               {/* <View
-                  className="flex-1 px-2 py-1.5 rounded items-center justify-center"
-                  style={{ backgroundColor: 'rgba(255,255,255,0.08)' }}
-               >
-                  <Text className="text-xs font-semibold text-success opacity-60 mb-0.5">
-                     {t('initialBuyIn')}
-                  </Text>
-                  <Text className="text-sm font-bold text-text">
-                     {t('currency')}
-                     {gameBaseAmount}
-                  </Text>
-               </View> */}
                <View
-                  className="flex-1 px-2 py-1.5 rounded items-center justify-center"
-                  style={{ backgroundColor: 'rgba(255,255,255,0.08)' }}
+                  className="flex-1 px-3 py-2 rounded-lg items-center justify-center border border-white/10"
+                  style={{ backgroundColor: theme.surfaceBlur }}
                >
-                  <Text className="text-xs font-semibold text-text mb-0.5">
+                  <Text 
+                     className="text-xs font-semibold mb-1"
+                     style={{ color: theme.textMuted }}
+                  >
                      {t('totalBuyIns')}
                   </Text>
-                  <Text className="text-sm font-bold text-text">
+                  <Text className="text-base font-bold" style={{ color: theme.text }}>
                      {t('currency')}
                      {player.totalBuyIns}
                   </Text>
@@ -112,33 +116,37 @@ const PlayerCard: React.FC<PlayerCardProps> = ({
             {/* Stats Row 2 */}
             <View className="flex-row gap-2">
                <View
-                  className="flex-1 px-2 py-1.5 rounded items-center justify-center"
-                  style={{ backgroundColor: 'rgba(255,255,255,0.08)' }}
+                  className="flex-1 px-3 py-2 rounded-lg items-center justify-center border border-white/10"
+                  style={{ backgroundColor: theme.surfaceBlur }}
                >
-                  <Text className="text-xs font-semibold text-text  mb-0.5">
+                  <Text 
+                     className="text-xs font-semibold mb-1"
+                     style={{ color: theme.textMuted }}
+                  >
                      {t('totalBuyOuts')}
                   </Text>
-                  <Text className="text-sm font-bold text-text">
+                  <Text className="text-base font-bold" style={{ color: theme.text }}>
                      {t('currency')}
                      {player.totalBuyOuts}
                   </Text>
                </View>
                <View
-                  className="flex-1 px-2 py-1.5 rounded items-center justify-center"
-                  style={{
-                     backgroundColor: 'rgba(255,255,255,0.08)',
-                  }}
+                  className="flex-1 px-3 py-2 rounded-lg items-center justify-center border border-white/10"
+                  style={{ backgroundColor: theme.surfaceBlur }}
                >
-                  <Text className="text-xs font-semibold text-text  mb-0.5">
+                  <Text 
+                     className="text-xs font-semibold mb-1"
+                     style={{ color: theme.textMuted }}
+                  >
                      {t('currentProfit')}
                   </Text>
                   <Text
-                     className="text-sm font-bold"
+                     className="text-base font-bold"
                      style={{
                         color:
                            player.currentProfit >= 0
-                              ? colors.success
-                              : colors.error,
+                              ? theme.success
+                              : theme.error,
                      }}
                   >
                      {t('currency')}
@@ -150,11 +158,12 @@ const PlayerCard: React.FC<PlayerCardProps> = ({
 
          {/* Action Buttons */}
          {player.isActive && (
-            <View className="flex-row gap-1.5 items-center justify-between w-full">
+            <View className="flex-row gap-2 items-center justify-between w-full">
                <View className="flex-1">
                   <AppButton
                      title={t('buyIn')}
                      onPress={() => onBuyIn(player)}
+                     variant="solid"
                      color="success"
                      disabled={isProcessing}
                      width="100%"
@@ -167,12 +176,13 @@ const PlayerCard: React.FC<PlayerCardProps> = ({
                   <AppButton
                      title={t('cancelBuyIn')}
                      onPress={() => onUndoBuyIn(player)}
-                     variant="outline"
+                     variant="solid"
                      color="warning"
                      disabled={isProcessing || player.totalBuyIns <= 0}
                      width="100%"
                      icon="arrow-undo"
                      size="small"
+                     textSize={11}
                   />
                </View>
 
@@ -180,6 +190,7 @@ const PlayerCard: React.FC<PlayerCardProps> = ({
                   <AppButton
                      title={t('cashOut')}
                      onPress={() => onCashOut(player)}
+                     variant="solid"
                      color="error"
                      disabled={isProcessing}
                      width="100%"

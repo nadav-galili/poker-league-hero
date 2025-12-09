@@ -25,6 +25,7 @@ interface AppButtonProps {
    width?: number | string;
    loading?: boolean;
    style?: any;
+   textSize?: number;
 }
 
 export const AppButton: React.FC<AppButtonProps> = ({
@@ -38,6 +39,7 @@ export const AppButton: React.FC<AppButtonProps> = ({
    width = '100%',
    loading = false,
    style,
+   textSize,
 }) => {
    const theme = getTheme();
    const scaleAnim = React.useRef(new Animated.Value(1)).current;
@@ -122,6 +124,7 @@ export const AppButton: React.FC<AppButtonProps> = ({
 
    const colorStyles = getColorStyles();
    const sizeStyles = getSizeStyles();
+   const finalTextSize = textSize || sizeStyles.fontSize;
 
    const getButtonContent = () => {
       if (loading) {
@@ -133,7 +136,7 @@ export const AppButton: React.FC<AppButtonProps> = ({
                <Text
                   style={{
                      color: theme.text,
-                     fontSize: sizeStyles.fontSize,
+                     fontSize: finalTextSize,
                      fontWeight: '600',
                   }}
                >
@@ -161,7 +164,7 @@ export const AppButton: React.FC<AppButtonProps> = ({
                   color: disabled
                      ? theme.textDisabled
                      : (colorStyles as any).textColor || theme.text,
-                  fontSize: sizeStyles.fontSize,
+                  fontSize: finalTextSize,
                   fontWeight: '600',
                }}
             >
@@ -280,7 +283,7 @@ export const AppButton: React.FC<AppButtonProps> = ({
                               color: disabled
                                  ? theme.textDisabled
                                  : colorStyles.solid,
-                              fontSize: sizeStyles.fontSize,
+                              fontSize: finalTextSize,
                               fontWeight: '600',
                            }}
                         >
@@ -305,7 +308,7 @@ export const AppButton: React.FC<AppButtonProps> = ({
                               color: disabled
                                  ? theme.textDisabled
                                  : colorStyles.solid,
-                              fontSize: sizeStyles.fontSize,
+                              fontSize: finalTextSize,
                               fontWeight: '600',
                            }}
                         >
