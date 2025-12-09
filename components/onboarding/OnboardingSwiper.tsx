@@ -197,23 +197,17 @@ export default function OnboardingSwiper() {
                {
                   backgroundColor: '#1e1b4b', // indigo 950
                   image: (
-                     <View
-                        style={{
-                           width: 150,
-                           height: 150,
-                           borderRadius: 75,
-                           backgroundColor: 'rgba(245, 158, 11, 0.2)', // amber with opacity
-                           alignItems: 'center',
-                           justifyContent: 'center',
-                           borderWidth: 2,
-                           borderColor: colors.warning,
-                        }}
-                     >
-                        <Ionicons
-                           name="game-controller"
-                           size={80}
-                           color={colors.warning}
-                        />
+                     <View className="items-center justify-center w-full">
+                        <View className="items-center justify-center w-full">
+                           <Image
+                              source={require('@/assets/images/new_onboarding/screen_shot4.webp')}
+                              style={{
+                                 width: screenWidth * 1,
+                                 height: 400,
+                              }}
+                              resizeMode="contain"
+                           />
+                        </View>
                      </View>
                   ),
                   title: t('onboardingGamesTitle'),
