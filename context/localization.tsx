@@ -277,6 +277,15 @@ export interface Translations {
    hideHistory: string;
    buyInCancelled: string;
    noEventsYet: string;
+
+   // Profile Edit
+   editProfile: string;
+   updateProfile: string;
+   profileImage: string;
+   fullName: string;
+   changeImage: string;
+   profileUpdated: string;
+   profileUpdateFailed: string;
 }
 
 // English translations
@@ -540,6 +549,15 @@ const enTranslations: Translations = {
    hideHistory: 'Hide History',
    buyInCancelled: 'Buy-in cancelled',
    noEventsYet: 'No game events yet',
+
+   // Profile Edit
+   editProfile: 'Edit Profile',
+   updateProfile: 'Update Profile',
+   profileImage: 'Profile Image',
+   fullName: 'Full Name',
+   changeImage: 'Change Image',
+   profileUpdated: 'Profile updated successfully',
+   profileUpdateFailed: 'Failed to update profile',
 };
 
 // Hebrew translations
@@ -802,6 +820,15 @@ const heTranslations: Translations = {
    hideHistory: 'הסתר היסטוריה',
    buyInCancelled: 'כניסה בוטלה',
    noEventsYet: 'אין אירועי משחק עדיין',
+
+   // Profile Edit
+   editProfile: 'ערוך פרופיל',
+   updateProfile: 'עדכן פרופיל',
+   profileImage: 'תמונת פרופיל',
+   fullName: 'שם מלא',
+   changeImage: 'שנה תמונה',
+   profileUpdated: 'הפרופיל עודכן בהצלחה',
+   profileUpdateFailed: 'נכשל בעדכון הפרופיל',
 };
 
 const translations = {

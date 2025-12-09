@@ -1,6 +1,8 @@
 import { colors, getTheme } from '@/colors';
+import { EditProfileModal } from '@/components/modals/EditProfileModal';
 import { useAuth } from '@/context/auth';
 import { useLocalization } from '@/context/localization';
+import { uploadImageToR2 } from '@/utils/cloudflareR2';
 import { Ionicons } from '@expo/vector-icons';
 import { Image } from 'expo-image';
 import { useRouter } from 'expo-router';
@@ -19,10 +21,12 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 export default function Account() {
    const theme = getTheme('light');
-   const { user, signOut, fetchWithAuth } = useAuth();
+   const { user, signOut, fetchWithAuth, refreshUser } = useAuth();
    const { t } = useLocalization();
    const router = useRouter();
    const [isDeletingData, setIsDeletingData] = useState(false);
+   const [isEditProfileVisible, setIsEditProfileVisible] = useState(false);
+   const [isUpdatingProfile, setIsUpdatingProfile] = useState(false);
    const insets = useSafeAreaInsets();
    const { width } = Dimensions.get('window');
    const isIPad =
@@ -77,6 +81,61 @@ export default function Account() {
             },
          ]
       );
+   };
+
+   const handleUpdateProfile = async (
+      name: string,
+      imageUri: string | null
+   ) => {
+      try {
+         setIsUpdatingProfile(true);
+
+         // 1. Upload image if changed
+         let uploadedImageUrl = imageUri;
+         if (
+            imageUri &&
+            imageUri !== user?.picture &&
+            !imageUri.startsWith('http')
+         ) {
+            try {
+               uploadedImageUrl = await uploadImageToR2(
+                  imageUri,
+                  'profile-images'
+               );
+            } catch (error) {
+               console.error('Failed to upload image:', error);
+               Alert.alert('Error', 'Failed to upload image');
+               setIsUpdatingProfile(false);
+               return;
+            }
+         }
+
+         // 2. Call update API
+         const response = await fetchWithAuth('/api/user/update', {
+            method: 'PUT',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+               fullName: name,
+               profileImageUrl: uploadedImageUrl,
+            }),
+         });
+
+         if (!response.ok) {
+            const errorData = await response.json();
+            throw new Error(errorData.error || 'Failed to update profile');
+         }
+
+         // 3. Refresh user context
+         await refreshUser();
+
+         setIsEditProfileVisible(false);
+         Alert.alert('Success', t('profileUpdated'));
+      } catch (error) {
+         console.error('Error updating profile:', error);
+         Alert.alert('Error', t('profileUpdateFailed'));
+      } finally {
+         setIsUpdatingProfile(false);
+      }
    };
 
    if (!user) {
@@ -159,9 +218,29 @@ export default function Account() {
                {/* User Info */}
                <View style={styles.userInfo}>
                   <View style={styles.nameContainer}>
-                     <Text className="text-lg font-bold text-success">
-                        {user.name || 'Unknown User'}
-                     </Text>
+                     <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' }}>
+                         <Text className="text-lg font-bold text-success">
+                            {user.name || 'Unknown User'}
+                         </Text>
+                         <Pressable
+                            onPress={() => setIsEditProfileVisible(true)}
+                            style={({ pressed }) => [
+                               {
+                                  opacity: pressed ? 0.7 : 1,
+                                  flexDirection: 'row',
+                                  alignItems: 'center',
+                                  backgroundColor: colors.primary,
+                                  paddingHorizontal: 8,
+                                  paddingVertical: 4,
+                                  borderRadius: 8,
+                                  gap: 4
+                               }
+                            ]}
+                         >
+                            <Ionicons name="pencil" size={12} color="#FFFFFF" />
+                            <Text className="text-xs text-white font-bold">EDIT</Text>
+                         </Pressable>
+                     </View>
                      <View
                         style={[
                            styles.nameUnderline,
@@ -373,6 +452,14 @@ export default function Account() {
                </View>
             </View>*/}
          </ScrollView>
+         <EditProfileModal
+            visible={isEditProfileVisible}
+            onClose={() => setIsEditProfileVisible(false)}
+            onSubmit={handleUpdateProfile}
+            currentName={user?.name || ''}
+            currentImage={user?.picture || null}
+            isLoading={isUpdatingProfile}
+         />
       </View>
    );
 }

@@ -8,7 +8,9 @@ import {
    REFRESH_COOKIE_OPTIONS,
    REFRESH_TOKEN_EXPIRY,
 } from '@/constants';
+import { getDb, users } from '@/db';
 import { addBreadcrumb } from '@/utils/sentry';
+import { eq } from 'drizzle-orm';
 import * as jose from 'jose';
 import { v4 as uuidv4 } from 'uuid';
 
@@ -256,19 +258,90 @@ export async function POST(request: Request) {
       const jti = uuidv4();
 
       // Get the user info from the token
-      const userInfo = decoded.payload;
+      const tokenPayload = decoded.payload;
+
+      // 🔍 Query the database for the LATEST user info
+      let userInfo = { ...tokenPayload };
+
+      // BACKWARD COMPATIBILITY: Handle both number and string userId, and missing userId
+      let userId: number | null = null;
+      if (tokenPayload.userId) {
+         userId =
+            typeof tokenPayload.userId === 'string'
+               ? parseInt(tokenPayload.userId, 10)
+               : (tokenPayload.userId as number);
+      }
+
+      console.log(
+         `🔄 Refresh token: userId=${userId}, type=${typeof tokenPayload.userId}`
+      );
+
+      if (userId && !isNaN(userId)) {
+         try {
+            console.log(
+               `🔍 Fetching latest user data for userId ${userId} from database...`
+            );
+            const db = getDb();
+            const userRecord = await db
+               .select()
+               .from(users)
+               .where(eq(users.id, userId))
+               .limit(1);
+
+            console.log(
+               `📊 Database query result: ${userRecord.length} records found`
+            );
+
+            if (userRecord.length > 0) {
+               const user = userRecord[0];
+               console.log(
+                  `📝 DB user data: name="${user.fullName}", email="${user.email}", image="${user.profileImageUrl}"`
+               );
+
+               // Update token payload with fresh data from DB
+               userInfo = {
+                  ...userInfo,
+                  name: user.fullName,
+                  email: user.email || userInfo.email,
+                  picture: user.profileImageUrl || userInfo.picture,
+                  // Ensure we keep other essential claims
+                  sub: user.googleId || user.appleId || userInfo.sub,
+                  userId: userId, // Preserve the userId
+               };
+               console.log(
+                  `✅ Refreshed token data for user ${userId} from database`
+               );
+            } else {
+               console.warn(
+                  `⚠️ User ${userId} not found in database during refresh`
+               );
+            }
+         } catch (dbError) {
+            console.error('❌ Database error during token refresh:', dbError);
+            // Fallback to token payload if DB fails - BACKWARD COMPATIBILITY
+         }
+      } else {
+         console.log(
+            'ℹ️ No userId in token - using token payload (backward compatible mode)'
+         );
+      }
 
       // Check if we have all the required user information
       // If not, we need to add it to ensure ProfileCard works correctly
       const hasRequiredUserInfo =
          userInfo.name && userInfo.email && userInfo.picture;
 
+      console.log(
+         `✔️ Required fields present: name=${!!userInfo.name}, email=${!!userInfo.email}, picture=${!!userInfo.picture}`
+      );
+
       // Create a complete user info object
       let completeUserInfo = { ...userInfo };
 
       // If we're missing user info, try to fetch it from a user database or service
-      // For this example, we'll just ensure the type field is preserved
+      // BACKWARD COMPATIBILITY: Only apply fallbacks if truly missing
       if (!hasRequiredUserInfo) {
+         console.log('⚠️ Missing required user info, applying fallbacks');
          // In a real implementation, you would fetch the user data from your database
          // using the sub (user ID) as the key
          // For now, we'll just ensure we keep the refresh token type
@@ -278,19 +351,26 @@ export async function POST(request: Request) {
             type: 'refresh',
             // Add any missing fields that might be needed by the UI
             // These would normally come from your user database
+            // BACKWARD COMPATIBILITY: Only set fallbacks if field is missing
             name: userInfo.name || `apple-user`,
             email: userInfo.email || `apple-user`,
             picture:
                userInfo.picture ||
                `https://ui-avatars.com/api/?name=User&background=random`,
          };
+      } else {
+         console.log('✅ All required user info present, using as-is');
       }
 
       // Ensure userId is preserved from original token
       const userInfoWithUserId = {
          ...completeUserInfo,
-         userId: completeUserInfo.userId, // Preserve the database user ID
+         userId: completeUserInfo.userId || userId, // Preserve the database user ID (BACKWARD COMPATIBLE)
       };
+
+      console.log(
+         `🎫 Creating new access token with: name="${userInfoWithUserId.name}", email="${userInfoWithUserId.email}"`
+      );
 
       // Create a new access token with complete user info
       const newAccessToken = await new jose.SignJWT({
@@ -352,12 +432,13 @@ export async function POST(request: Request) {
       }
 
       // For native platforms, return the new tokens in the response body
+      console.log(`✅ Returning new tokens for native platform`);
       return Response.json({
          accessToken: newAccessToken,
          refreshToken: newRefreshToken,
       });
    } catch (error) {
-      console.error('Refresh token error:', error);
+      console.error('❌ Refresh token error:', error);
       return Response.json(
          { error: 'Failed to refresh token' },
          { status: 500 }

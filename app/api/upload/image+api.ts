@@ -31,6 +31,12 @@ export async function POST(request: Request) {
          );
       }
 
+      // Parse query params to get folder
+      const url = new URL(request.url);
+      const folder = url.searchParams.get('folder') || 'league-images';
+      // Sanitize folder name to prevent directory traversal
+      const sanitizedFolder = folder.replace(/[^a-zA-Z0-9-_]/g, '');
+
       const formData = await request.formData();
       const fileData = (formData as any).get('file') as File | Blob | null;
       if (!fileData) {
@@ -110,7 +116,7 @@ export async function POST(request: Request) {
 
       // Generate unique filename
       const fileExtension = contentType === 'image/png' ? 'png' : 'jpg';
-      const fileName = `league-images/${uuidv4()}.${fileExtension}`;
+      const fileName = `${sanitizedFolder}/${uuidv4()}.${fileExtension}`;
 
       console.log(`📁 Uploading ${buffer.length} bytes to: ${fileName}`);
 
