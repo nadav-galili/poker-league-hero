@@ -270,6 +270,13 @@ export interface Translations {
    lastGameHighlights: string;
    generatingAnalysis: string;
    noSummaryYet: string;
+
+   // Game Events
+   gameHistory: string;
+   showHistory: string;
+   hideHistory: string;
+   buyInCancelled: string;
+   noEventsYet: string;
 }
 
 // English translations
@@ -526,6 +533,13 @@ const enTranslations: Translations = {
    lastGameHighlights: 'Last Game Highlights',
    generatingAnalysis: 'Generating Analysis...',
    noSummaryYet: 'No summary available yet',
+
+   // Game Events
+   gameHistory: 'GAME HISTORY',
+   showHistory: 'Show History',
+   hideHistory: 'Hide History',
+   buyInCancelled: 'Buy-in cancelled',
+   noEventsYet: 'No game events yet',
 };
 
 // Hebrew translations
@@ -781,6 +795,13 @@ const heTranslations: Translations = {
    lastGameHighlights: 'דגשי המשחק האחרון',
    generatingAnalysis: 'מייצר ניתוח...',
    noSummaryYet: 'אין סיכום זמין עדיין',
+
+   // Game Events
+   gameHistory: 'היסטוריית משחק',
+   showHistory: 'הצג היסטוריה',
+   hideHistory: 'הסתר היסטוריה',
+   buyInCancelled: 'כניסה בוטלה',
+   noEventsYet: 'אין אירועי משחק עדיין',
 };
 
 const translations = {

@@ -3,8 +3,8 @@
  * Provides centralized event tracking for the Poker League Hero app
  */
 
-import * as TrackingTransparency from 'expo-tracking-transparency';
 import Constants from 'expo-constants';
+import * as TrackingTransparency from 'expo-tracking-transparency';
 import { Mixpanel } from 'mixpanel-react-native';
 
 // Get Mixpanel token and server URL from environment variables
@@ -35,6 +35,9 @@ export type MixpanelEventName =
    | 'game_buy_in'
    | 'game_cash_out'
    | 'game_viewed'
+   | 'game_buy_in_undone'
+   | 'game_history_expanded'
+   | 'game_history_collapsed'
 
    // Player Selection Events
    | 'players_selected'
@@ -218,7 +221,9 @@ class MixpanelService {
          // Get app version dynamically
          const appVersion =
             Constants.expoConfig?.version ||
-            Constants.manifest?.version ||
+            (Constants.manifest2?.extra?.expoClient?.version as
+               | string
+               | undefined) ||
             '1.0.0';
 
          // Set super properties that will be sent with every event

@@ -13,6 +13,7 @@ import Toast from 'react-native-toast-message';
 
 import AddPlayerModal from '@/components/game/AddPlayerModal';
 import CashOutModal from '@/components/game/CashOutModal';
+import GameEventsList from '@/components/game/GameEventsList';
 import GameSummary from '@/components/game/GameSummary';
 import PlayerCard from '@/components/game/PlayerCard';
 import { ConfirmationModal } from '@/components/modals';
@@ -48,11 +49,12 @@ export default function GameScreen() {
       if (gameId) {
          trackScreenView('game_details', { game_id: gameId });
       }
-   }, [gameId]);
+   }, [gameId, trackScreenView]);
 
    // Modal states
    const [showCashOutModal, setShowCashOutModal] = React.useState(false);
    const [showAddPlayerModal, setShowAddPlayerModal] = React.useState(false);
+   const [showHistory, setShowHistory] = React.useState(false);
    const [showEndGameConfirmation, setShowEndGameConfirmation] =
       React.useState(false);
    const [selectedPlayer, setSelectedPlayer] =
@@ -227,7 +229,7 @@ export default function GameScreen() {
          setIsProcessing(true);
          await gameService.undoBuyIn(player);
 
-         trackGameEvent('game_undo_buy_in', gameId || '', game.leagueId, {
+         trackGameEvent('game_buy_in_undone', gameId || '', game.leagueId, {
             player_id: player.id,
             player_name: player.fullName,
          });
@@ -315,6 +317,16 @@ export default function GameScreen() {
 
       // Show confirmation modal
       setShowEndGameConfirmation(true);
+   };
+
+   const toggleHistory = () => {
+      const newState = !showHistory;
+      setShowHistory(newState);
+      trackGameEvent(
+         newState ? 'game_history_expanded' : 'game_history_collapsed',
+         gameId || '',
+         game?.leagueId || ''
+      );
    };
 
    const confirmEndGame = async () => {
@@ -485,6 +497,29 @@ export default function GameScreen() {
                width="50%"
                icon="person-add"
             />
+         </View>
+
+         {/* Game Events History */}
+         <View className="px-4 mb-2">
+            <TouchableOpacity
+               onPress={toggleHistory}
+               className="flex-row items-center justify-between bg-white p-3 rounded-lg border-2 border-black shadow-sm mb-2"
+               style={{ elevation: 2 }}
+            >
+               <Text className="font-black uppercase">{t('gameHistory')}</Text>
+               <View className="flex-row items-center gap-2">
+                  <Text className="text-xs font-bold text-gray-500">
+                     {showHistory ? t('hideHistory') : t('showHistory')}
+                  </Text>
+                  <Ionicons
+                     name={showHistory ? 'chevron-up' : 'chevron-down'}
+                     size={20}
+                     color={colors.text}
+                  />
+               </View>
+            </TouchableOpacity>
+
+            {showHistory && <GameEventsList players={game?.players || []} />}
          </View>
 
          {/* Add Player Modal */}
