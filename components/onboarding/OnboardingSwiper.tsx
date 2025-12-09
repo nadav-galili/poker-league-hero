@@ -2,7 +2,6 @@ import { colors } from '@/colors';
 import { useAuth } from '@/context/auth';
 import { useLocalization } from '@/context/localization';
 import { useMixpanel } from '@/hooks/useMixpanel';
-import { Ionicons } from '@expo/vector-icons';
 import { router } from 'expo-router';
 import React, { useEffect, useState } from 'react';
 import { Dimensions, Image, Text, TouchableOpacity, View } from 'react-native';
@@ -216,23 +215,17 @@ export default function OnboardingSwiper() {
                {
                   backgroundColor: '#4c0519', // rose 950
                   image: (
-                     <View
-                        style={{
-                           width: 150,
-                           height: 150,
-                           borderRadius: 75,
-                           backgroundColor: 'rgba(56, 189, 248, 0.2)', // blue with opacity
-                           alignItems: 'center',
-                           justifyContent: 'center',
-                           borderWidth: 2,
-                           borderColor: colors.info,
-                        }}
-                     >
-                        <Ionicons
-                           name="analytics"
-                           size={80}
-                           color={colors.info}
-                        />
+                     <View className="items-center justify-center w-full">
+                        <View className="items-center justify-center w-full">
+                           <Image
+                              source={require('@/assets/images/new_onboarding/screen_shot5.webp')}
+                              style={{
+                                 width: screenWidth * 1,
+                                 height: 400,
+                              }}
+                              resizeMode="contain"
+                           />
+                        </View>
                      </View>
                   ),
                   title: t('onboardingAiTitle'),
@@ -241,19 +234,17 @@ export default function OnboardingSwiper() {
                {
                   backgroundColor: colors.background,
                   image: (
-                     <View
-                        style={{
-                           width: 150,
-                           height: 150,
-                           borderRadius: 75,
-                           backgroundColor: 'rgba(255, 255, 255, 0.1)',
-                           alignItems: 'center',
-                           justifyContent: 'center',
-                           borderWidth: 2,
-                           borderColor: 'white',
-                        }}
-                     >
-                        <Ionicons name="rocket" size={80} color="white" />
+                     <View className="items-center justify-center w-full">
+                        <View className="items-center justify-center w-full">
+                           <Image
+                              source={require('@/assets/images/icon.png')}
+                              style={{
+                                 width: screenWidth * 1,
+                                 height: 400,
+                              }}
+                              resizeMode="contain"
+                           />
+                        </View>
                      </View>
                   ),
                   title: t('onboardingGetStartedTitle'),
