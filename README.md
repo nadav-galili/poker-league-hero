@@ -1,5 +1,12 @@
 ## Versions
 
+# Overall
+
+1.3.1
+Refactor onboarding
+Refactor in game ui
+Add game history
+
 # IOS
 
 vv
