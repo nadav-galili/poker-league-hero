@@ -218,28 +218,36 @@ export default function Account() {
                {/* User Info */}
                <View style={styles.userInfo}>
                   <View style={styles.nameContainer}>
-                     <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' }}>
-                         <Text className="text-lg font-bold text-success">
-                            {user.name || 'Unknown User'}
-                         </Text>
-                         <Pressable
-                            onPress={() => setIsEditProfileVisible(true)}
-                            style={({ pressed }) => [
-                               {
-                                  opacity: pressed ? 0.7 : 1,
-                                  flexDirection: 'row',
-                                  alignItems: 'center',
-                                  backgroundColor: colors.primary,
-                                  paddingHorizontal: 8,
-                                  paddingVertical: 4,
-                                  borderRadius: 8,
-                                  gap: 4
-                               }
-                            ]}
-                         >
-                            <Ionicons name="pencil" size={12} color="#FFFFFF" />
-                            <Text className="text-xs text-white font-bold">EDIT</Text>
-                         </Pressable>
+                     <View
+                        style={{
+                           flexDirection: 'row',
+                           alignItems: 'center',
+                           justifyContent: 'space-between',
+                        }}
+                     >
+                        <Text className="text-lg font-bold text-success">
+                           {user.name || 'Unknown User'}
+                        </Text>
+                        <Pressable
+                           onPress={() => setIsEditProfileVisible(true)}
+                           style={({ pressed }) => [
+                              {
+                                 opacity: pressed ? 0.7 : 1,
+                                 flexDirection: 'row',
+                                 alignItems: 'center',
+                                 backgroundColor: colors.primary,
+                                 paddingHorizontal: 8,
+                                 paddingVertical: 4,
+                                 borderRadius: 8,
+                                 gap: 4,
+                              },
+                           ]}
+                        >
+                           <Ionicons name="pencil" size={12} color="#FFFFFF" />
+                           <Text className="text-xs text-white font-bold">
+                              EDIT
+                           </Text>
+                        </Pressable>
                      </View>
                      <View
                         style={[
@@ -255,17 +263,6 @@ export default function Account() {
                         {user.email || 'No email'}
                      </Text>
                   </View>
-
-                  {user.email_verified && (
-                     <View style={styles.verifiedBadge}>
-                        <Ionicons
-                           name="checkmark-circle"
-                           size={14}
-                           color={colors.primary}
-                        />
-                        <Text className="text-xs text-white">VERIFIED</Text>
-                     </View>
-                  )}
                </View>
             </View>
 

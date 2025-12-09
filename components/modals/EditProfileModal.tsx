@@ -34,6 +34,7 @@ export function EditProfileModal({
 
    useEffect(() => {
       if (visible) {
+         console.log('🖼️ Modal opened with image:', currentImage);
          setName(currentName);
          setImage(currentImage);
          setError(null);
@@ -50,7 +51,9 @@ export function EditProfileModal({
          });
 
          if (!result.canceled) {
-            setImage(result.assets[0].uri);
+            const newImageUri = result.assets[0].uri;
+            console.log('📸 New image picked:', newImageUri);
+            setImage(newImageUri);
          }
       } catch (err) {
          console.error('Error picking image:', err);
@@ -106,28 +109,35 @@ export function EditProfileModal({
                         <Pressable
                            onPress={handlePickImage}
                            disabled={isLoading}
-                           className="w-32 h-32 rounded-full border-4 border-border overflow-hidden bg-gray-200 active:opacity-90"
+                           className="w-[150px] h-[150px] rounded-full border-4 border-border overflow-hidden active:opacity-90"
                         >
-                           <Image
-                              source={{
-                                 uri:
-                                    image ||
-                                    'https://via.placeholder.com/150x150/3057FF/FFFFFF?text=?',
-                              }}
-                              className="w-full h-full"
-                              contentFit="cover"
-                           />
+                           {image ? (
+                              <Image
+                                 source={{ uri: image }}
+                                 style={{ width: '100%', height: '100%' }}
+                                 contentFit="cover"
+                                 transition={200}
+                              />
+                           ) : (
+                              <View className="w-full h-full items-center justify-center bg-gray-300">
+                                 <Ionicons
+                                    name="person"
+                                    size={48}
+                                    color="#9CA3AF"
+                                 />
+                              </View>
+                           )}
                         </Pressable>
                         <Pressable
                            onPress={handlePickImage}
                            disabled={isLoading}
-                           className="absolute bottom-0 right-0 bg-primary p-2.5 rounded-full border-3 border-border shadow-sm active:scale-95"
+                           className="absolute bottom-0 right-0 bg-primary p-4.5 rounded-full border-3 border-border shadow-sm active:scale-95"
                         >
                            <Ionicons name="camera" size={20} color="#FFFFFF" />
                         </Pressable>
                      </View>
                      <Pressable onPress={handlePickImage} disabled={isLoading}>
-                        <Text className="text-sm font-bold text-primary underline uppercase tracking-wider">
+                        <Text className="text-sm font-bold text-success underline uppercase tracking-wider">
                            {t('changeImage')}
                         </Text>
                      </Pressable>
@@ -166,6 +176,7 @@ export function EditProfileModal({
                         color="primary"
                         disabled={isLoading}
                         width="100%"
+                        icon="close"
                      />
                   </View>
                   <View className="flex-1">
@@ -175,6 +186,7 @@ export function EditProfileModal({
                         color="success"
                         disabled={isLoading}
                         width="100%"
+                        icon="save"
                      />
                   </View>
                </View>

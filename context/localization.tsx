@@ -501,21 +501,26 @@ const enTranslations: Translations = {
 
    // Onboarding
    onboardingWelcomeTitle: 'Welcome to Poker League Hero',
-   onboardingWelcomeSubtitle: 'The ultimate tool for managing your home poker games and leagues.',
+   onboardingWelcomeSubtitle:
+      'The ultimate tool for managing your home poker games and leagues.',
    onboardingLeaguesTitle: 'Manage Leagues',
-   onboardingLeaguesSubtitle: 'Create private leagues, invite friends, and keep track of who runs the table.',
+   onboardingLeaguesSubtitle:
+      'Create private leagues, invite friends, and keep track of who runs the table.',
    onboardingStatsTitle: 'Track Statistics',
-   onboardingStatsSubtitle: 'Detailed player stats, ROI tracking, and performance history over time.',
+   onboardingStatsSubtitle:
+      'Detailed player stats, ROI tracking, and performance history over time.',
    onboardingGamesTitle: 'Live Game Tracking',
-   onboardingGamesSubtitle: 'Easy buy-ins, re-buys, and cash-outs. Handle the math while you handle the cards.',
+   onboardingGamesSubtitle:
+      'Easy buy-ins, re-buys, and cash-outs. Handle the math while you handle the cards.',
    onboardingAiTitle: 'AI Insights',
-   onboardingAiSubtitle: 'Get smart analysis of your league\'s performance and game trends.',
+   onboardingAiSubtitle:
+      "Get smart analysis of your league's performance and game trends.",
    onboardingGetStartedTitle: 'Ready to Shuffle Up?',
-   onboardingGetStartedSubtitle: 'Start your league today and become a Poker League Hero.',
+   onboardingGetStartedSubtitle:
+      'Start your league today and become a Poker League Hero.',
    onboardingSkip: 'Skip',
    onboardingNext: 'Next',
    onboardingDone: 'Get Started',
-   onboardingViewAgain: 'View Onboarding Again',
    continueWithGoogle: 'Continue with Google',
    termsOfService: 'Terms of Service',
    // Deep linking / Join League
@@ -552,9 +557,9 @@ const enTranslations: Translations = {
 
    // Profile Edit
    editProfile: 'Edit Profile',
-   updateProfile: 'Update Profile',
+   updateProfile: 'Save',
    profileImage: 'Profile Image',
-   fullName: 'Full Name',
+   fullName: 'Name',
    changeImage: 'Change Image',
    profileUpdated: 'Profile updated successfully',
    profileUpdateFailed: 'Failed to update profile',
@@ -771,21 +776,25 @@ const heTranslations: Translations = {
 
    // Onboarding
    onboardingWelcomeTitle: 'ברוכים הבאים ל-Poker League Hero',
-   onboardingWelcomeSubtitle: 'הכלי האולטימטיבי לניהול משחקי הפוקר והליגות הביתיות שלך.',
+   onboardingWelcomeSubtitle:
+      'הכלי האולטימטיבי לניהול משחקי הפוקר והליגות הביתיות שלך.',
    onboardingLeaguesTitle: 'ניהול ליגות',
-   onboardingLeaguesSubtitle: 'צור ליגות פרטיות, הזמן חברים ועקוב אחר מי ששולט בשולחן.',
+   onboardingLeaguesSubtitle:
+      'צור ליגות פרטיות, הזמן חברים ועקוב אחר מי ששולט בשולחן.',
    onboardingStatsTitle: 'מעקב סטטיסטיקות',
-   onboardingStatsSubtitle: 'סטטיסטיקות שחקן מפורטות, מעקב ROI והיסטוריית ביצועים לאורך זמן.',
+   onboardingStatsSubtitle:
+      'סטטיסטיקות שחקן מפורטות, מעקב ROI והיסטוריית ביצועים לאורך זמן.',
    onboardingGamesTitle: 'מעקב משחק חי',
-   onboardingGamesSubtitle: 'כניסות קלות, כניסות חוזרות ומשיכות. תן לנו לטפל בחישובים בזמן שאתה משחק.',
+   onboardingGamesSubtitle:
+      'כניסות קלות, כניסות חוזרות ומשיכות. תן לנו לטפל בחישובים בזמן שאתה משחק.',
    onboardingAiTitle: 'תובנות AI',
    onboardingAiSubtitle: 'קבל ניתוח חכם של ביצועי הליגה ומגמות המשחק שלך.',
    onboardingGetStartedTitle: 'מוכנים להתחיל?',
-   onboardingGetStartedSubtitle: 'התחל את הליגה שלך היום והפוך לגיבור ליגת הפוקר.',
+   onboardingGetStartedSubtitle:
+      'התחל את הליגה שלך היום והפוך לגיבור ליגת הפוקר.',
    onboardingSkip: 'דלג',
    onboardingNext: 'הבא',
    onboardingDone: 'התחל',
-   onboardingViewAgain: 'צפה שוב בהדרכה',
    continueWithGoogle: 'המשך עם גוגל',
    termsOfService: 'תנאי שירות',
 
