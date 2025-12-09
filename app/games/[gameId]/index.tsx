@@ -57,6 +57,10 @@ export default function GameScreen() {
    const [showHistory, setShowHistory] = React.useState(false);
    const [showEndGameConfirmation, setShowEndGameConfirmation] =
       React.useState(false);
+   const [showRemovePlayerConfirmation, setShowRemovePlayerConfirmation] =
+      React.useState(false);
+   const [playerToRemove, setPlayerToRemove] =
+      React.useState<GamePlayer | null>(null);
    const [selectedPlayer, setSelectedPlayer] =
       React.useState<GamePlayer | null>(null);
    const [cashOutAmount, setCashOutAmount] = React.useState('');
@@ -255,12 +259,42 @@ export default function GameScreen() {
    };
 
    const handleRemovePlayer = (player: GamePlayer) => {
-      Toast.show({
-         type: 'info',
-         text1: t('confirmRemovePlayer'),
-         text2: t('removePlayerMessage'),
-      });
-      setTimeout(() => removePlayer(player), 1500);
+      setPlayerToRemove(player);
+      setShowRemovePlayerConfirmation(true);
+   };
+
+   const confirmRemovePlayer = async () => {
+      if (!gameService || !game || !playerToRemove) return;
+
+      try {
+         setIsProcessing(true);
+         await gameService.removePlayer(playerToRemove);
+
+         trackGameEvent('game_player_removed', gameId || '', game.leagueId, {
+            player_id: playerToRemove.id,
+            player_name: playerToRemove.fullName,
+         });
+
+         Toast.show({
+            type: 'success',
+            text1: t('success'),
+            text2: t('playerRemoved'),
+         });
+         loadGameData();
+      } catch (error) {
+         const errorMessage =
+            error instanceof Error ? error.message : 'Failed to remove player';
+         trackError(error as Error, 'game_screen_remove_player');
+         Toast.show({
+            type: 'error',
+            text1: t('error'),
+            text2: errorMessage,
+         });
+      } finally {
+         setIsProcessing(false);
+         setShowRemovePlayerConfirmation(false);
+         setPlayerToRemove(null);
+      }
    };
 
    const removePlayer = async (player: GamePlayer) => {
@@ -562,6 +596,19 @@ export default function GameScreen() {
             message={t('endGameConfirmationMessage')}
             onConfirm={confirmEndGame}
             onCancel={() => setShowEndGameConfirmation(false)}
+            isProcessing={isProcessing}
+         />
+
+         {/* Remove Player Confirmation Modal */}
+         <ConfirmationModal
+            visible={showRemovePlayerConfirmation}
+            title={t('confirmRemovePlayer')}
+            message={t('removePlayerMessage')}
+            onConfirm={confirmRemovePlayer}
+            onCancel={() => {
+               setShowRemovePlayerConfirmation(false);
+               setPlayerToRemove(null);
+            }}
             isProcessing={isProcessing}
          />
       </View>
