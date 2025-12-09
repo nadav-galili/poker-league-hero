@@ -1,19 +1,24 @@
-import { colors, getGradient } from '@/colors';
+import { colors } from '@/colors';
 import { useAuth } from '@/context/auth';
 import { useLocalization } from '@/context/localization';
 import { useMixpanel } from '@/hooks/useMixpanel';
 import { Ionicons } from '@expo/vector-icons';
-import { LinearGradient } from 'expo-linear-gradient';
 import { router } from 'expo-router';
 import React, { useEffect, useState } from 'react';
-import { Image, Text, TouchableOpacity, View } from 'react-native';
+import { Dimensions, Image, Text, TouchableOpacity, View } from 'react-native';
 import Onboarding from 'react-native-onboarding-swiper';
 
 export default function OnboardingSwiper() {
    const { markOnboardingComplete } = useAuth();
-   const { t, isRTL } = useLocalization();
+   const { t } = useLocalization();
    const { track } = useMixpanel();
    const [activeIndex, setActiveIndex] = useState(0);
+
+   // Get screen dimensions for responsive layout
+   const { width: screenWidth, height: screenHeight } =
+      Dimensions.get('window');
+   // Calculate responsive image height (40% of screen height, leaving room for text and buttons)
+   const imageHeight = Math.min(screenHeight * 0.4, 450);
 
    useEffect(() => {
       track('onboarding_started');
@@ -43,7 +48,7 @@ export default function OnboardingSwiper() {
    const DoneButton = ({ ...props }) => {
       // Only show done button on the last slide
       if (activeIndex !== PAGES_COUNT - 1) return null;
-      
+
       return (
          <TouchableOpacity
             style={{
@@ -125,48 +130,31 @@ export default function OnboardingSwiper() {
                width: selected ? 12 : 6,
                height: 6,
                marginHorizontal: 3,
-               backgroundColor: selected ? colors.primary : 'rgba(255,255,255,0.3)',
+               backgroundColor: selected
+                  ? colors.primary
+                  : 'rgba(255,255,255,0.3)',
                borderRadius: 3,
             }}
          />
       );
    };
 
-   // Common background component with gradient
-   const Background = ({ colorStart, colorEnd }: { colorStart: string; colorEnd: string }) => (
-      <LinearGradient
-         colors={[colorStart, colorEnd]}
-         style={{
-            flex: 1,
-            position: 'absolute',
-            top: 0,
-            left: 0,
-            right: 0,
-            bottom: 0,
-         }}
-      />
-   );
-
    return (
-      <View style={{ flex: 1, backgroundColor: colors.background }}>
+      <View className="flex-1 bg-background">
          <Onboarding
             pages={[
                {
-                  backgroundColor: colors.background,
+                  backgroundColor: 'transparent',
                   image: (
-                     <View
-                        style={{
-                           width: 150,
-                           height: 150,
-                           borderRadius: 75,
-                           backgroundColor: 'rgba(139, 92, 246, 0.2)', // primary with opacity
-                           alignItems: 'center',
-                           justifyContent: 'center',
-                           borderWidth: 2,
-                           borderColor: colors.primary,
-                        }}
-                     >
-                        <Ionicons name="card" size={80} color={colors.primary} />
+                     <View className="items-center justify-center w-full">
+                        <Image
+                           source={require('@/assets/images/new_onboarding/screen_shot1.webp')}
+                           style={{
+                              width: screenWidth * 0.92,
+                              height: imageHeight,
+                           }}
+                           resizeMode="contain"
+                        />
                      </View>
                   ),
                   title: t('onboardingWelcomeTitle'),
@@ -175,19 +163,15 @@ export default function OnboardingSwiper() {
                {
                   backgroundColor: '#2e1065', // dark purple
                   image: (
-                     <View
-                        style={{
-                           width: 150,
-                           height: 150,
-                           borderRadius: 75,
-                           backgroundColor: 'rgba(236, 72, 153, 0.2)', // pink with opacity
-                           alignItems: 'center',
-                           justifyContent: 'center',
-                           borderWidth: 2,
-                           borderColor: colors.secondary,
-                        }}
-                     >
-                        <Ionicons name="trophy" size={80} color={colors.secondary} />
+                     <View className="items-center justify-center w-full">
+                        <Image
+                           source={require('@/assets/images/new_onboarding/screen_shot2.webp')}
+                           style={{
+                              width: screenWidth * 1,
+                              height: 400,
+                           }}
+                           resizeMode="contain"
+                        />
                      </View>
                   ),
                   title: t('onboardingLeaguesTitle'),
@@ -196,19 +180,15 @@ export default function OnboardingSwiper() {
                {
                   backgroundColor: '#0f172a', // slate 900
                   image: (
-                     <View
-                        style={{
-                           width: 150,
-                           height: 150,
-                           borderRadius: 75,
-                           backgroundColor: 'rgba(16, 185, 129, 0.2)', // green with opacity
-                           alignItems: 'center',
-                           justifyContent: 'center',
-                           borderWidth: 2,
-                           borderColor: colors.success,
-                        }}
-                     >
-                        <Ionicons name="stats-chart" size={80} color={colors.success} />
+                     <View className="items-center justify-center w-full">
+                        <Image
+                           source={require('@/assets/images/new_onboarding/screen_shot3.webp')}
+                           style={{
+                              width: screenWidth * 1,
+                              height: 400,
+                           }}
+                           resizeMode="contain"
+                        />
                      </View>
                   ),
                   title: t('onboardingStatsTitle'),
@@ -229,7 +209,11 @@ export default function OnboardingSwiper() {
                            borderColor: colors.warning,
                         }}
                      >
-                        <Ionicons name="game-controller" size={80} color={colors.warning} />
+                        <Ionicons
+                           name="game-controller"
+                           size={80}
+                           color={colors.warning}
+                        />
                      </View>
                   ),
                   title: t('onboardingGamesTitle'),
@@ -250,7 +234,11 @@ export default function OnboardingSwiper() {
                            borderColor: colors.info,
                         }}
                      >
-                        <Ionicons name="analytics" size={80} color={colors.info} />
+                        <Ionicons
+                           name="analytics"
+                           size={80}
+                           color={colors.info}
+                        />
                      </View>
                   ),
                   title: t('onboardingAiTitle'),
@@ -287,18 +275,27 @@ export default function OnboardingSwiper() {
             DotComponent={Dot}
             bottomBarHighlight={false}
             titleStyles={{
-               fontSize: 28,
+               fontSize: Math.min(screenHeight * 0.028, 26),
                fontWeight: 'bold',
                color: 'white',
-               marginBottom: 10,
+               marginBottom: 12,
+               paddingHorizontal: 24,
+               textAlign: 'center',
             }}
             subTitleStyles={{
-               fontSize: 16,
+               fontSize: Math.min(screenHeight * 0.019, 16),
                color: 'rgba(255,255,255,0.8)',
-               paddingHorizontal: 20,
+               paddingHorizontal: 32,
+               lineHeight: Math.min(screenHeight * 0.026, 24),
+               textAlign: 'center',
+               marginTop: 0,
             }}
             containerStyles={{
+               paddingBottom: 80,
+            }}
+            imageContainerStyles={{
                paddingBottom: 20,
+               flex: 0,
             }}
          />
       </View>

@@ -15,13 +15,13 @@ const rawColors = {
    glassBlur: 'rgba(255, 255, 255, 0.05)', // Very subtle glass effect
 
    // Modern accent colors
-   primaryPurple: '#8B5CF6', // Purple primary
-   primaryPurpleLight: '#A78BFA', // Lighter purple
-   primaryPurpleDark: '#7C3AED', // Darker purple
+   primaryPurple: '#7C3AED', // Purple primary (Violet 600)
+   primaryPurpleLight: '#8B5CF6', // Lighter purple (Violet 500)
+   primaryPurpleDark: '#6D28D9', // Darker purple (Violet 700)
 
    // Status colors - modern and accessible
-   successGreen: '#4ADE80', // Modern success green
-   successGreenDark: '#10B981', // Darker success green
+   successGreen: '#22c55e', // Modern success green (Green 500)
+   successGreenDark: '#16a34a', // Darker success green (Green 600)
    errorRed: '#F87171', // Modern error red
    errorRedDark: '#EF4444', // Darker error red
    warningOrange: '#FB923C', // Modern warning orange
@@ -48,10 +48,10 @@ const rawColors = {
    shadowBlack: 'rgba(0, 0, 0, 0.5)', // Standard black shadow
 
    // Gradient stops
-   gradientStart: '#8B5CF6', // Purple gradient start
-   gradientEnd: '#A78BFA', // Purple gradient end
-   successGradientStart: '#4ADE80',
-   successGradientEnd: '#10B981',
+   gradientStart: '#7C3AED', // Purple gradient start
+   gradientEnd: '#6D28D9', // Purple gradient end
+   successGradientStart: '#22c55e',
+   successGradientEnd: '#16a34a',
    errorGradientStart: '#F87171',
    errorGradientEnd: '#EF4444',
    warningGradientStart: '#FB923C',

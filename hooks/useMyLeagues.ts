@@ -21,7 +21,7 @@ import { Alert } from 'react-native';
 
 export function useMyLeagues() {
    const { t } = useLocalization();
-   const { fetchWithAuth } = useAuth();
+   const { fetchWithAuth, user } = useAuth();
    const { track, trackLeagueEvent } = useMixpanel();
 
    const [leagues, setLeagues] = React.useState<LeagueWithTheme[]>([]);
@@ -76,26 +76,30 @@ export function useMyLeagues() {
       [fetchWithAuth]
    );
 
-   // Load leagues on mount with proper cleanup
+   // Load leagues on mount with proper cleanup (only if user is authenticated)
    React.useEffect(() => {
+      if (!user) return; // Don't fetch if user is not authenticated
+
       const abortController = new AbortController();
       loadLeagues(abortController.signal);
 
       return () => {
          abortController.abort();
       };
-   }, [loadLeagues]);
+   }, [loadLeagues, user]);
 
    // Refresh leagues when screen comes into focus (e.g., after creating a league)
    useFocusEffect(
       React.useCallback(() => {
+         if (!user) return; // Don't fetch if user is not authenticated
+
          const abortController = new AbortController();
          loadLeagues(abortController.signal);
 
          return () => {
             abortController.abort();
          };
-      }, [loadLeagues])
+      }, [loadLeagues, user])
    );
 
    // Track screen visit

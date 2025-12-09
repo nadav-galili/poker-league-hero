@@ -59,7 +59,7 @@ export default function LoginForm() {
                   {/* App Title - Glassmorphism Typography */}
                   <View className="items-center mb-8">
                      <LinearGradient
-                        colors={['#ec4899', '#f43f5e']}
+                        colors={['#0dafe6', '#0f99c6']}
                         start={{ x: 0, y: 0 }}
                         end={{ x: 1, y: 0 }}
                         className="px-1 py-0.5 mb-3"

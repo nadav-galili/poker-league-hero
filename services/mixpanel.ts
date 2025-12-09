@@ -46,6 +46,12 @@ export type MixpanelEventName =
    | 'modal_opened'
    | 'modal_closed'
 
+   // Onboarding Events
+   | 'onboarding_started'
+   | 'onboarding_completed'
+   | 'onboarding_skipped'
+   | 'onboarding_slide_viewed'
+
    // Error Events
    | 'error_occurred'
    | 'api_error';

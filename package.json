@@ -81,6 +81,7 @@
       "@types/form-data": "^2.5.2",
       "@types/pg": "^8.15.5",
       "@types/react": "~19.0.10",
+      "@types/react-native-onboarding-swiper": "^1.1.9",
       "@types/uuid": "^10.0.0",
       "drizzle-kit": "^0.31.4",
       "eslint": "^9.25.0",

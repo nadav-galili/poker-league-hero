@@ -68,6 +68,7 @@
         "@types/form-data": "^2.5.2",
         "@types/pg": "^8.15.5",
         "@types/react": "~19.0.10",
+        "@types/react-native-onboarding-swiper": "^1.1.9",
         "@types/uuid": "^10.0.0",
         "drizzle-kit": "^0.31.4",
         "eslint": "^9.25.0",
@@ -790,6 +791,8 @@
     "@types/pg": ["@types/pg@8.15.5", "", { "dependencies": { "@types/node": "*", "pg-protocol": "*", "pg-types": "^2.2.0" } }, "sha512-LF7lF6zWEKxuT3/OR8wAZGzkg4ENGXFNyiV/JeOt9z5B+0ZVwbql9McqX5c/WStFq1GaGso7H1AzP/qSzmlCKQ=="],
 
     "@types/react": ["@types/react@19.0.14", "", { "dependencies": { "csstype": "^3.0.2" } }, "sha512-ixLZ7zG7j1fM0DijL9hDArwhwcCb4vqmePgwtV0GfnkHRSCUEv4LvzarcTdhoqgyMznUx/EhoTUv31CKZzkQlw=="],
+
+    "@types/react-native-onboarding-swiper": ["@types/react-native-onboarding-swiper@1.1.9", "", { "dependencies": { "@types/react": "*", "react-native": "*" } }, "sha512-xCvsk7e6gQ9tEsK/xUPGA88mjF4sz8xFWAt+8de5xyjvrp3/nY0RJKPUd8ZtZzhGqcDm2tdsfI6KdNS5XuDxuA=="],
 
     "@types/stack-utils": ["@types/stack-utils@2.0.3", "", {}, "sha512-9aEbYZ3TbYMznPdcdr3SmIrLXwC/AKZXQeCf9Pgao5CKb8CyHuEX5jzWPTkvregvhRJHcpRO6BFoGW9ycaOkYw=="],
 

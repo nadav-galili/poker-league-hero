@@ -69,6 +69,7 @@ export const AppButton: React.FC<AppButtonProps> = ({
             solidDark: theme.successDark,
             gradient: getGradient('success'),
             shadow: `rgba(74, 222, 128, 0.3)`,
+            textColor: '#000000',
          },
          error: {
             solid: theme.error,
@@ -148,12 +149,18 @@ export const AppButton: React.FC<AppButtonProps> = ({
                <Ionicons
                   name={icon}
                   size={sizeStyles.iconSize}
-                  color={disabled ? theme.textDisabled : theme.text}
+                  color={
+                     disabled
+                        ? theme.textDisabled
+                        : (colorStyles as any).textColor || theme.text
+                  }
                />
             )}
             <Text
                style={{
-                  color: disabled ? theme.textDisabled : theme.text,
+                  color: disabled
+                     ? theme.textDisabled
+                     : (colorStyles as any).textColor || theme.text,
                   fontSize: sizeStyles.fontSize,
                   fontWeight: '600',
                }}
