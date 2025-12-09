@@ -183,85 +183,52 @@ export default function Account() {
             showsVerticalScrollIndicator={false}
          >
             {/* User Profile Card */}
-            <View
-               style={[
-                  styles.profileCard,
-                  styles.brutalistShadow,
-                  { backgroundColor: theme.surface, borderColor: theme.border },
-               ]}
-            >
-               {/* Profile Image */}
-               <View style={styles.imageContainer}>
-                  <Image
-                     source={{
-                        uri:
-                           user.picture ||
-                           'https://via.placeholder.com/80x80/3057FF/FFFFFF?text=?',
-                     }}
-                     style={styles.profileImage}
-                     contentFit="cover"
-                  />
-                  <View
-                     style={[
-                        styles.imageFrame,
-                        { borderColor: colors.primary },
-                     ]}
-                  />
-                  <View
-                     style={[
-                        styles.imageCornerAccent,
-                        { backgroundColor: colors.accent },
-                     ]}
-                  />
-               </View>
-
-               {/* User Info */}
-               <View style={styles.userInfo}>
-                  <View style={styles.nameContainer}>
-                     <View
-                        style={{
-                           flexDirection: 'row',
-                           alignItems: 'center',
-                           justifyContent: 'space-between',
+            <View className="bg-surfaceElevated rounded-2xl p-6 border border-border/50 backdrop-blur-sm">
+               <View className="flex-row items-center gap-4">
+                  {/* Profile Image */}
+                  <View className="relative">
+                     <Image
+                        source={{
+                           uri:
+                              user.picture ||
+                              'https://via.placeholder.com/80x80/3057FF/FFFFFF?text=?',
                         }}
-                     >
-                        <Text className="text-lg font-bold text-success">
+                        style={{ width: 80, height: 80, borderRadius: 40 }}
+                        contentFit="cover"
+                     />
+                  </View>
+
+                  {/* User Info */}
+                  <View className="flex-1 gap-2">
+                     <View className="flex-row items-center justify-between">
+                        <Text className="text-xl font-semibold text-info">
                            {user.name || 'Unknown User'}
                         </Text>
                         <Pressable
                            onPress={() => setIsEditProfileVisible(true)}
-                           style={({ pressed }) => [
-                              {
-                                 opacity: pressed ? 0.7 : 1,
-                                 flexDirection: 'row',
-                                 alignItems: 'center',
-                                 backgroundColor: colors.primary,
-                                 paddingHorizontal: 8,
-                                 paddingVertical: 4,
-                                 borderRadius: 8,
-                                 gap: 4,
-                              },
-                           ]}
+                           className="flex-row items-center gap-1.5 bg-primary/20 px-3 py-1.5 rounded-lg active:opacity-70"
                         >
-                           <Ionicons name="pencil" size={12} color="#FFFFFF" />
-                           <Text className="text-xs text-white font-bold">
-                              EDIT
+                           <Ionicons
+                              name="pencil"
+                              size={14}
+                              color={colors.success}
+                           />
+                           <Text className="text-xs font-medium text-success">
+                              Edit
                            </Text>
                         </Pressable>
                      </View>
-                     <View
-                        style={[
-                           styles.nameUnderline,
-                           { backgroundColor: colors.primary },
-                        ]}
-                     />
-                  </View>
 
-                  <View style={styles.emailContainer}>
-                     <Ionicons name="mail" size={14} color={colors.info} />
-                     <Text className="text-sm text-white">
-                        {user.email || 'No email'}
-                     </Text>
+                     <View className="flex-row items-center gap-2">
+                        <Ionicons
+                           name="mail-outline"
+                           size={16}
+                           color={colors.textMuted}
+                        />
+                        <Text className="text-sm text-textMuted">
+                           {user.email || 'No email'}
+                        </Text>
+                     </View>
                   </View>
                </View>
             </View>
@@ -502,102 +469,6 @@ const styles = StyleSheet.create({
    placeholder: {
       textAlign: 'center',
       marginTop: 40,
-   },
-
-   // Profile Card
-   profileCard: {
-      flexDirection: 'row',
-      alignItems: 'center',
-      padding: 12,
-      borderRadius: 16,
-      borderWidth: 3,
-   },
-
-   brutalistShadow: {
-      shadowColor: colors.text,
-      shadowOffset: { width: 8, height: 8 },
-      shadowOpacity: 0.4,
-      shadowRadius: 0,
-      elevation: 16,
-   },
-
-   imageContainer: {
-      position: 'relative',
-      marginRight: 12,
-   },
-
-   profileImage: {
-      width: 80,
-      height: 80,
-      borderRadius: 20,
-      borderWidth: 3,
-      borderColor: '#FFFFFF',
-   },
-
-   imageFrame: {
-      position: 'absolute',
-      top: -6,
-      left: -6,
-      right: -6,
-      bottom: -6,
-      borderWidth: 3,
-      borderRadius: 24,
-      opacity: 0.8,
-   },
-
-   imageCornerAccent: {
-      position: 'absolute',
-      top: -3,
-      right: -3,
-      width: 18,
-      height: 18,
-      borderRadius: 9,
-      borderWidth: 2,
-      borderColor: '#FFFFFF',
-   },
-
-   userInfo: {
-      flex: 1,
-      gap: 8,
-   },
-
-   nameContainer: {
-      position: 'relative',
-   },
-
-   userName: {
-      letterSpacing: 1.2,
-   },
-
-   nameUnderline: {
-      position: 'absolute',
-      bottom: -4,
-      left: 0,
-      width: '80%',
-      height: 4,
-      opacity: 0.8,
-   },
-
-   emailContainer: {
-      flexDirection: 'row',
-      alignItems: 'center',
-      gap: 8,
-      marginTop: 8,
-   },
-
-   userEmail: {
-      letterSpacing: 0.5,
-   },
-
-   verifiedBadge: {
-      flexDirection: 'row',
-      alignItems: 'center',
-      gap: 6,
-      marginTop: 4,
-   },
-
-   verifiedText: {
-      letterSpacing: 1,
    },
 
    // Sections
