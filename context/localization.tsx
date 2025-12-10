@@ -286,6 +286,14 @@ export interface Translations {
    changeImage: string;
    profileUpdated: string;
    profileUpdateFailed: string;
+
+   // Edit League
+   editLeague: string;
+   updateLeague: string;
+   changeLeagueImage: string;
+   leagueUpdatedSuccess: string;
+   failedToUpdateLeague: string;
+   failedToUploadImage: string;
 }
 
 // English translations
@@ -563,6 +571,14 @@ const enTranslations: Translations = {
    changeImage: 'Change Image',
    profileUpdated: 'Profile updated successfully',
    profileUpdateFailed: 'Failed to update profile',
+
+   // Edit League
+   editLeague: 'Edit League',
+   updateLeague: 'Update League',
+   changeLeagueImage: 'Change League Image',
+   leagueUpdatedSuccess: 'League updated successfully',
+   failedToUpdateLeague: 'Failed to update league',
+   failedToUploadImage: 'Failed to upload image',
 };
 
 // Hebrew translations
@@ -838,13 +854,23 @@ const heTranslations: Translations = {
    changeImage: 'שנה תמונה',
    profileUpdated: 'הפרופיל עודכן בהצלחה',
    profileUpdateFailed: 'נכשל בעדכון הפרופיל',
+
+   // Edit League
+   editLeague: 'ערוך ליגה',
+   updateLeague: 'עדכן ליגה',
+   changeLeagueImage: 'שנה תמונת ליגה',
+   leagueUpdatedSuccess: 'הליגה עודכנה בהצלחה',
+   failedToUpdateLeague: 'נכשל בעדכון הליגה',
+   failedToUploadImage: 'נכשל בהעלאת התמונה',
 };
 
 const translations = {
    en: enTranslations,
    he: heTranslations,
+   // ... rest of file
 };
 
+// ... rest of file
 const LANGUAGE_STORAGE_KEY = '@poker_league_language';
 
 export function LocalizationProvider({

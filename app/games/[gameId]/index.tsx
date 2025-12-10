@@ -297,38 +297,6 @@ export default function GameScreen() {
       }
    };
 
-   const removePlayer = async (player: GamePlayer) => {
-      if (!gameService || !game) return;
-
-      try {
-         setIsProcessing(true);
-         await gameService.removePlayer(player);
-
-         trackGameEvent('game_player_removed', gameId || '', game.leagueId, {
-            player_id: player.id,
-            player_name: player.fullName,
-         });
-
-         Toast.show({
-            type: 'success',
-            text1: t('success'),
-            text2: t('playerRemoved'),
-         });
-         loadGameData();
-      } catch (error) {
-         const errorMessage =
-            error instanceof Error ? error.message : 'Failed to remove player';
-         trackError(error as Error, 'game_screen_remove_player');
-         Toast.show({
-            type: 'error',
-            text1: t('error'),
-            text2: errorMessage,
-         });
-      } finally {
-         setIsProcessing(false);
-      }
-   };
-
    const openAddPlayerModal = () => {
       loadAvailableMembers();
       setShowAddPlayerModal(true);

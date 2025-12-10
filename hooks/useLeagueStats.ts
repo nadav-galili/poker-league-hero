@@ -22,6 +22,14 @@ export interface LeagueStats {
    };
 }
 
+export interface LeagueMember {
+   id: number;
+   fullName: string;
+   profileImageUrl: string | null;
+   role: string;
+   joinedAt: string;
+}
+
 export interface LeagueData {
    id: string;
    name: string;
@@ -29,6 +37,7 @@ export interface LeagueData {
    description?: string;
    status: string;
    createdAt: string;
+   members?: LeagueMember[];
 }
 
 interface UseLeagueStatsReturn {

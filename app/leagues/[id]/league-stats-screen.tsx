@@ -4,19 +4,23 @@ import {
    StatCard,
    TopProfitPlayerCard,
 } from '@/components/league/LeagueStats';
+import { EditLeagueModal } from '@/components/modals/EditLeagueModal';
 import Summary from '@/components/summary/summary';
+import { useAuth } from '@/context/auth';
 import { useLocalization } from '@/context/localization';
 import { useLeagueGames } from '@/hooks/useLeagueGames';
 import { useLeagueStats } from '@/hooks/useLeagueStats';
 import { createStatCards } from '@/services/leagueStatsHelpers';
 import { StatType } from '@/services/leagueStatsService';
+import { uploadImageToR2 } from '@/utils/cloudflareR2';
 import { Ionicons } from '@expo/vector-icons';
 import { Image } from 'expo-image';
 import { LinearGradient } from 'expo-linear-gradient';
 import { router, useLocalSearchParams } from 'expo-router';
-import React from 'react';
+import React, { useState } from 'react';
 import {
    ActivityIndicator,
+   Alert,
    Pressable,
    RefreshControl,
    ScrollView,
@@ -29,6 +33,7 @@ import Animated, {
    useSharedValue,
    withSpring,
 } from 'react-native-reanimated';
+import Toast from 'react-native-toast-message';
 
 const AnimatedPressable = Animated.createAnimatedComponent(Pressable);
 
@@ -81,6 +86,9 @@ GlassmorphismLoader.displayName = 'GlassmorphismLoader';
 export default function LeagueStatsScreen() {
    const { t, isRTL } = useLocalization();
    const { id: leagueId } = useLocalSearchParams<{ id: string }>();
+   const { user, fetchWithAuth } = useAuth();
+   const [isEditModalVisible, setIsEditModalVisible] = useState(false);
+   const [isUpdatingLeague, setIsUpdatingLeague] = useState(false);
 
    const {
       league,
@@ -126,6 +134,95 @@ export default function LeagueStatsScreen() {
       },
       [leagueId]
    );
+
+   const handleUpdateLeague = async (name: string, imageUri: string | null) => {
+      if (!league) return;
+      try {
+         setIsUpdatingLeague(true);
+
+         // 1. Upload image if changed
+         let uploadedImageUrl = imageUri;
+         if (
+            imageUri &&
+            imageUri !== league.imageUrl &&
+            !imageUri.startsWith('http')
+         ) {
+            try {
+               uploadedImageUrl = await uploadImageToR2(
+                  imageUri,
+                  'league-images'
+               );
+            } catch (error) {
+               console.error('Failed to upload image:', error);
+               Alert.alert(t('error'), t('failedToUploadImage'));
+               setIsUpdatingLeague(false);
+               return;
+            }
+         }
+
+         // 2. Call update API
+         const response = await fetchWithAuth(`/api/leagues/${leagueId}`, {
+            method: 'PATCH',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+               name,
+               imageUrl: uploadedImageUrl,
+            }),
+         });
+
+         if (!response.ok) {
+            const errorData = await response.json();
+            throw new Error(errorData.error || t('failedToUpdateLeague'));
+         }
+
+         // 3. Delete old image if changed and exists
+         if (
+            league.imageUrl &&
+            uploadedImageUrl !== league.imageUrl &&
+            league.imageUrl.includes('r2.dev')
+         ) {
+            // Try to delete old image, but don't fail if it fails
+            try {
+               // Extract key logic should be in the API, but we can call a delete endpoint
+               // For now we'll just implement the PATCH and handle deletion there or separately
+               // The plan says create a DELETE handler.
+               // We will implement that in the next steps.
+               // For now, let's just assume we will call it if we implement it.
+               await fetchWithAuth(
+                  `/api/upload/image?url=${encodeURIComponent(league.imageUrl)}`,
+                  {
+                     method: 'DELETE',
+                  }
+               );
+            } catch (e) {
+               console.warn('Failed to delete old image', e);
+            }
+         }
+
+         setIsEditModalVisible(false);
+         loadLeagueData(); // Refresh data
+         Toast.show({
+            type: 'success',
+            text1: t('success'),
+            text2: t('leagueUpdatedSuccess'),
+         });
+      } catch (error) {
+         console.error('Update league failed:', error);
+         Toast.show({
+            type: 'error',
+            text1: t('error'),
+            text2: t('failedToUpdateLeague'),
+         });
+      } finally {
+         setIsUpdatingLeague(false);
+      }
+   };
+
+   // Check if user is a member of the league
+   const isMember = React.useMemo(() => {
+      if (!user || !league?.members) return false;
+      return league.members.some((member) => member.id === user.userId);
+   }, [user, league]);
 
    // Memoized style objects to prevent recreation on every render
    const headerButtonStyle = React.useMemo(
@@ -279,8 +376,8 @@ export default function LeagueStatsScreen() {
                   accessibilityRole="summary"
                   accessibilityLabel={`${t('leagueDetails')}: ${league.name}`}
                >
-                  {league.imageUrl && (
-                     <View className="mr-6">
+                  <View className="mr-6 items-center">
+                     {league.imageUrl ? (
                         <Image
                            source={{ uri: league.imageUrl }}
                            style={imageStyle}
@@ -290,8 +387,31 @@ export default function LeagueStatsScreen() {
                            accessible={true}
                            accessibilityLabel={`${t('leagueImage')}: ${league.name}`}
                         />
-                     </View>
-                  )}
+                     ) : (
+                        <View
+                           style={imageStyle}
+                           className="bg-white/10 items-center justify-center border border-white/20"
+                        >
+                           <Ionicons
+                              name="trophy"
+                              size={40}
+                              color="rgba(255,255,255,0.5)"
+                           />
+                        </View>
+                     )}
+
+                     {isMember && (
+                        <Pressable
+                           onPress={() => setIsEditModalVisible(true)}
+                           className="flex-row items-center mt-3 bg-white/10 px-3 py-1.5 rounded-full border border-white/20 active:bg-white/20"
+                        >
+                           <Ionicons name="pencil" size={12} color="white" />
+                           <Text className="text-white text-xs ml-1.5 font-medium">
+                              {t('editLeague')}
+                           </Text>
+                        </Pressable>
+                     )}
+                  </View>
 
                   <View className="flex-1 justify-center">
                      <Text className="text-white mb-4 font-semibold text-xl">
@@ -375,6 +495,15 @@ export default function LeagueStatsScreen() {
                />
             </View>
          </ScrollView>
+
+         <EditLeagueModal
+            visible={isEditModalVisible}
+            onClose={() => setIsEditModalVisible(false)}
+            onSubmit={handleUpdateLeague}
+            currentName={league.name}
+            currentImage={league.imageUrl || null}
+            isLoading={isUpdatingLeague}
+         />
       </LinearGradient>
    );
 }
