@@ -22,6 +22,14 @@ import {
 } from 'react-native';
 
 // TypeScript interfaces for better type safety
+interface LeagueMember {
+   id: number;
+   fullName?: string;
+   profileImageUrl?: string | null;
+   role?: string;
+   joinedAt?: string;
+}
+
 interface LeagueData {
    id: string;
    name: string;
@@ -30,7 +38,7 @@ interface LeagueData {
    memberCount: number;
    isActive: boolean;
    createdAt: string;
-   members?: { id: number }[];
+   members?: LeagueMember[];
 }
 
 interface ActiveGame {
@@ -82,6 +90,16 @@ const setCachedData = (key: string, data: any): void => {
    cache.set(key, { data, timestamp: Date.now() });
 };
 
+// Helper function to convert hex color to rgba with opacity
+const hexToRgba = (hex: string, opacity: number): string => {
+   const result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
+   if (!result) return `rgba(255, 255, 255, ${opacity})`;
+   const r = parseInt(result[1], 16);
+   const g = parseInt(result[2], 16);
+   const b = parseInt(result[3], 16);
+   return `rgba(${r}, ${g}, ${b}, ${opacity})`;
+};
+
 // Poker-themed loader component
 const GlassmorphismLoader = React.memo<GlassmorphismLoaderProps>(
    ({ message = 'Loading...' }) => {
@@ -103,16 +121,6 @@ const GlassmorphismLoader = React.memo<GlassmorphismLoaderProps>(
 
 GlassmorphismLoader.displayName = 'GlassmorphismLoader';
 
-// Helper function to convert hex color to rgba with opacity
-const hexToRgba = (hex: string, opacity: number): string => {
-   const result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
-   if (!result) return `rgba(255, 255, 255, ${opacity})`;
-   const r = parseInt(result[1], 16);
-   const g = parseInt(result[2], 16);
-   const b = parseInt(result[3], 16);
-   return `rgba(${r}, ${g}, ${b}, ${opacity})`;
-};
-
 // Reusable ActionCard component with poker-themed design
 const ActionCard = React.memo<ActionCardProps>(
    ({
@@ -121,7 +129,7 @@ const ActionCard = React.memo<ActionCardProps>(
       iconName,
       iconColor,
       bgColor,
-      borderColor,
+
       shadowColor,
       onPress,
       isRTL,
@@ -143,18 +151,19 @@ const ActionCard = React.memo<ActionCardProps>(
             >
                <View className="flex-row items-center py-4 px-5">
                   <View
-                     className="w-14 h-14 rounded-full items-center justify-center mr-4"
-                     style={[
-                        styles.iconContainer,
-                        {
-                           backgroundColor: hexToRgba(iconColor, 0.15),
-                           shadowColor: iconColor,
-                        },
-                     ]}
+                     style={{
+                        width: 48,
+                        height: 48,
+                        borderRadius: 24,
+                        backgroundColor: hexToRgba(iconColor, 0.15),
+                        borderWidth: 1,
+                        borderColor: hexToRgba(iconColor, 0.3),
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        marginRight: 16,
+                     }}
                   >
-                     <View style={{ padding: 8 }}>
-                        <Ionicons name={iconName} size={18} color={iconColor} />
-                     </View>
+                     <Ionicons name={iconName} size={22} color={iconColor} />
                   </View>
 
                   <View className="flex-1">
@@ -559,15 +568,17 @@ function LeagueStatsComponent() {
             >
                <LinearGradient
                   colors={[
-                     'rgba(124, 58, 237, 0.15)',
-                     'rgba(124, 58, 237, 0.08)',
+                     'rgba(124, 58, 237, 0.12)',
+                     'rgba(124, 58, 237, 0.05)',
                   ]}
                   start={{ x: 0, y: 0 }}
                   end={{ x: 1, y: 1 }}
-                  style={{ padding: 20 }}
+                  style={styles.leagueCardGradient}
                >
+                  {/* Top Section: Image + Info */}
                   <View className="flex-row">
-                     <View className="mr-4">
+                     {/* Image + Edit Button Column */}
+                     <View className="items-center p-3">
                         <View style={styles.imageContainer}>
                            <Image
                               source={{ uri: league.imageUrl }}
@@ -600,28 +611,32 @@ function LeagueStatsComponent() {
                         {isMember && (
                            <Pressable
                               onPress={() => setIsEditModalVisible(true)}
-                              className="flex-row items-center justify-center mt-3 bg-white/10 px-3 py-1.5 rounded-full active:opacity-80"
+                              className="flex-row items-center mt-2 bg-white/10 px-2.5 py-1 rounded-full active:opacity-70"
                               style={styles.editButton}
                            >
-                              <Ionicons name="pencil" size={11} color="white" />
-                              <Text className="text-white text-xs ml-1.5 font-semibold">
+                              <Ionicons
+                                 name="pencil"
+                                 size={10}
+                                 color="rgba(255,255,255,0.8)"
+                              />
+                              <Text className="text-white/80 text-[10px] ml-1 font-medium">
                                  {t('editLeague')}
                               </Text>
                            </Pressable>
                         )}
                      </View>
 
-                     <View className="flex-1 justify-center">
-                        <Text className="text-white mb-3 font-bold text-lg">
+                     {/* Info Column */}
+                     <View className="flex-1 ml-4 justify-center">
+                        <Text className="text-success font-bold text-2xl mb-1">
                            {league.name}
                         </Text>
-
-                        <View className="gap-2.5">
-                           <Text className="text-white/60 text-sm font-medium">
+                        <View className="flex-row items-center">
+                           <Text className="text-white text-xs">
                               {t('leagueCode')}
                            </Text>
                            <View
-                              className="self-start px-3.5 py-1.5 rounded-lg"
+                              className="px-3 py-1 rounded-md mr-3"
                               style={styles.inviteCodeBadge}
                               accessibilityRole="text"
                               accessibilityLabel={`${t('inviteCode')}: ${league.inviteCode}`}
@@ -630,13 +645,48 @@ function LeagueStatsComponent() {
                                  {league.inviteCode}
                               </Text>
                            </View>
-
-                           <Text className="text-white/60 text-sm font-medium">
+                           {/* <Text className="text-white/50 text-xs">
                               {league.memberCount} {t('members')}
-                           </Text>
+                           </Text> */}
                         </View>
                      </View>
                   </View>
+
+                  {/* Divider */}
+                  <View className="h-px bg-white/10 my-4" />
+
+                  {/* Members Section */}
+                  {league.members && league.members.length > 0 && (
+                     <View>
+                        <Text className="text-white/50 text-xs font-medium mb-3 uppercase tracking-wider">
+                           {t('members')}
+                        </Text>
+                        <View className="flex-row flex-wrap">
+                           {league.members.map((item) => (
+                              <View
+                                 key={item.id}
+                                 style={styles.memberAvatarContainer}
+                              >
+                                 <Image
+                                    source={{
+                                       uri:
+                                          item.profileImageUrl ||
+                                          'https://via.placeholder.com/32x32/7C3AED/FFFFFF?text=?',
+                                    }}
+                                    style={styles.memberAvatar}
+                                    contentFit="cover"
+                                    cachePolicy="memory-disk"
+                                    placeholder={{
+                                       uri: 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNk+M9QDwADhgGAWjR9awAAAABJRU5ErkJggg==',
+                                    }}
+                                    placeholderContentFit="cover"
+                                    transition={200}
+                                 />
+                              </View>
+                           ))}
+                        </View>
+                     </View>
+                  )}
                </LinearGradient>
             </View>
 
@@ -775,40 +825,35 @@ const styles = StyleSheet.create({
    leagueCard: {
       shadowColor: '#7C3AED',
       shadowOffset: { width: 0, height: 4 },
-      shadowOpacity: 0.25,
+      shadowOpacity: 0.2,
       shadowRadius: 12,
-      elevation: 8,
-   } as ViewStyle,
-   imageContainer: {
-      width: 90,
-      height: 90,
-      borderRadius: 18,
-      overflow: 'hidden',
-      shadowColor: '#7C3AED',
-      shadowOffset: { width: 0, height: 4 },
-      shadowOpacity: 0.3,
-      shadowRadius: 8,
       elevation: 6,
    } as ViewStyle,
+   leagueCardGradient: {
+      padding: 16,
+      borderRadius: 16,
+   } as ViewStyle,
+   imageContainer: {
+      width: 64,
+      height: 64,
+      borderRadius: 14,
+      overflow: 'hidden',
+      borderWidth: 2,
+      borderColor: 'rgba(139, 92, 246, 0.4)',
+   } as ViewStyle,
    leagueImage: {
-      width: 90,
-      height: 90,
-      borderRadius: 18,
+      width: 64,
+      height: 64,
    },
    editButton: {
       shadowColor: '#000',
       shadowOffset: { width: 0, height: 1 },
-      shadowOpacity: 0.2,
+      shadowOpacity: 0.15,
       shadowRadius: 2,
       elevation: 2,
    } as ViewStyle,
    inviteCodeBadge: {
-      backgroundColor: 'rgba(139, 92, 246, 0.2)',
-      shadowColor: '#8B5CF6',
-      shadowOffset: { width: 0, height: 2 },
-      shadowOpacity: 0.2,
-      shadowRadius: 4,
-      elevation: 3,
+      backgroundColor: 'rgba(139, 92, 246, 0.25)',
    } as ViewStyle,
    actionCardPressable: {
       marginBottom: 0,
@@ -840,6 +885,17 @@ const styles = StyleSheet.create({
       shadowRadius: 4,
       elevation: 3,
    } as ViewStyle,
+   memberAvatarContainer: {
+      marginRight: 8,
+      marginBottom: 8,
+   } as ViewStyle,
+   memberAvatar: {
+      width: 32,
+      height: 32,
+      borderRadius: 16,
+      borderWidth: 2,
+      borderColor: 'rgba(139, 92, 246, 0.3)',
+   },
 });
 
 // Add React.memo to prevent unnecessary re-renders
