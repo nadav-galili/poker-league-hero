@@ -18,6 +18,7 @@ import {
    View,
 } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import Toast from 'react-native-toast-message';
 
 export default function Account() {
    const theme = getTheme('light');
@@ -31,7 +32,6 @@ export default function Account() {
    const { width } = Dimensions.get('window');
    const isIPad =
       Platform.OS === 'ios' && ((Platform as any).isPad || width >= 768);
-
    const handleDeleteData = () => {
       Alert.alert(
          'Delete Your Data',
@@ -129,10 +129,16 @@ export default function Account() {
          await refreshUser();
 
          setIsEditProfileVisible(false);
-         Alert.alert('Success', t('profileUpdated'));
+         Toast.show({
+            type: 'success',
+            text1: t('profileUpdated'),
+         });
       } catch (error) {
          console.error('Error updating profile:', error);
-         Alert.alert('Error', t('profileUpdateFailed'));
+         Toast.show({
+            type: 'error',
+            text1: t('profileUpdateFailed'),
+         });
       } finally {
          setIsUpdatingProfile(false);
       }
@@ -201,7 +207,7 @@ export default function Account() {
                   {/* User Info */}
                   <View className="flex-1 gap-2">
                      <View className="flex-row items-center justify-between">
-                        <Text className="text-xl font-semibold text-info">
+                        <Text className="text-xl font-semibold text-info capitalize">
                            {user.name || 'Unknown User'}
                         </Text>
                         <Pressable
@@ -320,101 +326,6 @@ export default function Account() {
                   </Pressable>
                </View>
             </View>
-
-            {/* User Details */}
-            {/* <View style={styles.detailsContainer}>
-               <Text
-                  variant="h4"
-                  color={theme.text}
-                  style={[styles.sectionTitle, isRTL && styles.rtlText]}
-               >
-                  {t('userDetails')}
-               </Text>
-
-               <View
-                  style={[
-                     styles.detailCard,
-                     {
-                        backgroundColor: theme.surface,
-                        borderColor: theme.border,
-                     },
-                  ]}
-               >
-                  <View style={styles.detailRow}>
-                     <Text
-                        variant="labelSmall"
-                        color={colors.border}
-                        style={styles.detailLabel}
-                     >
-                        USER ID
-                     </Text>
-                     <Text
-                        variant="body"
-                        color={theme.text}
-                        style={styles.detailValue}
-                     >
-                        {user.id}
-                     </Text>
-                  </View>
-
-                  {user.given_name && (
-                     <View style={styles.detailRow}>
-                        <Text
-                           variant="labelSmall"
-                           color={colors.border}
-                           style={styles.detailLabel}
-                        >
-                           FIRST NAME
-                        </Text>
-                        <Text
-                           variant="body"
-                           color={theme.text}
-                           style={styles.detailValue}
-                        >
-                           {user.given_name}
-                        </Text>
-                     </View>
-                  )}
-
-                  {user.family_name && (
-                     <View style={styles.detailRow}>
-                        <Text
-                           variant="labelSmall"
-                           color={colors.border}
-                           style={styles.detailLabel}
-                        >
-                           LAST NAME
-                        </Text>
-                        <Text
-                           variant="body"
-                           color={theme.text}
-                           style={styles.detailValue}
-                        >
-                           {user.family_name}
-                        </Text>
-                     </View>
-                  )}
-
-                  {user.provider && (
-                     <View style={styles.detailRow}>
-                        <Text
-                           variant="labelSmall"
-                           color={colors.border}
-                           style={styles.detailLabel}
-                        >
-                           PROVIDER
-                        </Text>
-                        <Text
-                           variant="body"
-                           color={theme.text}
-                           style={styles.detailValue}
-                        >
-                           {user.provider.toUpperCase()}
-                        </Text>
-                     </View>
-                  )}
-               </View>
-            </View>*/}
          </ScrollView>
          <EditProfileModal
             visible={isEditProfileVisible}
