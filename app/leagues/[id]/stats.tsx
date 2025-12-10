@@ -82,7 +82,7 @@ const setCachedData = (key: string, data: any): void => {
    cache.set(key, { data, timestamp: Date.now() });
 };
 
-// GlassmorphismLoader component for consistent loading state
+// Poker-themed loader component
 const GlassmorphismLoader = React.memo<GlassmorphismLoaderProps>(
    ({ message = 'Loading...' }) => {
       return (
@@ -92,7 +92,7 @@ const GlassmorphismLoader = React.memo<GlassmorphismLoaderProps>(
          >
             <View style={styles.loaderContent}>
                <View style={styles.loaderInner}>
-                  <ActivityIndicator size="large" color="#60A5FA" />
+                  <ActivityIndicator size="large" color="#7C3AED" />
                   <Text style={styles.loaderText}>{message}</Text>
                </View>
             </View>
@@ -103,7 +103,17 @@ const GlassmorphismLoader = React.memo<GlassmorphismLoaderProps>(
 
 GlassmorphismLoader.displayName = 'GlassmorphismLoader';
 
-// Reusable ActionCard component to reduce code duplication
+// Helper function to convert hex color to rgba with opacity
+const hexToRgba = (hex: string, opacity: number): string => {
+   const result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
+   if (!result) return `rgba(255, 255, 255, ${opacity})`;
+   const r = parseInt(result[1], 16);
+   const g = parseInt(result[2], 16);
+   const b = parseInt(result[3], 16);
+   return `rgba(${r}, ${g}, ${b}, ${opacity})`;
+};
+
+// Reusable ActionCard component with poker-themed design
 const ActionCard = React.memo<ActionCardProps>(
    ({
       title,
@@ -120,38 +130,47 @@ const ActionCard = React.memo<ActionCardProps>(
    }) => {
       return (
          <Pressable
-            className="active:scale-[0.98]"
+            className="active:opacity-90"
             onPress={onPress}
             accessibilityRole="button"
             accessibilityLabel={accessibilityLabel || title}
             accessibilityHint={accessibilityHint || description}
+            style={styles.actionCardPressable}
          >
             <View
-               className={`${bgColor} backdrop-blur-xl ${borderColor} rounded-3xl p-6`}
+               className={`${bgColor} rounded-2xl py-4 px-4`}
                style={[styles.actionCard, { shadowColor }]}
             >
-               <View className="flex-row items-center">
+               <View className="flex-row items-center py-4 px-5">
                   <View
-                     className={`w-16 h-16 ${bgColor.replace('/10', '/20')} backdrop-blur-xl ${borderColor.replace('/30', '/40')} rounded-2xl items-center justify-center mr-5`}
-                     style={[styles.iconContainer, { shadowColor }]}
+                     className="w-14 h-14 rounded-full items-center justify-center mr-4"
+                     style={[
+                        styles.iconContainer,
+                        {
+                           backgroundColor: hexToRgba(iconColor, 0.15),
+                           shadowColor: iconColor,
+                        },
+                     ]}
                   >
-                     <Ionicons name={iconName} size={28} color={iconColor} />
+                     <View style={{ padding: 8 }}>
+                        <Ionicons name={iconName} size={18} color={iconColor} />
+                     </View>
                   </View>
 
                   <View className="flex-1">
-                     <Text className="text-white font-semibold text-lg mb-2">
+                     <Text className="text-white font-bold text-base mb-1">
                         {title}
                      </Text>
-                     <Text className="text-white/70 font-medium">
+                     <Text className="text-white/60 text-sm leading-5">
                         {description}
                      </Text>
                   </View>
 
-                  <View className="ml-4">
+                  <View className="ml-3">
                      <Ionicons
                         name={isRTL ? 'chevron-back' : 'chevron-forward'}
-                        size={24}
-                        color={iconColor}
+                        size={20}
+                        color="rgba(255, 255, 255, 0.5)"
                      />
                   </View>
                </View>
@@ -438,53 +457,6 @@ function LeagueStatsComponent() {
       loadLeagueDetails(abortController.signal);
    }, [loadLeagueDetails]);
 
-   // Memoize style objects to prevent recreation on every render
-   const headerButtonStyle = React.useMemo(
-      () => ({
-         shadowColor: '#000000',
-         shadowOffset: { width: 0, height: 4 },
-         shadowOpacity: 0.3,
-         shadowRadius: 8,
-         elevation: 8,
-      }),
-      []
-   );
-
-   const leagueHeaderStyle = React.useMemo(
-      () => ({
-         shadowColor: '#FFFFFF',
-         shadowOffset: { width: 0, height: 8 },
-         shadowOpacity: 0.1,
-         shadowRadius: 16,
-         elevation: 16,
-      }),
-      []
-   );
-
-   const imageStyle = React.useMemo(
-      () => ({
-         width: 100,
-         height: 100,
-         borderRadius: 20,
-         shadowColor: '#FFFFFF',
-         shadowOffset: { width: 0, height: 4 },
-         shadowOpacity: 0.2,
-         shadowRadius: 8,
-      }),
-      []
-   );
-
-   const inviteCodeStyle = React.useMemo(
-      () => ({
-         shadowColor: '#8B5CF6',
-         shadowOffset: { width: 0, height: 4 },
-         shadowOpacity: 0.3,
-         shadowRadius: 8,
-         elevation: 8,
-      }),
-      []
-   );
-
    if (isLoading) {
       return <GlassmorphismLoader message={t('loadingLeagueDetails')} />;
    }
@@ -495,53 +467,48 @@ function LeagueStatsComponent() {
             colors={['#1a0033', '#0f001a', '#000000']}
             style={{ flex: 1 }}
          >
-            {/* Modern Dark Header */}
-            <View className="flex-row items-center justify-between px-6 py-12 pt-16 bg-transparent">
+            {/* Poker-themed Header */}
+            <View className="flex-row items-center justify-between px-5 py-10 pt-16 bg-transparent">
                <Pressable
                   onPress={handleBack}
-                  className="w-12 h-12 rounded-2xl bg-white/10 backdrop-blur-xl border border-white/20 items-center justify-center active:scale-95"
-                  style={headerButtonStyle}
+                  className="w-11 h-11 rounded-full bg-white/8 items-center justify-center active:opacity-70"
+                  style={styles.backButton}
                   accessibilityRole="button"
                   accessibilityLabel={t('goBack')}
                   accessibilityHint={t('navigateBackToPreviousScreen')}
                >
                   <Ionicons
                      name={isRTL ? 'arrow-forward' : 'arrow-back'}
-                     size={20}
+                     size={22}
                      color="white"
                   />
                </Pressable>
-               <Text className="text-white text-xl font-semibold">
+               <Text className="text-white text-lg font-bold tracking-wide">
                   {t('leagueStats')}
                </Text>
-               <View className="w-12" />
+               <View className="w-11" />
             </View>
 
             <View className="flex-1 items-center justify-center p-8">
                <View
-                  className="bg-red-500/10 backdrop-blur-xl border border-red-500/30 rounded-3xl p-8"
-                  style={{
-                     shadowColor: '#FF0000',
-                     shadowOffset: { width: 0, height: 8 },
-                     shadowOpacity: 0.2,
-                     shadowRadius: 16,
-                     elevation: 16,
-                  }}
+                  className="bg-red-500/10 rounded-2xl p-8"
+                  style={styles.errorCard}
                >
-                  <Text className="text-red-400 text-center mb-6 font-semibold text-lg">
+                  <Text className="text-red-400 text-center mb-4 font-bold text-lg">
                      {t('error')}
                   </Text>
-                  <Text className="text-white/80 text-center mb-8 font-medium">
+                  <Text className="text-white/70 text-center mb-6 text-sm leading-5">
                      {error || t('leagueNotFound')}
                   </Text>
                   <Pressable
                      onPress={handleRetry}
-                     className="bg-red-500/20 backdrop-blur-xl border border-red-500/40 rounded-2xl px-6 py-3 active:scale-95"
+                     className="bg-red-500/20 rounded-xl px-6 py-3 active:opacity-80"
+                     style={styles.retryButton}
                      accessibilityRole="button"
                      accessibilityLabel={t('retry')}
                      accessibilityHint={t('retryLoadingLeagueDetails')}
                   >
-                     <Text className="text-red-400 text-center font-semibold">
+                     <Text className="text-red-300 text-center font-bold text-sm">
                         {t('retry')}
                      </Text>
                   </Pressable>
@@ -556,107 +523,125 @@ function LeagueStatsComponent() {
          colors={['#1a0033', '#0f001a', '#000000']}
          style={{ flex: 1 }}
       >
-         {/* Modern Dark Header */}
-         <View className="flex-row items-center justify-between px-6 py-12 pt-16 bg-transparent">
+         {/* Poker-themed Header */}
+         <View className="flex-row items-center justify-between px-5 py-10 pt-16 bg-transparent">
             <Pressable
                onPress={handleBack}
-               className="w-12 h-12 rounded-2xl bg-white/10 backdrop-blur-xl border border-white/20 items-center justify-center active:scale-95"
-               style={headerButtonStyle}
+               className="w-11 h-11 rounded-full bg-white/8 items-center justify-center active:opacity-70"
+               style={styles.backButton}
                accessibilityRole="button"
                accessibilityLabel={t('goBack')}
                accessibilityHint={t('navigateBackToPreviousScreen')}
             >
                <Ionicons
                   name={isRTL ? 'arrow-forward' : 'arrow-back'}
-                  size={20}
+                  size={22}
                   color="white"
                />
             </Pressable>
-            <Text className="text-white text-xl font-semibold">
+            <Text className="text-white text-lg font-bold tracking-wide">
                {t('leagueStats')}
             </Text>
-            <View className="w-12" />
+            <View className="w-11" />
          </View>
 
          <ScrollView
             className="flex-1"
-            contentContainerStyle={{ padding: 24, paddingBottom: 96 }}
+            contentContainerStyle={{ padding: 20, paddingBottom: 96 }}
             showsVerticalScrollIndicator={false}
          >
-            {/* League Header with modern glass effect */}
+            {/* League Card - Poker chip style */}
             <View
-               className="flex-row p-6 rounded-3xl mb-8 bg-white/5 backdrop-blur-xl border border-white/20"
-               style={leagueHeaderStyle}
+               className="rounded-2xl mb-6 overflow-hidden"
+               style={styles.leagueCard}
                accessibilityRole="summary"
                accessibilityLabel={`${t('leagueDetails')}: ${league.name}`}
             >
-               <View className="mr-6 items-center">
-                  <Image
-                     source={{ uri: league.imageUrl }}
-                     style={imageStyle}
-                     contentFit="cover"
-                     cachePolicy="memory-disk"
-                     priority="high"
-                     placeholder={{
-                        uri: 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNk+M9QDwADhgGAWjR9awAAAABJRU5ErkJggg==',
-                     }}
-                     placeholderContentFit="cover"
-                     transition={300}
-                     accessible={true}
-                     accessibilityLabel={`${t('leagueImage')}: ${league.name}`}
-                     onError={(error) => {
-                        captureException(
-                           new Error('League image loading failed'),
-                           {
-                              function: 'Image.onError',
-                              screen: 'LeagueStats',
-                              leagueId: league.id,
-                              imageUri: league.imageUrl,
-                              error: error.toString(),
-                           }
-                        );
-                     }}
-                  />
+               <LinearGradient
+                  colors={[
+                     'rgba(124, 58, 237, 0.15)',
+                     'rgba(124, 58, 237, 0.08)',
+                  ]}
+                  start={{ x: 0, y: 0 }}
+                  end={{ x: 1, y: 1 }}
+                  style={{ padding: 20 }}
+               >
+                  <View className="flex-row">
+                     <View className="mr-4">
+                        <View style={styles.imageContainer}>
+                           <Image
+                              source={{ uri: league.imageUrl }}
+                              style={styles.leagueImage}
+                              contentFit="cover"
+                              cachePolicy="memory-disk"
+                              priority="high"
+                              placeholder={{
+                                 uri: 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNk+M9QDwADhgGAWjR9awAAAABJRU5ErkJggg==',
+                              }}
+                              placeholderContentFit="cover"
+                              transition={300}
+                              accessible={true}
+                              accessibilityLabel={`${t('leagueImage')}: ${league.name}`}
+                              onError={(error) => {
+                                 captureException(
+                                    new Error('League image loading failed'),
+                                    {
+                                       function: 'Image.onError',
+                                       screen: 'LeagueStats',
+                                       leagueId: league.id,
+                                       imageUri: league.imageUrl,
+                                       error: error.toString(),
+                                    }
+                                 );
+                              }}
+                           />
+                        </View>
 
-                  {isMember && (
-                     <Pressable
-                        onPress={() => setIsEditModalVisible(true)}
-                        className="flex-row items-center mt-3 bg-white/10 px-3 py-1.5 rounded-full border border-white/20 active:bg-white/20"
-                     >
-                        <Ionicons name="pencil" size={12} color="white" />
-                        <Text className="text-white text-xs ml-1.5 font-medium">
-                           {t('editLeague')}
-                        </Text>
-                     </Pressable>
-                  )}
-               </View>
-
-               <View className="flex-1 justify-center">
-                  <Text className="text-white mb-4 font-semibold text-xl">
-                     {league.name}
-                  </Text>
-
-                  <View className="gap-3">
-                     <View
-                        className="self-start px-4 py-2 rounded-xl bg-purple-500/20 backdrop-blur-xl border border-purple-400/30"
-                        style={inviteCodeStyle}
-                        accessibilityRole="text"
-                        accessibilityLabel={`${t('inviteCode')}: ${league.inviteCode}`}
-                     >
-                        <Text className="text-purple-300 font-semibold">
-                           {league.inviteCode}
-                        </Text>
+                        {isMember && (
+                           <Pressable
+                              onPress={() => setIsEditModalVisible(true)}
+                              className="flex-row items-center justify-center mt-3 bg-white/10 px-3 py-1.5 rounded-full active:opacity-80"
+                              style={styles.editButton}
+                           >
+                              <Ionicons name="pencil" size={11} color="white" />
+                              <Text className="text-white text-xs ml-1.5 font-semibold">
+                                 {t('editLeague')}
+                              </Text>
+                           </Pressable>
+                        )}
                      </View>
 
-                     <Text className="text-white/70 font-medium">
-                        {league.memberCount} {t('members')}
-                     </Text>
+                     <View className="flex-1 justify-center">
+                        <Text className="text-white mb-3 font-bold text-lg">
+                           {league.name}
+                        </Text>
+
+                        <View className="gap-2.5">
+                           <Text className="text-white/60 text-sm font-medium">
+                              {t('leagueCode')}
+                           </Text>
+                           <View
+                              className="self-start px-3.5 py-1.5 rounded-lg"
+                              style={styles.inviteCodeBadge}
+                              accessibilityRole="text"
+                              accessibilityLabel={`${t('inviteCode')}: ${league.inviteCode}`}
+                           >
+                              <Text className="text-purple-200 font-bold text-xs tracking-wider">
+                                 {league.inviteCode}
+                              </Text>
+                           </View>
+
+                           <Text className="text-white/60 text-sm font-medium">
+                              {league.memberCount} {t('members')}
+                           </Text>
+                        </View>
+                     </View>
                   </View>
-               </View>
+               </LinearGradient>
             </View>
 
             {/* Main Action Cards */}
-            <View className="gap-6">
+            <View className="gap-4">
                {/* View Detailed Stats Card */}
                <ActionCard
                   title={t('viewDetailedStats')}
@@ -675,27 +660,32 @@ function LeagueStatsComponent() {
                {/* Conditional Game Action Card */}
                {isCheckingActiveGame ? (
                   <View
-                     className="bg-gray-500/10 backdrop-blur-xl border border-gray-400/30 rounded-3xl p-6"
+                     className="bg-gray-500/10 rounded-2xl"
                      style={[styles.actionCard, { shadowColor: '#6B7280' }]}
                      accessibilityRole="text"
                      accessibilityLabel={t('checkingGames')}
                   >
-                     <View className="flex-row items-center">
+                     <View className="flex-row items-center py-4 px-5">
                         <View
-                           className="w-16 h-16 bg-gray-500/20 backdrop-blur-xl border border-gray-400/40 rounded-2xl items-center justify-center mr-5"
+                           className="w-14 h-14 rounded-full items-center justify-center mr-4"
                            style={[
                               styles.iconContainer,
-                              { shadowColor: '#6B7280' },
+                              {
+                                 backgroundColor: 'rgba(156, 163, 175, 0.15)',
+                                 shadowColor: '#9CA3AF',
+                              },
                            ]}
                         >
-                           <ActivityIndicator size="small" color="#9CA3AF" />
+                           <View style={{ padding: 8 }}>
+                              <ActivityIndicator size="small" color="#9CA3AF" />
+                           </View>
                         </View>
 
                         <View className="flex-1">
-                           <Text className="text-white font-semibold text-lg mb-2">
+                           <Text className="text-white font-bold text-base mb-1">
                               {t('checkingGames')}
                            </Text>
-                           <Text className="text-white/70 font-medium">
+                           <Text className="text-white/60 text-sm leading-5">
                               {t('checkingGamesDescription')}
                            </Text>
                         </View>
@@ -747,7 +737,7 @@ function LeagueStatsComponent() {
    );
 }
 
-// Memoized style objects
+// Poker-themed style objects
 const styles = StyleSheet.create({
    loaderContainer: {
       flex: 1,
@@ -759,17 +749,15 @@ const styles = StyleSheet.create({
       padding: 32,
    } as ViewStyle,
    loaderInner: {
-      backgroundColor: 'rgba(255, 255, 255, 0.05)',
-      borderRadius: 24,
+      backgroundColor: 'rgba(124, 58, 237, 0.15)',
+      borderRadius: 20,
       padding: 32,
       alignItems: 'center',
-      borderWidth: 1,
-      borderColor: 'rgba(255, 255, 255, 0.2)',
-      shadowColor: '#FFFFFF',
-      shadowOffset: { width: 0, height: 8 },
-      shadowOpacity: 0.1,
-      shadowRadius: 16,
-      elevation: 16,
+      shadowColor: '#7C3AED',
+      shadowOffset: { width: 0, height: 4 },
+      shadowOpacity: 0.3,
+      shadowRadius: 12,
+      elevation: 8,
    } as ViewStyle,
    loaderText: {
       color: 'white',
@@ -777,17 +765,80 @@ const styles = StyleSheet.create({
       fontWeight: '600',
       marginTop: 16,
    },
-   actionCard: {
-      shadowOffset: { width: 0, height: 8 },
-      shadowOpacity: 0.2,
-      shadowRadius: 16,
-      elevation: 16,
+   backButton: {
+      shadowColor: '#000',
+      shadowOffset: { width: 0, height: 2 },
+      shadowOpacity: 0.25,
+      shadowRadius: 4,
+      elevation: 4,
    } as ViewStyle,
-   iconContainer: {
+   leagueCard: {
+      shadowColor: '#7C3AED',
+      shadowOffset: { width: 0, height: 4 },
+      shadowOpacity: 0.25,
+      shadowRadius: 12,
+      elevation: 8,
+   } as ViewStyle,
+   imageContainer: {
+      width: 90,
+      height: 90,
+      borderRadius: 18,
+      overflow: 'hidden',
+      shadowColor: '#7C3AED',
       shadowOffset: { width: 0, height: 4 },
       shadowOpacity: 0.3,
       shadowRadius: 8,
+      elevation: 6,
+   } as ViewStyle,
+   leagueImage: {
+      width: 90,
+      height: 90,
+      borderRadius: 18,
+   },
+   editButton: {
+      shadowColor: '#000',
+      shadowOffset: { width: 0, height: 1 },
+      shadowOpacity: 0.2,
+      shadowRadius: 2,
+      elevation: 2,
+   } as ViewStyle,
+   inviteCodeBadge: {
+      backgroundColor: 'rgba(139, 92, 246, 0.2)',
+      shadowColor: '#8B5CF6',
+      shadowOffset: { width: 0, height: 2 },
+      shadowOpacity: 0.2,
+      shadowRadius: 4,
+      elevation: 3,
+   } as ViewStyle,
+   actionCardPressable: {
+      marginBottom: 0,
+   } as ViewStyle,
+   actionCard: {
+      shadowOffset: { width: 0, height: 4 },
+      shadowOpacity: 0.25,
+      shadowRadius: 10,
+      elevation: 6,
+   } as ViewStyle,
+   iconContainer: {
+      shadowOffset: { width: 0, height: 2 },
+      shadowOpacity: 0.25,
+      shadowRadius: 4,
+      elevation: 3,
+      overflow: 'hidden',
+   } as ViewStyle,
+   errorCard: {
+      shadowColor: '#EF4444',
+      shadowOffset: { width: 0, height: 4 },
+      shadowOpacity: 0.25,
+      shadowRadius: 12,
       elevation: 8,
+   } as ViewStyle,
+   retryButton: {
+      shadowColor: '#EF4444',
+      shadowOffset: { width: 0, height: 2 },
+      shadowOpacity: 0.2,
+      shadowRadius: 4,
+      elevation: 3,
    } as ViewStyle,
 });
 
