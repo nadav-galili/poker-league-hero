@@ -1,6 +1,8 @@
+import { EditLeagueModal } from '@/components/modals/EditLeagueModal';
 import { BASE_URL } from '@/constants';
 import { useAuth } from '@/context/auth';
 import { useLocalization } from '@/context/localization';
+import { useEditLeague } from '@/hooks/useEditLeague';
 
 import { captureException } from '@/utils/sentry';
 import { Ionicons } from '@expo/vector-icons';
@@ -28,6 +30,7 @@ interface LeagueData {
    memberCount: number;
    isActive: boolean;
    createdAt: string;
+   members?: { id: number }[];
 }
 
 interface ActiveGame {
@@ -162,7 +165,7 @@ ActionCard.displayName = 'ActionCard';
 
 function LeagueStatsComponent() {
    const { t, isRTL } = useLocalization();
-   const { fetchWithAuth } = useAuth();
+   const { fetchWithAuth, user } = useAuth();
    const { id } = useLocalSearchParams<{ id: string }>();
 
    const [league, setLeague] = React.useState<LeagueData | null>(null);
@@ -264,6 +267,27 @@ function LeagueStatsComponent() {
       },
       [id, fetchWithAuth]
    );
+
+   // Use the custom hook for edit logic
+   const {
+      isEditModalVisible,
+      setIsEditModalVisible,
+      isUpdatingLeague,
+      handleUpdateLeague,
+   } = useEditLeague({
+      leagueId: id,
+      currentLeague: league,
+      onSuccess: () => {
+         // Force reload league details bypassing cache
+         const abortController = new AbortController();
+         // Clear cache for this league
+         if (id) {
+            const cacheKey = `league_${id}`;
+            cache.delete(cacheKey);
+         }
+         loadLeagueDetails(abortController.signal);
+      },
+   });
 
    // Function to check for active game with abort controller support and caching
    const checkActiveGame = React.useCallback(
@@ -381,6 +405,12 @@ function LeagueStatsComponent() {
          };
       }, [league, checkActiveGame])
    );
+
+   // Check if user is a member of the league
+   const isMember = React.useMemo(() => {
+      if (!user || !league?.members) return false;
+      return league.members.some((member) => member.id === user.userId);
+   }, [user, league]);
 
    // Memoize all callback functions to prevent unnecessary re-renders
    const handleBack = React.useCallback(() => {
@@ -560,7 +590,7 @@ function LeagueStatsComponent() {
                accessibilityRole="summary"
                accessibilityLabel={`${t('leagueDetails')}: ${league.name}`}
             >
-               <View className="mr-6">
+               <View className="mr-6 items-center">
                   <Image
                      source={{ uri: league.imageUrl }}
                      style={imageStyle}
@@ -587,6 +617,18 @@ function LeagueStatsComponent() {
                         );
                      }}
                   />
+
+                  {isMember && (
+                     <Pressable
+                        onPress={() => setIsEditModalVisible(true)}
+                        className="flex-row items-center mt-3 bg-white/10 px-3 py-1.5 rounded-full border border-white/20 active:bg-white/20"
+                     >
+                        <Ionicons name="pencil" size={12} color="white" />
+                        <Text className="text-white text-xs ml-1.5 font-medium">
+                           {t('editLeague')}
+                        </Text>
+                     </Pressable>
+                  )}
                </View>
 
                <View className="flex-1 justify-center">
@@ -692,6 +734,15 @@ function LeagueStatsComponent() {
                )}
             </View>
          </ScrollView>
+
+         <EditLeagueModal
+            visible={isEditModalVisible}
+            onClose={() => setIsEditModalVisible(false)}
+            onSubmit={handleUpdateLeague}
+            currentName={league.name}
+            currentImage={league.imageUrl || null}
+            isLoading={isUpdatingLeague}
+         />
       </LinearGradient>
    );
 }

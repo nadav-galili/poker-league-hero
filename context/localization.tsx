@@ -574,7 +574,7 @@ const enTranslations: Translations = {
 
    // Edit League
    editLeague: 'Edit League',
-   updateLeague: 'Update League',
+   updateLeague: 'save',
    changeLeagueImage: 'Change League Image',
    leagueUpdatedSuccess: 'League updated successfully',
    failedToUpdateLeague: 'Failed to update league',
