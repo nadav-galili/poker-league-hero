@@ -1,12 +1,12 @@
 import { colors } from '@/colors';
 import { useLocalization } from '@/context/localization';
 import { Ionicons } from '@expo/vector-icons';
-import { Tabs } from 'expo-router';
 import { LinearGradient } from 'expo-linear-gradient';
+import { Tabs } from 'expo-router';
 import React, { useEffect, useRef } from 'react';
-import { Animated, View, Text } from 'react-native';
+import { Animated, Text, View } from 'react-native';
 
-// Custom cyberpunk tab icon component with glowing effects
+// Cyberpunk tab icon component with full design system
 function CyberpunkTabIcon({
    iconName,
    focusedIconName,
@@ -14,18 +14,18 @@ function CyberpunkTabIcon({
    color,
    label,
 }: {
-   iconName: string;
-   focusedIconName: string;
+   iconName: React.ComponentProps<typeof Ionicons>['name'];
+   focusedIconName: React.ComponentProps<typeof Ionicons>['name'];
    focused: boolean;
    color: string;
    label: string;
 }) {
    const glowAnim = useRef(new Animated.Value(0)).current;
-   const scaleAnim = useRef(new Animated.Value(1)).current;
+   const slideAnim = useRef(new Animated.Value(focused ? 1 : 0)).current;
 
    useEffect(() => {
       if (focused) {
-         // Start pulsing glow animation when active
+         // Pulsing glow animation
          const glowAnimation = Animated.loop(
             Animated.sequence([
                Animated.timing(glowAnim, {
@@ -41,46 +41,46 @@ function CyberpunkTabIcon({
             ])
          );
 
-         const scaleAnimation = Animated.timing(scaleAnim, {
-            toValue: 1.1,
-            duration: 200,
-            useNativeDriver: true,
+         // Slide in animation for active state
+         const slideAnimation = Animated.timing(slideAnim, {
+            toValue: 1,
+            duration: 300,
+            useNativeDriver: false,
          });
 
          glowAnimation.start();
-         scaleAnimation.start();
+         slideAnimation.start();
 
          return () => {
             glowAnimation.stop();
          };
       } else {
-         Animated.timing(scaleAnim, {
-            toValue: 1,
-            duration: 200,
-            useNativeDriver: true,
+         Animated.timing(slideAnim, {
+            toValue: 0,
+            duration: 300,
+            useNativeDriver: false,
          }).start();
       }
-   }, [focused, glowAnim, scaleAnim]);
+   }, [focused, glowAnim, slideAnim]);
 
    const glowOpacity = glowAnim.interpolate({
       inputRange: [0, 1],
-      outputRange: [0.3, 1],
+      outputRange: [0.4, 1],
    });
 
-   const shadowRadius = glowAnim.interpolate({
+   const activeOpacity = slideAnim.interpolate({
       inputRange: [0, 1],
-      outputRange: [8, 16],
+      outputRange: [0, 1],
    });
 
    return (
-      <Animated.View
+      <View
          style={{
+            width: '100%',
+            height: '100%',
             alignItems: 'center',
             justifyContent: 'center',
             position: 'relative',
-            transform: [{ scale: scaleAnim }],
-            width: 140,
-            height: 60,
             paddingHorizontal: 12,
          }}
       >
@@ -89,80 +89,87 @@ function CyberpunkTabIcon({
             <Animated.View
                style={{
                   position: 'absolute',
-                  width: 130,
-                  height: 55,
-                  backgroundColor: colors.holoBlue,
+                  left: 6,
+                  right: 6,
+                  top: 6,
+                  bottom: 6,
                   borderRadius: 16,
+                  backgroundColor: colors.holoBlue,
+                  opacity: activeOpacity.interpolate({
+                     inputRange: [0, 1],
+                     outputRange: [0, 0.4],
+                  }),
                   borderWidth: 1,
                   borderColor: colors.neonCyan,
-                  opacity: glowOpacity,
-                  top: 2.5,
-                  left: 5,
                }}
             />
          )}
 
-         {/* Corner brackets for active state */}
+         {/* Corner brackets - all 4 corners for cyberpunk style */}
          {focused && (
             <>
-               <View
+               <Animated.View
                   style={{
                      position: 'absolute',
-                     top: 0,
-                     left: 2,
-                     width: 8,
-                     height: 8,
+                     top: 4,
+                     left: 4,
+                     width: 10,
+                     height: 10,
                      borderTopWidth: 2,
                      borderLeftWidth: 2,
                      borderColor: colors.matrixGreen,
+                     opacity: activeOpacity,
                   }}
                />
-               <View
+               <Animated.View
                   style={{
                      position: 'absolute',
-                     top: 0,
-                     right: 2,
-                     width: 8,
-                     height: 8,
+                     top: 4,
+                     right: 4,
+                     width: 10,
+                     height: 10,
                      borderTopWidth: 2,
                      borderRightWidth: 2,
-                     borderColor: colors.matrixGreen,
+                     borderColor: colors.neonCyan,
+                     opacity: activeOpacity,
                   }}
                />
-               <View
+               <Animated.View
                   style={{
                      position: 'absolute',
-                     bottom: 0,
-                     left: 2,
-                     width: 8,
-                     height: 8,
+                     bottom: 4,
+                     left: 4,
+                     width: 10,
+                     height: 10,
                      borderBottomWidth: 2,
                      borderLeftWidth: 2,
-                     borderColor: colors.matrixGreen,
+                     borderColor: colors.neonPink,
+                     opacity: activeOpacity,
                   }}
                />
-               <View
+               <Animated.View
                   style={{
                      position: 'absolute',
-                     bottom: 0,
-                     right: 2,
-                     width: 8,
-                     height: 8,
+                     bottom: 4,
+                     right: 4,
+                     width: 10,
+                     height: 10,
                      borderBottomWidth: 2,
                      borderRightWidth: 2,
                      borderColor: colors.matrixGreen,
+                     opacity: activeOpacity,
                   }}
                />
             </>
          )}
 
-         {/* Content Container for perfect centering */}
+         {/* Content container - vertically centered */}
          <View
             style={{
                alignItems: 'center',
                justifyContent: 'center',
-               flex: 1,
-               width: '100%',
+               gap: 4,
+               zIndex: 2,
             }}
          >
             {/* Icon with glow effect */}
@@ -171,14 +178,13 @@ function CyberpunkTabIcon({
                   shadowColor: focused ? colors.neonCyan : 'transparent',
                   shadowOffset: { width: 0, height: 0 },
                   shadowOpacity: focused ? glowOpacity : 0,
-                  shadowRadius: focused ? shadowRadius : 0,
+                  shadowRadius: focused ? 12 : 0,
                   elevation: focused ? 10 : 0,
-                  marginBottom: 2,
                }}
             >
                <Ionicons
                   name={focused ? focusedIconName : iconName}
-                  size={20}
+                  size={22}
                   color={focused ? colors.neonCyan : colors.textMuted}
                   style={{
                      textShadowColor: focused ? colors.neonCyan : 'transparent',
@@ -191,26 +197,24 @@ function CyberpunkTabIcon({
             {/* Label with cyberpunk styling */}
             <Text
                style={{
-                  fontSize: 8,
+                  fontSize: 9,
                   fontFamily: 'monospace',
                   fontWeight: '600',
-                  letterSpacing: 0.3,
+                  letterSpacing: 0.5,
                   color: focused ? colors.neonCyan : colors.textMuted,
                   textTransform: 'uppercase',
+                  textAlign: 'center',
                   textShadowColor: focused ? colors.neonCyan : 'transparent',
                   textShadowOffset: { width: 0, height: 0 },
                   textShadowRadius: focused ? 4 : 0,
-                  textAlign: 'center',
-                  width: '100%',
-                  maxWidth: 120,
+                  lineHeight: 11,
                }}
                numberOfLines={2}
-               ellipsizeMode="tail"
             >
                {label}
             </Text>
          </View>
-      </Animated.View>
+      </View>
    );
 }
 
@@ -232,18 +236,69 @@ export default function TabLayout() {
                borderWidth: 0,
                elevation: 0,
                shadowOpacity: 0,
+               paddingBottom: 0,
+               paddingTop: 0,
             },
             tabBarBackground: () => (
-               <LinearGradient
-                  colors={['#000011', '#001122', '#000000']}
-                  style={{
-                     flex: 1,
-                     borderRadius: 24,
-                     overflow: 'hidden',
-                     position: 'relative',
-                  }}
-               >
-                  {/* Corner brackets for the tab bar */}
+               <View style={{ flex: 1, position: 'relative' }}>
+                  <LinearGradient
+                     colors={[
+                        colors.cyberDarkBlue,
+                        colors.cyberDarkPurple,
+                        colors.cyberBackground,
+                     ]}
+                     start={{ x: 0, y: 0 }}
+                     end={{ x: 1, y: 1 }}
+                     style={{
+                        flex: 1,
+                        borderRadius: 24,
+                        borderWidth: 2,
+                        borderColor: colors.neonCyan,
+                        shadowColor: colors.neonCyan,
+                        shadowOffset: { width: 0, height: 0 },
+                        shadowOpacity: 0.6,
+                        shadowRadius: 16,
+                        elevation: 12,
+                        overflow: 'hidden',
+                     }}
+                  >
+                     {/* Holographic overlay */}
+                     <LinearGradient
+                        colors={[
+                           colors.holoBlue,
+                           'transparent',
+                           colors.holoPink,
+                        ]}
+                        start={{ x: 0, y: 0 }}
+                        end={{ x: 1, y: 1 }}
+                        style={{
+                           position: 'absolute',
+                           top: 0,
+                           left: 0,
+                           right: 0,
+                           bottom: 0,
+                           opacity: 0.2,
+                        }}
+                     />
+
+                     {/* Scan lines effect */}
+                     {Array.from({ length: 6 }).map((_, i) => (
+                        <View
+                           key={i}
+                           style={{
+                              position: 'absolute',
+                              left: 0,
+                              right: 0,
+                              height: 1,
+                              backgroundColor: colors.scanlineCyan,
+                              top: i * 15,
+                              opacity: 0.1,
+                           }}
+                        />
+                     ))}
+                  </LinearGradient>
+
+                  {/* Corner brackets - cyberpunk style */}
                   <View
                      style={{
                         position: 'absolute',
@@ -265,7 +320,7 @@ export default function TabLayout() {
                         height: 16,
                         borderTopWidth: 3,
                         borderRightWidth: 3,
-                        borderColor: colors.matrixGreen,
+                        borderColor: colors.neonCyan,
                      }}
                   />
                   <View
@@ -277,7 +332,7 @@ export default function TabLayout() {
                         height: 16,
                         borderBottomWidth: 3,
                         borderLeftWidth: 3,
-                        borderColor: colors.matrixGreen,
+                        borderColor: colors.neonPink,
                      }}
                   />
                   <View
@@ -292,11 +347,19 @@ export default function TabLayout() {
                         borderColor: colors.matrixGreen,
                      }}
                   />
-               </LinearGradient>
+               </View>
             ),
-            tabBarShowLabel: false, // We're handling labels in our custom component
+            tabBarShowLabel: false,
             tabBarActiveTintColor: colors.neonCyan,
             tabBarInactiveTintColor: colors.textMuted,
+            tabBarItemStyle: {
+               justifyContent: 'center',
+               alignItems: 'center',
+            },
+            tabBarIconStyle: {
+               width: '100%',
+               height: '100%',
+            },
          }}
       >
          <Tabs.Screen
