@@ -175,7 +175,7 @@ export const AppButton: React.FC<AppButtonProps> = ({
    };
 
    const baseStyle = {
-      width: width as number,
+      width,
       paddingVertical: sizeStyles.paddingVertical,
       paddingHorizontal: sizeStyles.paddingHorizontal,
       borderRadius: sizeStyles.borderRadius,

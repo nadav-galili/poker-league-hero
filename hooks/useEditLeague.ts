@@ -2,7 +2,7 @@ import { useAuth } from '@/context/auth';
 import { useLocalization } from '@/context/localization';
 import { uploadImageToR2 } from '@/utils/cloudflareR2';
 import React, { useState } from 'react';
-import { Alert } from 'react-native';
+import Toast from 'react-native-toast-message';
 
 export interface UseEditLeagueResult {
    isEditModalVisible: boolean;
@@ -49,7 +49,11 @@ export function useEditLeague({
                );
             } catch (error) {
                console.error('Failed to upload image:', error);
-               Alert.alert(t('error'), t('failedToUploadImage'));
+               Toast.show({
+                  type: 'error',
+                  text1: t('error'),
+                  text2: t('failedToUploadImage'),
+               });
                setIsUpdatingLeague(false);
                return;
             }
@@ -94,10 +98,18 @@ export function useEditLeague({
          if (onSuccess) {
             onSuccess();
          }
-         Alert.alert(t('success'), t('leagueUpdatedSuccess'));
+         Toast.show({
+            type: 'success',
+            text1: t('success'),
+            text2: t('leagueUpdatedSuccess'),
+         });
       } catch (error) {
          console.error('Update league failed:', error);
-         Alert.alert(t('error'), t('failedToUpdateLeague'));
+         Toast.show({
+            type: 'error',
+            text1: t('error'),
+            text2: t('failedToUpdateLeague'),
+         });
       } finally {
          setIsUpdatingLeague(false);
       }
