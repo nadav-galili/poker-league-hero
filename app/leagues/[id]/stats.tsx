@@ -1,3 +1,4 @@
+import { colors, getCyberpunkGradient } from '@/colors';
 import { EditLeagueModal } from '@/components/modals/EditLeagueModal';
 import { BASE_URL } from '@/constants';
 import { useAuth } from '@/context/auth';
@@ -7,13 +8,14 @@ import { useEditLeague } from '@/hooks/useEditLeague';
 import { captureException } from '@/utils/sentry';
 import { Ionicons } from '@expo/vector-icons';
 
+import CyberpunkLoader from '@/components/ui/CyberpunkLoader';
 import { Image } from 'expo-image';
 import { LinearGradient } from 'expo-linear-gradient';
 import { router, useFocusEffect, useLocalSearchParams } from 'expo-router';
-import CyberpunkLoader from '@/components/ui/CyberpunkLoader';
-import React from 'react';
+import React, { useEffect, useRef } from 'react';
 import type { ViewStyle } from 'react-native';
 import {
+   Animated,
    Pressable,
    ScrollView,
    StyleSheet,
@@ -53,9 +55,6 @@ interface ActionCardProps {
    description: string;
    iconName: keyof typeof Ionicons.glyphMap;
    iconColor: string;
-   bgColor: string;
-   borderColor: string;
-   shadowColor: string;
    onPress: () => void;
    isRTL: boolean;
    accessibilityLabel?: string;
@@ -100,12 +99,12 @@ const hexToRgba = (hex: string, opacity: number): string => {
    return `rgba(${r}, ${g}, ${b}, ${opacity})`;
 };
 
-// Poker-themed loader component
-const GlassmorphismLoader = React.memo<GlassmorphismLoaderProps>(
+// Cyberpunk loader component
+const CyberpunkLoaderScreen = React.memo<GlassmorphismLoaderProps>(
    ({ message = 'Loading...' }) => {
       return (
          <LinearGradient
-            colors={['#1a0033', '#0f001a', '#000000']}
+            colors={getCyberpunkGradient('dark')}
             style={styles.loaderContainer}
          >
             <View style={styles.loaderContent}>
@@ -118,71 +117,351 @@ const GlassmorphismLoader = React.memo<GlassmorphismLoaderProps>(
    }
 );
 
-GlassmorphismLoader.displayName = 'GlassmorphismLoader';
+CyberpunkLoaderScreen.displayName = 'CyberpunkLoaderScreen';
 
-// Reusable ActionCard component with poker-themed design
+// Cyberpunk Header Component with corner brackets and neon effects
+const CyberpunkHeader = React.memo<{
+   title: string;
+   onBack: () => void;
+   isRTL: boolean;
+   backButtonLabel: string;
+   backButtonHint: string;
+}>(({ title, onBack, isRTL, backButtonLabel, backButtonHint }) => {
+   const glowAnim = useRef(new Animated.Value(0)).current;
+
+   useEffect(() => {
+      const glowAnimation = Animated.loop(
+         Animated.sequence([
+            Animated.timing(glowAnim, {
+               toValue: 1,
+               duration: 2000,
+               useNativeDriver: false,
+            }),
+            Animated.timing(glowAnim, {
+               toValue: 0.3,
+               duration: 2000,
+               useNativeDriver: false,
+            }),
+         ])
+      );
+      glowAnimation.start();
+
+      return () => glowAnimation.stop();
+   }, [glowAnim]);
+
+   const glowOpacity = glowAnim.interpolate({
+      inputRange: [0, 1],
+      outputRange: [0.3, 0.8],
+   });
+
+   return (
+      <View style={styles.cyberpunkHeader}>
+         <LinearGradient
+            colors={getCyberpunkGradient('dark')}
+            start={{ x: 0, y: 0 }}
+            end={{ x: 1, y: 1 }}
+            style={styles.headerGradient}
+         >
+            {/* Corner brackets */}
+            <View
+               style={[
+                  styles.cornerBracket,
+                  styles.topLeft,
+                  { borderColor: colors.matrixGreen },
+               ]}
+            />
+            <View
+               style={[
+                  styles.cornerBracket,
+                  styles.topRight,
+                  { borderColor: colors.neonCyan },
+               ]}
+            />
+            <View
+               style={[
+                  styles.cornerBracket,
+                  styles.bottomLeft,
+                  { borderColor: colors.neonPink },
+               ]}
+            />
+            <View
+               style={[
+                  styles.cornerBracket,
+                  styles.bottomRight,
+                  { borderColor: colors.matrixGreen },
+               ]}
+            />
+
+            {/* Holographic overlay */}
+            <LinearGradient
+               colors={[colors.holoBlue, 'transparent', colors.holoPink]}
+               start={{ x: 0, y: 0 }}
+               end={{ x: 1, y: 1 }}
+               style={styles.holoOverlay}
+            />
+
+            {/* Scan lines */}
+            {Array.from({ length: 4 }).map((_, i) => (
+               <Animated.View
+                  key={i}
+                  style={[
+                     styles.scanLine,
+                     {
+                        top: 16 + i * 12,
+                        opacity: glowOpacity.interpolate({
+                           inputRange: [0.3, 0.8],
+                           outputRange: [0.05, 0.15],
+                        }),
+                     },
+                  ]}
+               />
+            ))}
+
+            {/* Header Content */}
+            <View style={styles.headerContent}>
+               <Pressable
+                  onPress={onBack}
+                  style={styles.cyberpunkBackButton}
+                  accessibilityRole="button"
+                  accessibilityLabel={backButtonLabel}
+                  accessibilityHint={backButtonHint}
+               >
+                  <LinearGradient
+                     colors={[colors.holoBlue, colors.holoWhite]}
+                     style={styles.backButtonGradient}
+                  >
+                     <Animated.View
+                        style={[
+                           styles.backButtonGlow,
+                           {
+                              shadowOpacity: glowOpacity,
+                              shadowColor: colors.neonCyan,
+                           },
+                        ]}
+                     >
+                        <Ionicons
+                           name={isRTL ? 'arrow-forward' : 'arrow-back'}
+                           size={20}
+                           color={colors.neonCyan}
+                           style={{
+                              textShadowColor: colors.neonCyan,
+                              textShadowOffset: { width: 0, height: 0 },
+                              textShadowRadius: 8,
+                           }}
+                        />
+                     </Animated.View>
+                  </LinearGradient>
+               </Pressable>
+
+               <View style={styles.titleContainer}>
+                  <Text style={styles.cyberpunkTitle}>{title}</Text>
+                  <Animated.View
+                     style={[
+                        styles.titleUnderline,
+                        {
+                           shadowOpacity: glowOpacity,
+                           backgroundColor: colors.neonCyan,
+                        },
+                     ]}
+                  />
+               </View>
+
+               <View style={styles.headerSpacer} />
+            </View>
+         </LinearGradient>
+      </View>
+   );
+});
+
+CyberpunkHeader.displayName = 'CyberpunkHeader';
+
+// Reusable ActionCard component with cyberpunk design
 const ActionCard = React.memo<ActionCardProps>(
    ({
       title,
       description,
       iconName,
       iconColor,
-      bgColor,
-
-      shadowColor,
       onPress,
       isRTL,
       accessibilityLabel,
       accessibilityHint,
    }) => {
+      const glowAnim = useRef(new Animated.Value(0)).current;
+
+      useEffect(() => {
+         const glowAnimation = Animated.loop(
+            Animated.sequence([
+               Animated.timing(glowAnim, {
+                  toValue: 1,
+                  duration: 2500,
+                  useNativeDriver: false,
+               }),
+               Animated.timing(glowAnim, {
+                  toValue: 0.4,
+                  duration: 2500,
+                  useNativeDriver: false,
+               }),
+            ])
+         );
+         glowAnimation.start();
+
+         return () => glowAnimation.stop();
+      }, [glowAnim]);
+
+      const glowOpacity = glowAnim.interpolate({
+         inputRange: [0, 1],
+         outputRange: [0.3, 0.8],
+      });
+
       return (
          <Pressable
-            className="active:opacity-90"
             onPress={onPress}
             accessibilityRole="button"
             accessibilityLabel={accessibilityLabel || title}
             accessibilityHint={accessibilityHint || description}
-            style={styles.actionCardPressable}
+            style={[styles.actionCardPressable, { opacity: 1 }]}
          >
-            <View
-               className={`${bgColor} rounded-2xl py-4 px-4`}
-               style={[styles.actionCard, { shadowColor }]}
+            <Animated.View
+               style={[
+                  styles.cyberpunkActionCard,
+                  {
+                     shadowColor: iconColor,
+                     shadowOpacity: glowOpacity.interpolate({
+                        inputRange: [0.3, 0.8],
+                        outputRange: [0.3, 0.6],
+                     }),
+                     borderColor: iconColor,
+                  },
+               ]}
             >
-               <View className="flex-row items-center py-4 px-5">
+               <LinearGradient
+                  colors={[
+                     colors.cyberBackground,
+                     colors.holoBlue,
+                     'transparent',
+                  ]}
+                  start={{ x: 0, y: 0 }}
+                  end={{ x: 1, y: 1 }}
+                  style={styles.actionCardGradient}
+               >
+                  {/* Corner brackets */}
                   <View
-                     style={{
-                        width: 48,
-                        height: 48,
-                        borderRadius: 24,
-                        backgroundColor: hexToRgba(iconColor, 0.15),
-                        borderWidth: 1,
-                        borderColor: hexToRgba(iconColor, 0.3),
-                        alignItems: 'center',
-                        justifyContent: 'center',
-                        marginRight: 16,
-                     }}
-                  >
-                     <Ionicons name={iconName} size={22} color={iconColor} />
-                  </View>
+                     style={[
+                        styles.actionCornerBracket,
+                        styles.actionTopLeft,
+                        { borderColor: colors.matrixGreen },
+                     ]}
+                  />
+                  <View
+                     style={[
+                        styles.actionCornerBracket,
+                        styles.actionTopRight,
+                        { borderColor: iconColor },
+                     ]}
+                  />
+                  <View
+                     style={[
+                        styles.actionCornerBracket,
+                        styles.actionBottomLeft,
+                        { borderColor: colors.neonPink },
+                     ]}
+                  />
+                  <View
+                     style={[
+                        styles.actionCornerBracket,
+                        styles.actionBottomRight,
+                        { borderColor: colors.matrixGreen },
+                     ]}
+                  />
 
-                  <View className="flex-1">
-                     <Text className="text-white font-bold text-base mb-1">
-                        {title}
-                     </Text>
-                     <Text className="text-white/60 text-sm leading-5">
-                        {description}
-                     </Text>
-                  </View>
+                  {/* Holographic overlay */}
+                  <LinearGradient
+                     colors={[
+                        hexToRgba(iconColor, 0.1),
+                        'transparent',
+                        hexToRgba(iconColor, 0.05),
+                     ]}
+                     start={{ x: 0, y: 0 }}
+                     end={{ x: 1, y: 1 }}
+                     style={styles.actionHoloOverlay}
+                  />
 
-                  <View className="ml-3">
-                     <Ionicons
-                        name={isRTL ? 'chevron-back' : 'chevron-forward'}
-                        size={20}
-                        color="rgba(255, 255, 255, 0.5)"
+                  {/* Scan lines */}
+                  {Array.from({ length: 3 }).map((_, i) => (
+                     <Animated.View
+                        key={i}
+                        style={[
+                           styles.actionScanLine,
+                           {
+                              top: 20 + i * 15,
+                              backgroundColor: iconColor,
+                              opacity: glowOpacity.interpolate({
+                                 inputRange: [0.3, 0.8],
+                                 outputRange: [0.03, 0.08],
+                              }),
+                           },
+                        ]}
                      />
+                  ))}
+
+                  <View style={styles.actionCardContent}>
+                     <Animated.View
+                        style={[
+                           styles.cyberpunkIconContainer,
+                           {
+                              backgroundColor: hexToRgba(iconColor, 0.15),
+                              borderColor: iconColor,
+                              shadowColor: iconColor,
+                              shadowOpacity: glowOpacity,
+                           },
+                        ]}
+                     >
+                        <Ionicons
+                           name={iconName}
+                           size={24}
+                           color="black"
+                           style={{
+                              textShadowColor: iconColor,
+                              textShadowOffset: { width: 0, height: 0 },
+                              textShadowRadius: 6,
+                           }}
+                        />
+                     </Animated.View>
+
+                     <View style={styles.actionTextContainer}>
+                        <Text style={styles.actionTitle}>{title}</Text>
+                        <Text style={styles.actionDescription}>
+                           {description}
+                        </Text>
+                     </View>
+
+                     <Animated.View
+                        style={[
+                           styles.actionChevron,
+                           {
+                              shadowColor: colors.neonCyan,
+                              shadowOpacity: glowOpacity.interpolate({
+                                 inputRange: [0.3, 0.8],
+                                 outputRange: [0.2, 0.4],
+                              }),
+                           },
+                        ]}
+                     >
+                        <Ionicons
+                           name={isRTL ? 'chevron-back' : 'chevron-forward'}
+                           size={20}
+                           color={colors.neonCyan}
+                           style={{
+                              textShadowColor: colors.neonCyan,
+                              textShadowOffset: { width: 0, height: 0 },
+                              textShadowRadius: 4,
+                           }}
+                        />
+                     </Animated.View>
                   </View>
-               </View>
-            </View>
+               </LinearGradient>
+            </Animated.View>
          </Pressable>
       );
    }
@@ -466,59 +745,42 @@ function LeagueStatsComponent() {
    }, [loadLeagueDetails]);
 
    if (isLoading) {
-      return <GlassmorphismLoader message={t('loadingLeagueDetails')} />;
+      return <CyberpunkLoaderScreen message={t('loadingLeagueDetails')} />;
    }
 
    if (error || !league) {
       return (
          <LinearGradient
-            colors={['#1a0033', '#0f001a', '#000000']}
+            colors={getCyberpunkGradient('dark')}
             style={{ flex: 1 }}
          >
-            {/* Poker-themed Header */}
-            <View className="flex-row items-center justify-between px-5 py-10 pt-16 bg-transparent">
-               <Pressable
-                  onPress={handleBack}
-                  className="w-11 h-11 rounded-full bg-white/8 items-center justify-center active:opacity-70"
-                  style={styles.backButton}
-                  accessibilityRole="button"
-                  accessibilityLabel={t('goBack')}
-                  accessibilityHint={t('navigateBackToPreviousScreen')}
-               >
-                  <Ionicons
-                     name={isRTL ? 'arrow-forward' : 'arrow-back'}
-                     size={22}
-                     color="white"
-                  />
-               </Pressable>
-               <Text className="text-white text-lg font-bold tracking-wide">
-                  {t('leagueStats')}
-               </Text>
-               <View className="w-11" />
-            </View>
+            <CyberpunkHeader
+               title={t('leagueStats')}
+               onBack={handleBack}
+               isRTL={isRTL}
+               backButtonLabel={t('goBack')}
+               backButtonHint={t('navigateBackToPreviousScreen')}
+            />
 
             <View className="flex-1 items-center justify-center p-8">
-               <View
-                  className="bg-red-500/10 rounded-2xl p-8"
-                  style={styles.errorCard}
-               >
-                  <Text className="text-red-400 text-center mb-4 font-bold text-lg">
-                     {t('error')}
-                  </Text>
-                  <Text className="text-white/70 text-center mb-6 text-sm leading-5">
+               <View style={styles.errorCard}>
+                  <Text style={styles.errorTitle}>{t('error')}</Text>
+                  <Text style={styles.errorMessage}>
                      {error || t('leagueNotFound')}
                   </Text>
                   <Pressable
                      onPress={handleRetry}
-                     className="bg-red-500/20 rounded-xl px-6 py-3 active:opacity-80"
                      style={styles.retryButton}
                      accessibilityRole="button"
                      accessibilityLabel={t('retry')}
                      accessibilityHint={t('retryLoadingLeagueDetails')}
                   >
-                     <Text className="text-red-300 text-center font-bold text-sm">
-                        {t('retry')}
-                     </Text>
+                     <LinearGradient
+                        colors={[colors.errorDark, colors.error]}
+                        style={styles.retryButtonGradient}
+                     >
+                        <Text style={styles.retryButtonText}>{t('retry')}</Text>
+                     </LinearGradient>
                   </Pressable>
                </View>
             </View>
@@ -527,38 +789,21 @@ function LeagueStatsComponent() {
    }
 
    return (
-      <LinearGradient
-         colors={['#1a0033', '#0f001a', '#000000']}
-         style={{ flex: 1 }}
-      >
-         {/* Poker-themed Header */}
-         <View className="flex-row items-center justify-between px-5 py-10 pt-16 bg-transparent">
-            <Pressable
-               onPress={handleBack}
-               className="w-11 h-11 rounded-full bg-white/8 items-center justify-center active:opacity-70"
-               style={styles.backButton}
-               accessibilityRole="button"
-               accessibilityLabel={t('goBack')}
-               accessibilityHint={t('navigateBackToPreviousScreen')}
-            >
-               <Ionicons
-                  name={isRTL ? 'arrow-forward' : 'arrow-back'}
-                  size={22}
-                  color="white"
-               />
-            </Pressable>
-            <Text className="text-white text-lg font-bold tracking-wide">
-               {t('leagueStats')}
-            </Text>
-            <View className="w-11" />
-         </View>
+      <LinearGradient colors={getCyberpunkGradient('dark')} style={{ flex: 1 }}>
+         <CyberpunkHeader
+            title={t('leagueStats')}
+            onBack={handleBack}
+            isRTL={isRTL}
+            backButtonLabel={t('goBack')}
+            backButtonHint={t('navigateBackToPreviousScreen')}
+         />
 
          <ScrollView
             className="flex-1"
             contentContainerStyle={{ padding: 20, paddingBottom: 96 }}
             showsVerticalScrollIndicator={false}
          >
-            {/* League Card - Poker chip style */}
+            {/* League Card - Cyberpunk style */}
             <View
                className="rounded-2xl mb-6 overflow-hidden"
                style={styles.leagueCard}
@@ -566,14 +811,49 @@ function LeagueStatsComponent() {
                accessibilityLabel={`${t('leagueDetails')}: ${league.name}`}
             >
                <LinearGradient
-                  colors={[
-                     'rgba(124, 58, 237, 0.12)',
-                     'rgba(124, 58, 237, 0.05)',
-                  ]}
+                  colors={getCyberpunkGradient('holo')}
                   start={{ x: 0, y: 0 }}
                   end={{ x: 1, y: 1 }}
                   style={styles.leagueCardGradient}
                >
+                  {/* Corner brackets for league card */}
+                  <View
+                     style={[
+                        styles.cornerBracket,
+                        styles.cardTopLeft,
+                        { borderColor: colors.matrixGreen },
+                     ]}
+                  />
+                  <View
+                     style={[
+                        styles.cornerBracket,
+                        styles.cardTopRight,
+                        { borderColor: colors.neonCyan },
+                     ]}
+                  />
+                  <View
+                     style={[
+                        styles.cornerBracket,
+                        styles.cardBottomLeft,
+                        { borderColor: colors.neonPink },
+                     ]}
+                  />
+                  <View
+                     style={[
+                        styles.cornerBracket,
+                        styles.cardBottomRight,
+                        { borderColor: colors.matrixGreen },
+                     ]}
+                  />
+
+                  {/* Holographic overlay for league card */}
+                  <LinearGradient
+                     colors={[colors.holoBlue, 'transparent', colors.holoPink]}
+                     start={{ x: 0, y: 0 }}
+                     end={{ x: 1, y: 1 }}
+                     style={styles.cardHoloOverlay}
+                  />
+
                   {/* Top Section: Image + Info */}
                   <View className="flex-row">
                      {/* Image + Edit Button Column */}
@@ -627,11 +907,9 @@ function LeagueStatsComponent() {
 
                      {/* Info Column */}
                      <View className="flex-1 ml-4 justify-center">
-                        <Text className="text-success font-bold text-2xl mb-1">
-                           {league.name}
-                        </Text>
+                        <Text style={styles.leagueName}>{league.name}</Text>
                         <View className="flex-row items-center">
-                           <Text className="text-white text-xs">
+                           <Text style={styles.leagueCodeLabel}>
                               {t('leagueCode')}
                            </Text>
                            <View
@@ -640,7 +918,7 @@ function LeagueStatsComponent() {
                               accessibilityRole="text"
                               accessibilityLabel={`${t('inviteCode')}: ${league.inviteCode}`}
                            >
-                              <Text className="text-purple-200 font-bold text-xs tracking-wider">
+                              <Text style={styles.inviteCodeText}>
                                  {league.inviteCode}
                               </Text>
                            </View>
@@ -651,15 +929,24 @@ function LeagueStatsComponent() {
                      </View>
                   </View>
 
-                  {/* Divider */}
-                  <View className="h-px bg-white/10 my-4" />
+                  {/* Cyberpunk divider with glow */}
+                  <View style={styles.cyberpunkDivider}>
+                     <LinearGradient
+                        colors={[
+                           colors.neonCyan,
+                           colors.matrixGreen,
+                           colors.neonCyan,
+                        ]}
+                        start={{ x: 0, y: 0 }}
+                        end={{ x: 1, y: 0 }}
+                        style={styles.dividerGradient}
+                     />
+                  </View>
 
                   {/* Members Section */}
                   {league.members && league.members.length > 0 && (
                      <View>
-                        <Text className="text-white/50 text-xs font-medium mb-3 uppercase tracking-wider">
-                           {t('members')}
-                        </Text>
+                        <Text style={styles.membersLabel}>{t('members')}</Text>
                         <View className="flex-row flex-wrap">
                            {league.members.map((item) => (
                               <View
@@ -689,17 +976,14 @@ function LeagueStatsComponent() {
                </LinearGradient>
             </View>
 
-            {/* Main Action Cards */}
-            <View className="gap-4">
+            {/* Main Action Cards with cyberpunk container */}
+            <View style={styles.actionCardsContainer}>
                {/* View Detailed Stats Card */}
                <ActionCard
                   title={t('viewDetailedStats')}
                   description={t('viewStatsDescription')}
                   iconName="stats-chart"
-                  iconColor="#60A5FA"
-                  bgColor="bg-blue-500/10"
-                  borderColor="border border-blue-400/30"
-                  shadowColor="#3B82F6"
+                  iconColor={colors.neonCyan}
                   onPress={handleViewStats}
                   isRTL={isRTL}
                   accessibilityLabel={t('viewDetailedStats')}
@@ -709,36 +993,52 @@ function LeagueStatsComponent() {
                {/* Conditional Game Action Card */}
                {isCheckingActiveGame ? (
                   <View
-                     className="bg-gray-500/10 rounded-2xl"
-                     style={[styles.actionCard, { shadowColor: '#6B7280' }]}
+                     style={[
+                        styles.cyberpunkActionCard,
+                        {
+                           shadowColor: colors.neonCyan,
+                           shadowOpacity: 0.4,
+                           borderColor: colors.neonCyan,
+                        },
+                     ]}
                      accessibilityRole="text"
                      accessibilityLabel={t('checkingGames')}
                   >
-                     <View className="flex-row items-center py-4 px-5">
-                        <View
-                           className="w-14 h-14 rounded-full items-center justify-center mr-4"
-                           style={[
-                              styles.iconContainer,
-                              {
-                                 backgroundColor: 'rgba(156, 163, 175, 0.15)',
-                                 shadowColor: '#9CA3AF',
-                              },
-                           ]}
-                        >
-                           <View style={{ padding: 8 }}>
+                     <LinearGradient
+                        colors={[
+                           colors.cyberBackground,
+                           colors.holoBlue,
+                           'transparent',
+                        ]}
+                        start={{ x: 0, y: 0 }}
+                        end={{ x: 1, y: 1 }}
+                        style={styles.actionCardGradient}
+                     >
+                        <View style={styles.actionCardContent}>
+                           <View
+                              style={[
+                                 styles.cyberpunkIconContainer,
+                                 {
+                                    backgroundColor: colors.holoBlue,
+                                    borderColor: colors.neonCyan,
+                                    shadowColor: colors.neonCyan,
+                                    shadowOpacity: 0.6,
+                                 },
+                              ]}
+                           >
                               <CyberpunkLoader size="small" variant="cyan" />
                            </View>
-                        </View>
 
-                        <View className="flex-1">
-                           <Text className="text-white font-bold text-base mb-1">
-                              {t('checkingGames')}
-                           </Text>
-                           <Text className="text-white/60 text-sm leading-5">
-                              {t('checkingGamesDescription')}
-                           </Text>
+                           <View style={styles.actionTextContainer}>
+                              <Text style={styles.actionTitle}>
+                                 {t('checkingGames')}
+                              </Text>
+                              <Text style={styles.actionDescription}>
+                                 {t('checkingGamesDescription')}
+                              </Text>
+                           </View>
                         </View>
-                     </View>
+                     </LinearGradient>
                   </View>
                ) : activeGame ? (
                   /* Continue Active Game Card */
@@ -746,10 +1046,7 @@ function LeagueStatsComponent() {
                      title={t('continueGame')}
                      description={t('continueGameDescription')}
                      iconName="play-circle"
-                     iconColor="#FB923C"
-                     bgColor="bg-orange-500/10"
-                     borderColor="border border-orange-400/30"
-                     shadowColor="#F97316"
+                     iconColor={colors.neonOrange}
                      onPress={handleContinueGame}
                      isRTL={isRTL}
                      accessibilityLabel={t('continueGame')}
@@ -761,10 +1058,7 @@ function LeagueStatsComponent() {
                      title={t('startNewGame')}
                      description={t('startGameDescription')}
                      iconName="play-circle"
-                     iconColor="#4ADE80"
-                     bgColor="bg-green-500/10"
-                     borderColor="border border-green-400/30"
-                     shadowColor="#22C55E"
+                     iconColor={colors.matrixGreen}
                      onPress={handleStartGame}
                      isRTL={isRTL}
                      accessibilityLabel={t('startNewGame')}
@@ -786,7 +1080,7 @@ function LeagueStatsComponent() {
    );
 }
 
-// Poker-themed style objects
+// Cyberpunk-themed style objects
 const styles = StyleSheet.create({
    loaderContainer: {
       flex: 1,
@@ -798,47 +1092,227 @@ const styles = StyleSheet.create({
       padding: 32,
    } as ViewStyle,
    loaderInner: {
-      backgroundColor: 'rgba(124, 58, 237, 0.15)',
+      backgroundColor: colors.holoBlue,
       borderRadius: 20,
       padding: 32,
       alignItems: 'center',
-      shadowColor: '#7C3AED',
-      shadowOffset: { width: 0, height: 4 },
-      shadowOpacity: 0.3,
-      shadowRadius: 12,
+      borderWidth: 2,
+      borderColor: colors.neonCyan,
+      shadowColor: colors.neonCyan,
+      shadowOffset: { width: 0, height: 0 },
+      shadowOpacity: 0.6,
+      shadowRadius: 16,
+      elevation: 12,
+   } as ViewStyle,
+   // Cyberpunk Header Styles
+   cyberpunkHeader: {
+      height: 100,
+      position: 'relative',
+   } as ViewStyle,
+   headerGradient: {
+      flex: 1,
+      borderBottomWidth: 2,
+      borderBottomColor: colors.neonCyan,
+      position: 'relative',
+   } as ViewStyle,
+   cornerBracket: {
+      position: 'absolute',
+      width: 16,
+      height: 16,
+      borderWidth: 3,
+      zIndex: 10,
+   } as ViewStyle,
+   topLeft: {
+      top: 8,
+      left: 8,
+      borderRightWidth: 0,
+      borderBottomWidth: 0,
+   } as ViewStyle,
+   topRight: {
+      top: 8,
+      right: 8,
+      borderLeftWidth: 0,
+      borderBottomWidth: 0,
+   } as ViewStyle,
+   bottomLeft: {
+      bottom: 8,
+      left: 8,
+      borderRightWidth: 0,
+      borderTopWidth: 0,
+   } as ViewStyle,
+   bottomRight: {
+      bottom: 8,
+      right: 8,
+      borderLeftWidth: 0,
+      borderTopWidth: 0,
+   } as ViewStyle,
+   holoOverlay: {
+      position: 'absolute',
+      top: 0,
+      left: 0,
+      right: 0,
+      bottom: 0,
+      opacity: 0.15,
+   } as ViewStyle,
+   scanLine: {
+      position: 'absolute',
+      left: 0,
+      right: 0,
+      height: 1,
+      backgroundColor: colors.scanlineCyan,
+   } as ViewStyle,
+   headerContent: {
+      flex: 1,
+      flexDirection: 'row',
+      alignItems: 'center',
+      justifyContent: 'space-between',
+      paddingHorizontal: 20,
+      paddingTop: 40,
+      paddingBottom: 10,
+      zIndex: 5,
+   } as ViewStyle,
+   cyberpunkBackButton: {
+      width: 44,
+      height: 44,
+      borderRadius: 12,
+      overflow: 'hidden',
+      borderWidth: 1,
+      borderColor: colors.neonCyan,
+   } as ViewStyle,
+   backButtonGradient: {
+      flex: 1,
+      alignItems: 'center',
+      justifyContent: 'center',
+   } as ViewStyle,
+   backButtonGlow: {
+      shadowOffset: { width: 0, height: 0 },
+      shadowRadius: 8,
       elevation: 8,
    } as ViewStyle,
-   loaderText: {
-      color: 'white',
-      fontSize: 16,
-      fontWeight: '600',
-      marginTop: 16,
+   titleContainer: {
+      alignItems: 'center',
+      position: 'relative',
+   } as ViewStyle,
+   cyberpunkTitle: {
+      color: colors.neonCyan,
+      fontSize: 18,
+      fontWeight: 'bold',
+      fontFamily: 'monospace',
+      letterSpacing: 1.2,
+      textTransform: 'uppercase',
+      textShadowColor: colors.neonCyan,
+      textShadowOffset: { width: 0, height: 0 },
+      textShadowRadius: 8,
    },
-   backButton: {
-      shadowColor: '#000',
-      shadowOffset: { width: 0, height: 2 },
-      shadowOpacity: 0.25,
+   titleUnderline: {
+      height: 2,
+      width: 60,
+      marginTop: 4,
+      shadowOffset: { width: 0, height: 0 },
       shadowRadius: 4,
       elevation: 4,
    } as ViewStyle,
+   headerSpacer: {
+      width: 44,
+   } as ViewStyle,
+   // League Card Corner Brackets
+   cardTopLeft: {
+      top: 4,
+      left: 4,
+      borderRightWidth: 0,
+      borderBottomWidth: 0,
+   } as ViewStyle,
+   cardTopRight: {
+      top: 4,
+      right: 4,
+      borderLeftWidth: 0,
+      borderBottomWidth: 0,
+   } as ViewStyle,
+   cardBottomLeft: {
+      bottom: 4,
+      left: 4,
+      borderRightWidth: 0,
+      borderTopWidth: 0,
+   } as ViewStyle,
+   cardBottomRight: {
+      bottom: 4,
+      right: 4,
+      borderLeftWidth: 0,
+      borderTopWidth: 0,
+   } as ViewStyle,
+   cardHoloOverlay: {
+      position: 'absolute',
+      top: 0,
+      left: 0,
+      right: 0,
+      bottom: 0,
+      opacity: 0.1,
+   } as ViewStyle,
    leagueCard: {
-      shadowColor: '#7C3AED',
-      shadowOffset: { width: 0, height: 4 },
-      shadowOpacity: 0.2,
-      shadowRadius: 12,
-      elevation: 6,
+      borderWidth: 2,
+      borderColor: colors.neonCyan,
+      shadowColor: colors.neonCyan,
+      shadowOffset: { width: 0, height: 0 },
+      shadowOpacity: 0.6,
+      shadowRadius: 16,
+      elevation: 12,
+      position: 'relative',
    } as ViewStyle,
    leagueCardGradient: {
-      padding: 16,
-      borderRadius: 16,
+      padding: 20,
+      borderRadius: 14,
+      position: 'relative',
    } as ViewStyle,
+   leagueName: {
+      color: colors.neonCyan,
+      fontWeight: 'bold',
+      fontSize: 24,
+      fontFamily: 'monospace',
+      letterSpacing: 1,
+      textTransform: 'uppercase',
+      textShadowColor: colors.neonCyan,
+      textShadowOffset: { width: 0, height: 0 },
+      textShadowRadius: 8,
+      marginBottom: 8,
+   },
+   leagueCodeLabel: {
+      color: colors.textMuted,
+      fontSize: 12,
+      fontFamily: 'monospace',
+      textTransform: 'uppercase',
+      letterSpacing: 0.5,
+   },
+   inviteCodeText: {
+      color: colors.matrixGreen,
+      fontWeight: 'bold',
+      fontSize: 14,
+      fontFamily: 'monospace',
+      letterSpacing: 1.5,
+      textShadowColor: colors.matrixGreen,
+      textShadowOffset: { width: 0, height: 0 },
+      textShadowRadius: 1,
+   },
+   membersLabel: {
+      color: colors.textMuted,
+      fontSize: 12,
+      fontFamily: 'monospace',
+      fontWeight: '600',
+      marginBottom: 12,
+      textTransform: 'uppercase',
+      letterSpacing: 1,
+   },
    imageContainer: {
       width: 64,
       height: 64,
       borderRadius: 14,
       overflow: 'hidden',
       borderWidth: 2,
-      borderColor: 'rgba(139, 92, 246, 0.4)',
+      borderColor: colors.neonCyan,
+      shadowColor: colors.neonCyan,
+      shadowOffset: { width: 0, height: 0 },
+      shadowOpacity: 0.4,
+      shadowRadius: 8,
+      elevation: 6,
    } as ViewStyle,
    leagueImage: {
       width: 64,
@@ -852,37 +1326,195 @@ const styles = StyleSheet.create({
       elevation: 2,
    } as ViewStyle,
    inviteCodeBadge: {
-      backgroundColor: 'rgba(139, 92, 246, 0.25)',
+      backgroundColor: colors.holoGreen,
+      borderWidth: 1,
+      borderColor: colors.matrixGreen,
+      shadowColor: colors.matrixGreen,
+      shadowOffset: { width: 0, height: 0 },
+      shadowOpacity: 0.3,
+      shadowRadius: 4,
+      elevation: 3,
    } as ViewStyle,
    actionCardPressable: {
-      marginBottom: 0,
+      marginBottom: 16,
    } as ViewStyle,
-   actionCard: {
-      shadowOffset: { width: 0, height: 4 },
-      shadowOpacity: 0.25,
-      shadowRadius: 10,
+   // Cyberpunk Action Card Styles
+   cyberpunkActionCard: {
+      borderRadius: 16,
+      borderWidth: 2,
+      shadowOffset: { width: 0, height: 0 },
+      shadowRadius: 16,
+      elevation: 12,
+      overflow: 'hidden',
+      position: 'relative',
+   } as ViewStyle,
+   actionCardGradient: {
+      padding: 20,
+      position: 'relative',
+   } as ViewStyle,
+   actionCornerBracket: {
+      position: 'absolute',
+      width: 12,
+      height: 12,
+      borderWidth: 2,
+      zIndex: 10,
+   } as ViewStyle,
+   actionTopLeft: {
+      top: 4,
+      left: 4,
+      borderRightWidth: 0,
+      borderBottomWidth: 0,
+   } as ViewStyle,
+   actionTopRight: {
+      top: 4,
+      right: 4,
+      borderLeftWidth: 0,
+      borderBottomWidth: 0,
+   } as ViewStyle,
+   actionBottomLeft: {
+      bottom: 4,
+      left: 4,
+      borderRightWidth: 0,
+      borderTopWidth: 0,
+   } as ViewStyle,
+   actionBottomRight: {
+      bottom: 4,
+      right: 4,
+      borderLeftWidth: 0,
+      borderTopWidth: 0,
+   } as ViewStyle,
+   actionHoloOverlay: {
+      position: 'absolute',
+      top: 0,
+      left: 0,
+      right: 0,
+      bottom: 0,
+      opacity: 0.8,
+   } as ViewStyle,
+   actionScanLine: {
+      position: 'absolute',
+      left: 0,
+      right: 0,
+      height: 1,
+   } as ViewStyle,
+   actionCardContent: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      zIndex: 5,
+   } as ViewStyle,
+   cyberpunkIconContainer: {
+      width: 56,
+      height: 56,
+      borderRadius: 16,
+      borderWidth: 2,
+      alignItems: 'center',
+      justifyContent: 'center',
+      marginRight: 16,
+      shadowOffset: { width: 0, height: 0 },
+      shadowRadius: 8,
       elevation: 6,
    } as ViewStyle,
-   iconContainer: {
-      shadowOffset: { width: 0, height: 2 },
-      shadowOpacity: 0.25,
+   actionTextContainer: {
+      flex: 1,
+   } as ViewStyle,
+   actionTitle: {
+      color: colors.textNeonGreen,
+      fontSize: 16,
+      fontWeight: 'bold',
+      fontFamily: 'monospace',
+      letterSpacing: 0.8,
+      textTransform: 'uppercase',
+      marginBottom: 6,
+      textShadowColor: 'black',
+      textShadowOffset: { width: 0, height: 0 },
+      textShadowRadius: 2,
+   },
+   actionDescription: {
+      color: colors.textMuted,
+      fontSize: 14,
+      fontFamily: 'monospace',
+      letterSpacing: 0.5,
+      lineHeight: 20,
+   },
+   actionChevron: {
+      marginLeft: 12,
+      shadowOffset: { width: 0, height: 0 },
       shadowRadius: 4,
-      elevation: 3,
-      overflow: 'hidden',
+      elevation: 4,
    } as ViewStyle,
    errorCard: {
-      shadowColor: '#EF4444',
-      shadowOffset: { width: 0, height: 4 },
-      shadowOpacity: 0.25,
-      shadowRadius: 12,
-      elevation: 8,
+      backgroundColor: colors.holoBlue,
+      borderRadius: 16,
+      borderWidth: 2,
+      borderColor: colors.error,
+      padding: 32,
+      shadowColor: colors.error,
+      shadowOffset: { width: 0, height: 0 },
+      shadowOpacity: 0.6,
+      shadowRadius: 16,
+      elevation: 12,
+      position: 'relative',
    } as ViewStyle,
+   errorTitle: {
+      color: colors.error,
+      fontSize: 20,
+      fontWeight: 'bold',
+      fontFamily: 'monospace',
+      letterSpacing: 1,
+      textAlign: 'center',
+      textTransform: 'uppercase',
+      marginBottom: 16,
+      textShadowColor: colors.error,
+      textShadowOffset: { width: 0, height: 0 },
+      textShadowRadius: 6,
+   },
+   errorMessage: {
+      color: colors.textMuted,
+      fontSize: 14,
+      fontFamily: 'monospace',
+      letterSpacing: 0.5,
+      textAlign: 'center',
+      lineHeight: 20,
+      marginBottom: 24,
+   },
    retryButton: {
-      shadowColor: '#EF4444',
-      shadowOffset: { width: 0, height: 2 },
-      shadowOpacity: 0.2,
-      shadowRadius: 4,
-      elevation: 3,
+      borderRadius: 12,
+      overflow: 'hidden',
+      borderWidth: 1,
+      borderColor: colors.error,
+      shadowColor: colors.error,
+      shadowOffset: { width: 0, height: 0 },
+      shadowOpacity: 0.4,
+      shadowRadius: 8,
+      elevation: 6,
+   } as ViewStyle,
+   retryButtonGradient: {
+      paddingHorizontal: 24,
+      paddingVertical: 12,
+      alignItems: 'center',
+      justifyContent: 'center',
+   } as ViewStyle,
+   retryButtonText: {
+      color: colors.text,
+      fontSize: 14,
+      fontWeight: 'bold',
+      fontFamily: 'monospace',
+      letterSpacing: 0.8,
+      textTransform: 'uppercase',
+   },
+   // Cyberpunk divider styles
+   cyberpunkDivider: {
+      height: 2,
+      marginVertical: 16,
+      position: 'relative',
+   } as ViewStyle,
+   dividerGradient: {
+      height: 2,
+      opacity: 0.6,
+   } as ViewStyle,
+   // Action cards container
+   actionCardsContainer: {
+      gap: 16,
    } as ViewStyle,
    memberAvatarContainer: {
       marginRight: 8,
@@ -893,7 +1525,12 @@ const styles = StyleSheet.create({
       height: 32,
       borderRadius: 16,
       borderWidth: 2,
-      borderColor: 'rgba(139, 92, 246, 0.3)',
+      borderColor: colors.neonCyan,
+      shadowColor: colors.neonCyan,
+      shadowOffset: { width: 0, height: 0 },
+      shadowOpacity: 0.2,
+      shadowRadius: 3,
+      elevation: 2,
    },
 });
 

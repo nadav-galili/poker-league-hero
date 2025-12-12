@@ -6,6 +6,7 @@ import {
 } from '@/components/league/LeagueStats';
 import { EditLeagueModal } from '@/components/modals/EditLeagueModal';
 import Summary from '@/components/summary/summary';
+import CyberpunkLoader from '@/components/ui/CyberpunkLoader';
 import { useAuth } from '@/context/auth';
 import { useLocalization } from '@/context/localization';
 import { useEditLeague } from '@/hooks/useEditLeague';
@@ -26,7 +27,6 @@ import {
    Text,
    View,
 } from 'react-native';
-import CyberpunkLoader from '@/components/ui/CyberpunkLoader';
 import Animated, {
    useAnimatedStyle,
    useSharedValue,

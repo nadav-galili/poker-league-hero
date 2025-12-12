@@ -16,10 +16,10 @@ import {
    Animated,
    Dimensions,
    Modal,
-   Pressable,
    TextInput,
    TouchableOpacity,
    View,
+   StyleSheet,
 } from 'react-native';
 
 interface EditLeagueModalProps {
@@ -269,15 +269,7 @@ export function EditLeagueModal({
          onRequestClose={onClose}
       >
          {/* Cyberpunk backdrop with matrix rain */}
-         <View
-            style={{
-               flex: 1,
-               backgroundColor: 'rgba(0, 0, 0, 0.95)',
-               justifyContent: 'center',
-               alignItems: 'center',
-               position: 'relative',
-            }}
-         >
+         <View style={modalStyles.backdrop}>
             {/* Matrix rain background */}
             <View
                style={{
@@ -351,12 +343,13 @@ export function EditLeagueModal({
 
             {/* Modal container */}
             <Animated.View
-               style={{
-                  width: '90%',
-                  maxWidth: 420,
-                  transform: [{ scale: modalScaleAnim }],
-                  opacity: modalOpacityAnim,
-               }}
+               style={[
+                  modalStyles.modalContainer,
+                  {
+                     transform: [{ scale: modalScaleAnim }],
+                     opacity: modalOpacityAnim,
+                  },
+               ]}
             >
                {/* Outer glow effect */}
                <Animated.View
@@ -383,23 +376,10 @@ export function EditLeagueModal({
                   colors={[colors.cyberBackground, colors.holoBlue, colors.cyberBackground]}
                   start={{ x: 0, y: 0 }}
                   end={{ x: 1, y: 1 }}
-                  style={{
-                     borderRadius: 16,
-                     borderWidth: 2,
-                     borderColor: colors.neonCyan,
-                     overflow: 'hidden',
-                     position: 'relative',
-                  }}
+                  style={modalStyles.modalContent}
                >
                   {/* Background glass effect */}
-                  <View
-                     style={{
-                        position: 'absolute',
-                        inset: 0,
-                        backgroundColor: colors.cyberBackground,
-                        opacity: 0.9,
-                     }}
-                  />
+                  <View style={modalStyles.backgroundGlass} />
 
                   {/* Holographic flicker overlay */}
                   <Animated.View
@@ -437,37 +417,12 @@ export function EditLeagueModal({
                   />
 
                   {/* Header */}
-                  <View
-                     style={{
-                        flexDirection: 'row',
-                        alignItems: 'center',
-                        justifyContent: 'space-between',
-                        paddingHorizontal: 20,
-                        paddingVertical: 20,
-                        borderBottomWidth: 1,
-                        borderBottomColor: colors.borderNeonCyan,
-                        position: 'relative',
-                     }}
-                  >
+                  <View style={modalStyles.header}>
                      {/* Close button with cyberpunk styling */}
                      <TouchableOpacity
                         onPress={onClose}
                         disabled={isLoading}
-                        style={{
-                           width: 40,
-                           height: 40,
-                           borderRadius: 8,
-                           backgroundColor: colors.cyberBackground,
-                           borderWidth: 2,
-                           borderColor: colors.error,
-                           alignItems: 'center',
-                           justifyContent: 'center',
-                           position: 'relative',
-                           shadowColor: colors.error,
-                           shadowOffset: { width: 0, height: 0 },
-                           shadowOpacity: 0.6,
-                           shadowRadius: 8,
-                        }}
+                        style={modalStyles.closeButton}
                      >
                         <Ionicons
                            name="close"
@@ -480,42 +435,27 @@ export function EditLeagueModal({
                            }}
                         />
                         {/* Corner brackets for close button */}
-                        <View style={{ position: 'absolute', top: -2, left: -2, width: 8, height: 2, backgroundColor: colors.error }} />
-                        <View style={{ position: 'absolute', top: -2, left: -2, width: 2, height: 8, backgroundColor: colors.error }} />
-                        <View style={{ position: 'absolute', top: -2, right: -2, width: 8, height: 2, backgroundColor: colors.error }} />
-                        <View style={{ position: 'absolute', top: -2, right: -2, width: 2, height: 8, backgroundColor: colors.error }} />
+                        <View style={[modalStyles.cornerBracket, modalStyles.closeButtonTopLeft]} />
+                        <View style={[modalStyles.cornerBracket, modalStyles.closeButtonTopRight]} />
+                        <View style={[modalStyles.cornerBracket, modalStyles.closeButtonBottomLeft]} />
+                        <View style={[modalStyles.cornerBracket, modalStyles.closeButtonBottomRight]} />
                      </TouchableOpacity>
 
                      {/* Title with neon glow */}
-                     <Text
-                        style={{
-                           fontSize: 18,
-                           fontFamily: 'monospace',
-                           fontWeight: '700',
-                           color: colors.neonCyan,
-                           textTransform: 'uppercase',
-                           letterSpacing: 2,
-                           textAlign: 'center',
-                           flex: 1,
-                           marginHorizontal: 16,
-                           textShadowColor: colors.neonCyan,
-                           textShadowOffset: { width: 0, height: 0 },
-                           textShadowRadius: 12,
-                        }}
-                     >
+                     <Text style={modalStyles.title}>
                         {t('editLeague')}
                      </Text>
 
                      {/* Data stream indicators */}
-                     <View style={{ width: 40, alignItems: 'flex-end' }}>
-                        <View style={{ width: 20, height: 1, backgroundColor: colors.neonCyan, opacity: 0.6 }} />
-                        <View style={{ width: 12, height: 1, backgroundColor: colors.neonPink, opacity: 0.4, marginTop: 2 }} />
-                        <View style={{ width: 16, height: 1, backgroundColor: colors.neonGreen, opacity: 0.5, marginTop: 2 }} />
+                     <View style={modalStyles.dataStream}>
+                        <View style={[modalStyles.streamLine, { backgroundColor: colors.neonCyan, width: 20, opacity: 0.6 }]} />
+                        <View style={[modalStyles.streamLine, { backgroundColor: colors.neonPink, width: 12, opacity: 0.4, marginTop: 2 }]} />
+                        <View style={[modalStyles.streamLine, { backgroundColor: colors.neonGreen, width: 16, opacity: 0.5, marginTop: 2 }]} />
                      </View>
                   </View>
 
                   {/* Content section */}
-                  <View style={{ padding: 24, gap: 24 }}>
+                  <View style={modalStyles.contentSection}>
                      {/* Cyberpunk Image Picker */}
                      <View style={{ alignItems: 'center', gap: 16 }}>
                         <View style={{ position: 'relative' }}>
@@ -893,4 +833,114 @@ export function EditLeagueModal({
       </Modal>
    );
 }
+
+// Modal-specific styles
+const modalStyles = StyleSheet.create({
+   backdrop: {
+      flex: 1,
+      backgroundColor: 'rgba(0, 0, 0, 0.95)',
+      justifyContent: 'center',
+      alignItems: 'center',
+      position: 'relative',
+      paddingHorizontal: 20,
+   },
+   modalContainer: {
+      width: '100%',
+      maxWidth: 420,
+   },
+   modalContent: {
+      borderRadius: 16,
+      borderWidth: 2,
+      borderColor: colors.neonCyan,
+      overflow: 'hidden',
+      position: 'relative',
+   },
+   backgroundGlass: {
+      position: 'absolute',
+      top: 0,
+      left: 0,
+      right: 0,
+      bottom: 0,
+      backgroundColor: colors.cyberBackground,
+      opacity: 0.9,
+   },
+   header: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      justifyContent: 'space-between',
+      paddingHorizontal: 20,
+      paddingVertical: 20,
+      borderBottomWidth: 1,
+      borderBottomColor: colors.borderNeonCyan,
+      position: 'relative',
+   },
+   closeButton: {
+      width: 40,
+      height: 40,
+      borderRadius: 8,
+      backgroundColor: colors.cyberBackground,
+      borderWidth: 2,
+      borderColor: colors.error,
+      alignItems: 'center',
+      justifyContent: 'center',
+      position: 'relative',
+      shadowColor: colors.error,
+      shadowOffset: { width: 0, height: 0 },
+      shadowOpacity: 0.6,
+      shadowRadius: 8,
+   },
+   cornerBracket: {
+      position: 'absolute',
+      backgroundColor: colors.error,
+   },
+   closeButtonTopLeft: {
+      top: -2,
+      left: -2,
+      width: 8,
+      height: 2,
+   },
+   closeButtonTopRight: {
+      top: -2,
+      right: -2,
+      width: 8,
+      height: 2,
+   },
+   closeButtonBottomLeft: {
+      bottom: -2,
+      left: -2,
+      width: 8,
+      height: 2,
+   },
+   closeButtonBottomRight: {
+      bottom: -2,
+      right: -2,
+      width: 8,
+      height: 2,
+   },
+   title: {
+      fontSize: 18,
+      fontFamily: 'monospace',
+      fontWeight: '700',
+      color: colors.neonCyan,
+      textTransform: 'uppercase',
+      letterSpacing: 2,
+      textAlign: 'center',
+      flex: 1,
+      marginHorizontal: 16,
+      textShadowColor: colors.neonCyan,
+      textShadowOffset: { width: 0, height: 0 },
+      textShadowRadius: 12,
+   },
+   dataStream: {
+      width: 40,
+      alignItems: 'flex-end',
+   },
+   streamLine: {
+      height: 1,
+   },
+   contentSection: {
+      padding: 24,
+      gap: 24,
+   },
+});
 
