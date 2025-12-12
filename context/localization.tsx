@@ -332,8 +332,8 @@ const enTranslations: Translations = {
 
    // Common
    language: 'LANGUAGE',
-   english: 'English',
-   hebrew: 'עברית',
+   english: 'En',
+   hebrew: 'He',
    success: 'Success',
    ok: 'OK',
    currency: '$',
@@ -618,8 +618,8 @@ const heTranslations: Translations = {
 
    // Common
    language: 'שפה',
-   english: 'English',
-   hebrew: 'עברית',
+   english: 'En',
+   hebrew: 'He',
    success: 'הצלחה',
    ok: 'אישור',
    currency: '₪',

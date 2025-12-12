@@ -104,7 +104,7 @@ export function MyLeaguesHeader({
 
             {/* Enhanced Language Selector */}
             <View className="relative">
-               <LanguageSelector size="small" />
+               <LanguageSelector size="medium" />
                {/* Holographic frame */}
                <View className="absolute inset-0 border border-holoBlue rounded-lg opacity-30 pointer-events-none" />
             </View>
