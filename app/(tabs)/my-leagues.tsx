@@ -14,7 +14,7 @@ import { captureException } from '@/utils/sentry';
 import { FlashList } from '@shopify/flash-list';
 import { LinearGradient } from 'expo-linear-gradient';
 import React from 'react';
-import { RefreshControl, View, Animated } from 'react-native';
+import { Animated, RefreshControl, View } from 'react-native';
 
 export default function MyLeagues() {
    const {
@@ -117,12 +117,14 @@ export default function MyLeagues() {
                            inputRange: [0, 1],
                            outputRange: [0.1, 0.3],
                         }),
-                        transform: [{
-                           scale: glowAnim.interpolate({
-                              inputRange: [0, 1],
-                              outputRange: [1, 1.02],
-                           }),
-                        }],
+                        transform: [
+                           {
+                              scale: glowAnim.interpolate({
+                                 inputRange: [0, 1],
+                                 outputRange: [1, 1.02],
+                              }),
+                           },
+                        ],
                      }}
                   />
 
@@ -137,12 +139,14 @@ export default function MyLeagues() {
                   <Animated.View
                      className="absolute left-0 right-0 h-0.5 bg-neonCyan opacity-60"
                      style={{
-                        transform: [{
-                           translateY: scanlineAnim.interpolate({
-                              inputRange: [0, 1],
-                              outputRange: [0, 120],
-                           }),
-                        }],
+                        transform: [
+                           {
+                              translateY: scanlineAnim.interpolate({
+                                 inputRange: [0, 1],
+                                 outputRange: [0, 120],
+                              }),
+                           },
+                        ],
                      }}
                   />
                </View>
@@ -158,7 +162,9 @@ export default function MyLeagues() {
             return (
                <View className="bg-red-500/20 border border-red-500 rounded-xl p-5 mx-4 items-center justify-center min-h-[100px] relative">
                   <View className="absolute inset-0 bg-gradient-to-r from-transparent via-red-500/10 to-transparent animate-pulse" />
-                  <Text className="text-red-400 font-mono">ERROR: NEURAL_LINK_FAILED</Text>
+                  <Text className="text-red-400 font-mono">
+                     ERROR: NEURAL_LINK_FAILED
+                  </Text>
                </View>
             );
          }
@@ -176,7 +182,12 @@ export default function MyLeagues() {
          {/* Cyberpunk background with multiple layers */}
          <LinearGradient
             colors={getCyberpunkGradient('dark')}
-            style={{ flex: 1, position: 'absolute', width: '100%', height: '100%' }}
+            style={{
+               flex: 1,
+               position: 'absolute',
+               width: '100%',
+               height: '100%',
+            }}
          />
 
          {/* Matrix grid overlay */}
@@ -193,9 +204,9 @@ export default function MyLeagues() {
                      key={`v-${i}`}
                      className="absolute w-px bg-neonCyan/10"
                      style={{
-                        left: (i * 20),
+                        left: i * 20,
                         top: 0,
-                        bottom: 0
+                        bottom: 0,
                      }}
                   />
                ))}
@@ -204,9 +215,9 @@ export default function MyLeagues() {
                      key={`h-${i}`}
                      className="absolute h-px bg-neonCyan/10"
                      style={{
-                        top: (i * 20),
+                        top: i * 20,
                         left: 0,
-                        right: 0
+                        right: 0,
                      }}
                   />
                ))}
@@ -263,12 +274,14 @@ export default function MyLeagues() {
                      <Animated.View
                         className="absolute inset-0 bg-gradient-to-r from-transparent via-neonCyan/20 to-transparent"
                         style={{
-                           transform: [{
-                              translateX: glowAnim.interpolate({
-                                 inputRange: [0, 1],
-                                 outputRange: [-300, 300],
-                              }),
-                           }],
+                           transform: [
+                              {
+                                 translateX: glowAnim.interpolate({
+                                    inputRange: [0, 1],
+                                    outputRange: [-300, 300],
+                                 }),
+                              },
+                           ],
                         }}
                      />
                   </View>
@@ -347,7 +360,6 @@ export default function MyLeagues() {
             submitText={t('join')}
             cancelText={t('cancel')}
             isLoading={isLoading}
-            theme="dark"
          />
 
          {/* Bottom status bar */}

@@ -18,6 +18,7 @@ import {
 import { router, useFocusEffect } from 'expo-router';
 import React from 'react';
 import { Alert } from 'react-native';
+import Toast from 'react-native-toast-message';
 
 export function useMyLeagues() {
    const { t } = useLocalization();
@@ -184,21 +185,16 @@ export function useMyLeagues() {
                   }
                );
 
-               // Success! Show success message
-               Alert.alert(
-                  t('success'),
-                  `${t('joinedLeagueSuccess')} "${result.league.name}"`,
-                  [
-                     {
-                        text: t('ok'),
-                        onPress: () => {
-                           // Refresh the leagues list to ensure consistency
-                           const abortController = new AbortController();
-                           loadLeagues(abortController.signal);
-                        },
-                     },
-                  ]
-               );
+               // Success! Show success toast
+               Toast.show({
+                  type: 'success',
+                  text1: t('success'),
+                  text2: `${t('joinedLeagueSuccess')} "${result.league.name}"`,
+               });
+
+               // Refresh the leagues list to ensure consistency
+               const abortController = new AbortController();
+               loadLeagues(abortController.signal);
             } else {
                Alert.alert(t('error'), result.error || 'Failed to join league');
             }
