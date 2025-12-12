@@ -3,12 +3,12 @@ import { Ionicons } from '@expo/vector-icons';
 import { LinearGradient } from 'expo-linear-gradient';
 import React from 'react';
 import {
-   ActivityIndicator,
    Animated,
    Pressable,
    Text,
    View,
 } from 'react-native';
+import CyberpunkLoader from './CyberpunkLoader';
 
 export type ButtonVariant = 'solid' | 'gradient' | 'glass' | 'outline';
 export type ButtonColor = 'primary' | 'success' | 'error' | 'warning' | 'info';
@@ -132,7 +132,7 @@ export const AppButton: React.FC<AppButtonProps> = ({
             <View
                style={{ flexDirection: 'row', alignItems: 'center', gap: 8 }}
             >
-               <ActivityIndicator size="small" color={theme.text} />
+               <CyberpunkLoader size="small" variant="cyan" />
                <Text
                   style={{
                      color: theme.text,
@@ -272,12 +272,7 @@ export const AppButton: React.FC<AppButtonProps> = ({
                >
                   {loading ? (
                      <>
-                        <ActivityIndicator
-                           size="small"
-                           color={
-                              disabled ? theme.textDisabled : colorStyles.solid
-                           }
-                        />
+                        <CyberpunkLoader size="small" variant="cyan" />
                         <Text
                            style={{
                               color: disabled

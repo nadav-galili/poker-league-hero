@@ -3,13 +3,13 @@ import { Ionicons } from '@expo/vector-icons';
 import { LinearGradient } from 'expo-linear-gradient';
 import React from 'react';
 import {
-   ActivityIndicator,
    Animated,
    Pressable,
    Text,
    View,
    ViewStyle,
 } from 'react-native';
+import CyberpunkLoader from './CyberpunkLoader';
 
 export type CyberpunkButtonVariant = 'join' | 'create' | 'primary' | 'secondary';
 export type CyberpunkButtonSize = 'small' | 'medium' | 'large';
@@ -209,7 +209,10 @@ export const CyberpunkButton: React.FC<CyberpunkButtonProps> = ({
       if (loading) {
          return (
             <View className="flex-row items-center justify-center gap-2">
-               <ActivityIndicator size="small" color={variantStyles.textColor} />
+               <CyberpunkLoader
+                  size="small"
+                  variant="cyan"
+               />
                <Text
                   className="font-mono font-bold tracking-wider"
                   style={{

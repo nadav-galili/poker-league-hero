@@ -3,7 +3,8 @@ import { useLocalization } from '@/context/localization';
 import { useFocusEffect } from '@react-navigation/native';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import React, { useCallback } from 'react';
-import { ActivityIndicator, View } from 'react-native';
+import { View } from 'react-native';
+import CyberpunkLoader from '@/components/ui/CyberpunkLoader';
 import { leagueOperationsService } from '@/services/leagueOperationsService';
 import Toast from 'react-native-toast-message';
 
@@ -89,8 +90,12 @@ export default function JoinLeagueHandler() {
    );
 
    return (
-      <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
-         <ActivityIndicator size="large" color="#ec4899" />
+      <View className="flex-1 justify-center items-center bg-cyberBackground">
+         <CyberpunkLoader
+            size="large"
+            variant="pink"
+            text="JOINING LEAGUE..."
+         />
       </View>
    );
 }

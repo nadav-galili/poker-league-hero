@@ -3,7 +3,8 @@ import { formatCurrency } from '@/services/leagueStatsFormatters';
 import { Ionicons } from '@expo/vector-icons';
 import { Image } from 'expo-image';
 import React from 'react';
-import { ActivityIndicator, Dimensions, StyleSheet, Text, View } from 'react-native';
+import { Dimensions, StyleSheet, Text, View } from 'react-native';
+import CyberpunkLoader from '@/components/ui/CyberpunkLoader';
 
 const { width: screenWidth } = Dimensions.get('window');
 
@@ -51,7 +52,10 @@ export default function TopProfitPlayerCard({
                   className="w-10 h-10 bg-green-500/20 border border-green-400/40 rounded-xl items-center justify-center mb-3"
                   style={iconContainerStyle}
                >
-                  <ActivityIndicator size="small" color="#4ADE80" />
+                  <CyberpunkLoader
+                     size="small"
+                     variant="green"
+                  />
                </View>
                <Text className="text-white/70 text-xs font-medium">
                   {t('loading')}...

@@ -19,7 +19,6 @@ import { LinearGradient } from 'expo-linear-gradient';
 import { router, useLocalSearchParams } from 'expo-router';
 import React from 'react';
 import {
-   ActivityIndicator,
    Pressable,
    RefreshControl,
    ScrollView,
@@ -27,6 +26,7 @@ import {
    Text,
    View,
 } from 'react-native';
+import CyberpunkLoader from '@/components/ui/CyberpunkLoader';
 import Animated, {
    useAnimatedStyle,
    useSharedValue,
@@ -70,8 +70,7 @@ const GlassmorphismLoader = React.memo<{ message?: string }>(
          >
             <View style={styles.loaderContent}>
                <View style={styles.loaderInner}>
-                  <ActivityIndicator size="large" color="#60A5FA" />
-                  <Text style={styles.loaderText}>{message}</Text>
+                  <CyberpunkLoader size="large" variant="blue" text={message} />
                </View>
             </View>
          </LinearGradient>

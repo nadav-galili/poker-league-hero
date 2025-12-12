@@ -5,12 +5,12 @@ import { Ionicons } from '@expo/vector-icons';
 import { Image } from 'expo-image';
 import React from 'react';
 import {
-   ActivityIndicator,
    Dimensions,
    StyleSheet,
    Text,
    View,
 } from 'react-native';
+import CyberpunkLoader from '@/components/ui/CyberpunkLoader';
 
 const { width: screenWidth } = Dimensions.get('window');
 
@@ -118,7 +118,10 @@ export default function PlayerStatCard({
                   className="w-10 h-10 bg-white/10 border border-white/20 rounded-xl items-center justify-center mb-3"
                   style={iconContainerStyle}
                >
-                  <ActivityIndicator size="small" color={config.color} />
+                  <CyberpunkLoader
+                     size="small"
+                     variant="cyan"
+                  />
                </View>
                <Text className="text-white/70 text-xs font-medium">
                   {t('loading')}...

@@ -10,10 +10,10 @@ import { Ionicons } from '@expo/vector-icons';
 import { Image } from 'expo-image';
 import { LinearGradient } from 'expo-linear-gradient';
 import { router, useFocusEffect, useLocalSearchParams } from 'expo-router';
+import CyberpunkLoader from '@/components/ui/CyberpunkLoader';
 import React from 'react';
 import type { ViewStyle } from 'react-native';
 import {
-   ActivityIndicator,
    Pressable,
    ScrollView,
    StyleSheet,
@@ -110,8 +110,7 @@ const GlassmorphismLoader = React.memo<GlassmorphismLoaderProps>(
          >
             <View style={styles.loaderContent}>
                <View style={styles.loaderInner}>
-                  <ActivityIndicator size="large" color="#7C3AED" />
-                  <Text style={styles.loaderText}>{message}</Text>
+                  <CyberpunkLoader size="large" variant="cyan" text={message} />
                </View>
             </View>
          </LinearGradient>
@@ -727,7 +726,7 @@ function LeagueStatsComponent() {
                            ]}
                         >
                            <View style={{ padding: 8 }}>
-                              <ActivityIndicator size="small" color="#9CA3AF" />
+                              <CyberpunkLoader size="small" variant="cyan" />
                            </View>
                         </View>
 
