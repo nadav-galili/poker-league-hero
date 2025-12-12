@@ -292,11 +292,11 @@ export function AnimatedStatsCard({
 
 // Comparison chart component for stats
 interface ComparisonChartProps {
-   data: Array<{
+   data: {
       label: string;
       value: number;
       color?: string;
-   }>;
+   }[];
    title: string;
    animated?: boolean;
    delay?: number;

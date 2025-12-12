@@ -229,6 +229,7 @@ export interface Translations {
    avgGameDuration: string;
 
    // Onboarding
+   onboardingViewAgain: string;
    onboardingWelcomeTitle: string;
    onboardingWelcomeSubtitle: string;
    onboardingLeaguesTitle: string;
@@ -508,6 +509,7 @@ const enTranslations: Translations = {
    avgGameDuration: 'AVG GAME DURATION',
 
    // Onboarding
+   onboardingViewAgain: 'Re-watch Onboarding',
    onboardingWelcomeTitle: 'Welcome to Poker AI:HomeStack',
    onboardingWelcomeSubtitle:
       'The ultimate tool for managing your home poker games and leagues.',
@@ -791,6 +793,7 @@ const heTranslations: Translations = {
    avgGameDuration: 'משך משחק ממוצע',
 
    // Onboarding
+   onboardingViewAgain: 'הצג מחדש את ההדרכה',
    onboardingWelcomeTitle: 'ברוכים הבאים ל-Poker AI:HomeStack',
    onboardingWelcomeSubtitle:
       'הכלי האולטימטיבי לניהול משחקי הפוקר והליגות הביתיות שלך.',

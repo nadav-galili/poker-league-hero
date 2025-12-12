@@ -29,6 +29,8 @@ const styles = StyleSheet.create({
       justifyContent: 'center',
       borderRadius: 5,
       backgroundColor: '#000',
+      borderWidth: 2,
+      borderColor: '#ffffff',
    },
    icon: {
       width: 24,

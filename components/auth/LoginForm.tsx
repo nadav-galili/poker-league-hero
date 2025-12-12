@@ -1,9 +1,17 @@
+import { colors, getCyberpunkGradient } from '@/colors';
 import { useAuth } from '@/context/auth';
 import { useLocalization } from '@/context/localization';
-import { BlurView } from 'expo-blur';
 import { LinearGradient } from 'expo-linear-gradient';
 import { useRouter } from 'expo-router';
-import { Image, Pressable, StatusBar, Text, View } from 'react-native';
+import React from 'react';
+import {
+   Animated,
+   Image,
+   Pressable,
+   StatusBar,
+   Text,
+   View,
+} from 'react-native';
 import { SignInWithAppleButton } from '../SignInWithAppleButton';
 import SignInWithGoogleButton from '../SigninWithGoogleButton';
 
@@ -12,6 +20,86 @@ export default function LoginForm() {
    const { t } = useLocalization();
    const router = useRouter();
 
+   // Cyberpunk animations
+   const scanlineAnim = React.useRef(new Animated.Value(0)).current;
+   const glowAnim = React.useRef(new Animated.Value(0)).current;
+   const matrixFade = React.useRef(new Animated.Value(0.1)).current;
+   const titleGlow = React.useRef(new Animated.Value(0)).current;
+
+   // Cyberpunk animations setup
+   React.useEffect(() => {
+      // Single scan line animation on mount
+      const scanlineAnimation = Animated.timing(scanlineAnim, {
+         toValue: 1,
+         duration: 3000,
+         useNativeDriver: true,
+      });
+
+      // Pulsing glow animation
+      const glowAnimation = Animated.loop(
+         Animated.sequence([
+            Animated.timing(glowAnim, {
+               toValue: 1,
+               duration: 2000,
+               useNativeDriver: true,
+            }),
+            Animated.timing(glowAnim, {
+               toValue: 0,
+               duration: 2000,
+               useNativeDriver: true,
+            }),
+         ])
+      );
+
+      // Matrix fade animation
+      const matrixAnimation = Animated.loop(
+         Animated.sequence([
+            Animated.timing(matrixFade, {
+               toValue: 0.3,
+               duration: 4000,
+               useNativeDriver: true,
+            }),
+            Animated.timing(matrixFade, {
+               toValue: 0.1,
+               duration: 4000,
+               useNativeDriver: true,
+            }),
+         ])
+      );
+
+      // Title glow animation
+      const titleAnimation = Animated.loop(
+         Animated.sequence([
+            Animated.timing(titleGlow, {
+               toValue: 1,
+               duration: 3000,
+               useNativeDriver: false,
+            }),
+            Animated.timing(titleGlow, {
+               toValue: 0,
+               duration: 3000,
+               useNativeDriver: false,
+            }),
+         ])
+      );
+
+      scanlineAnimation.start();
+      glowAnimation.start();
+      matrixAnimation.start();
+      titleAnimation.start();
+
+      return () => {
+         glowAnimation.stop();
+         matrixAnimation.stop();
+         titleAnimation.stop();
+      };
+   }, []);
+
+   const scanlineTranslateY = scanlineAnim.interpolate({
+      inputRange: [0, 1],
+      outputRange: [-100, 900],
+   });
+
    return (
       <>
          <StatusBar
@@ -19,31 +107,128 @@ export default function LoginForm() {
             backgroundColor="transparent"
             translucent
          />
-         <LinearGradient
-            colors={['#3730a3', '#581c87', '#3730a3']}
-            start={{ x: 0, y: 0 }}
-            end={{ x: 1, y: 1 }}
-            className="flex-1"
-         >
-            <View className="flex-1 justify-center items-center px-5 py-12">
-               {/* Hero section with app icon */}
-               <View className="items-center mb-12">
-                  {/* App Icon Container - Glassmorphism style */}
-                  <View className="mb-10 relative">
-                     <BlurView
-                        intensity={80}
-                        tint="dark"
-                        className="w-48 h-48 rounded-3xl items-center justify-center overflow-hidden border"
+
+         {/* Cyberpunk background with multiple layers */}
+         <View className="flex-1 relative">
+            <LinearGradient
+               colors={getCyberpunkGradient('dark')}
+               style={{
+                  flex: 1,
+                  position: 'absolute',
+                  width: '100%',
+                  height: '100%',
+               }}
+            />
+
+            {/* Matrix grid overlay */}
+            <Animated.View
+               className="absolute inset-0 opacity-20"
+               style={{ opacity: matrixFade }}
+            >
+               <View className="flex-1 bg-gradient-to-br from-transparent via-neonCyan/5 to-neonPink/5" />
+
+               {/* Grid pattern */}
+               <View className="absolute inset-0">
+                  {Array.from({ length: 20 }).map((_, i) => (
+                     <View
+                        key={`v-${i}`}
+                        className="absolute w-px bg-neonCyan/10"
                         style={{
-                           backgroundColor: 'rgba(30, 41, 59, 0.5)',
-                           borderColor: 'rgba(255, 255, 255, 0.1)',
-                           shadowColor: '#ec4899',
-                           shadowOffset: { width: 0, height: 12 },
-                           shadowOpacity: 0.3,
+                           left: i * 20,
+                           top: 0,
+                           bottom: 0,
+                        }}
+                     />
+                  ))}
+                  {Array.from({ length: 50 }).map((_, i) => (
+                     <View
+                        key={`h-${i}`}
+                        className="absolute h-px bg-neonCyan/10"
+                        style={{
+                           top: i * 20,
+                           left: 0,
+                           right: 0,
+                        }}
+                     />
+                  ))}
+               </View>
+            </Animated.View>
+
+            {/* Scan line effect */}
+            <Animated.View
+               className="absolute left-0 right-0 h-1 bg-neonCyan opacity-80"
+               style={{
+                  transform: [{ translateY: scanlineTranslateY }],
+                  shadowColor: colors.neonCyan,
+                  shadowOffset: { width: 0, height: 0 },
+                  shadowOpacity: 1,
+                  shadowRadius: 10,
+               }}
+            />
+
+            {/* Corner frame elements */}
+            <View className="absolute top-0 left-0 w-8 h-8 border-l-2 border-t-2 border-neonCyan" />
+            <View className="absolute top-0 right-0 w-8 h-8 border-r-2 border-t-2 border-neonPink" />
+            <View className="absolute bottom-0 left-0 w-8 h-8 border-l-2 border-b-2 border-neonGreen" />
+            <View className="absolute bottom-0 right-0 w-8 h-8 border-r-2 border-b-2 border-neonBlue" />
+
+            <View className="flex-1 justify-center items-center px-5 py-12">
+               {/* Hero section with cyberpunk app icon */}
+               <View className="items-center mb-12 relative">
+                  {/* Cyberpunk App Icon Container */}
+                  <View className="mb-10 relative">
+                     {/* Outer glow ring */}
+                     <Animated.View
+                        className="absolute inset-0 w-56 h-56 -m-4 rounded-xl border-2 border-neonCyan/30"
+                        style={{
+                           opacity: glowAnim.interpolate({
+                              inputRange: [0, 1],
+                              outputRange: [0.3, 0.8],
+                           }),
+                           transform: [
+                              {
+                                 scale: glowAnim.interpolate({
+                                    inputRange: [0, 1],
+                                    outputRange: [1, 1.05],
+                                 }),
+                              },
+                           ],
+                           shadowColor: colors.neonCyan,
+                           shadowOffset: { width: 0, height: 0 },
+                           shadowOpacity: 1,
                            shadowRadius: 20,
-                           elevation: 12,
+                        }}
+                     />
+
+                     {/* Corner brackets */}
+                     <View className="absolute -top-2 -left-2 w-4 h-4 border-l-2 border-t-2 border-neonGreen" />
+                     <View className="absolute -top-2 -right-2 w-4 h-4 border-r-2 border-t-2 border-neonPink" />
+                     <View className="absolute -bottom-2 -left-2 w-4 h-4 border-l-2 border-b-2 border-neonBlue" />
+                     <View className="absolute -bottom-2 -right-2 w-4 h-4 border-r-2 border-b-2 border-neonOrange" />
+
+                     {/* Main icon container */}
+                     <View
+                        className="w-48 h-48 items-center justify-center relative border-2 border-neonCyan/50 bg-cyberBackground/80"
+                        style={{
+                           borderRadius: 12,
+                           shadowColor: colors.neonCyan,
+                           shadowOffset: { width: 0, height: 0 },
+                           shadowOpacity: 0.5,
+                           shadowRadius: 15,
                         }}
                      >
+                        {/* Holographic overlay */}
+                        <Animated.View
+                           className="absolute inset-0 rounded-xl"
+                           style={{
+                              backgroundColor: colors.holoBlue,
+                              opacity: glowAnim.interpolate({
+                                 inputRange: [0, 1],
+                                 outputRange: [0.1, 0.3],
+                              }),
+                           }}
+                        />
+
                         <Image
                            source={require('@/assets/images/icon.png')}
                            style={{
@@ -53,154 +238,335 @@ export default function LoginForm() {
                            }}
                            resizeMode="contain"
                         />
-                     </BlurView>
+
+                        {/* Scanning line overlay */}
+                        <Animated.View
+                           className="absolute left-0 right-0 h-1 bg-neonGreen opacity-60"
+                           style={{
+                              transform: [
+                                 {
+                                    translateY: scanlineAnim.interpolate({
+                                       inputRange: [0, 1],
+                                       outputRange: [0, 180],
+                                    }),
+                                 },
+                              ],
+                           }}
+                        />
+                     </View>
                   </View>
 
-                  {/* App Title - Glassmorphism Typography */}
-                  <View className="items-center mb-8">
-                     <LinearGradient
-                        colors={['#0dafe6', '#0f99c6']}
-                        start={{ x: 0, y: 0 }}
-                        end={{ x: 1, y: 0 }}
-                        className="px-1 py-0.5 mb-3"
+                  {/* Cyberpunk App Title */}
+                  <View className="items-center mb-8 relative">
+                     {/* Title with animated neon glow */}
+                     <Animated.View
+                        className="mb-3 relative"
+                        style={{
+                           shadowColor: colors.neonCyan,
+                           shadowOffset: { width: 0, height: 0 },
+                           shadowOpacity: titleGlow.interpolate({
+                              inputRange: [0, 1],
+                              outputRange: [0.5, 1],
+                           }),
+                           shadowRadius: titleGlow.interpolate({
+                              inputRange: [0, 1],
+                              outputRange: [10, 25],
+                           }),
+                        }}
                      >
-                        <Text className="text-4xl font-black text-white tracking-wide">
+                        <Text
+                           className="text-4xl font-black text-neonCyan tracking-wide"
+                           style={{
+                              textShadowColor: colors.neonCyan,
+                              textShadowOffset: { width: 0, height: 0 },
+                              textShadowRadius: 10,
+                           }}
+                        >
                            POKER AI
                         </Text>
-                     </LinearGradient>
-                     <Text className="text-3xl font-bold text-white/90 tracking-wider mb-4">
+                        {/* Animated underline */}
+                        <Animated.View
+                           className="absolute -bottom-1 left-0 right-0 h-0.5 bg-neonCyan"
+                           style={{
+                              opacity: titleGlow.interpolate({
+                                 inputRange: [0, 1],
+                                 outputRange: [0.6, 1],
+                              }),
+                              shadowColor: colors.neonCyan,
+                              shadowOffset: { width: 0, height: 0 },
+                              shadowOpacity: 1,
+                              shadowRadius: 8,
+                           }}
+                        />
+                     </Animated.View>
+
+                     <Animated.Text
+                        className="text-3xl font-bold tracking-wider mb-4"
+                        style={{
+                           color: colors.textSecondary,
+                           textShadowColor: colors.neonPink,
+                           textShadowOffset: { width: 0, height: 0 },
+                           textShadowRadius: titleGlow.interpolate({
+                              inputRange: [0, 1],
+                              outputRange: [5, 15],
+                           }),
+                        }}
+                     >
                         HomeStack
-                     </Text>
+                     </Animated.Text>
+
+                     {/* Cyberpunk feature tags */}
                      <View className="flex-row gap-2">
-                        <View className="px-3 py-1 rounded-full bg-cyan-500/20 border border-cyan-400/30">
-                           <Text className="text-cyan-300 font-semibold text-sm">
-                              TRACK
-                           </Text>
-                        </View>
-                        <View className="px-3 py-1 rounded-full bg-emerald-500/20 border border-emerald-400/30">
-                           <Text className="text-emerald-300 font-semibold text-sm">
-                              COMPETE
-                           </Text>
-                        </View>
-                        <View className="px-3 py-1 rounded-full bg-pink-500/20 border border-pink-400/30">
-                           <Text className="text-pink-300 font-semibold text-sm">
-                              DOMINATE
-                           </Text>
-                        </View>
+                        <Animated.View
+                           className="relative"
+                           style={{
+                              transform: [
+                                 {
+                                    scale: glowAnim.interpolate({
+                                       inputRange: [0, 1],
+                                       outputRange: [1, 1.05],
+                                    }),
+                                 },
+                              ],
+                           }}
+                        >
+                           <View className="px-3 py-1 border border-neonCyan bg-neonCyan/10 relative">
+                              <Text className="text-neonCyan font-bold text-sm tracking-wider">
+                                 TRACK
+                              </Text>
+                              <View className="absolute top-0 left-0 w-1 h-1 bg-neonCyan" />
+                              <View className="absolute top-0 right-0 w-1 h-1 bg-neonCyan" />
+                           </View>
+                        </Animated.View>
+
+                        <Animated.View
+                           className="relative"
+                           style={{
+                              transform: [
+                                 {
+                                    scale: glowAnim.interpolate({
+                                       inputRange: [0, 1],
+                                       outputRange: [1.05, 1],
+                                    }),
+                                 },
+                              ],
+                           }}
+                        >
+                           <View className="px-3 py-1 border border-neonGreen bg-neonGreen/10 relative">
+                              <Text className="text-neonGreen font-bold text-sm tracking-wider">
+                                 COMPETE
+                              </Text>
+                              <View className="absolute bottom-0 left-0 w-1 h-1 bg-neonGreen" />
+                              <View className="absolute bottom-0 right-0 w-1 h-1 bg-neonGreen" />
+                           </View>
+                        </Animated.View>
+
+                        <Animated.View
+                           className="relative"
+                           style={{
+                              transform: [
+                                 {
+                                    scale: glowAnim.interpolate({
+                                       inputRange: [0, 1],
+                                       outputRange: [1, 1.05],
+                                    }),
+                                 },
+                              ],
+                           }}
+                        >
+                           <View className="px-3 py-1 border border-neonPink bg-neonPink/10 relative">
+                              <Text className="text-neonPink font-bold text-sm tracking-wider">
+                                 DOMINATE
+                              </Text>
+                              <View className="absolute top-0 left-0 w-1 h-1 bg-neonPink" />
+                              <View className="absolute bottom-0 right-0 w-1 h-1 bg-neonPink" />
+                           </View>
+                        </Animated.View>
                      </View>
                   </View>
                </View>
 
-               {/* Action buttons - Glassmorphism style */}
-               <View className="w-3/4 gap-12 ">
-                  {/* Google Sign In Button */}
-                  {/* <Pressable
-                     onPress={signIn}
-                     className="mb-6 relative"
-                     style={({ pressed }) => ({
-                        transform: pressed ? [{ scale: 0.98 }] : [{ scale: 1 }],
-                     })}
-                  >
-                     <View
-                        className="flex-row items-center justify-center py-3 px-6 rounded-lg overflow-hidden border-[1px]"
-                        style={{
-                           backgroundColor: '#ffffff',
-                           borderColor: '#dadce0',
-                           shadowColor: '#000000',
-                           shadowOffset: { width: 0, height: 1 },
-                           shadowOpacity: 0.12,
-                           shadowRadius: 2,
-                           elevation: 2,
-                        }}
-                     >
-                        <View className="w-5 h-5 rounded items-center justify-center mr-3">
-                           <Ionicons
-                              name="logo-google"
-                              size={20}
-                              color={colors.primary}
-                           />
-                        </View>
-                        <Text
-                           className="font-medium text-base"
-                           style={{ color: colors.primary }}
-                        >
-                           {t('signInWithGoogle')}
-                        </Text>
-                     </View>
-                  </Pressable> */}
-                  <SignInWithGoogleButton
-                     onPress={signIn}
-                     disabled={isLoading}
-                  />
-                  <SignInWithAppleButton />
+               {/* Cyberpunk Action buttons */}
+               <View className="w-3/4 gap-8 relative">
+                  {/* Side panel indicators */}
+                  <View className="absolute -left-6 top-4 bottom-4 w-1 bg-gradient-to-b from-neonCyan via-neonPink to-neonGreen opacity-60" />
+                  <View className="absolute -right-6 top-4 bottom-4 w-1 bg-gradient-to-b from-neonGreen via-neonBlue to-neonPink opacity-60" />
 
-                  {/* Additional Options */}
-                  <View className="items-center mt-8">
-                     {/* View Onboarding Again Button */}
+                  <Animated.View
+                     style={{
+                        opacity: glowAnim.interpolate({
+                           inputRange: [0, 1],
+                           outputRange: [0.9, 1],
+                        }),
+                     }}
+                  >
+                     <SignInWithGoogleButton
+                        onPress={signIn}
+                        disabled={isLoading}
+                     />
+                  </Animated.View>
+
+                  <Animated.View
+                     style={{
+                        opacity: glowAnim.interpolate({
+                           inputRange: [0, 1],
+                           outputRange: [1, 0.9],
+                        }),
+                     }}
+                  >
+                     <SignInWithAppleButton />
+                  </Animated.View>
+
+                  {/* Additional Options with cyberpunk styling */}
+                  <View className="items-center mt-8 relative">
+                     {/* Enhanced View Onboarding Again Button */}
                      <Pressable
                         onPress={async () => {
                            await resetOnboarding();
                            router.replace('/');
                         }}
-                        className="mb-6"
+                        className="mb-8 relative"
                         style={({ pressed }) => ({
                            transform: pressed
                               ? [{ scale: 0.95 }]
                               : [{ scale: 1 }],
                         })}
                      >
-                        <BlurView
-                           intensity={60}
-                           tint="dark"
-                           className="py-3 px-6 rounded-2xl overflow-hidden border"
+                        {/* Outer glow ring */}
+                        <Animated.View
+                           className="absolute inset-0 -m-2 border border-neonGreen/30 rounded-lg"
                            style={{
-                              backgroundColor: 'rgba(30, 41, 59, 0.4)',
-                              borderColor: 'rgba(255, 255, 255, 0.1)',
+                              opacity: glowAnim.interpolate({
+                                 inputRange: [0, 1],
+                                 outputRange: [0.4, 0.9],
+                              }),
+                              shadowColor: colors.neonGreen,
+                              shadowOffset: { width: 0, height: 0 },
+                              shadowOpacity: 0.8,
+                              shadowRadius: 15,
+                           }}
+                        />
+
+                        <Animated.View
+                           className="py-4 px-8 border-2 border-neonGreen bg-cyberBackground/80 relative"
+                           style={{
+                              borderRadius: 12,
+                              opacity: glowAnim.interpolate({
+                                 inputRange: [0, 1],
+                                 outputRange: [0.9, 1],
+                              }),
+                              shadowColor: colors.neonGreen,
+                              shadowOffset: { width: 0, height: 0 },
+                              shadowOpacity: 1,
+                              shadowRadius: glowAnim.interpolate({
+                                 inputRange: [0, 1],
+                                 outputRange: [8, 20],
+                              }),
                            }}
                         >
-                           <Text className="font-semibold text-white/80 text-sm tracking-wide">
+                           {/* Corner brackets - larger and more prominent */}
+                           <View className="absolute top-0 left-0 w-4 h-4 border-l-2 border-t-2 border-neonGreen" />
+                           <View className="absolute top-0 right-0 w-4 h-4 border-r-2 border-t-2 border-neonGreen" />
+                           <View className="absolute bottom-0 left-0 w-4 h-4 border-l-2 border-b-2 border-neonGreen" />
+                           <View className="absolute bottom-0 right-0 w-4 h-4 border-r-2 border-b-2 border-neonGreen" />
+
+                           {/* Side accent lines */}
+                           <View className="absolute left-0 top-1/4 bottom-1/4 w-0.5 bg-neonGreen/60" />
+                           <View className="absolute right-0 top-1/4 bottom-1/4 w-0.5 bg-neonGreen/60" />
+
+                           {/* Holographic overlay */}
+                           <Animated.View
+                              className="absolute inset-0 bg-neonGreen/10 rounded-lg"
+                              style={{
+                                 opacity: glowAnim.interpolate({
+                                    inputRange: [0, 1],
+                                    outputRange: [0.1, 0.3],
+                                 }),
+                              }}
+                           />
+
+                           <Text
+                              className="font-black text-textNeonGreen text-base tracking-widest"
+                              style={{
+                                 textShadowColor: colors.neonOrange,
+                                 textShadowOffset: { width: 0, height: 0 },
+                                 textShadowRadius: 8,
+                              }}
+                           >
                               {t('onboardingViewAgain')}
                            </Text>
-                        </BlurView>
+                        </Animated.View>
                      </Pressable>
 
-                     <BlurView
-                        intensity={40}
-                        tint="dark"
-                        className="p-4 rounded-2xl mx-4 border overflow-hidden"
+                     {/* Terms and Privacy with cyberpunk styling */}
+                     <Animated.View
+                        className="p-4 mx-4 border border-neonCyan/20 bg-cyberBackground/40 relative"
                         style={{
-                           backgroundColor: 'rgba(30, 41, 59, 0.3)',
-                           borderColor: 'rgba(255, 255, 255, 0.05)',
+                           borderRadius: 8,
+                           opacity: glowAnim.interpolate({
+                              inputRange: [0, 1],
+                              outputRange: [0.7, 0.9],
+                           }),
                         }}
                      >
+                        {/* Holographic overlay */}
+                        <Animated.View
+                           className="absolute inset-0 rounded-lg"
+                           style={{
+                              backgroundColor: colors.holoBlue,
+                              opacity: glowAnim.interpolate({
+                                 inputRange: [0, 1],
+                                 outputRange: [0.05, 0.15],
+                              }),
+                           }}
+                        />
+
                         <Text className="text-xs text-center text-white/60 leading-relaxed">
                            By continuing, you agree to our{' '}
                            <Text
-                              className="text-cyan-400"
+                              className="text-neonCyan font-semibold"
                               onPress={() => router.push('/terms')}
+                              style={{
+                                 textShadowColor: colors.neonCyan,
+                                 textShadowOffset: { width: 0, height: 0 },
+                                 textShadowRadius: 5,
+                              }}
                            >
                               Terms
                            </Text>{' '}
                            and{' '}
                            <Text
-                              className="text-cyan-400"
+                              className="text-neonCyan font-semibold"
                               onPress={() => router.push('/privacy')}
+                              style={{
+                                 textShadowColor: colors.neonCyan,
+                                 textShadowOffset: { width: 0, height: 0 },
+                                 textShadowRadius: 5,
+                              }}
                            >
                               Privacy Policy
                            </Text>
                         </Text>
-                     </BlurView>
+                     </Animated.View>
                   </View>
                </View>
             </View>
 
-            {/* Bottom gradient accent */}
-            <LinearGradient
-               colors={['transparent', 'rgba(236, 72, 153, 0.1)']}
-               className="absolute bottom-0 left-0 right-0 h-32"
-               pointerEvents="none"
+            {/* Bottom status bar with cyberpunk styling */}
+            <Animated.View
+               className="absolute bottom-0 left-0 right-0 h-1 bg-gradient-to-r from-neonCyan via-neonPink to-neonGreen"
+               style={{
+                  opacity: glowAnim.interpolate({
+                     inputRange: [0, 1],
+                     outputRange: [0.5, 1],
+                  }),
+                  shadowColor: colors.neonCyan,
+                  shadowOffset: { width: 0, height: 0 },
+                  shadowOpacity: 1,
+                  shadowRadius: 10,
+               }}
             />
-         </LinearGradient>
+         </View>
       </>
    );
 }
