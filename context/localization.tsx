@@ -508,7 +508,7 @@ const enTranslations: Translations = {
    avgGameDuration: 'AVG GAME DURATION',
 
    // Onboarding
-   onboardingWelcomeTitle: 'Welcome to Poker League Hero',
+   onboardingWelcomeTitle: 'Welcome to Poker AI:HomeStack',
    onboardingWelcomeSubtitle:
       'The ultimate tool for managing your home poker games and leagues.',
    onboardingLeaguesTitle: 'Manage Leagues',
@@ -791,7 +791,7 @@ const heTranslations: Translations = {
    avgGameDuration: 'משך משחק ממוצע',
 
    // Onboarding
-   onboardingWelcomeTitle: 'ברוכים הבאים ל-Poker League Hero',
+   onboardingWelcomeTitle: 'ברוכים הבאים ל-Poker AI:HomeStack',
    onboardingWelcomeSubtitle:
       'הכלי האולטימטיבי לניהול משחקי הפוקר והליגות הביתיות שלך.',
    onboardingLeaguesTitle: 'ניהול ליגות',
