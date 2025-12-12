@@ -342,18 +342,14 @@ const CyberpunkAnonymousPlayerTag = React.memo<{
             style={[
                cyberpunkStyles.anonymousTagContainer,
                {
-                  shadowColor: colors.neonOrange,
+                  shadowColor: colors.neonCyan,
                   shadowOpacity: glowOpacity,
-                  borderColor: colors.neonOrange,
+                  borderColor: colors.neonCyan,
                },
             ]}
          >
             <LinearGradient
-               colors={[
-                  colors.cyberBackground,
-                  colors.neonOrange,
-                  'transparent',
-               ]}
+               colors={[colors.cyberBackground, colors.neonCyan, 'transparent']}
                start={{ x: 0, y: 0 }}
                end={{ x: 1, y: 0 }}
                style={cyberpunkStyles.anonymousTagGradient}
@@ -363,7 +359,7 @@ const CyberpunkAnonymousPlayerTag = React.memo<{
                   style={[
                      cyberpunkStyles.miniScanLine,
                      {
-                        backgroundColor: colors.neonOrange,
+                        backgroundColor: colors.neonPink,
                         opacity: glowOpacity.interpolate({
                            inputRange: [0.3, 0.7],
                            outputRange: [0.1, 0.3],
@@ -383,7 +379,7 @@ const CyberpunkAnonymousPlayerTag = React.memo<{
                <Ionicons
                   name="close-circle"
                   size={16}
-                  color={colors.neonOrange}
+                  color={colors.neonPink}
                   style={{
                      textShadowColor: colors.neonOrange,
                      textShadowOffset: { width: 0, height: 0 },

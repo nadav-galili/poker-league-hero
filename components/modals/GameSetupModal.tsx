@@ -1,18 +1,24 @@
 /**
- * GameSetupModal component for configuring game settings before creation
+ * GameSetupModal component - Cyberpunk styled modal for configuring game settings
+ * Features neon green matrix theme with holographic effects
  */
 
-import { colors, getTheme } from '@/colors';
-import { Text } from '@/components/Text';
-import { AppButton } from '@/components/ui/AppButton';
+import { colors, getCyberpunkGradient } from '@/colors';
+import { Text as CustomText } from '@/components/Text';
 import { BuyInSelector } from '@/components/ui/BuyInSelector';
+import { CyberpunkButton } from '@/components/ui/CyberpunkButton';
 import { useLocalization } from '@/context/localization';
 import { LeagueMember } from '@/types';
 import { Ionicons } from '@expo/vector-icons';
 import { Image } from 'expo-image';
-import React from 'react';
+import { LinearGradient } from 'expo-linear-gradient';
+import React, { useEffect, useRef } from 'react';
 import {
+   Animated,
+   Dimensions,
+   KeyboardAvoidingView,
    Modal,
+   Platform,
    ScrollView,
    StyleSheet,
    TouchableOpacity,
@@ -33,6 +39,197 @@ interface GameSetupModalProps {
    theme?: 'light' | 'dark';
 }
 
+const { width: screenWidth, height: screenHeight } = Dimensions.get('window');
+
+// Matrix Rain Component - Game Setup themed
+function MatrixRain() {
+   const animatedValues = useRef(
+      Array.from({ length: 12 }, () => new Animated.Value(0))
+   ).current;
+
+   useEffect(() => {
+      const animations = animatedValues.map((value, index) =>
+         Animated.loop(
+            Animated.sequence([
+               Animated.delay(index * 150),
+               Animated.timing(value, {
+                  toValue: 1,
+                  duration: 2500 + Math.random() * 1500,
+                  useNativeDriver: true,
+               }),
+            ])
+         )
+      );
+
+      animations.forEach((anim) => anim.start());
+      return () => animations.forEach((anim) => anim.stop());
+   }, []);
+
+   return (
+      <View style={StyleSheet.absoluteFill} pointerEvents="none">
+         {animatedValues.map((animValue, index) => (
+            <Animated.View
+               key={index}
+               style={[
+                  {
+                     position: 'absolute',
+                     left: (index * screenWidth) / 12,
+                     width: 2,
+                     height: screenHeight,
+                     backgroundColor: colors.neonGreen, // Game setup green theme
+                     opacity: animValue.interpolate({
+                        inputRange: [0, 0.3, 0.7, 1],
+                        outputRange: [0, 0.15, 0.08, 0],
+                     }),
+                     transform: [
+                        {
+                           translateY: animValue.interpolate({
+                              inputRange: [0, 1],
+                              outputRange: [-screenHeight, screenHeight * 1.2],
+                           }),
+                        },
+                     ],
+                  },
+               ]}
+            />
+         ))}
+      </View>
+   );
+}
+
+// Corner Brackets Component
+function CornerBrackets({ color = colors.neonGreen }: { color?: string }) {
+   return (
+      <View style={StyleSheet.absoluteFill} pointerEvents="none">
+         {/* Top Left */}
+         <View
+            style={[
+               styles.cornerBracket,
+               styles.topLeft,
+               { borderColor: color },
+            ]}
+         />
+         {/* Top Right */}
+         <View
+            style={[
+               styles.cornerBracket,
+               styles.topRight,
+               { borderColor: color },
+            ]}
+         />
+         {/* Bottom Left */}
+         <View
+            style={[
+               styles.cornerBracket,
+               styles.bottomLeft,
+               { borderColor: color },
+            ]}
+         />
+         {/* Bottom Right */}
+         <View
+            style={[
+               styles.cornerBracket,
+               styles.bottomRight,
+               { borderColor: color },
+            ]}
+         />
+      </View>
+   );
+}
+
+// Holographic Overlay Component
+function HolographicOverlay() {
+   const scanLineAnim = useRef(new Animated.Value(0)).current;
+   const flickerAnim = useRef(new Animated.Value(0)).current;
+
+   useEffect(() => {
+      // Continuous scan line animation
+      Animated.loop(
+         Animated.timing(scanLineAnim, {
+            toValue: 1,
+            duration: 3000,
+            useNativeDriver: true,
+         })
+      ).start();
+
+      // Occasional flicker effect
+      Animated.loop(
+         Animated.sequence([
+            Animated.timing(flickerAnim, {
+               toValue: 1,
+               duration: 100,
+               useNativeDriver: true,
+            }),
+            Animated.timing(flickerAnim, {
+               toValue: 0,
+               duration: 100,
+               useNativeDriver: true,
+            }),
+            Animated.delay(5000),
+         ])
+      ).start();
+   }, []);
+
+   return (
+      <View style={StyleSheet.absoluteFill} pointerEvents="none">
+         {/* Moving scan line */}
+         <Animated.View
+            style={[
+               {
+                  position: 'absolute',
+                  left: 0,
+                  right: 0,
+                  height: 2,
+                  backgroundColor: colors.neonGreen,
+                  opacity: 0.4,
+                  shadowColor: colors.neonGreen,
+                  shadowOffset: { width: 0, height: 0 },
+                  shadowOpacity: 0.6,
+                  shadowRadius: 4,
+                  transform: [
+                     {
+                        translateY: scanLineAnim.interpolate({
+                           inputRange: [0, 1],
+                           outputRange: [0, screenHeight],
+                        }),
+                     },
+                  ],
+               },
+            ]}
+         />
+
+         {/* Static horizontal scan lines */}
+         {Array.from({ length: 15 }, (_, i) => (
+            <View
+               key={i}
+               style={[
+                  {
+                     position: 'absolute',
+                     left: 0,
+                     right: 0,
+                     height: 1,
+                     top: (i * screenHeight) / 15,
+                     backgroundColor: colors.neonGreen,
+                     opacity: 0.015,
+                  },
+               ]}
+            />
+         ))}
+
+         {/* Flicker overlay */}
+         <Animated.View
+            style={[
+               StyleSheet.absoluteFill,
+               {
+                  backgroundColor: 'rgba(0, 255, 65, 0.02)',
+                  opacity: flickerAnim,
+               },
+            ]}
+         />
+      </View>
+   );
+}
+
 export function GameSetupModal({
    visible,
    selectedPlayers,
@@ -46,8 +243,9 @@ export function GameSetupModal({
    anonymousPlayers = [],
    theme: themeProp = 'light',
 }: GameSetupModalProps) {
-   const theme = getTheme(themeProp);
    const { t } = useLocalization();
+   const glowAnim = useRef(new Animated.Value(0)).current;
+   const pulseAnim = useRef(new Animated.Value(0)).current;
 
    const buyInOptions = availableBuyIns.map((value) => ({
       value,
@@ -55,368 +253,575 @@ export function GameSetupModal({
       displayValue: value,
    }));
 
+   useEffect(() => {
+      if (visible) {
+         // Title glow animation
+         Animated.loop(
+            Animated.sequence([
+               Animated.timing(glowAnim, {
+                  toValue: 1,
+                  duration: 1500,
+                  useNativeDriver: false,
+               }),
+               Animated.timing(glowAnim, {
+                  toValue: 0,
+                  duration: 1500,
+                  useNativeDriver: false,
+               }),
+            ])
+         ).start();
+
+         // Subtle pulse for cards
+         Animated.loop(
+            Animated.sequence([
+               Animated.timing(pulseAnim, {
+                  toValue: 1,
+                  duration: 2000,
+                  useNativeDriver: true,
+               }),
+               Animated.timing(pulseAnim, {
+                  toValue: 0,
+                  duration: 2000,
+                  useNativeDriver: true,
+               }),
+            ])
+         ).start();
+      }
+   }, [visible, glowAnim, pulseAnim]);
+
+   const handleClose = () => {
+      onClose();
+   };
+
    return (
       <Modal
          visible={visible}
-         animationType="slide"
-         presentationStyle="pageSheet"
-         onRequestClose={onClose}
+         animationType="fade"
+         transparent={true}
+         onRequestClose={handleClose}
       >
-         <View
-            style={[
-               styles.modalContainer,
-               { backgroundColor: theme.background },
-            ]}
-         >
-            {/* Modal Header */}
-            <View
-               style={[styles.modalHeader, { backgroundColor: colors.primary }]}
+         <View style={modalStyles.backdrop}>
+            <KeyboardAvoidingView
+               behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+               style={modalStyles.modalContainer}
             >
-               <TouchableOpacity
-                  onPress={onClose}
-                  style={styles.modalBackButton}
+               <LinearGradient
+                  colors={getCyberpunkGradient('matrix')}
+                  style={modalStyles.gradientContainer}
                >
-                  <Ionicons name="close" size={24} color={colors.text} />
-               </TouchableOpacity>
-               <Text style={[styles.modalHeaderTitle, { color: colors.text }]}>
-                  {t('gameSetup')}
-               </Text>
-               <View style={styles.placeholder} />
-            </View>
+                  <MatrixRain />
+                  <HolographicOverlay />
+                  <CornerBrackets color={colors.neonGreen} />
 
-            <ScrollView
-               style={styles.modalContent}
-               showsVerticalScrollIndicator={false}
-            >
-               {/* League Info */}
-               {leagueName && (
-                  <View
-                     style={[
-                        styles.infoCard,
-                        { backgroundColor: theme.surfaceElevated },
-                     ]}
-                  >
-                     <Text
-                        variant="h4"
-                        color={theme.text}
-                        style={styles.infoLabel}
+                  {/* Header */}
+                  <View style={modalStyles.header}>
+                     <TouchableOpacity
+                        onPress={handleClose}
+                        style={modalStyles.closeButton}
+                        disabled={isCreatingGame}
                      >
-                        {t('league')}
-                     </Text>
-                     <Text variant="body" color={theme.textMuted}>
-                        {leagueName}
-                     </Text>
-                  </View>
-               )}
-
-               {/* Selected Players Summary */}
-               <View
-                  style={[
-                     styles.summaryCard,
-                     { backgroundColor: theme.surfaceElevated },
-                  ]}
-               >
-                  <Text
-                     variant="h3"
-                     color={theme.text}
-                     style={styles.summaryTitle}
-                  >
-                     {t('selectedPlayers')} (
-                     {selectedPlayers.length + anonymousPlayers.length})
-                  </Text>
-                  <View style={styles.selectedPlayersList}>
-                     {selectedPlayers.map((member) => (
-                        <View key={member.id} style={styles.selectedPlayerItem}>
-                           <Image
-                              source={{
-                                 uri:
-                                    member.profileImageUrl ||
-                                    'https://via.placeholder.com/30x30/cccccc/666666?text=?',
-                              }}
-                              style={styles.selectedPlayerImage}
-                              contentFit="cover"
-                           />
-                           <Text
-                              variant="body"
-                              color={theme.text}
-                              style={styles.selectedPlayerName}
-                           >
-                              {member.fullName}
-                           </Text>
-                        </View>
-                     ))}
-                     {anonymousPlayers.map((player, index) => (
-                        <View
-                           key={`anon-${index}`}
-                           style={styles.selectedPlayerItem}
+                        <LinearGradient
+                           colors={[colors.neonGreen, colors.matrixGreenDark]}
+                           style={modalStyles.closeButtonGradient}
                         >
-                           <Image
-                              source={require('@/assets/images/anonymous.webp')}
-                              style={styles.selectedPlayerImage}
-                              contentFit="cover"
+                           <Ionicons
+                              name="close"
+                              size={20}
+                              color={colors.cyberBackground}
                            />
-                           <Text
-                              variant="body"
-                              color={theme.text}
-                              style={styles.selectedPlayerName}
+                        </LinearGradient>
+                     </TouchableOpacity>
+
+                     <Animated.View
+                        style={[
+                           modalStyles.titleContainer,
+                           {
+                              shadowOpacity: glowAnim.interpolate({
+                                 inputRange: [0, 1],
+                                 outputRange: [0.2, 0.6],
+                              }),
+                           },
+                        ]}
+                     >
+                        <CustomText variant="h2" style={modalStyles.title}>
+                           {t('gameSetup')}
+                        </CustomText>
+                     </Animated.View>
+                  </View>
+
+                  {/* Content */}
+                  <ScrollView
+                     style={modalStyles.scrollContent}
+                     showsVerticalScrollIndicator={false}
+                     contentContainerStyle={{ paddingBottom: 20 }}
+                  >
+                     {/* Selected Players Summary */}
+                     <Animated.View
+                        style={[
+                           modalStyles.cyberpunkCard,
+                           {
+                              transform: [
+                                 {
+                                    scale: pulseAnim.interpolate({
+                                       inputRange: [0, 1],
+                                       outputRange: [1, 1.02],
+                                    }),
+                                 },
+                              ],
+                           },
+                        ]}
+                     >
+                        <LinearGradient
+                           colors={[
+                              'rgba(0, 255, 65, 0.1)',
+                              'rgba(0, 0, 0, 0.8)',
+                           ]}
+                           style={modalStyles.cardGradient}
+                        >
+                           <CustomText
+                              variant="h4"
+                              style={modalStyles.cardTitle}
                            >
-                              {player.name}
-                           </Text>
-                        </View>
-                     ))}
-                  </View>
-               </View>
+                              {t('selectedPlayers')} (PLAYERS:{' '}
+                              {selectedPlayers.length + anonymousPlayers.length}
+                              )
+                           </CustomText>
 
-               {/* Buy-in Selector */}
-               <View
-                  style={[
-                     styles.inputCard,
-                     { backgroundColor: theme.surfaceElevated },
-                  ]}
-               >
-                  <Text
-                     variant="h4"
-                     color={theme.text}
-                     style={styles.inputLabel}
-                  >
-                     {t('buyInAmount')} *
-                  </Text>
-                  <BuyInSelector
-                     selectedBuyIn={buyIn}
-                     onBuyInChange={onBuyInChange}
-                     options={buyInOptions}
-                     variant="horizontal"
-                     disabled={isCreatingGame}
-                  />
-               </View>
+                           <View style={modalStyles.playersGrid}>
+                              {selectedPlayers.map((member) => (
+                                 <View
+                                    key={member.id}
+                                    style={modalStyles.playerChip}
+                                 >
+                                    <LinearGradient
+                                       colors={[
+                                          colors.neonGreen,
+                                          colors.matrixGreenDark,
+                                       ]}
+                                       style={modalStyles.playerChipGradient}
+                                    >
+                                       <View
+                                          style={
+                                             modalStyles.playerImageContainer
+                                          }
+                                       >
+                                          <Image
+                                             source={{
+                                                uri:
+                                                   member.profileImageUrl ||
+                                                   'https://via.placeholder.com/30x30/cccccc/666666?text=?',
+                                             }}
+                                             style={modalStyles.playerImage}
+                                             contentFit="cover"
+                                          />
+                                       </View>
+                                       <CustomText
+                                          variant="caption"
+                                          style={modalStyles.playerName}
+                                       >
+                                          {member.fullName.toUpperCase()}
+                                       </CustomText>
+                                    </LinearGradient>
+                                 </View>
+                              ))}
+                              {anonymousPlayers.map((player, index) => (
+                                 <View
+                                    key={`anon-${index}`}
+                                    style={modalStyles.playerChip}
+                                 >
+                                    <LinearGradient
+                                       colors={[colors.neonOrange, '#CC4400']}
+                                       style={modalStyles.playerChipGradient}
+                                    >
+                                       <View
+                                          style={
+                                             modalStyles.playerImageContainer
+                                          }
+                                       >
+                                          <Image
+                                             source={require('@/assets/images/anonymous.webp')}
+                                             style={modalStyles.playerImage}
+                                             contentFit="cover"
+                                          />
+                                       </View>
+                                       <CustomText
+                                          variant="caption"
+                                          style={
+                                             modalStyles.playerNameAnonymous
+                                          }
+                                       >
+                                          {player.name.toUpperCase()}
+                                       </CustomText>
+                                    </LinearGradient>
+                                 </View>
+                              ))}
+                           </View>
+                        </LinearGradient>
+                     </Animated.View>
 
-               {/* Game Summary */}
-               <View
-                  style={[
-                     styles.summaryCard,
-                     { backgroundColor: theme.surfaceElevated },
-                  ]}
-               >
-                  <Text
-                     variant="h4"
-                     color={theme.text}
-                     style={styles.summaryTitle}
-                  >
-                     {t('gameSummary')}
-                  </Text>
-                  <View style={styles.summaryRow}>
-                     <Text variant="body" color={theme.textMuted}>
-                        {t('totalPlayers')}:
-                     </Text>
-                     <Text
-                        variant="body"
-                        color={theme.text}
-                        style={styles.summaryValue}
-                     >
-                        {selectedPlayers.length + anonymousPlayers.length}
-                     </Text>
-                  </View>
-                  <View style={styles.summaryRow}>
-                     <Text variant="body" color={theme.textMuted}>
-                        {t('buyInPerPlayer')}:
-                     </Text>
-                     <Text
-                        variant="body"
-                        color={theme.text}
-                        style={styles.summaryValue}
-                     >
-                        ₪{buyIn}
-                     </Text>
-                  </View>
-                  <View style={styles.summaryRow}>
-                     <Text variant="body" color={theme.textMuted}>
-                        {t('totalPot')}:
-                     </Text>
-                     <Text
-                        variant="h4"
-                        color={colors.primary}
-                        style={styles.summaryValue}
-                     >
-                        ₪
-                        {parseInt(buyIn) *
-                           (selectedPlayers.length + anonymousPlayers.length)}
-                     </Text>
-                  </View>
-               </View>
-            </ScrollView>
+                     {/* Buy-in Selector */}
+                     <View style={modalStyles.cyberpunkCard}>
+                        <LinearGradient
+                           colors={[
+                              'rgba(0, 255, 65, 0.1)',
+                              'rgba(0, 0, 0, 0.8)',
+                           ]}
+                           style={modalStyles.cardGradient}
+                        >
+                           <CustomText
+                              variant="h4"
+                              style={modalStyles.cardTitle}
+                           >
+                              BUY-IN AMOUNT *
+                           </CustomText>
+                           <View style={modalStyles.buyinContainer}>
+                              <BuyInSelector
+                                 selectedBuyIn={buyIn}
+                                 onBuyInChange={onBuyInChange}
+                                 options={buyInOptions}
+                                 variant="horizontal"
+                                 disabled={isCreatingGame}
+                              />
+                           </View>
+                        </LinearGradient>
+                     </View>
 
-            {/* Create Game Button */}
-            <View className="flex justify-center items-center pb-10 pt-4">
-               <AppButton
-                  title={isCreatingGame ? t('creatingGame') : t('createGame')}
-                  onPress={() => {
-                     onCreateGame();
-                  }}
-                  color="success"
-                  disabled={isCreatingGame}
-                  size="large"
-                  icon="play-circle-outline"
-               />
-            </View>
+                     {/* Game Summary */}
+                     <View style={modalStyles.cyberpunkCard}>
+                        <LinearGradient
+                           colors={[
+                              'rgba(0, 255, 65, 0.1)',
+                              'rgba(0, 0, 0, 0.8)',
+                           ]}
+                           style={modalStyles.cardGradient}
+                        >
+                           <CustomText
+                              variant="h4"
+                              style={modalStyles.cardTitle}
+                           >
+                              GAME SUMMARY
+                           </CustomText>
+
+                           <View style={modalStyles.summaryGrid}>
+                              <View style={modalStyles.summaryItem}>
+                                 <CustomText
+                                    variant="caption"
+                                    style={modalStyles.summaryLabel}
+                                 >
+                                    TOTAL PLAYERS
+                                 </CustomText>
+                                 <CustomText
+                                    variant="h3"
+                                    style={modalStyles.summaryValue}
+                                 >
+                                    {selectedPlayers.length +
+                                       anonymousPlayers.length}
+                                 </CustomText>
+                              </View>
+
+                              <View style={modalStyles.summaryItem}>
+                                 <CustomText
+                                    variant="caption"
+                                    style={modalStyles.summaryLabel}
+                                 >
+                                    BUY-IN/PLAYER
+                                 </CustomText>
+                                 <CustomText
+                                    variant="h3"
+                                    style={modalStyles.summaryValue}
+                                 >
+                                    ₪{buyIn}
+                                 </CustomText>
+                              </View>
+
+                              <View style={modalStyles.summaryItemHighlight}>
+                                 <CustomText
+                                    variant="caption"
+                                    style={modalStyles.summaryLabelHighlight}
+                                 >
+                                    TOTAL POT
+                                 </CustomText>
+                                 <CustomText
+                                    variant="h2"
+                                    style={modalStyles.summaryValueHighlight}
+                                 >
+                                    ₪
+                                    {parseInt(buyIn) *
+                                       (selectedPlayers.length +
+                                          anonymousPlayers.length)}
+                                 </CustomText>
+                              </View>
+                           </View>
+                        </LinearGradient>
+                     </View>
+                  </ScrollView>
+
+                  {/* Create Game Button */}
+                  <View style={modalStyles.buttonContainer}>
+                     <CyberpunkButton
+                        title={
+                           isCreatingGame ? t('creatingGame') : t('createGame')
+                        }
+                        onPress={onCreateGame}
+                        variant="create"
+                        size="large"
+                        icon="play-circle-outline"
+                        disabled={isCreatingGame}
+                        loading={isCreatingGame}
+                        width="100%"
+                     />
+                  </View>
+               </LinearGradient>
+            </KeyboardAvoidingView>
          </View>
       </Modal>
    );
 }
 
-const styles = StyleSheet.create({
-   modalContainer: {
+const modalStyles = StyleSheet.create({
+   backdrop: {
       flex: 1,
+      backgroundColor: 'rgba(0, 0, 0, 0.95)',
+      justifyContent: 'center',
+      alignItems: 'center',
+      paddingHorizontal: 10,
+      paddingVertical: 20,
    },
-
-   modalHeader: {
+   modalContainer: {
+      width: '100%',
+      maxWidth: '95%',
+      height: '85%',
+   },
+   gradientContainer: {
+      flex: 1,
+      borderRadius: 0,
+      borderWidth: 2,
+      borderColor: colors.neonGreen,
+      shadowColor: colors.neonGreen,
+      shadowOffset: { width: 0, height: 0 },
+      shadowOpacity: 0.3,
+      shadowRadius: 8,
+      elevation: 20,
+      position: 'relative',
+      overflow: 'hidden',
+   },
+   header: {
       flexDirection: 'row',
       alignItems: 'center',
       justifyContent: 'space-between',
       paddingHorizontal: 20,
-      paddingTop: 60,
+      paddingTop: 20,
       paddingBottom: 16,
-      borderBottomWidth: 6,
-      borderBottomColor: colors.text,
+      borderBottomWidth: 2,
+      borderBottomColor: colors.neonGreen,
+      backgroundColor: 'rgba(0, 0, 0, 0.4)',
    },
-
-   modalBackButton: {
-      padding: 8,
+   closeButton: {
+      borderRadius: 0,
+      borderWidth: 1,
+      borderColor: colors.neonGreen,
+      overflow: 'hidden',
    },
-
-   modalHeaderTitle: {
-      fontSize: 20,
-      fontWeight: '700',
-      textTransform: 'uppercase',
-      letterSpacing: 1,
-   },
-
-   placeholder: {
-      width: 40,
-   },
-
-   modalContent: {
-      flex: 1,
-      padding: 16,
-   },
-
-   infoCard: {
-      padding: 16,
-      borderRadius: 12,
-      borderWidth: 3,
-      borderColor: colors.border,
-      marginBottom: 16,
-      shadowColor: colors.shadow,
-      shadowOffset: { width: 4, height: 4 },
-      shadowOpacity: 1,
-      shadowRadius: 0,
-      elevation: 8,
-   },
-
-   infoLabel: {
-      letterSpacing: 1.2,
-      marginBottom: 4,
-   },
-
-   summaryCard: {
-      padding: 16,
-      borderRadius: 12,
-      borderWidth: 3,
-      borderColor: colors.border,
-      marginBottom: 16,
-      shadowColor: colors.shadow,
-      shadowOffset: { width: 4, height: 4 },
-      shadowOpacity: 1,
-      shadowRadius: 0,
-      elevation: 8,
-   },
-
-   summaryTitle: {
-      letterSpacing: 1.2,
-      marginBottom: 12,
-   },
-
-   selectedPlayersList: {
-      flexDirection: 'row',
-      flexWrap: 'wrap',
-      gap: 12,
-   },
-
-   selectedPlayerItem: {
-      flexDirection: 'row',
-      alignItems: 'center',
-      backgroundColor: colors.primaryLight,
+   closeButtonGradient: {
       paddingHorizontal: 12,
       paddingVertical: 8,
-      borderRadius: 20,
-      borderWidth: 2,
-      borderColor: colors.primary,
-      position: 'relative',
-   },
-
-   selectedPlayerImage: {
-      width: 24,
-      height: 24,
-      borderRadius: 12,
-      marginRight: 8,
-      borderWidth: 1,
-      borderColor: colors.border,
-   },
-
-   selectedPlayerName: {
-      letterSpacing: 0.5,
-      fontWeight: '600',
-   },
-
-   adminBadge: {
-      position: 'absolute',
-      top: -2,
-      right: -2,
-      width: 16,
-      height: 16,
-      borderRadius: 8,
-      backgroundColor: colors.background,
       alignItems: 'center',
       justifyContent: 'center',
-      borderWidth: 1,
-      borderColor: colors.warning,
    },
-
-   inputCard: {
-      padding: 16,
-      borderRadius: 12,
-      borderWidth: 3,
-      borderColor: colors.border,
-      marginBottom: 16,
-      shadowColor: colors.shadow,
-      shadowOffset: { width: 4, height: 4 },
-      shadowOpacity: 1,
-      shadowRadius: 0,
+   titleContainer: {
+      flex: 1,
+      alignItems: 'center',
+      shadowColor: colors.neonGreen,
+      shadowOffset: { width: 0, height: 0 },
+      shadowRadius: 10,
       elevation: 8,
    },
-
-   inputLabel: {
-      letterSpacing: 1,
-      marginBottom: 12,
+   title: {
+      fontSize: 18,
+      fontWeight: '700',
+      textTransform: 'uppercase',
+      letterSpacing: 2,
+      textAlign: 'center',
+      color: colors.neonGreen,
+      textShadowColor: colors.neonGreen,
+      textShadowOffset: { width: 0, height: 0 },
+      textShadowRadius: 6,
+      fontFamily: Platform.OS === 'ios' ? 'Courier' : 'monospace',
    },
-
-   summaryRow: {
+   scrollContent: {
+      flex: 1,
+      padding: 20,
+   },
+   cyberpunkCard: {
+      marginBottom: 20,
+      borderRadius: 0,
+      borderWidth: 1,
+      borderColor: colors.neonGreen,
+      shadowColor: colors.shadowNeonGreen,
+      shadowOffset: { width: 0, height: 0 },
+      shadowOpacity: 0.2,
+      shadowRadius: 8,
+      elevation: 8,
+      overflow: 'hidden',
+   },
+   cardGradient: {
+      padding: 16,
+      position: 'relative',
+   },
+   cardTitle: {
+      fontSize: 14,
+      fontWeight: '700',
+      textTransform: 'uppercase',
+      letterSpacing: 1.5,
+      color: colors.text,
+      marginBottom: 16,
+      textShadowColor: colors.neonGreen,
+      textShadowOffset: { width: 0, height: 0 },
+      textShadowRadius: 6,
+      fontFamily: Platform.OS === 'ios' ? 'Courier' : 'monospace',
+   },
+   playersGrid: {
+      flexDirection: 'row',
+      flexWrap: 'wrap',
+      gap: 8,
+   },
+   playerChip: {
+      borderRadius: 0,
+      borderWidth: 1,
+      borderColor: colors.neonGreen,
+      overflow: 'hidden',
+      marginBottom: 8,
+   },
+   playerChipGradient: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      paddingHorizontal: 12,
+      paddingVertical: 8,
+      gap: 8,
+   },
+   playerImageContainer: {
+      borderRadius: 12,
+      borderWidth: 1,
+      borderColor: colors.cyberBackground,
+      overflow: 'hidden',
+   },
+   playerImage: {
+      width: 24,
+      height: 24,
+   },
+   playerName: {
+      fontSize: 11,
+      fontWeight: '600',
+      color: colors.cyberBackground,
+      letterSpacing: 0.5,
+      fontFamily: Platform.OS === 'ios' ? 'Courier' : 'monospace',
+   },
+   playerNameAnonymous: {
+      fontSize: 11,
+      fontWeight: '600',
+      color: colors.cyberBackground,
+      letterSpacing: 0.5,
+      fontFamily: Platform.OS === 'ios' ? 'Courier' : 'monospace',
+   },
+   buyinContainer: {
+      alignItems: 'center',
+   },
+   summaryGrid: {
+      gap: 16,
+   },
+   summaryItem: {
       flexDirection: 'row',
       justifyContent: 'space-between',
       alignItems: 'center',
-      marginBottom: 8,
+      paddingVertical: 8,
+      borderBottomWidth: 1,
+      borderBottomColor: 'rgba(0, 255, 65, 0.1)',
    },
-
-   summaryValue: {
+   summaryItemHighlight: {
+      flexDirection: 'row',
+      justifyContent: 'space-between',
+      alignItems: 'center',
+      paddingVertical: 12,
+      backgroundColor: 'rgba(0, 255, 65, 0.05)',
+      borderWidth: 1,
+      borderColor: colors.neonGreen,
+      paddingHorizontal: 16,
+      marginTop: 8,
+   },
+   summaryLabel: {
+      fontSize: 11,
       fontWeight: '600',
+      color: colors.textMuted,
+      letterSpacing: 1,
+      textTransform: 'uppercase',
+      fontFamily: Platform.OS === 'ios' ? 'Courier' : 'monospace',
    },
+   summaryLabelHighlight: {
+      fontSize: 11,
+      fontWeight: '700',
+      color: colors.neonGreen,
+      letterSpacing: 1,
+      textTransform: 'uppercase',
+      fontFamily: Platform.OS === 'ios' ? 'Courier' : 'monospace',
+      textShadowColor: colors.neonGreen,
+      textShadowOffset: { width: 0, height: 0 },
+      textShadowRadius: 4,
+   },
+   summaryValue: {
+      fontSize: 16,
+      fontWeight: '700',
+      color: colors.text,
+      letterSpacing: 0.5,
+      fontFamily: Platform.OS === 'ios' ? 'Courier' : 'monospace',
+   },
+   summaryValueHighlight: {
+      fontSize: 20,
+      fontWeight: '700',
+      color: colors.neonGreen,
+      letterSpacing: 1,
+      textShadowColor: colors.neonGreen,
+      textShadowOffset: { width: 0, height: 0 },
+      textShadowRadius: 4,
+      fontFamily: Platform.OS === 'ios' ? 'Courier' : 'monospace',
+   },
+   buttonContainer: {
+      padding: 20,
+      paddingTop: 16,
+      borderTopWidth: 1,
+      borderTopColor: colors.neonGreen,
+      backgroundColor: 'rgba(0, 0, 0, 0.3)',
+   },
+});
 
-   modalFooter: {
-      padding: 16,
-      paddingBottom: 32,
-      shadowColor: colors.shadow,
-      shadowOffset: { width: 0, height: -4 },
-      shadowOpacity: 1,
-      shadowRadius: 0,
-      elevation: 16,
+const styles = StyleSheet.create({
+   cornerBracket: {
+      position: 'absolute',
+      width: 24,
+      height: 24,
+      borderWidth: 2,
+   },
+   topLeft: {
+      top: 12,
+      left: 12,
+      borderRightWidth: 0,
+      borderBottomWidth: 0,
+   },
+   topRight: {
+      top: 12,
+      right: 12,
+      borderLeftWidth: 0,
+      borderBottomWidth: 0,
+   },
+   bottomLeft: {
+      bottom: 12,
+      left: 12,
+      borderRightWidth: 0,
+      borderTopWidth: 0,
+   },
+   bottomRight: {
+      bottom: 12,
+      right: 12,
+      borderLeftWidth: 0,
+      borderTopWidth: 0,
    },
 });
