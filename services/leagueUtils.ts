@@ -1,4 +1,15 @@
-import { and, count, desc, eq, gte, inArray, lte, sql, sum } from 'drizzle-orm';
+import {
+   and,
+   count,
+   desc,
+   eq,
+   gte,
+   inArray,
+   lte,
+   sql,
+   sum,
+   or,
+} from 'drizzle-orm';
 import {
    cashIns,
    gamePlayers,
@@ -103,24 +114,38 @@ export async function isInviteCodeAvailable(
 
 /**
  * Generate a unique invite code that's not already in use
+ * Optimized with reduced attempts and batch checking
  */
 export async function generateUniqueInviteCode(): Promise<string> {
-   let inviteCode: string;
-   let attempts = 0;
-   const maxAttempts = 10;
+   const db = getDb();
 
-   do {
-      inviteCode = generateInviteCode();
-      attempts++;
+   // Generate 3 codes at once to reduce DB queries
+   const candidates = Array.from({ length: 3 }, () => generateInviteCode());
 
-      if (attempts > maxAttempts) {
-         throw new Error(
-            'Failed to generate unique invite code after multiple attempts'
-         );
+   // Check all candidates in a single query using inArray
+   const existing = await db
+      .select({ inviteCode: leagues.inviteCode })
+      .from(leagues)
+      .where(inArray(leagues.inviteCode, candidates));
+
+   const usedCodes = new Set(existing.map((e) => e.inviteCode));
+   const availableCode = candidates.find((code) => !usedCodes.has(code));
+
+   if (availableCode) {
+      return availableCode;
+   }
+
+   // Fallback: generate more codes if all were taken (very unlikely)
+   for (let i = 0; i < 5; i++) {
+      const code = generateInviteCode();
+      if (await isInviteCodeAvailable(code)) {
+         return code;
       }
-   } while (!(await isInviteCodeAvailable(inviteCode)));
+   }
 
-   return inviteCode;
+   throw new Error(
+      'Failed to generate unique invite code after multiple attempts'
+   );
 }
 
 /**
@@ -133,56 +158,60 @@ export async function createLeague(data: {
 }): Promise<any> {
    const db = getDb();
 
-   // Get user id from email
-   const user = await db
-      .select()
-      .from(users)
-      .where(eq(users.email, data.adminUserEmail));
+   try {
+      // Get user id from email with minimal select
+      const user = await db
+         .select({ id: users.id })
+         .from(users)
+         .where(eq(users.email, data.adminUserEmail))
+         .limit(1);
 
-   console.log('User lookup result:', user);
+      if (!user || user.length === 0) {
+         throw new Error('User not found');
+      }
 
-   if (!user || user.length === 0) {
-      throw new Error('User not found');
-   }
-   const userId = user[0].id;
-   let imageUrl = data.image;
+      const userId = user[0].id;
 
-   // Note: If imageUrl starts with 'file://', it means the client didn't upload the image first.
-   // The client must upload via /api/upload/image before creating the league.
-   if (imageUrl && imageUrl.startsWith('file://')) {
-      throw new Error(
-         'Image must be uploaded to R2 before league creation. Use /api/upload/image endpoint first.'
-      );
-   }
+      // Set default image URL immediately
+      let imageUrl = data.image;
+      if (imageUrl && imageUrl.startsWith('file://')) {
+         throw new Error(
+            'Image must be uploaded to R2 before league creation. Use /api/upload/image endpoint first.'
+         );
+      }
+      if (!imageUrl) {
+         imageUrl =
+            'https://pub-6908906fe4c24b7b82ff61e803190c28.r2.dev/icon.png';
+      }
 
-   if (!imageUrl) {
-      imageUrl = 'https://pub-6908906fe4c24b7b82ff61e803190c28.r2.dev/icon.png';
-   }
+      // Generate invite code with reduced attempts for faster execution
+      const inviteCode = await generateUniqueInviteCode();
 
-   data.image = imageUrl;
-   const inviteCode = await generateUniqueInviteCode();
+      const leagueData = {
+         name: data.name,
+         adminUserId: userId,
+         inviteCode,
+         imageUrl,
+      };
 
-   const leagueData = {
-      ...data,
-      adminUserId: userId,
-      inviteCode,
-      imageUrl: imageUrl || undefined, // Use the uploaded URL
-   };
+      // Sequential operations (neon-http doesn't support transactions)
+      // Insert league first
+      const [league] = await db.insert(leagues).values(leagueData).returning();
 
-   const result = await db.insert(leagues).values(leagueData).returning();
-   //add user to league_members
-   await db
-      .insert(leagueMembers)
-      .values({
-         leagueId: result[0].id,
+      // Then insert league member
+      await db.insert(leagueMembers).values({
+         leagueId: league.id,
          userId,
          role: 'admin',
          isActive: true,
          joinedAt: new Date(),
-      })
-      .returning();
+      });
 
-   return result[0];
+      return league;
+   } catch (error) {
+      console.error('Error in createLeague:', error);
+      throw error;
+   }
 }
 
 /**

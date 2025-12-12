@@ -256,6 +256,8 @@ const HexagonalSpinner: React.FC<{
   );
 };
 
+HexagonalSpinner.displayName = 'HexagonalSpinner';
+
 const MatrixCode: React.FC<{
   variant: CyberpunkLoaderVariant;
   size: CyberpunkLoaderSize;
@@ -334,6 +336,8 @@ const MatrixCode: React.FC<{
   );
 };
 
+MatrixCode.displayName = 'MatrixCode';
+
 const ScanLines: React.FC<{
   size: CyberpunkLoaderSize;
   colors: ReturnType<typeof getVariantColors>;
@@ -387,6 +391,8 @@ const ScanLines: React.FC<{
     />
   );
 };
+
+ScanLines.displayName = 'ScanLines';
 
 const CornerBrackets: React.FC<{
   size: CyberpunkLoaderSize;
@@ -504,6 +510,8 @@ const CornerBrackets: React.FC<{
     </>
   );
 };
+
+CornerBrackets.displayName = 'CornerBrackets';
 
 export default function CyberpunkLoader({
   size = 'medium',
@@ -747,6 +755,9 @@ export default function CyberpunkLoader({
   return LoaderContent;
 }
 
+// Add displayName for React DevTools and debugging
+CyberpunkLoader.displayName = 'CyberpunkLoader';
+
 // Helper component for animated loading dots
 const LoadingDot: React.FC<{
   delay: number;
@@ -809,3 +820,6 @@ const LoadingDot: React.FC<{
     />
   );
 };
+
+// Add displayName for LoadingDot component
+LoadingDot.displayName = 'LoadingDot';

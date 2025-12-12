@@ -5,7 +5,14 @@ import { useMixpanel } from '@/hooks/useMixpanel';
 import { LinearGradient } from 'expo-linear-gradient';
 import { router } from 'expo-router';
 import React, { useEffect, useState } from 'react';
-import { Animated, Dimensions, Image, Pressable, Text, View } from 'react-native';
+import {
+   Animated,
+   Dimensions,
+   Image,
+   Pressable,
+   Text,
+   View,
+} from 'react-native';
 import Onboarding from 'react-native-onboarding-swiper';
 
 export default function OnboardingSwiper() {
@@ -164,12 +171,14 @@ export default function OnboardingSwiper() {
                   inputRange: [0, 1],
                   outputRange: [0.9, 1],
                }),
-               transform: [{
-                  scale: glowAnim.interpolate({
-                     inputRange: [0, 1],
-                     outputRange: [1, 1.05],
-                  }),
-               }],
+               transform: [
+                  {
+                     scale: glowAnim.interpolate({
+                        inputRange: [0, 1],
+                        outputRange: [1, 1.05],
+                     }),
+                  },
+               ],
             }}
          >
             <Pressable
@@ -190,10 +199,22 @@ export default function OnboardingSwiper() {
                {...props}
             >
                {/* Multiple corner brackets for extra cyberpunk feel */}
-               <View className="absolute -top-2 -left-2 w-6 h-6 border-l-4 border-t-4" style={{ borderColor: '#00FF41' }} />
-               <View className="absolute -top-2 -right-2 w-6 h-6 border-r-4 border-t-4" style={{ borderColor: '#00FF41' }} />
-               <View className="absolute -bottom-2 -left-2 w-6 h-6 border-l-4 border-b-4" style={{ borderColor: '#00FF41' }} />
-               <View className="absolute -bottom-2 -right-2 w-6 h-6 border-r-4 border-b-4" style={{ borderColor: '#00FF41' }} />
+               <View
+                  className="absolute -top-2 -left-2 w-6 h-6 border-l-4 border-t-4"
+                  style={{ borderColor: '#00FF41' }}
+               />
+               <View
+                  className="absolute -top-2 -right-2 w-6 h-6 border-r-4 border-t-4"
+                  style={{ borderColor: '#00FF41' }}
+               />
+               <View
+                  className="absolute -bottom-2 -left-2 w-6 h-6 border-l-4 border-b-4"
+                  style={{ borderColor: '#00FF41' }}
+               />
+               <View
+                  className="absolute -bottom-2 -right-2 w-6 h-6 border-r-4 border-b-4"
+                  style={{ borderColor: '#00FF41' }}
+               />
 
                {/* Inner corner accents */}
                <View className="absolute top-1 left-1 w-2 h-2 bg-green-400" />
@@ -252,10 +273,22 @@ export default function OnboardingSwiper() {
                {...props}
             >
                {/* Corner brackets in white for maximum contrast */}
-               <View className="absolute -top-1 -left-1 w-3 h-3 border-l-2 border-t-2" style={{ borderColor: '#ffffff' }} />
-               <View className="absolute -top-1 -right-1 w-3 h-3 border-r-2 border-t-2" style={{ borderColor: '#ffffff' }} />
-               <View className="absolute -bottom-1 -left-1 w-3 h-3 border-l-2 border-b-2" style={{ borderColor: '#ffffff' }} />
-               <View className="absolute -bottom-1 -right-1 w-3 h-3 border-r-2 border-b-2" style={{ borderColor: '#ffffff' }} />
+               <View
+                  className="absolute -top-1 -left-1 w-3 h-3 border-l-2 border-t-2"
+                  style={{ borderColor: '#ffffff' }}
+               />
+               <View
+                  className="absolute -top-1 -right-1 w-3 h-3 border-r-2 border-t-2"
+                  style={{ borderColor: '#ffffff' }}
+               />
+               <View
+                  className="absolute -bottom-1 -left-1 w-3 h-3 border-l-2 border-b-2"
+                  style={{ borderColor: '#ffffff' }}
+               />
+               <View
+                  className="absolute -bottom-1 -right-1 w-3 h-3 border-r-2 border-b-2"
+                  style={{ borderColor: '#ffffff' }}
+               />
 
                {/* Dark overlay for better contrast */}
                <Animated.View
@@ -397,9 +430,10 @@ export default function OnboardingSwiper() {
                >
                   {/* Main shape */}
                   <LinearGradient
-                     colors={selected
-                        ? [colors.neonCyan, colors.neonBlue]
-                        : [colors.textMuted, colors.cyberGray]
+                     colors={
+                        selected
+                           ? [colors.neonCyan, colors.neonBlue]
+                           : [colors.textMuted, colors.cyberGray]
                      }
                      start={{ x: 0, y: 0 }}
                      end={{ x: 1, y: 1 }}
@@ -408,7 +442,9 @@ export default function OnboardingSwiper() {
                         height: '100%',
                         borderRadius: selected ? 2 : 3,
                         borderWidth: 1,
-                        borderColor: selected ? colors.neonCyan : colors.textMuted,
+                        borderColor: selected
+                           ? colors.neonCyan
+                           : colors.textMuted,
                      }}
                   />
 
@@ -437,12 +473,21 @@ export default function OnboardingSwiper() {
       outputRange: [-100, screenHeight + 100],
    });
 
-   const CyberpunkBackground = ({ variant }: { variant: 'neon' | 'cyber' | 'matrix' | 'holo' | 'dark' }) => (
+   const CyberpunkBackground = ({
+      variant,
+   }: {
+      variant: 'neon' | 'cyber' | 'matrix' | 'holo' | 'dark';
+   }) => (
       <View className="absolute inset-0">
          {/* Cyberpunk gradient background */}
          <LinearGradient
             colors={getCyberpunkGradient(variant)}
-            style={{ flex: 1, position: 'absolute', width: '100%', height: '100%' }}
+            style={{
+               flex: 1,
+               position: 'absolute',
+               width: '100%',
+               height: '100%',
+            }}
          />
 
          {/* Matrix grid overlay */}
@@ -457,9 +502,9 @@ export default function OnboardingSwiper() {
                      key={`v-${i}`}
                      className="absolute w-px bg-neonCyan/3"
                      style={{
-                        left: (i * screenWidth / 10),
+                        left: (i * screenWidth) / 10,
                         top: 0,
-                        bottom: 0
+                        bottom: 0,
                      }}
                   />
                ))}
@@ -468,15 +513,14 @@ export default function OnboardingSwiper() {
                      key={`h-${i}`}
                      className="absolute h-px bg-neonCyan/3"
                      style={{
-                        top: (i * screenHeight / 15),
+                        top: (i * screenHeight) / 15,
                         left: 0,
-                        right: 0
+                        right: 0,
                      }}
                   />
                ))}
             </View>
          </Animated.View>
-
 
          {/* Corner frame elements */}
          <View className="absolute top-0 left-0 w-6 h-6 border-l-2 border-t-2 border-neonCyan/60" />
@@ -486,26 +530,63 @@ export default function OnboardingSwiper() {
       </View>
    );
 
-   const CyberpunkImageFrame = ({ children, variant }: { children: React.ReactNode, variant: 'neon' | 'cyber' | 'matrix' | 'holo' | 'dark' }) => {
+   const CyberpunkImageFrame = ({
+      children,
+      variant,
+   }: {
+      children: React.ReactNode;
+      variant: 'neon' | 'cyber' | 'matrix' | 'holo' | 'dark';
+   }) => {
       const getFrameColor = () => {
          switch (variant) {
-            case 'matrix': return colors.neonGreen;
-            case 'cyber': return colors.neonPink;
-            case 'neon': return colors.neonCyan;
-            case 'holo': return colors.neonBlue;
-            default: return colors.neonPurple;
+            case 'matrix':
+               return colors.neonGreen;
+            case 'cyber':
+               return colors.neonPink;
+            case 'neon':
+               return colors.neonCyan;
+            case 'holo':
+               return colors.neonBlue;
+            default:
+               return colors.neonPurple;
          }
       };
 
       return (
-         <View
-            className="relative"
-         >
+         <View className="relative">
             {/* Static corner brackets - no animation */}
-            <View className="absolute -top-2 -left-2 w-4 h-4" style={{ borderLeftWidth: 2, borderTopWidth: 2, borderColor: getFrameColor() }} />
-            <View className="absolute -top-2 -right-2 w-4 h-4" style={{ borderRightWidth: 2, borderTopWidth: 2, borderColor: getFrameColor() }} />
-            <View className="absolute -bottom-2 -left-2 w-4 h-4" style={{ borderLeftWidth: 2, borderBottomWidth: 2, borderColor: getFrameColor() }} />
-            <View className="absolute -bottom-2 -right-2 w-4 h-4" style={{ borderRightWidth: 2, borderBottomWidth: 2, borderColor: getFrameColor() }} />
+            <View
+               className="absolute -top-2 -left-2 w-4 h-4"
+               style={{
+                  borderLeftWidth: 2,
+                  borderTopWidth: 2,
+                  borderColor: getFrameColor(),
+               }}
+            />
+            <View
+               className="absolute -top-2 -right-2 w-4 h-4"
+               style={{
+                  borderRightWidth: 2,
+                  borderTopWidth: 2,
+                  borderColor: getFrameColor(),
+               }}
+            />
+            <View
+               className="absolute -bottom-2 -left-2 w-4 h-4"
+               style={{
+                  borderLeftWidth: 2,
+                  borderBottomWidth: 2,
+                  borderColor: getFrameColor(),
+               }}
+            />
+            <View
+               className="absolute -bottom-2 -right-2 w-4 h-4"
+               style={{
+                  borderRightWidth: 2,
+                  borderBottomWidth: 2,
+                  borderColor: getFrameColor(),
+               }}
+            />
 
             {/* Simplified main frame */}
             <View
@@ -534,7 +615,9 @@ export default function OnboardingSwiper() {
                      <>
                         <CyberpunkBackground variant={getCyberpunkVariant(0)} />
                         <View className="items-center justify-center w-full relative z-10">
-                           <CyberpunkImageFrame variant={getCyberpunkVariant(0)}>
+                           <CyberpunkImageFrame
+                              variant={getCyberpunkVariant(0)}
+                           >
                               <Image
                                  source={require('@/assets/images/new_onboarding/screen_shot1.webp')}
                                  style={{
@@ -556,7 +639,9 @@ export default function OnboardingSwiper() {
                      <>
                         <CyberpunkBackground variant={getCyberpunkVariant(1)} />
                         <View className="items-center justify-center w-full relative z-10">
-                           <CyberpunkImageFrame variant={getCyberpunkVariant(1)}>
+                           <CyberpunkImageFrame
+                              variant={getCyberpunkVariant(1)}
+                           >
                               <Image
                                  source={require('@/assets/images/new_onboarding/screen_shot2.webp')}
                                  style={{
@@ -578,7 +663,9 @@ export default function OnboardingSwiper() {
                      <>
                         <CyberpunkBackground variant={getCyberpunkVariant(2)} />
                         <View className="items-center justify-center w-full relative z-10">
-                           <CyberpunkImageFrame variant={getCyberpunkVariant(2)}>
+                           <CyberpunkImageFrame
+                              variant={getCyberpunkVariant(2)}
+                           >
                               <Image
                                  source={require('@/assets/images/new_onboarding/screen_shot3.webp')}
                                  style={{
@@ -600,7 +687,9 @@ export default function OnboardingSwiper() {
                      <>
                         <CyberpunkBackground variant={getCyberpunkVariant(3)} />
                         <View className="items-center justify-center w-full relative z-10">
-                           <CyberpunkImageFrame variant={getCyberpunkVariant(3)}>
+                           <CyberpunkImageFrame
+                              variant={getCyberpunkVariant(3)}
+                           >
                               <Image
                                  source={require('@/assets/images/new_onboarding/screen_shot4.webp')}
                                  style={{
@@ -622,7 +711,9 @@ export default function OnboardingSwiper() {
                      <>
                         <CyberpunkBackground variant={getCyberpunkVariant(4)} />
                         <View className="items-center justify-center w-full relative z-10">
-                           <CyberpunkImageFrame variant={getCyberpunkVariant(4)}>
+                           <CyberpunkImageFrame
+                              variant={getCyberpunkVariant(4)}
+                           >
                               <Image
                                  source={require('@/assets/images/new_onboarding/screen_shot5.webp')}
                                  style={{
@@ -644,7 +735,9 @@ export default function OnboardingSwiper() {
                      <>
                         <CyberpunkBackground variant={getCyberpunkVariant(5)} />
                         <View className="items-center justify-center w-full relative z-10">
-                           <CyberpunkImageFrame variant={getCyberpunkVariant(5)}>
+                           <CyberpunkImageFrame
+                              variant={getCyberpunkVariant(5)}
+                           >
                               <View className="items-center justify-center p-8">
                                  {/* App icon with simplified styling */}
                                  <View
@@ -672,16 +765,20 @@ export default function OnboardingSwiper() {
                                     <Animated.View
                                        className="relative"
                                        style={{
-                                          transform: [{
-                                             scale: glowAnim.interpolate({
-                                                inputRange: [0, 1],
-                                                outputRange: [1, 1.05],
-                                             }),
-                                          }],
+                                          transform: [
+                                             {
+                                                scale: glowAnim.interpolate({
+                                                   inputRange: [0, 1],
+                                                   outputRange: [1, 1.05],
+                                                }),
+                                             },
+                                          ],
                                        }}
                                     >
                                        <View className="px-3 py-2 border border-neonCyan bg-neonCyan/15 relative rounded">
-                                          <Text className="text-neonCyan font-mono font-bold text-xs tracking-wider">LEAGUES</Text>
+                                          <Text className="text-neonCyan font-mono font-bold text-xs tracking-wider">
+                                             LEAGUES
+                                          </Text>
                                           <View className="absolute top-0 left-0 w-1 h-1 bg-neonCyan" />
                                           <View className="absolute top-0 right-0 w-1 h-1 bg-neonCyan" />
                                        </View>
@@ -690,16 +787,20 @@ export default function OnboardingSwiper() {
                                     <Animated.View
                                        className="relative"
                                        style={{
-                                          transform: [{
-                                             scale: glowAnim.interpolate({
-                                                inputRange: [0, 1],
-                                                outputRange: [1.05, 1],
-                                             }),
-                                          }],
+                                          transform: [
+                                             {
+                                                scale: glowAnim.interpolate({
+                                                   inputRange: [0, 1],
+                                                   outputRange: [1.05, 1],
+                                                }),
+                                             },
+                                          ],
                                        }}
                                     >
                                        <View className="px-3 py-2 border border-neonGreen bg-neonGreen/15 relative rounded">
-                                          <Text className="text-neonGreen font-mono font-bold text-xs tracking-wider">STATS</Text>
+                                          <Text className="text-neonGreen font-mono font-bold text-xs tracking-wider">
+                                             STATS
+                                          </Text>
                                           <View className="absolute bottom-0 left-0 w-1 h-1 bg-neonGreen" />
                                           <View className="absolute bottom-0 right-0 w-1 h-1 bg-neonGreen" />
                                        </View>
@@ -708,16 +809,20 @@ export default function OnboardingSwiper() {
                                     <Animated.View
                                        className="relative"
                                        style={{
-                                          transform: [{
-                                             scale: glowAnim.interpolate({
-                                                inputRange: [0, 1],
-                                                outputRange: [1, 1.05],
-                                             }),
-                                          }],
+                                          transform: [
+                                             {
+                                                scale: glowAnim.interpolate({
+                                                   inputRange: [0, 1],
+                                                   outputRange: [1, 1.05],
+                                                }),
+                                             },
+                                          ],
                                        }}
                                     >
                                        <View className="px-3 py-2 border border-neonPink bg-neonPink/15 relative rounded">
-                                          <Text className="text-neonPink font-mono font-bold text-xs tracking-wider">AI</Text>
+                                          <Text className="text-neonPink font-mono font-bold text-xs tracking-wider">
+                                             AI
+                                          </Text>
                                           <View className="absolute top-0 left-0 w-1 h-1 bg-neonPink" />
                                           <View className="absolute bottom-0 right-0 w-1 h-1 bg-neonPink" />
                                        </View>
@@ -743,7 +848,7 @@ export default function OnboardingSwiper() {
             titleStyles={{
                fontSize: Math.min(screenHeight * 0.032, 28),
                fontWeight: '900',
-               color: colors.textPrimary,
+               color: colors.text,
                marginBottom: 12,
                paddingHorizontal: 24,
                textAlign: 'center',
@@ -755,7 +860,7 @@ export default function OnboardingSwiper() {
                letterSpacing: 1.5,
             }}
             subTitleStyles={{
-               fontSize: Math.min(screenHeight * 0.020, 17),
+               fontSize: Math.min(screenHeight * 0.02, 17),
                color: colors.textSecondary,
                paddingHorizontal: 32,
                lineHeight: Math.min(screenHeight * 0.028, 26),

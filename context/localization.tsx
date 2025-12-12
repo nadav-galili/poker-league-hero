@@ -876,11 +876,9 @@ const translations = {
 // ... rest of file
 const LANGUAGE_STORAGE_KEY = '@poker_league_language';
 
-export function LocalizationProvider({
+export const LocalizationProvider: React.FC<{ children: React.ReactNode }> = ({
    children,
-}: {
-   children: React.ReactNode;
-}) {
+}) => {
    const [language, setLanguageState] = useState<Language>('en');
    const [isInitialized, setIsInitialized] = useState(false);
 
@@ -950,7 +948,9 @@ export function LocalizationProvider({
          {children}
       </LocalizationContext.Provider>
    );
-}
+};
+
+LocalizationProvider.displayName = 'LocalizationProvider';
 
 export function useLocalization() {
    const context = useContext(LocalizationContext);

@@ -1,32 +1,34 @@
-import { colors, getTheme } from '@/colors';
-import type { ValidationState } from '@/components/forms/BrutalistFormField';
+import { colors, getCyberpunkGradient } from '@/colors';
 import {
-   BrutalistFormField,
-   ClearButton,
-} from '@/components/forms/BrutalistFormField';
-import { LoadingState } from '@/components/shared/LoadingState';
-import { Text } from '@/components/Text';
-import { AppButton } from '@/components/ui/AppButton';
-// BASE_URL import removed - using relative URLs with fetchWithAuth
+   CyberpunkClearButton,
+   CyberpunkFormField,
+   type ValidationState,
+} from '@/components/forms/CyberpunkFormField';
+import { CyberpunkImagePicker } from '@/components/forms/CyberpunkImagePicker';
+import { CyberpunkButton } from '@/components/ui/CyberpunkButton';
+import CyberpunkLoader from '@/components/ui/CyberpunkLoader';
 import { useAuth } from '@/context/auth';
 import { useLocalization } from '@/context/localization';
 import { captureException } from '@/utils/sentry';
 import { Ionicons } from '@expo/vector-icons';
-import { Image } from 'expo-image';
 import * as ImagePicker from 'expo-image-picker';
+import { LinearGradient } from 'expo-linear-gradient';
 import { router } from 'expo-router';
-import React, { useCallback, useState } from 'react';
+import React, { useCallback, useEffect, useRef, useState } from 'react';
 import {
+   Animated,
+   Dimensions,
    Platform,
    ScrollView,
-   StyleSheet,
+   Text,
    TouchableOpacity,
    View,
 } from 'react-native';
 import Toast from 'react-native-toast-message';
 
+const { height: screenHeight } = Dimensions.get('window');
+
 export default function CreateLeague() {
-   const theme = getTheme('light');
    const { t, isRTL } = useLocalization();
    const [isLoading, setIsLoading] = useState(false);
    const [formData, setFormData] = useState({
@@ -42,8 +44,89 @@ export default function CreateLeague() {
    const [errors, setErrors] = useState<{
       name?: string;
    }>({});
+
+   // Animation refs
+   const matrixAnim = useRef(new Animated.Value(0)).current;
+   const scanlineAnim = useRef(new Animated.Value(0)).current;
+   const hologramAnim = useRef(new Animated.Value(0)).current;
+   const glowAnim = useRef(new Animated.Value(0)).current;
+
    //get user data from auth context
    const { user, fetchWithAuth } = useAuth();
+
+   // Initialize cyberpunk animations
+   useEffect(() => {
+      // Matrix rain effect
+      const matrixAnimation = Animated.loop(
+         Animated.sequence([
+            Animated.timing(matrixAnim, {
+               toValue: 1,
+               duration: 200,
+               useNativeDriver: true,
+            }),
+            Animated.timing(matrixAnim, {
+               toValue: 0,
+               duration: 200,
+               useNativeDriver: true,
+            }),
+            Animated.delay(3000),
+         ])
+      );
+
+      // Scan line effect
+      const scanlineAnimation = Animated.loop(
+         Animated.timing(scanlineAnim, {
+            toValue: 1,
+            duration: 4000,
+            useNativeDriver: true,
+         })
+      );
+
+      // Hologram flicker
+      const hologramAnimation = Animated.loop(
+         Animated.sequence([
+            Animated.timing(hologramAnim, {
+               toValue: 1,
+               duration: 150,
+               useNativeDriver: true,
+            }),
+            Animated.timing(hologramAnim, {
+               toValue: 0,
+               duration: 150,
+               useNativeDriver: true,
+            }),
+            Animated.delay(5000),
+         ])
+      );
+
+      // Continuous glow
+      const glowAnimation = Animated.loop(
+         Animated.sequence([
+            Animated.timing(glowAnim, {
+               toValue: 1,
+               duration: 3000,
+               useNativeDriver: false,
+            }),
+            Animated.timing(glowAnim, {
+               toValue: 0,
+               duration: 3000,
+               useNativeDriver: false,
+            }),
+         ])
+      );
+
+      matrixAnimation.start();
+      scanlineAnimation.start();
+      hologramAnimation.start();
+      glowAnimation.start();
+
+      return () => {
+         matrixAnimation.stop();
+         scanlineAnimation.stop();
+         hologramAnimation.stop();
+         glowAnimation.stop();
+      };
+   }, [matrixAnim, scanlineAnim, hologramAnim, glowAnim]);
 
    // Validation functions
    const validateLeagueName = useCallback((name: string): string | null => {
@@ -308,7 +391,8 @@ export default function CreateLeague() {
             text1: t('success'),
             text2: 'League created successfully',
          });
-         router.back();
+         // Navigate to the leagues list
+         router.replace('/(tabs)/my-leagues');
       } catch (error) {
          console.error('❌ Create league error:', error);
          captureException(error as Error, {
@@ -335,7 +419,8 @@ export default function CreateLeague() {
    };
 
    const handleBack = () => {
-      router.back();
+      // Navigate to the leagues list if there's no previous screen
+      router.replace('/(tabs)/my-leagues');
    };
 
    const pickImage = async () => {
@@ -412,33 +497,200 @@ export default function CreateLeague() {
       setFormData({ ...formData, image: null });
    };
    if (isLoading) {
-      return <LoadingState />;
+      return (
+         <LinearGradient
+            colors={getCyberpunkGradient('dark')}
+            style={{ flex: 1 }}
+         >
+            <View className="flex-1 items-center justify-center">
+               <CyberpunkLoader size="large" variant="matrix" />
+               <Text
+                  className="font-mono font-bold text-lg tracking-widest uppercase mt-6"
+                  style={{
+                     color: colors.textNeonGreen,
+                     textShadowColor: colors.shadowNeonGreen,
+                     textShadowOffset: { width: 0, height: 0 },
+                     textShadowRadius: 10,
+                  }}
+               >
+                  INITIALIZING LEAGUE PROTOCOL...
+               </Text>
+            </View>
+         </LinearGradient>
+      );
    }
 
    return (
-      <View style={[styles.container, { backgroundColor: theme.background }]}>
+      <View className="flex-1">
+         {/* Cyberpunk Background */}
+         <LinearGradient
+            colors={getCyberpunkGradient('dark')}
+            style={{ position: 'absolute', inset: 0 }}
+         />
+
+         {/* Matrix Grid Overlay */}
+         <View
+            className="absolute inset-0 opacity-10"
+            style={{
+               backgroundColor: 'transparent',
+               backgroundImage: `linear-gradient(${colors.neonCyan}22 1px, transparent 1px), linear-gradient(90deg, ${colors.neonCyan}22 1px, transparent 1px)`,
+               backgroundSize: '20px 20px',
+            }}
+         />
+
+         {/* Scan Lines */}
+         <Animated.View
+            className="absolute left-0 right-0 h-0.5"
+            style={{
+               backgroundColor: colors.neonCyan,
+               opacity: 0.3,
+               transform: [
+                  {
+                     translateY: scanlineAnim.interpolate({
+                        inputRange: [0, 1],
+                        outputRange: [0, screenHeight],
+                     }),
+                  },
+               ],
+               shadowColor: colors.shadowNeonCyan,
+               shadowOffset: { width: 0, height: 0 },
+               shadowOpacity: 1,
+               shadowRadius: 10,
+            }}
+         />
+
+         {/* Holographic Flicker Overlay */}
+         <Animated.View
+            className="absolute inset-0 bg-white"
+            style={{
+               opacity: hologramAnim.interpolate({
+                  inputRange: [0, 1],
+                  outputRange: [0, 0.03],
+               }),
+            }}
+         />
+
          {/* Header */}
-         <View style={[styles.header, { backgroundColor: colors.secondary }]}>
-            <TouchableOpacity onPress={handleBack} style={styles.backButton}>
+         <Animated.View
+            className="flex-row items-center justify-between px-5 py-4 border-b-2"
+            style={{
+               borderBottomColor: colors.neonCyan,
+               backgroundColor: colors.cyberBackground,
+               shadowColor: colors.shadowNeonCyan,
+               shadowOffset: { width: 0, height: 8 },
+               shadowOpacity: glowAnim.interpolate({
+                  inputRange: [0, 1],
+                  outputRange: [0.5, 1],
+               }),
+               shadowRadius: 20,
+               elevation: 20,
+            }}
+         >
+            {/* Back Button */}
+            <TouchableOpacity
+               onPress={handleBack}
+               className="p-2 rounded-xl border-2"
+               style={{
+                  backgroundColor: colors.cyberBackground,
+                  borderColor: colors.neonCyan,
+               }}
+            >
                <Ionicons
                   name={isRTL ? 'arrow-forward' : 'arrow-back'}
                   size={24}
-                  color={colors.text}
+                  color={colors.neonCyan}
+                  style={{
+                     textShadowColor: colors.shadowNeonCyan,
+                     textShadowOffset: { width: 0, height: 0 },
+                     textShadowRadius: 10,
+                  }}
                />
+               {/* Corner brackets for back button */}
+               <View className="absolute -top-1 -left-1">
+                  <View
+                     style={{
+                        width: 12,
+                        height: 3,
+                        backgroundColor: colors.neonCyan,
+                     }}
+                  />
+                  <View
+                     style={{
+                        width: 3,
+                        height: 12,
+                        backgroundColor: colors.neonCyan,
+                        marginTop: -3,
+                     }}
+                  />
+               </View>
+               <View className="absolute -top-1 -right-1">
+                  <View
+                     style={{
+                        width: 12,
+                        height: 3,
+                        backgroundColor: colors.neonCyan,
+                     }}
+                  />
+                  <View
+                     style={{
+                        width: 3,
+                        height: 12,
+                        backgroundColor: colors.neonCyan,
+                        alignSelf: 'flex-end',
+                        marginTop: -3,
+                     }}
+                  />
+               </View>
             </TouchableOpacity>
-            <Text style={[styles.headerTitle, { color: colors.text }]}>
-               {t('createLeague')}
-            </Text>
-            <View style={styles.placeholder} />
-         </View>
+
+            {/* Header Title */}
+            <View className="flex-row items-center">
+               <Text
+                  className="font-mono font-bold text-xl tracking-widest uppercase"
+                  style={{
+                     color: colors.textNeonCyan,
+                     textShadowColor: colors.shadowNeonCyan,
+                     textShadowOffset: { width: 0, height: 0 },
+                     textShadowRadius: 15,
+                  }}
+               >
+                  {t('createLeague')}
+               </Text>
+               {/* Header corner brackets */}
+               <View className="ml-3 flex-row">
+                  <View
+                     style={{
+                        width: 16,
+                        height: 3,
+                        backgroundColor: colors.neonCyan,
+                     }}
+                  />
+                  <View
+                     style={{
+                        width: 3,
+                        height: 16,
+                        backgroundColor: colors.neonCyan,
+                        marginTop: -3,
+                        marginLeft: -3,
+                     }}
+                  />
+               </View>
+            </View>
+
+            {/* Placeholder for symmetry */}
+            <View style={{ width: 48 }} />
+         </Animated.View>
 
          <ScrollView
-            style={styles.content}
-            contentContainerStyle={styles.contentContainer}
+            className="flex-1"
+            contentContainerStyle={{
+               padding: 20,
+               paddingBottom: 40,
+            }}
             showsVerticalScrollIndicator={false}
          >
-            {/* League Name */}
-            <BrutalistFormField
+            {/* League Name Field */}
+            <CyberpunkFormField
                label={t('leagueName')}
                icon="trophy"
                value={formData.name}
@@ -446,17 +698,19 @@ export default function CreateLeague() {
                validationState={validationStates.name}
                errorMessage={errors.name}
                successMessage={
-                  validationStates.name === 'valid' ? 'Perfect!' : undefined
+                  validationStates.name === 'valid'
+                     ? 'PROTOCOL VERIFIED!'
+                     : undefined
                }
-               placeholder="Enter league name"
+               placeholder="Enter league designation..."
                maxLength={50}
                showCharacterCount={true}
                required={true}
-               helpText="Choose a unique name for your poker league"
+               helpText="Choose a unique identifier for your poker league matrix"
                variant="large"
                rightComponent={
                   formData.name.length > 0 ? (
-                     <ClearButton
+                     <CyberpunkClearButton
                         onPress={() => handleNameChange('')}
                         visible={formData.name.length > 0}
                      />
@@ -464,204 +718,146 @@ export default function CreateLeague() {
                }
             />
 
-            {/* League Image */}
-            <View style={styles.inputGroup}>
-               <Text style={[styles.label, { color: theme.text }]}>
-                  {t('leagueImage')} (Optional)
-               </Text>
-               <View style={styles.imageContainer}>
-                  {formData.image ? (
-                     <View style={styles.imagePreviewContainer}>
-                        <Image
-                           source={{ uri: formData.image }}
-                           style={styles.imagePreview}
-                           contentFit="cover"
-                        />
-                        <TouchableOpacity
-                           style={styles.removeImageButton}
-                           onPress={removeImage}
-                        >
-                           <Ionicons
-                              name="close-circle"
-                              size={24}
-                              color={colors.error}
-                           />
-                        </TouchableOpacity>
-                     </View>
-                  ) : (
-                     <TouchableOpacity
-                        style={[
-                           styles.imagePickerButton,
-                           {
-                              backgroundColor: colors.text,
-                              borderColor: colors.text,
-                           },
-                        ]}
-                        onPress={pickImage}
-                     >
-                        <Ionicons
-                           name="camera"
-                           size={32}
-                           color={colors.backgroundGradientEnd}
-                        />
-                        <Text
-                           style={[
-                              styles.imagePickerText,
-                              { color: colors.backgroundGradientEnd },
-                           ]}
-                        >
-                           {t('selectImage')}
-                        </Text>
-                     </TouchableOpacity>
-                  )}
-               </View>
-            </View>
+            {/* League Image Picker */}
+            <CyberpunkImagePicker
+               imageUri={formData.image}
+               onPickImage={pickImage}
+               onRemoveImage={removeImage}
+               label={`${t('leagueImage')} (Optional)`}
+               size="large"
+               style={{ marginBottom: 32 }}
+            />
 
             {/* Create Button */}
-            <View style={styles.buttonContainer}>
-               <AppButton
+            <View className="mt-8">
+               <CyberpunkButton
                   title={t('createLeagueButton')}
                   onPress={handleCreateLeague}
-                  color="success"
-                  width="100%"
+                  variant="create"
+                  size="large"
                   icon="add-circle"
+                  loading={isLoading}
+                  width="100%"
                />
             </View>
          </ScrollView>
+
+         {/* Matrix Rain Effects */}
+         <Animated.View
+            className="absolute top-0 left-4 w-px h-full opacity-20"
+            style={{
+               backgroundColor: colors.matrixGreen,
+               opacity: matrixAnim.interpolate({
+                  inputRange: [0, 1],
+                  outputRange: [0, 0.6],
+               }),
+               shadowColor: colors.shadowNeonGreen,
+               shadowOffset: { width: 0, height: 0 },
+               shadowOpacity: 1,
+               shadowRadius: 8,
+            }}
+         />
+         <Animated.View
+            className="absolute top-0 right-8 w-px h-full opacity-20"
+            style={{
+               backgroundColor: colors.neonCyan,
+               opacity: matrixAnim.interpolate({
+                  inputRange: [0, 1],
+                  outputRange: [0, 0.4],
+               }),
+               shadowColor: colors.shadowNeonCyan,
+               shadowOffset: { width: 0, height: 0 },
+               shadowOpacity: 1,
+               shadowRadius: 8,
+            }}
+         />
+
+         {/* Corner Interface Elements */}
+         <View className="absolute top-20 left-5">
+            <View
+               style={{
+                  width: 20,
+                  height: 4,
+                  backgroundColor: colors.neonPink,
+                  opacity: 0.6,
+               }}
+            />
+            <View
+               style={{
+                  width: 4,
+                  height: 20,
+                  backgroundColor: colors.neonPink,
+                  marginTop: -4,
+                  opacity: 0.6,
+               }}
+            />
+         </View>
+
+         <View className="absolute top-20 right-5">
+            <View
+               style={{
+                  width: 20,
+                  height: 4,
+                  backgroundColor: colors.neonBlue,
+                  opacity: 0.6,
+               }}
+            />
+            <View
+               style={{
+                  width: 4,
+                  height: 20,
+                  backgroundColor: colors.neonBlue,
+                  alignSelf: 'flex-end',
+                  marginTop: -4,
+                  opacity: 0.6,
+               }}
+            />
+         </View>
+
+         <View className="absolute bottom-20 left-5">
+            <View
+               style={{
+                  width: 4,
+                  height: 20,
+                  backgroundColor: colors.neonOrange,
+                  marginBottom: -4,
+                  opacity: 0.6,
+               }}
+            />
+            <View
+               style={{
+                  width: 20,
+                  height: 4,
+                  backgroundColor: colors.neonOrange,
+                  opacity: 0.6,
+               }}
+            />
+         </View>
+
+         <View className="absolute bottom-20 right-5">
+            <View
+               style={{
+                  width: 4,
+                  height: 20,
+                  backgroundColor: colors.neonGreen,
+                  alignSelf: 'flex-end',
+                  marginBottom: -4,
+                  opacity: 0.6,
+               }}
+            />
+            <View
+               style={{
+                  width: 20,
+                  height: 4,
+                  backgroundColor: colors.neonGreen,
+                  opacity: 0.6,
+               }}
+            />
+         </View>
       </View>
    );
 }
 
-const styles = StyleSheet.create({
-   container: {
-      flex: 1,
-   },
-   header: {
-      flexDirection: 'row',
-      alignItems: 'center',
-      justifyContent: 'space-between',
-      paddingHorizontal: 20,
-      paddingVertical: 16,
-      borderBottomWidth: 6,
-      borderBottomColor: colors.text,
-      shadowColor: colors.text,
-      shadowOffset: { width: 0, height: 8 },
-      shadowOpacity: 1,
-      shadowRadius: 0,
-      elevation: 12,
-   },
-   backButton: {
-      padding: 8,
-   },
-   headerTitle: {
-      fontSize: 20,
-      fontWeight: '700',
-      textTransform: 'uppercase',
-      letterSpacing: 1,
-   },
-   placeholder: {
-      width: 40,
-   },
-   content: {
-      flex: 1,
-   },
-   contentContainer: {
-      padding: 20,
-      paddingBottom: 40,
-   },
-   inputGroup: {
-      marginBottom: 24,
-   },
-   label: {
-      fontSize: 16,
-      fontWeight: '600',
-      marginBottom: 8,
-      textTransform: 'uppercase',
-      letterSpacing: 0.5,
-   },
-   input: {
-      flex: 1,
-      height: 50,
-      borderWidth: 4,
-      borderRadius: 12,
-      paddingHorizontal: 16,
-      paddingLeft: 48,
-      fontSize: 16,
-      fontWeight: '600',
-      shadowColor: colors.text,
-      shadowOffset: { width: 4, height: 4 },
-      shadowOpacity: 1,
-      shadowRadius: 0,
-      elevation: 8,
-   },
-   inputContainer: {
-      flexDirection: 'row',
-      alignItems: 'center',
-      position: 'relative',
-   },
-   inputIcon: {
-      position: 'absolute',
-      left: 16,
-      zIndex: 1,
-   },
-
-   buttonContainer: {
-      marginTop: 32,
-   },
-   createButton: {
-      height: 56,
-      shadowColor: colors.text,
-      shadowOffset: { width: 6, height: 6 },
-      shadowOpacity: 1,
-      shadowRadius: 0,
-      elevation: 12,
-   },
-   imageContainer: {
-      alignItems: 'center',
-   },
-   imagePreviewContainer: {
-      position: 'relative',
-      alignItems: 'center',
-   },
-   imagePreview: {
-      width: 120,
-      height: 120,
-      borderRadius: 12,
-      borderWidth: 3,
-      borderColor: colors.border,
-   },
-   removeImageButton: {
-      position: 'absolute',
-      top: -8,
-      right: -8,
-      backgroundColor: colors.text,
-      borderRadius: 12,
-      borderWidth: 2,
-      borderColor: colors.border,
-   },
-   imagePickerButton: {
-      width: 120,
-      height: 120,
-      borderRadius: 12,
-      borderWidth: 4,
-      borderStyle: 'dashed',
-      alignItems: 'center',
-      justifyContent: 'center',
-      gap: 8,
-      shadowColor: colors.text,
-      shadowOffset: { width: 4, height: 4 },
-      shadowOpacity: 1,
-      shadowRadius: 0,
-      elevation: 8,
-   },
-   imagePickerText: {
-      fontSize: 12,
-      fontWeight: '500',
-      textAlign: 'center',
-   },
-   loadingContainer: {
-      flex: 1,
-      justifyContent: 'center',
-      alignItems: 'center',
-   },
-});
+// All styles are now implemented using NativeWind classes and inline styles
+// for the cyberpunk aesthetic with proper corner brackets, matrix effects,
+// and neon glow animations
