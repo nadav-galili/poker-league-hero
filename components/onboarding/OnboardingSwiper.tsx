@@ -468,11 +468,6 @@ export default function OnboardingSwiper() {
       return variants[index] as 'neon' | 'cyber' | 'matrix' | 'holo' | 'dark';
    };
 
-   const scanlineTranslateY = scanlineAnim.interpolate({
-      inputRange: [0, 1],
-      outputRange: [-100, screenHeight + 100],
-   });
-
    const CyberpunkBackground = ({
       variant,
    }: {
@@ -619,7 +614,7 @@ export default function OnboardingSwiper() {
                               variant={getCyberpunkVariant(0)}
                            >
                               <Image
-                                 source={require('@/assets/images/new_onboarding/screen_shot1.webp')}
+                                 source={require('@/assets/images/onboarding/cyberss1.webp')}
                                  style={{
                                     width: screenWidth * 0.85,
                                     height: imageHeight,
@@ -643,7 +638,7 @@ export default function OnboardingSwiper() {
                               variant={getCyberpunkVariant(1)}
                            >
                               <Image
-                                 source={require('@/assets/images/new_onboarding/screen_shot2.webp')}
+                                 source={require('@/assets/images/onboarding/cyberss2.webp')}
                                  style={{
                                     width: screenWidth * 0.85,
                                     height: imageHeight,
@@ -667,7 +662,7 @@ export default function OnboardingSwiper() {
                               variant={getCyberpunkVariant(2)}
                            >
                               <Image
-                                 source={require('@/assets/images/new_onboarding/screen_shot3.webp')}
+                                 source={require('@/assets/images/onboarding/cyberss3.webp')}
                                  style={{
                                     width: screenWidth * 0.85,
                                     height: imageHeight,
@@ -691,7 +686,7 @@ export default function OnboardingSwiper() {
                               variant={getCyberpunkVariant(3)}
                            >
                               <Image
-                                 source={require('@/assets/images/new_onboarding/screen_shot4.webp')}
+                                 source={require('@/assets/images/onboarding/cyberss4.webp')}
                                  style={{
                                     width: screenWidth * 0.85,
                                     height: imageHeight,
@@ -715,7 +710,7 @@ export default function OnboardingSwiper() {
                               variant={getCyberpunkVariant(4)}
                            >
                               <Image
-                                 source={require('@/assets/images/new_onboarding/screen_shot5.webp')}
+                                 source={require('@/assets/images/onboarding/cyberss5.webp')}
                                  style={{
                                     width: screenWidth * 0.85,
                                     height: imageHeight,

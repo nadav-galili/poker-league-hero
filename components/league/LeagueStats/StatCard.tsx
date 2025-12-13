@@ -35,7 +35,7 @@ const getCyberpunkColor = (index: number, fallbackColor: string) => {
       '#8A2BE2', // Blue Violet
       '#FF6B35', // Orange
       '#39FF14', // Electric Green
-      '#FF073A', // Neon Red
+      '#00FFFF', // Cyan
    ];
 
    // Use the index to assign different colors to different cards
@@ -46,7 +46,11 @@ const getCyberpunkColor = (index: number, fallbackColor: string) => {
 export default function StatCard({ card }: StatCardProps) {
    // Generate a stable index based on card title for consistent coloring
    const cardIndex = React.useMemo(() => {
-      return card.title.split('').reduce((acc, char) => acc + char.charCodeAt(0), 0) % 6;
+      return (
+         card.title
+            .split('')
+            .reduce((acc, char) => acc + char.charCodeAt(0), 0) % 6
+      );
    }, [card.title]);
 
    const cyberpunkColor = getCyberpunkColor(cardIndex, card.color);
@@ -98,11 +102,7 @@ export default function StatCard({ card }: StatCardProps) {
 
          {/* Holographic overlay effect */}
          <LinearGradient
-            colors={[
-               `${cyberpunkColor}10`,
-               'transparent',
-               '#00FFFF08',
-            ]}
+            colors={[`${cyberpunkColor}10`, 'transparent', '#00FFFF08']}
             start={{ x: 0, y: 0 }}
             end={{ x: 1, y: 1 }}
             style={{
@@ -155,7 +155,11 @@ export default function StatCard({ card }: StatCardProps) {
                   style={{ borderColor: '#00FFFF' }}
                />
 
-               <Ionicons name={card.icon as any} size={24} color={cyberpunkColor} />
+               <Ionicons
+                  name={card.icon as any}
+                  size={24}
+                  color={cyberpunkColor}
+               />
             </View>
 
             {/* Value - bright and cyberpunk styled */}
