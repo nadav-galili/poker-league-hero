@@ -596,18 +596,121 @@ export default function LeagueStatsScreen() {
                </View>
             </View>
 
-            {/* Main Stats Grid */}
+            {/* League Overview Section - Cyberpunk Neon Purple Theme */}
             <View className="mb-8 px-6">
-               <View className="bg-purple-500/10 backdrop-blur-xl border border-purple-400/30 rounded-3xl p-6 mb-6">
-                  <Text className="text-purple-300 text-center mb-4 text-xl font-semibold">
-                     {t('leagueOverview')}
-                  </Text>
+               {/* Cyberpunk League Overview Header */}
+               <View className="relative mb-6 overflow-hidden">
+                  <View
+                     className="bg-black/90 border-2 border-[#8A2BE2] px-6 py-4 relative"
+                     style={{
+                        shadowColor: '#8A2BE2',
+                        shadowOffset: { width: 0, height: 0 },
+                        shadowOpacity: 0.7,
+                        shadowRadius: 16,
+                        elevation: 16,
+                     }}
+                  >
+                     {/* Corner Brackets - Purple/Cyan Theme */}
+                     <View className="absolute top-1.5 left-1.5 w-5 h-5 border-l-2 border-t-2 border-[#8A2BE2]" />
+                     <View className="absolute top-1.5 right-1.5 w-5 h-5 border-r-2 border-t-2 border-[#00FFFF]" />
+                     <View className="absolute bottom-1.5 left-1.5 w-5 h-5 border-l-2 border-b-2 border-[#00FFFF]" />
+                     <View className="absolute bottom-1.5 right-1.5 w-5 h-5 border-r-2 border-b-2 border-[#8A2BE2]" />
+
+                     {/* Holographic Overlay - Purple Theme */}
+                     <LinearGradient
+                        colors={[
+                           'rgba(138, 43, 226, 0.1)',
+                           'transparent',
+                           'rgba(0, 255, 255, 0.08)',
+                        ]}
+                        start={{ x: 0, y: 0 }}
+                        end={{ x: 1, y: 1 }}
+                        style={{
+                           position: 'absolute',
+                           top: 0,
+                           left: 0,
+                           right: 0,
+                           bottom: 0,
+                           opacity: 0.9,
+                        }}
+                     />
+
+                     {/* Cyberpunk Title */}
+                     <Text
+                        className="text-center text-[#8A2BE2] text-xl font-mono font-bold tracking-[4px] uppercase"
+                        style={{
+                           textShadowColor: '#8A2BE2',
+                           textShadowOffset: { width: 0, height: 0 },
+                           textShadowRadius: 10,
+                        }}
+                     >
+                        {t('leagueOverview')}
+                     </Text>
+
+                     {/* Scan Lines - Dual Color */}
+                     <View
+                        className="absolute top-2 left-0 right-0 h-px bg-[#8A2BE2]"
+                        style={{ opacity: 0.4 }}
+                     />
+                     <View
+                        className="absolute bottom-2 left-0 right-0 h-px bg-[#00FFFF]"
+                        style={{ opacity: 0.4 }}
+                     />
+                  </View>
                </View>
 
-               <View className="flex-row flex-wrap justify-center items-start w-full gap-4">
-                  {statCards.map((card, index) => (
-                     <StatCard key={index} card={card} />
-                  ))}
+               {/* Enhanced Stats Grid with Cyberpunk Container */}
+               <View className="relative">
+                  {/* Cyberpunk Grid Background with Purple Accent */}
+                  <LinearGradient
+                     colors={[
+                        'transparent',
+                        'rgba(138, 43, 226, 0.03)',
+                        'transparent',
+                     ]}
+                     start={{ x: 0, y: 0 }}
+                     end={{ x: 1, y: 1 }}
+                     style={{
+                        position: 'absolute',
+                        top: -12,
+                        left: -12,
+                        right: -12,
+                        bottom: -12,
+                        borderWidth: 1,
+                        borderColor: 'rgba(138, 43, 226, 0.15)',
+                        borderRadius: 16,
+                        shadowColor: '#8A2BE2',
+                        shadowOffset: { width: 0, height: 0 },
+                        shadowOpacity: 0.2,
+                        shadowRadius: 8,
+                        elevation: 4,
+                     }}
+                  />
+
+                  {/* Corner Accents for Grid */}
+                  <View className="absolute -top-1 -left-1 w-3 h-3 border-l border-t border-[#8A2BE2]" />
+                  <View className="absolute -top-1 -right-1 w-3 h-3 border-r border-t border-[#00FFFF]" />
+                  <View className="absolute -bottom-1 -left-1 w-3 h-3 border-l border-b border-[#00FFFF]" />
+                  <View className="absolute -bottom-1 -right-1 w-3 h-3 border-r border-b border-[#8A2BE2]" />
+
+                  {/* Stats Cards Grid */}
+                  <View className="flex-row flex-wrap justify-center items-start w-full gap-4">
+                     {statCards.map((card, index) => (
+                        <View
+                           key={index}
+                           className="relative"
+                           style={{
+                              shadowColor: index % 2 === 0 ? '#8A2BE2' : '#00FFFF',
+                              shadowOffset: { width: 0, height: 0 },
+                              shadowOpacity: 0.25,
+                              shadowRadius: 6,
+                              elevation: 6,
+                           }}
+                        >
+                           <StatCard card={card} />
+                        </View>
+                     ))}
+                  </View>
                </View>
             </View>
 
