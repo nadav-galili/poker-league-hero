@@ -43,6 +43,10 @@ module.exports = {
             borderNeonCyan: colors.borderNeonCyan,
             borderNeonPink: colors.borderNeonPink,
             borderNeonGreen: colors.borderNeonGreen,
+            borderNeonYellow: '#FFFF00',
+            borderNeonOrange: '#FF8800',
+            borderNeonMagenta: '#FF00FF',
+            borderNeonRed: '#FF0080',
 
             // Cyberpunk neon colors
             neonCyan: colors.neonCyan,
@@ -51,6 +55,14 @@ module.exports = {
             neonBlue: colors.neonBlue,
             neonPurple: colors.neonPurple,
             neonOrange: colors.neonOrange,
+            neonYellow: '#FFFF00', // Bright neon yellow
+            neonMagenta: '#FF00FF', // Bright neon magenta
+            neonRed: '#FF0080', // Bright neon red
+
+            // Cyberpunk specific colors for better readability
+            'cyber-dark': '#000000', // Pure black for dark cyberpunk backgrounds
+            'cyber-white': '#FFFFFF', // Pure white for maximum contrast
+            'cyber-light': '#E0E0E0', // Light gray for secondary text
 
             // Holographic effects
             holoBlue: colors.holoBlue,

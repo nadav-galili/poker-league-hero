@@ -3,10 +3,10 @@ import { BASE_URL } from '@/constants';
 import { useAuth } from '@/context/auth';
 import { useLocalization } from '@/context/localization';
 import { Ionicons } from '@expo/vector-icons';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useQuery } from '@tanstack/react-query';
 import React, { useEffect, useState } from 'react';
-import { Text, View, TouchableOpacity } from 'react-native';
-import AsyncStorage from '@react-native-async-storage/async-storage';
+import { Text, TouchableOpacity, View } from 'react-native';
 import { LeagueCardSkeleton } from '../shared/LeagueCardSkeleton';
 
 type Props = {
@@ -53,7 +53,9 @@ const Summary = ({ leagueId }: Props) => {
             }
          );
          if (response.ok) {
-            console.log('✅ Successfully persisted summary to DB via separate endpoint');
+            console.log(
+               '✅ Successfully persisted summary to DB via separate endpoint'
+            );
             await AsyncStorage.removeItem(cacheKey);
             return true;
          }
@@ -77,7 +79,9 @@ const Summary = ({ leagueId }: Props) => {
          try {
             const cached = await AsyncStorage.getItem(cacheKey);
             if (cached) {
-               console.log('📦 Found locally cached summary, trying to persist...');
+               console.log(
+                  '📦 Found locally cached summary, trying to persist...'
+               );
                const cachedSummary = JSON.parse(cached) as AISummaryType;
                await persistSummaryToBackend(cachedSummary);
             }
@@ -117,7 +121,10 @@ const Summary = ({ leagueId }: Props) => {
          if (data.needsBackendCache && data.summary) {
             // Backend couldn't cache, store locally AND try separate endpoint
             try {
-               await AsyncStorage.setItem(cacheKey, JSON.stringify(data.summary));
+               await AsyncStorage.setItem(
+                  cacheKey,
+                  JSON.stringify(data.summary)
+               );
                console.log('💾 Stored summary in local cache');
                // Try to persist via separate lightweight endpoint
                persistSummaryToBackend(data.summary);
@@ -163,8 +170,8 @@ const Summary = ({ leagueId }: Props) => {
                className="relative p-5 border-2 items-center gap-4"
                style={{
                   backgroundColor: `${colors.cyberBackground}DD`,
-                  borderColor: colors.errorRed,
-                  shadowColor: colors.errorRed,
+                  borderColor: colors.error,
+                  shadowColor: colors.error,
                   shadowOffset: { width: 0, height: 0 },
                   shadowOpacity: 0.8,
                   shadowRadius: 10,
@@ -175,48 +182,48 @@ const Summary = ({ leagueId }: Props) => {
                <View className="absolute top-0 left-0 w-6 h-6">
                   <View
                      className="absolute top-0 left-0 w-4 h-1"
-                     style={{ backgroundColor: colors.errorRed }}
+                     style={{ backgroundColor: colors.error }}
                   />
                   <View
                      className="absolute top-0 left-0 w-1 h-4"
-                     style={{ backgroundColor: colors.errorRed }}
+                     style={{ backgroundColor: colors.error }}
                   />
                </View>
                <View className="absolute top-0 right-0 w-6 h-6">
                   <View
                      className="absolute top-0 right-0 w-4 h-1"
-                     style={{ backgroundColor: colors.errorRed }}
+                     style={{ backgroundColor: colors.error }}
                   />
                   <View
                      className="absolute top-0 right-0 w-1 h-4"
-                     style={{ backgroundColor: colors.errorRed }}
+                     style={{ backgroundColor: colors.error }}
                   />
                </View>
                <View className="absolute bottom-0 left-0 w-6 h-6">
                   <View
                      className="absolute bottom-0 left-0 w-4 h-1"
-                     style={{ backgroundColor: colors.errorRed }}
+                     style={{ backgroundColor: colors.error }}
                   />
                   <View
                      className="absolute bottom-0 left-0 w-1 h-4"
-                     style={{ backgroundColor: colors.errorRed }}
+                     style={{ backgroundColor: colors.error }}
                   />
                </View>
                <View className="absolute bottom-0 right-0 w-6 h-6">
                   <View
                      className="absolute bottom-0 right-0 w-4 h-1"
-                     style={{ backgroundColor: colors.errorRed }}
+                     style={{ backgroundColor: colors.error }}
                   />
                   <View
                      className="absolute bottom-0 right-0 w-1 h-4"
-                     style={{ backgroundColor: colors.errorRed }}
+                     style={{ backgroundColor: colors.error }}
                   />
                </View>
 
                <Text
                   className="text-center font-bold uppercase tracking-[2px] text-lg"
                   style={{
-                     color: colors.errorRed,
+                     color: colors.error,
                      fontFamily: 'monospace',
                   }}
                >
@@ -235,8 +242,8 @@ const Summary = ({ leagueId }: Props) => {
                   className="px-6 py-3 border-2 rounded mt-2"
                   style={{
                      backgroundColor: colors.cyberBackground,
-                     borderColor: colors.errorRed,
-                     shadowColor: colors.errorRed,
+                     borderColor: colors.error,
+                     shadowColor: colors.error,
                      shadowOffset: { width: 0, height: 0 },
                      shadowOpacity: 0.6,
                      shadowRadius: 5,
@@ -246,11 +253,13 @@ const Summary = ({ leagueId }: Props) => {
                   <Text
                      className="font-bold uppercase tracking-[1px]"
                      style={{
-                        color: colors.errorRed,
+                        color: colors.error,
                         fontFamily: 'monospace',
                      }}
                   >
-                     {'>> '}{t('retry')}{' <<'}
+                     {'>> '}
+                     {t('retry')}
+                     {' <<'}
                   </Text>
                </TouchableOpacity>
             </View>
@@ -323,12 +332,10 @@ const Summary = ({ leagueId }: Props) => {
                      fontFamily: 'monospace',
                   }}
                >
-                  <Ionicons
-                     name="sparkles"
-                     size={20}
-                     color={colors.neonPink}
-                  />{' '}
-                  {'/// '}{t('aiSummary')}{' ///'}
+                  <Ionicons name="sparkles" size={20} color={colors.neonPink} />{' '}
+                  {'/// '}
+                  {t('aiSummary')}
+                  {' ///'}
                </Text>
                <TouchableOpacity
                   onPress={() => refetch()}
@@ -416,14 +423,15 @@ const Summary = ({ leagueId }: Props) => {
                         fontFamily: 'monospace',
                      }}
                   >
-                     {'>> '}{t('financialSnapshot')}
+                     {'>> '}
+                     {t('financialSnapshot')}
                   </Text>
                   <Text
                      className="font-medium text-base leading-6"
                      style={{
                         color: colors.textSecondary,
                         textAlign: isRTL ? 'right' : 'left',
-                        writingDirection: isRTL ? 'rtl' : 'ltr'
+                        writingDirection: isRTL ? 'rtl' : 'ltr',
                      }}
                   >
                      {summary.summary.financialSnapshot}
@@ -500,14 +508,15 @@ const Summary = ({ leagueId }: Props) => {
                         fontFamily: 'monospace',
                      }}
                   >
-                     {'>> '}{t('lastGameHighlights')}
+                     {'>> '}
+                     {t('lastGameHighlights')}
                   </Text>
                   <Text
                      className="font-medium text-base leading-6"
                      style={{
                         color: colors.textSecondary,
                         textAlign: isRTL ? 'right' : 'left',
-                        writingDirection: isRTL ? 'rtl' : 'ltr'
+                        writingDirection: isRTL ? 'rtl' : 'ltr',
                      }}
                   >
                      {summary.summary.lastGameHighlights}
@@ -576,7 +585,9 @@ const Summary = ({ leagueId }: Props) => {
                      fontFamily: 'monospace',
                   }}
                >
-                  {'<< '}{t('noSummaryYet')}{' >>'}
+                  {'<< '}
+                  {t('noSummaryYet')}
+                  {' >>'}
                </Text>
             </View>
          )}

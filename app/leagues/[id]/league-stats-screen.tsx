@@ -426,49 +426,173 @@ export default function LeagueStatsScreen() {
 
             <Summary leagueId={parseInt(leagueId!)} />
 
-            {/* Player Stats Cards Grid */}
+            {/* Player Stats Cards Grid - Cyberpunk Transformation */}
             <View className="mb-8 px-6">
-               <View className="bg-blue-500/10 backdrop-blur-xl border border-blue-400/30 rounded-3xl p-6 mb-6">
-                  <Text className="text-blue-300 text-center mb-4 text-xl font-semibold">
-                     {t('playerStats')}
-                  </Text>
+               {/* Cyberpunk Section Header - Neon Magenta Theme */}
+               <View className="relative mb-6 overflow-hidden">
+                  <View
+                     className="bg-black/90 border border-[#FF1493] px-6 py-4 relative"
+                     style={{
+                        shadowColor: '#FF1493',
+                        shadowOffset: { width: 0, height: 0 },
+                        shadowOpacity: 0.6,
+                        shadowRadius: 12,
+                        elevation: 12,
+                     }}
+                  >
+                     {/* Corner Brackets for Section Header */}
+                     <View className="absolute top-1.5 left-1.5 w-4 h-4 border-l-2 border-t-2 border-[#FF1493]" />
+                     <View className="absolute top-1.5 right-1.5 w-4 h-4 border-r-2 border-t-2 border-[#00FFFF]" />
+                     <View className="absolute bottom-1.5 left-1.5 w-4 h-4 border-l-2 border-b-2 border-[#00FFFF]" />
+                     <View className="absolute bottom-1.5 right-1.5 w-4 h-4 border-r-2 border-b-2 border-[#FF1493]" />
+
+                     {/* Holographic Overlay */}
+                     <LinearGradient
+                        colors={[
+                           'rgba(255, 20, 147, 0.1)',
+                           'transparent',
+                           'rgba(0, 255, 255, 0.1)',
+                        ]}
+                        start={{ x: 0, y: 0 }}
+                        end={{ x: 1, y: 1 }}
+                        style={{
+                           position: 'absolute',
+                           top: 0,
+                           left: 0,
+                           right: 0,
+                           bottom: 0,
+                           opacity: 0.8,
+                        }}
+                     />
+
+                     {/* Cyberpunk Title */}
+                     <Text
+                        className="text-center text-[#FF1493] text-xl font-mono font-bold tracking-[3px] uppercase"
+                        style={{
+                           textShadowColor: '#FF1493',
+                           textShadowOffset: { width: 0, height: 0 },
+                           textShadowRadius: 8,
+                        }}
+                     >
+                        {t('playerStats')}
+                     </Text>
+
+                     {/* Scan Lines */}
+                     <View
+                        className="absolute top-2 left-0 right-0 h-px bg-[#FF1493]"
+                        style={{ opacity: 0.3 }}
+                     />
+                     <View
+                        className="absolute bottom-2 left-0 right-0 h-px bg-[#00FFFF]"
+                        style={{ opacity: 0.3 }}
+                     />
+                  </View>
                </View>
 
-               <View className="flex-row flex-wrap justify-center items-start w-full gap-4">
-                  <PressableStatCard
-                     onPress={() => handleStatPress('top-profit-player')}
+               {/* Enhanced Stats Cards Grid with Cyberpunk Accents */}
+               <View className="flex-row flex-wrap justify-center items-start w-full gap-4 relative">
+                  {/* Subtle Grid Background Effect */}
+                  <LinearGradient
+                     colors={[
+                        'transparent',
+                        'rgba(255, 20, 147, 0.02)',
+                        'transparent',
+                     ]}
+                     start={{ x: 0, y: 0 }}
+                     end={{ x: 1, y: 1 }}
+                     style={{
+                        position: 'absolute',
+                        top: -8,
+                        left: -8,
+                        right: -8,
+                        bottom: -8,
+                        borderWidth: 1,
+                        borderColor: 'rgba(255, 20, 147, 0.1)',
+                        borderRadius: 12,
+                     }}
+                  />
+
+                  <View
+                     className="relative"
+                     style={{
+                        shadowColor: '#FF1493',
+                        shadowOffset: { width: 0, height: 0 },
+                        shadowOpacity: 0.2,
+                        shadowRadius: 4,
+                        elevation: 4,
+                     }}
                   >
-                     <TopProfitPlayerCard leagueId={leagueId!} t={t} />
-                  </PressableStatCard>
-                  <PressableStatCard
-                     onPress={() => handleStatPress('most-active-player')}
+                     <PressableStatCard
+                        onPress={() => handleStatPress('top-profit-player')}
+                     >
+                        <TopProfitPlayerCard leagueId={leagueId!} t={t} />
+                     </PressableStatCard>
+                  </View>
+
+                  <View
+                     className="relative"
+                     style={{
+                        shadowColor: '#00FFFF',
+                        shadowOffset: { width: 0, height: 0 },
+                        shadowOpacity: 0.2,
+                        shadowRadius: 4,
+                        elevation: 4,
+                     }}
                   >
-                     <PlayerStatCard
-                        leagueId={leagueId!}
-                        statType="most-active-player"
-                        t={t}
-                     />
-                  </PressableStatCard>
-                  <PressableStatCard
-                     onPress={() =>
-                        handleStatPress('highest-single-game-profit')
-                     }
+                     <PressableStatCard
+                        onPress={() => handleStatPress('most-active-player')}
+                     >
+                        <PlayerStatCard
+                           leagueId={leagueId!}
+                           statType="most-active-player"
+                           t={t}
+                        />
+                     </PressableStatCard>
+                  </View>
+
+                  <View
+                     className="relative"
+                     style={{
+                        shadowColor: '#FF1493',
+                        shadowOffset: { width: 0, height: 0 },
+                        shadowOpacity: 0.2,
+                        shadowRadius: 4,
+                        elevation: 4,
+                     }}
                   >
-                     <PlayerStatCard
-                        leagueId={leagueId!}
-                        statType="highest-single-game-profit"
-                        t={t}
-                     />
-                  </PressableStatCard>
-                  <PressableStatCard
-                     onPress={() => handleStatPress('best-winning-streak')}
+                     <PressableStatCard
+                        onPress={() =>
+                           handleStatPress('highest-single-game-profit')
+                        }
+                     >
+                        <PlayerStatCard
+                           leagueId={leagueId!}
+                           statType="highest-single-game-profit"
+                           t={t}
+                        />
+                     </PressableStatCard>
+                  </View>
+
+                  <View
+                     className="relative"
+                     style={{
+                        shadowColor: '#00FFFF',
+                        shadowOffset: { width: 0, height: 0 },
+                        shadowOpacity: 0.2,
+                        shadowRadius: 4,
+                        elevation: 4,
+                     }}
                   >
-                     <PlayerStatCard
-                        leagueId={leagueId!}
-                        statType="best-winning-streak"
-                        t={t}
-                     />
-                  </PressableStatCard>
+                     <PressableStatCard
+                        onPress={() => handleStatPress('best-winning-streak')}
+                     >
+                        <PlayerStatCard
+                           leagueId={leagueId!}
+                           statType="best-winning-streak"
+                           t={t}
+                        />
+                     </PressableStatCard>
+                  </View>
                </View>
             </View>
 

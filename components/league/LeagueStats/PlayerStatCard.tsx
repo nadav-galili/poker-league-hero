@@ -21,23 +21,23 @@ interface PlayerStatCardProps {
    t: (key: string) => string;
 }
 
-// Stat type configurations with modern colors
+// Cyberpunk stat type configurations with neon colors
 const STAT_CONFIGS = {
    'top-profit-player': {
       title: 'topProfitPlayer',
       icon: 'trophy',
-      color: '#4ADE80', // Green
-      bgColor: 'bg-green-500/10',
-      borderColor: 'border-green-400/30',
+      color: '#00FF88', // Bright Neon Green
+      borderClass: 'border-neonGreen',
+      textClass: 'text-neonGreen',
       formatValue: (value: number | string | undefined | null) =>
          formatCurrency(value),
    },
    'most-active-player': {
       title: 'mostActivePlayer',
       icon: 'star',
-      color: '#60A5FA', // Blue
-      bgColor: 'bg-blue-500/10',
-      borderColor: 'border-blue-400/30',
+      color: '#88FFFF', // Bright Neon Cyan
+      borderClass: 'border-neonCyan',
+      textClass: 'text-neonCyan',
       formatValue: (value: number | string | undefined | null) => {
          if (value === null || value === undefined) {
             return 'N/A';
@@ -48,27 +48,27 @@ const STAT_CONFIGS = {
    'highest-single-game-profit': {
       title: 'highestSingleGameProfit',
       icon: 'trending-up',
-      color: '#FB923C', // Orange
-      bgColor: 'bg-orange-500/10',
-      borderColor: 'border-orange-400/30',
+      color: '#FFAA44', // Bright Neon Orange
+      borderClass: 'border-neonOrange',
+      textClass: 'text-neonOrange',
       formatValue: (value: number | string | undefined | null) =>
          formatCurrency(value),
    },
    'biggest-loser': {
       title: 'biggestLoser',
       icon: 'sad',
-      color: '#F87171', // Red
-      bgColor: 'bg-red-500/10',
-      borderColor: 'border-red-400/30',
+      color: '#FF00FF', // Neon Magenta
+      borderClass: 'border-neonMagenta',
+      textClass: 'text-neonMagenta',
       formatValue: (value: number | string | undefined | null) =>
          formatCurrency(value),
    },
    'best-winning-streak': {
       title: 'bestWinningStreak',
       icon: 'flame',
-      color: '#F59E0B', // Amber
-      bgColor: 'bg-amber-500/10',
-      borderColor: 'border-amber-400/30',
+      color: '#FFFF88', // Bright Neon Yellow
+      borderClass: 'border-neonYellow',
+      textClass: 'text-neonYellow',
       formatValue: (value: number | string | undefined | null) => {
          if (value === null || value === undefined) return 'N/A';
          return value.toString();
@@ -110,20 +110,27 @@ export default function PlayerStatCard({
    if (isLoading) {
       return (
          <View
-            className={`${config.bgColor} backdrop-blur-xl ${config.borderColor} rounded-3xl p-4 mb-4`}
-            style={[styles.card, cardStyle]}
+            className={`bg-cyber-dark border-2 ${config.borderClass} p-4 mb-4 relative`}
+            style={[styles.card, styles.getCyberpunkCardStyle(config.color)]}
          >
+            {/* Corner Brackets */}
+            <View style={styles.cornerBrackets}>
+               <View style={[styles.cornerBracket, styles.topLeft, { borderColor: config.color }]} />
+               <View style={[styles.cornerBracket, styles.topRight, { borderColor: config.color }]} />
+               <View style={[styles.cornerBracket, styles.bottomLeft, { borderColor: config.color }]} />
+               <View style={[styles.cornerBracket, styles.bottomRight, { borderColor: config.color }]} />
+            </View>
             <View className="items-center justify-center py-6">
                <View
-                  className="w-10 h-10 bg-white/10 border border-white/20 rounded-xl items-center justify-center mb-3"
-                  style={iconContainerStyle}
+                  className={`w-10 h-10 border-2 ${config.borderClass} items-center justify-center mb-3`}
+                  style={[styles.cyberpunkIcon, { backgroundColor: `${config.color}20` }]}
                >
                   <CyberpunkLoader
                      size="small"
                      variant="cyan"
                   />
                </View>
-               <Text className="text-white/70 text-xs font-medium">
+               <Text className={`${config.textClass} text-xs font-bold tracking-wide`}>
                   {t('loading')}...
                </Text>
             </View>
@@ -134,36 +141,28 @@ export default function PlayerStatCard({
    if (error || !data) {
       return (
          <View
-            className="bg-red-500/10 backdrop-blur-xl border-red-400/30 rounded-3xl p-4 mb-4"
-            style={[
-               styles.card,
-               {
-                  shadowColor: '#F87171',
-                  shadowOffset: { width: 0, height: 8 },
-                  shadowOpacity: 0.2,
-                  shadowRadius: 16,
-                  elevation: 16,
-               },
-            ]}
+            className="bg-cyber-dark border-2 border-neonRed p-4 mb-4 relative"
+            style={[styles.card, styles.getCyberpunkCardStyle('#ff0080')]}
          >
+            {/* Corner Brackets */}
+            <View style={styles.cornerBrackets}>
+               <View style={[styles.cornerBracket, styles.topLeft, { borderColor: '#ff0080' }]} />
+               <View style={[styles.cornerBracket, styles.topRight, { borderColor: '#ff0080' }]} />
+               <View style={[styles.cornerBracket, styles.bottomLeft, { borderColor: '#ff0080' }]} />
+               <View style={[styles.cornerBracket, styles.bottomRight, { borderColor: '#ff0080' }]} />
+            </View>
             <View className="items-center justify-center py-6">
                <View
-                  className="w-10 h-10 bg-red-500/20 border border-red-400/40 rounded-xl items-center justify-center mb-3"
-                  style={{
-                     shadowColor: '#F87171',
-                     shadowOffset: { width: 0, height: 4 },
-                     shadowOpacity: 0.3,
-                     shadowRadius: 8,
-                     elevation: 8,
-                  }}
+                  className="w-10 h-10 bg-neonRed/20 border-2 border-neonRed items-center justify-center mb-3"
+                  style={styles.cyberpunkIcon}
                >
                   <Ionicons
                      name={config.icon as any}
                      size={18}
-                     color="#F87171"
+                     color="#ff0080"
                   />
                </View>
-               <Text className="text-red-400 text-xs font-medium text-center">
+               <Text className="text-neonRed text-xs font-bold text-center tracking-wide">
                   {error || t('noCompletedGames')}
                </Text>
             </View>
@@ -173,18 +172,26 @@ export default function PlayerStatCard({
 
    return (
       <View
-         className={`${config.bgColor} backdrop-blur-xl ${config.borderColor} rounded-3xl p-4 mb-4`}
-         style={[styles.card, cardStyle]}
+         className={`bg-cyber-dark border-2 ${config.borderClass} p-4 mb-4 relative`}
+         style={[styles.card, styles.getCyberpunkCardStyle(config.color)]}
       >
+         {/* Corner Brackets */}
+         <View style={styles.cornerBrackets}>
+            <View style={[styles.cornerBracket, styles.topLeft, { borderColor: config.color }]} />
+            <View style={[styles.cornerBracket, styles.topRight, { borderColor: config.color }]} />
+            <View style={[styles.cornerBracket, styles.bottomLeft, { borderColor: config.color }]} />
+            <View style={[styles.cornerBracket, styles.bottomRight, { borderColor: config.color }]} />
+         </View>
+
          {/* Header with Icon */}
          <View className="flex-row items-center justify-between mb-3">
             <View
-               className="w-10 h-10 border border-white/30 rounded-xl items-center justify-center"
+               className={`w-10 h-10 border-2 ${config.borderClass} items-center justify-center`}
                style={[
+                  styles.cyberpunkIcon,
                   {
                      backgroundColor: `${config.color}20`,
                   },
-                  iconContainerStyle,
                ]}
             >
                <Ionicons
@@ -194,7 +201,7 @@ export default function PlayerStatCard({
                />
             </View>
             <Text
-               className="text-white/90 text-xs font-semibold flex-1 text-right"
+               className={`${config.textClass} text-xs font-bold flex-1 text-right tracking-wide`}
                numberOfLines={2}
             >
                {t(config.title)}
@@ -204,30 +211,19 @@ export default function PlayerStatCard({
          {/* Player Avatar */}
          <View className="items-center mb-3">
             {data.profileImageUrl ? (
-               <Image
-                  source={{ uri: data.profileImageUrl }}
-                  style={{
-                     width: 56,
-                     height: 56,
-                     borderRadius: 28,
-                     shadowColor: '#FFFFFF',
-                     shadowOffset: { width: 0, height: 4 },
-                     shadowOpacity: 0.2,
-                     shadowRadius: 8,
-                  }}
-                  contentFit="cover"
-                  cachePolicy="memory-disk"
-               />
+               <View style={styles.avatarContainer}>
+                  <Image
+                     source={{ uri: data.profileImageUrl }}
+                     style={styles.avatar}
+                     contentFit="cover"
+                     cachePolicy="memory-disk"
+                  />
+                  <View style={[styles.avatarBorder, { borderColor: config.color }]} />
+               </View>
             ) : (
                <View
-                  className="w-14 h-14 bg-white/10 border border-white/20 rounded-full items-center justify-center"
-                  style={{
-                     shadowColor: config.color,
-                     shadowOffset: { width: 0, height: 4 },
-                     shadowOpacity: 0.3,
-                     shadowRadius: 8,
-                     elevation: 8,
-                  }}
+                  className={`w-14 h-14 border-2 ${config.borderClass} items-center justify-center`}
+                  style={[styles.cyberpunkAvatar, { backgroundColor: `${config.color}20` }]}
                >
                   <Ionicons name="person" size={24} color={config.color} />
                </View>
@@ -237,33 +233,40 @@ export default function PlayerStatCard({
          {/* Player Info */}
          <View className="items-center">
             <Text
-               className="text-white text-base font-semibold text-center mb-1"
+               className="text-cyber-white text-base font-black text-center mb-1 tracking-wide"
+               style={{ textShadowColor: config.color, textShadowOffset: { width: 0, height: 0 }, textShadowRadius: 8 }}
                numberOfLines={1}
             >
                {data.fullName}
             </Text>
             <Text
-               className="text-xl font-bold mb-2"
-               style={{ color: config.color }}
+               className={`${config.textClass} text-xl font-black mb-2 tracking-wider`}
+               style={{ textShadowColor: config.color, textShadowOffset: { width: 0, height: 0 }, textShadowRadius: 10 }}
             >
                {config.formatValue(data.value)}
             </Text>
 
-            {/* Additional Data - Modern Design */}
+            {/* Additional Data - Cyberpunk Design */}
             {data.additionalData && (
                <View className="items-center">
                   {data.additionalData.gamesPlayed && (
                      <View
-                        className="px-3 py-1.5 rounded-xl mb-1.5 border border-white/20"
-                        style={{ backgroundColor: `${config.color}20` }}
+                        className={`px-3 py-1.5 mb-1.5 border-2 ${config.borderClass}`}
+                        style={[styles.statBadge, { backgroundColor: `${config.color}10` }]}
                      >
-                        <Text className="text-white font-medium text-xs">
+                        <Text
+                           className={`${config.textClass} font-bold text-xs tracking-wide`}
+                           style={{ textShadowColor: config.color, textShadowOffset: { width: 0, height: 0 }, textShadowRadius: 6 }}
+                        >
                            {data.additionalData.gamesPlayed} {t('gamesPlayed')}
                         </Text>
                      </View>
                   )}
                   {data.additionalData.totalProfit !== undefined && (
-                     <Text className="text-white/70 text-xs font-medium text-center">
+                     <Text
+                        className="text-cyber-white text-xs font-bold text-center tracking-wide"
+                        style={{ textShadowColor: '#FFFFFF', textShadowOffset: { width: 0, height: 0 }, textShadowRadius: 4 }}
+                     >
                         {t('totalProfit')}:{' '}
                         {formatCurrency(data.additionalData.totalProfit)}
                      </Text>
@@ -288,5 +291,90 @@ const styles = StyleSheet.create({
       width: getCardWidth(),
       minWidth: 140,
       maxWidth: 170,
+   },
+   getCyberpunkCardStyle: (color: string) => ({
+      shadowColor: color,
+      shadowOffset: { width: 0, height: 0 },
+      shadowOpacity: 0.8,
+      shadowRadius: 15,
+      elevation: 25,
+   }),
+   cyberpunkIcon: {
+      shadowColor: '#FFFFFF',
+      shadowOffset: { width: 0, height: 0 },
+      shadowOpacity: 1,
+      shadowRadius: 8,
+      elevation: 15,
+   },
+   cornerBrackets: {
+      position: 'absolute',
+      top: 0,
+      left: 0,
+      right: 0,
+      bottom: 0,
+      zIndex: 1,
+   },
+   cornerBracket: {
+      position: 'absolute',
+      width: 12,
+      height: 12,
+      borderWidth: 2,
+   },
+   topLeft: {
+      top: -2,
+      left: -2,
+      borderRightWidth: 0,
+      borderBottomWidth: 0,
+   },
+   topRight: {
+      top: -2,
+      right: -2,
+      borderLeftWidth: 0,
+      borderBottomWidth: 0,
+   },
+   bottomLeft: {
+      bottom: -2,
+      left: -2,
+      borderRightWidth: 0,
+      borderTopWidth: 0,
+   },
+   bottomRight: {
+      bottom: -2,
+      right: -2,
+      borderLeftWidth: 0,
+      borderTopWidth: 0,
+   },
+   avatarContainer: {
+      position: 'relative',
+      width: 56,
+      height: 56,
+   },
+   avatar: {
+      width: 56,
+      height: 56,
+      borderRadius: 6,
+   },
+   avatarBorder: {
+      position: 'absolute',
+      top: -2,
+      left: -2,
+      right: -2,
+      bottom: -2,
+      borderWidth: 2,
+      borderRadius: 8,
+   },
+   cyberpunkAvatar: {
+      shadowColor: '#FFFFFF',
+      shadowOffset: { width: 0, height: 0 },
+      shadowOpacity: 1,
+      shadowRadius: 10,
+      elevation: 15,
+   },
+   statBadge: {
+      shadowColor: '#FFFFFF',
+      shadowOffset: { width: 0, height: 0 },
+      shadowOpacity: 0.6,
+      shadowRadius: 6,
+      elevation: 10,
    },
 });
