@@ -1,14 +1,14 @@
 import { colors, getTheme } from '@/colors';
-import Button from '@/components/Button';
 import { LoadingState } from '@/components/shared/LoadingState';
 import { Text } from '@/components/Text';
 import { useAuth } from '@/context/auth';
 import { useLocalization } from '@/context/localization';
 import { useMixpanel } from '@/hooks/useMixpanel';
 import { Ionicons } from '@expo/vector-icons';
+import { LinearGradient } from 'expo-linear-gradient';
 import { router, useLocalSearchParams } from 'expo-router';
 import React from 'react';
-import { FlatList, TouchableOpacity, View } from 'react-native';
+import { FlatList, StyleSheet, TouchableOpacity, View } from 'react-native';
 import Toast from 'react-native-toast-message';
 
 import AddPlayerModal from '@/components/game/AddPlayerModal';
@@ -17,7 +17,7 @@ import GameEventsList from '@/components/game/GameEventsList';
 import GameSummary from '@/components/game/GameSummary';
 import PlayerCard from '@/components/game/PlayerCard';
 import { ConfirmationModal } from '@/components/modals';
-import { AppButton } from '@/components/ui/AppButton';
+import { CyberpunkButton } from '@/components/ui/CyberpunkButton';
 import { BASE_URL } from '@/constants';
 import { GamePlayer, LeagueMember, useGameData } from '@/hooks/useGameData';
 import { createGameService } from '@/services/gameService';
@@ -396,132 +396,335 @@ export default function GameScreen() {
 
    if (error || !game) {
       return (
-         <View className="flex-1" style={{ backgroundColor: theme.background }}>
-            <View
-               className="flex-row items-center justify-between px-5 pt-15 pb-4 border-b-6 border-black shadow-lg elevation-12"
-               style={{ backgroundColor: colors.primary }}
+         <View
+            className="flex-1"
+            style={{ backgroundColor: colors.cyberBackground }}
+         >
+            {/* Cyberpunk Error Header */}
+            <LinearGradient
+               colors={[
+                  colors.cyberBackground,
+                  colors.errorGradientStart,
+                  colors.cyberBackground,
+               ]}
+               start={{ x: 0, y: 0 }}
+               end={{ x: 1, y: 0 }}
+               style={styles.errorHeaderGradient}
             >
-               <TouchableOpacity onPress={handleBack} className="p-2">
-                  <Ionicons
-                     name={isRTL ? 'arrow-forward' : 'arrow-back'}
-                     size={24}
-                     color={colors.text}
-                  />
-               </TouchableOpacity>
-               <Text
-                  className="text-xl font-bold uppercase tracking-wide"
-                  style={{ color: colors.text }}
-               >
-                  {t('gameDetails')}
-               </Text>
-               <View className="w-10" />
-            </View>
+               <View style={styles.cornerTopLeft} />
+               <View style={styles.cornerTopRight} />
 
-            <View className="flex-1 justify-center items-center px-10 py-15">
-               <Text
-                  variant="h3"
-                  color={theme.error}
-                  className="text-center mb-3"
-               >
-                  {t('error')}
-               </Text>
-               <Text
-                  variant="body"
-                  color={theme.textMuted}
-                  className="text-center mb-6"
-               >
-                  {error || t('gameNotFound')}
-               </Text>
-               <Button
-                  title={t('retry')}
-                  onPress={loadGameData}
-                  variant="outline"
-                  size="small"
+               <View className="flex-row items-center justify-between px-5 pt-15 pb-4">
+                  <TouchableOpacity
+                     onPress={handleBack}
+                     style={styles.cyberpunkButton}
+                  >
+                     <LinearGradient
+                        colors={[colors.neonBlue, colors.neonCyan]}
+                        style={styles.buttonGradient}
+                     >
+                        <Ionicons
+                           name={isRTL ? 'arrow-forward' : 'arrow-back'}
+                           size={20}
+                           color={colors.neonBlue}
+                        />
+                     </LinearGradient>
+                     <View
+                        style={[
+                           styles.buttonGlow,
+                           { shadowColor: colors.neonBlue },
+                        ]}
+                     />
+                  </TouchableOpacity>
+
+                  <View style={styles.titleContainer}>
+                     <Text
+                        className="text-lg font-mono font-bold uppercase tracking-widest"
+                        style={{
+                           color: colors.errorGradientEnd,
+                           textShadowColor: colors.errorGradientStart,
+                           textShadowOffset: { width: 0, height: 0 },
+                           textShadowRadius: 10,
+                        }}
+                     >
+                        {t('gameDetails')}
+                     </Text>
+                     <View
+                        style={[
+                           styles.scanLine,
+                           { backgroundColor: colors.errorGradientEnd },
+                        ]}
+                     />
+                  </View>
+
+                  <View className="w-10" />
+               </View>
+
+               <View
+                  style={[
+                     styles.headerBorder,
+                     { backgroundColor: colors.errorGradientEnd },
+                  ]}
                />
+            </LinearGradient>
+
+            {/* Cyberpunk Error Content */}
+            <View className="flex-1 justify-center items-center px-10 py-15">
+               <View style={styles.errorContainer}>
+                  {/* Error icon with glitch effect */}
+                  <View style={styles.errorIcon}>
+                     <Ionicons
+                        name="warning-outline"
+                        size={64}
+                        color={colors.errorGradientEnd}
+                        style={{
+                           textShadowColor: colors.errorGradientStart,
+                           textShadowOffset: { width: 0, height: 0 },
+                           textShadowRadius: 15,
+                        }}
+                     />
+                  </View>
+
+                  <Text
+                     className="text-2xl font-mono font-bold uppercase tracking-widest text-center mb-4"
+                     style={{
+                        color: colors.errorGradientEnd,
+                        textShadowColor: colors.errorGradientStart,
+                        textShadowOffset: { width: 0, height: 0 },
+                        textShadowRadius: 8,
+                     }}
+                  >
+                     {'>>> ' + t('error') + ' <<<'}
+                  </Text>
+
+                  <View style={styles.errorMessage}>
+                     <Text
+                        className="text-sm font-mono text-center mb-6 leading-5"
+                        style={{ color: colors.textMuted }}
+                     >
+                        {error || t('gameNotFound')}
+                     </Text>
+                  </View>
+
+                  {/* Cyberpunk retry button */}
+                  <CyberpunkButton
+                     title={t('retry')}
+                     onPress={loadGameData}
+                     variant="secondary"
+                     size="medium"
+                     width="60%"
+                     icon="refresh"
+                  />
+               </View>
             </View>
          </View>
       );
    }
 
    return (
-      <View className="flex-1" style={{ backgroundColor: theme.background }}>
-         {/* Header */}
-         <View
-            className="flex-row items-center justify-between px-5 pt-15 pb-4 border-b-6 border-black shadow-lg elevation-12"
-            style={{ backgroundColor: colors.primary }}
+      <View
+         className="flex-1"
+         style={{ backgroundColor: colors.cyberBackground }}
+      >
+         {/* Cyberpunk Header */}
+         <LinearGradient
+            colors={[
+               colors.cyberBackground,
+               colors.cyberDarkBlue,
+               colors.cyberBackground,
+            ]}
+            start={{ x: 0, y: 0 }}
+            end={{ x: 1, y: 0 }}
+            style={styles.headerGradient}
          >
-            <TouchableOpacity onPress={handleBack} className="p-2">
-               <Ionicons
-                  name={isRTL ? 'arrow-forward' : 'arrow-back'}
-                  size={24}
-                  color={colors.text}
-               />
-            </TouchableOpacity>
-            <Text
-               className="text-xl font-bold uppercase tracking-wide"
-               style={{ color: colors.text }}
-            >
-               {t('gameDetails')}
-            </Text>
-            <View className="flex-row items-center gap-2">
-               <TouchableOpacity onPress={handleRefresh} className="p-2">
-                  <Ionicons name="refresh" size={24} color={colors.text} />
-               </TouchableOpacity>
-               {game?.status === 'active' && (
-                  <TouchableOpacity
-                     onPress={handleEndGame}
-                     className="p-2 rounded-lg border-2 border-gray-600 flex-row items-center gap-2"
-                     style={{ backgroundColor: colors.errorGradientEnd }}
+            {/* Corner brackets */}
+            <View style={styles.cornerTopLeft} />
+            <View style={styles.cornerTopRight} />
+
+            <View className="flex-row items-center justify-between px-5 pt-15 pb-4">
+               {/* Back button with cyberpunk styling */}
+               <TouchableOpacity
+                  onPress={handleBack}
+                  style={styles.cyberpunkButton}
+               >
+                  <LinearGradient
+                     colors={[colors.neonBlue, colors.neonCyan]}
+                     style={styles.buttonGradient}
                   >
                      <Ionicons
-                        name="stop-circle"
-                        size={24}
-                        color={colors.text}
+                        name={isRTL ? 'arrow-forward' : 'arrow-back'}
+                        size={20}
+                        color={colors.neonCyan}
                      />
-                     {allPlayersCashedOut && (
-                        <Text className="text-sm font-bold text-white">
-                           {t('endGame')}
-                        </Text>
-                     )}
+                  </LinearGradient>
+                  {/* Button glow */}
+                  <View
+                     style={[
+                        styles.buttonGlow,
+                        { shadowColor: colors.neonBlue },
+                     ]}
+                  />
+               </TouchableOpacity>
+
+               {/* Title with cyberpunk styling */}
+               <View style={styles.titleContainer}>
+                  <Text
+                     className="text-lg font-mono font-bold uppercase tracking-widest"
+                     style={{
+                        color: colors.neonCyan,
+                        textShadowColor: colors.shadowNeonCyan,
+                        textShadowOffset: { width: 0, height: 0 },
+                        textShadowRadius: 10,
+                     }}
+                  >
+                     {t('gameDetails')}
+                  </Text>
+                  {/* Scan lines */}
+                  <View style={styles.scanLine} />
+               </View>
+
+               {/* Action buttons */}
+               <View className="flex-row items-center gap-3">
+                  {/* Refresh button */}
+                  <TouchableOpacity
+                     onPress={handleRefresh}
+                     style={styles.cyberpunkButton}
+                  >
+                     <LinearGradient
+                        colors={[colors.neonBlue, colors.neonCyan]}
+                        style={styles.buttonGradient}
+                     >
+                        <Ionicons
+                           name="refresh"
+                           size={20}
+                           color={colors.neonCyan}
+                        />
+                     </LinearGradient>
+                     <View
+                        style={[
+                           styles.buttonGlow,
+                           { shadowColor: colors.neonBlue },
+                        ]}
+                     />
                   </TouchableOpacity>
-               )}
+
+                  {/* End game button */}
+                  {game?.status === 'active' && (
+                     <TouchableOpacity
+                        onPress={handleEndGame}
+                        style={styles.endGameButton}
+                     >
+                        <LinearGradient
+                           colors={[
+                              colors.errorGradientStart,
+                              colors.errorGradientEnd,
+                           ]}
+                           style={styles.endGameGradient}
+                        >
+                           <Ionicons
+                              name="stop-circle"
+                              size={20}
+                              color={colors.neonCyan}
+                           />
+                           {allPlayersCashedOut && (
+                              <Text
+                                 className="text-xs font-mono font-bold uppercase tracking-wide"
+                                 style={{ color: colors.neonCyan }}
+                              >
+                                 {t('endGame')}
+                              </Text>
+                           )}
+                        </LinearGradient>
+                        <View
+                           style={[
+                              styles.buttonGlow,
+                              { shadowColor: colors.errorGradientEnd },
+                           ]}
+                        />
+                     </TouchableOpacity>
+                  )}
+               </View>
             </View>
-         </View>
+
+            {/* Bottom border with cyber effect */}
+            <View style={styles.headerBorder} />
+         </LinearGradient>
 
          {/* Game Summary */}
          <GameSummary game={game} />
          <View className="px-4 pb-2 items-center my-4">
-            <AppButton
+            <CyberpunkButton
                title={t('addPlayer')}
                onPress={openAddPlayerModal}
-               color="info"
+               variant="join"
+               size="medium"
                disabled={isProcessing}
-               width="50%"
+               width="60%"
                icon="person-add"
             />
          </View>
 
-         {/* Game Events History */}
+         {/* Cyberpunk Game Events History */}
          <View className="px-4 mb-2">
             <TouchableOpacity
                onPress={toggleHistory}
-               className="flex-row items-center justify-between bg-white p-3 rounded-lg border-2 border-black shadow-sm mb-2"
-               style={{ elevation: 2 }}
+               style={styles.historyButton}
             >
-               <Text className="font-black uppercase">{t('gameHistory')}</Text>
-               <View className="flex-row items-center gap-2">
-                  <Text className="text-xs font-bold text-gray-500">
-                     {showHistory ? t('hideHistory') : t('showHistory')}
-                  </Text>
-                  <Ionicons
-                     name={showHistory ? 'chevron-up' : 'chevron-down'}
-                     size={20}
-                     color={colors.text}
-                  />
-               </View>
+               <LinearGradient
+                  colors={[
+                     colors.cyberDarkBlue,
+                     colors.cyberBackground,
+                     colors.cyberDarkBlue,
+                  ]}
+                  start={{ x: 0, y: 0 }}
+                  end={{ x: 1, y: 0 }}
+                  style={styles.historyGradient}
+               >
+                  {/* Corner brackets for history section */}
+                  <View style={styles.historyCornerTL} />
+                  <View style={styles.historyCornerTR} />
+                  <View style={styles.historyCornerBL} />
+                  <View style={styles.historyCornerBR} />
+
+                  <View className="flex-row items-center justify-between p-3">
+                     <Text
+                        className="font-mono font-bold uppercase tracking-wider"
+                        style={{
+                           color: colors.neonCyan,
+                           textShadowColor: colors.shadowNeonCyan,
+                           textShadowOffset: { width: 0, height: 0 },
+                           textShadowRadius: 8,
+                        }}
+                     >
+                        {t('gameHistory')}
+                     </Text>
+                     <View className="flex-row items-center gap-3">
+                        <Text
+                           className="text-xs font-mono uppercase tracking-wide"
+                           style={{ color: colors.textMuted }}
+                        >
+                           {showHistory ? t('hideHistory') : t('showHistory')}
+                        </Text>
+                        <View style={styles.chevronContainer}>
+                           <Ionicons
+                              name={showHistory ? 'chevron-up' : 'chevron-down'}
+                              size={18}
+                              color={colors.neonBlue}
+                           />
+                        </View>
+                     </View>
+                  </View>
+
+                  {/* Scan line effect */}
+                  <View style={styles.historyScanLine} />
+               </LinearGradient>
             </TouchableOpacity>
 
-            {showHistory && <GameEventsList players={game?.players || []} />}
+            {showHistory && (
+               <View style={styles.historyContent}>
+                  <GameEventsList players={game?.players || []} />
+               </View>
+            )}
          </View>
 
          {/* Add Player Modal */}
@@ -533,17 +736,35 @@ export default function GameScreen() {
             onAddPlayer={handleAddPlayer}
          />
 
-         {/* Players List */}
-         <FlatList
-            data={game.players}
-            renderItem={renderPlayerCard}
-            keyExtractor={(item) => item.id}
-            contentContainerStyle={{ padding: 16, paddingTop: 0 }}
-            showsVerticalScrollIndicator={false}
-            refreshing={refreshing}
-            onRefresh={handleRefresh}
-            ItemSeparatorComponent={() => <View className="h-3" />}
-         />
+         {/* Cyberpunk Players List */}
+         <View style={styles.playersContainer}>
+            {/* Players list header */}
+            <View style={styles.playersHeader}>
+               <Text
+                  className="font-mono font-bold uppercase tracking-widest text-center"
+                  style={{
+                     color: colors.neonBlue,
+                     textShadowColor: colors.shadowNeonCyan,
+                     textShadowOffset: { width: 0, height: 0 },
+                     textShadowRadius: 8,
+                  }}
+               >
+                  {t('activePlayers')}
+               </Text>
+               <View style={styles.playersHeaderLine} />
+            </View>
+
+            <FlatList
+               data={game.players}
+               renderItem={renderPlayerCard}
+               keyExtractor={(item) => item.id}
+               contentContainerStyle={{ padding: 16, paddingTop: 8 }}
+               showsVerticalScrollIndicator={false}
+               refreshing={refreshing}
+               onRefresh={handleRefresh}
+               ItemSeparatorComponent={() => <View className="h-3" />}
+            />
+         </View>
 
          {/* Cash Out Modal */}
          <CashOutModal
@@ -582,3 +803,246 @@ export default function GameScreen() {
       </View>
    );
 }
+
+// Cyberpunk StyleSheet
+const styles = StyleSheet.create({
+   // Header styles
+   headerGradient: {
+      borderBottomWidth: 2,
+      borderBottomColor: colors.neonBlue,
+      position: 'relative',
+      shadowColor: colors.shadowNeonCyan,
+      shadowOffset: { width: 0, height: 4 },
+      shadowOpacity: 0.6,
+      shadowRadius: 12,
+      elevation: 12,
+   },
+   cornerTopLeft: {
+      position: 'absolute',
+      top: -2,
+      left: -2,
+      width: 20,
+      height: 3,
+      backgroundColor: colors.neonCyan,
+   },
+   cornerTopRight: {
+      position: 'absolute',
+      top: -2,
+      right: -2,
+      width: 20,
+      height: 3,
+      backgroundColor: colors.neonCyan,
+   },
+   titleContainer: {
+      alignItems: 'center',
+      position: 'relative',
+   },
+   scanLine: {
+      position: 'absolute',
+      bottom: -2,
+      left: 0,
+      right: 0,
+      height: 1,
+      backgroundColor: colors.neonCyan,
+      opacity: 0.7,
+   },
+   cyberpunkButton: {
+      position: 'relative',
+      borderRadius: 8,
+      overflow: 'hidden',
+   },
+   buttonGradient: {
+      width: 36,
+      height: 36,
+      borderRadius: 8,
+      alignItems: 'center',
+      justifyContent: 'center',
+      borderWidth: 1,
+      borderColor: colors.neonCyan,
+   },
+   buttonGlow: {
+      position: 'absolute',
+      top: -2,
+      left: -2,
+      right: -2,
+      bottom: -2,
+      borderRadius: 10,
+      shadowOffset: { width: 0, height: 0 },
+      shadowOpacity: 0.6,
+      shadowRadius: 8,
+      elevation: 8,
+   },
+   endGameButton: {
+      position: 'relative',
+      borderRadius: 12,
+      overflow: 'hidden',
+   },
+   endGameGradient: {
+      paddingHorizontal: 12,
+      paddingVertical: 8,
+      borderRadius: 12,
+      flexDirection: 'row',
+      alignItems: 'center',
+      gap: 6,
+      borderWidth: 1,
+      borderColor: colors.errorGradientEnd,
+   },
+   headerBorder: {
+      position: 'absolute',
+      bottom: 0,
+      left: 0,
+      right: 0,
+      height: 2,
+      backgroundColor: colors.neonBlue,
+      shadowColor: colors.shadowNeonCyan,
+      shadowOffset: { width: 0, height: 0 },
+      shadowOpacity: 1,
+      shadowRadius: 6,
+   },
+
+   // History section styles
+   historyButton: {
+      borderRadius: 12,
+      borderWidth: 1,
+      borderColor: colors.neonBlue,
+      marginBottom: 8,
+      overflow: 'hidden',
+      shadowColor: colors.shadowNeonCyan,
+      shadowOffset: { width: 0, height: 2 },
+      shadowOpacity: 0.4,
+      shadowRadius: 8,
+      elevation: 6,
+   },
+   historyGradient: {
+      borderRadius: 11,
+      position: 'relative',
+   },
+   historyCornerTL: {
+      position: 'absolute',
+      top: -1,
+      left: -1,
+      width: 12,
+      height: 2,
+      backgroundColor: colors.neonCyan,
+   },
+   historyCornerTR: {
+      position: 'absolute',
+      top: -1,
+      right: -1,
+      width: 12,
+      height: 2,
+      backgroundColor: colors.neonCyan,
+   },
+   historyCornerBL: {
+      position: 'absolute',
+      bottom: -1,
+      left: -1,
+      width: 12,
+      height: 2,
+      backgroundColor: colors.neonCyan,
+   },
+   historyCornerBR: {
+      position: 'absolute',
+      bottom: -1,
+      right: -1,
+      width: 12,
+      height: 2,
+      backgroundColor: colors.neonCyan,
+   },
+   chevronContainer: {
+      borderWidth: 1,
+      borderColor: colors.neonBlue,
+      borderRadius: 4,
+      width: 24,
+      height: 24,
+      alignItems: 'center',
+      justifyContent: 'center',
+      backgroundColor: colors.cyberDarkBlue,
+   },
+   historyScanLine: {
+      position: 'absolute',
+      bottom: 0,
+      left: 0,
+      right: 0,
+      height: 1,
+      backgroundColor: colors.neonBlue,
+      opacity: 0.6,
+   },
+   historyContent: {
+      borderLeftWidth: 2,
+      borderRightWidth: 2,
+      borderBottomWidth: 2,
+      borderColor: colors.neonBlue,
+      borderTopWidth: 0,
+      borderBottomLeftRadius: 12,
+      borderBottomRightRadius: 12,
+      backgroundColor: colors.cyberBackground,
+      shadowColor: colors.shadowNeonCyan,
+      shadowOffset: { width: 0, height: 4 },
+      shadowOpacity: 0.3,
+      shadowRadius: 6,
+      elevation: 4,
+   },
+
+   // Players section styles
+   playersContainer: {
+      flex: 1,
+      backgroundColor: colors.cyberBackground,
+   },
+   playersHeader: {
+      alignItems: 'center',
+      paddingVertical: 12,
+      paddingHorizontal: 16,
+      borderBottomWidth: 1,
+      borderBottomColor: colors.neonBlue,
+      backgroundColor: colors.cyberDarkBlue,
+   },
+   playersHeaderLine: {
+      width: 120,
+      height: 1,
+      backgroundColor: colors.neonCyan,
+      marginTop: 4,
+      shadowColor: colors.shadowNeonCyan,
+      shadowOffset: { width: 0, height: 0 },
+      shadowOpacity: 1,
+      shadowRadius: 4,
+   },
+
+   // Error state styles
+   errorHeaderGradient: {
+      borderBottomWidth: 2,
+      borderBottomColor: colors.errorGradientEnd,
+      position: 'relative',
+      shadowColor: colors.errorGradientStart,
+      shadowOffset: { width: 0, height: 4 },
+      shadowOpacity: 0.6,
+      shadowRadius: 12,
+      elevation: 12,
+   },
+   errorContainer: {
+      alignItems: 'center',
+      backgroundColor: colors.cyberDarkBlue,
+      borderRadius: 16,
+      borderWidth: 2,
+      borderColor: colors.errorGradientEnd,
+      padding: 24,
+      shadowColor: colors.errorGradientStart,
+      shadowOffset: { width: 0, height: 8 },
+      shadowOpacity: 0.4,
+      shadowRadius: 16,
+      elevation: 10,
+   },
+   errorIcon: {
+      marginBottom: 16,
+      borderRadius: 50,
+      borderWidth: 2,
+      borderColor: colors.errorGradientEnd,
+      padding: 16,
+      backgroundColor: colors.cyberBackground,
+   },
+   errorMessage: {
+      borderLeftWidth: 2,
+      borderLeftColor: colors.errorGradientEnd,
+      paddingLeft: 12,
+   },
+});
