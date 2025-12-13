@@ -167,6 +167,7 @@ export interface Translations {
    gameInProgress: string;
    totalBuyIns: string;
    totalBuyOuts: string;
+   inBank: string;
    currentProfit: string;
    playerName: string;
    initialBuyIn: string;
@@ -444,6 +445,7 @@ const enTranslations: Translations = {
    gameInProgress: 'GAME IN PROGRESS',
    totalBuyIns: 'TOTAL BUY-INS',
    totalBuyOuts: 'TOTAL BUY-OUTS',
+   inBank: 'IN BANK',
    currentProfit: 'CURRENT PROFIT',
    playerName: 'PLAYER NAME',
    initialBuyIn: 'INITIAL BUY-IN',
@@ -729,6 +731,7 @@ const heTranslations: Translations = {
    gameInProgress: 'משחק פעיל',
    totalBuyIns: 'סך כל הכניסות',
    totalBuyOuts: 'סך כל היציאות',
+   inBank: 'בבנק',
    currentProfit: 'רווח נוכחי',
    playerName: 'שם השחקן',
    initialBuyIn: 'כניסה ראשונית',

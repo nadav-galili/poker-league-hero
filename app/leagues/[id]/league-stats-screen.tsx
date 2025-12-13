@@ -60,17 +60,18 @@ const PressableStatCard = ({
    );
 };
 
-// GlassmorphismLoader component for consistent loading state
-const GlassmorphismLoader = React.memo<{ message?: string }>(
+// CyberpunkStatsLoader component for league stats screen
+const CyberpunkStatsLoader = React.memo<{ message?: string }>(
    ({ message = 'Loading...' }) => {
       return (
          <LinearGradient
-            colors={['#1a0033', '#0f001a', '#000000']}
+            colors={['#000000', '#1A0B2E', '#FF1493']}
+            locations={[0, 0.7, 1]}
             style={styles.loaderContainer}
          >
             <View style={styles.loaderContent}>
                <View style={styles.loaderInner}>
-                  <CyberpunkLoader size="large" variant="blue" text={message} />
+                  <CyberpunkLoader size="large" variant="pink" text={message} />
                </View>
             </View>
          </LinearGradient>
@@ -78,7 +79,7 @@ const GlassmorphismLoader = React.memo<{ message?: string }>(
    }
 );
 
-GlassmorphismLoader.displayName = 'GlassmorphismLoader';
+CyberpunkStatsLoader.displayName = 'CyberpunkStatsLoader';
 
 export default function LeagueStatsScreen() {
    const { t, isRTL } = useLocalization();
@@ -149,16 +150,16 @@ export default function LeagueStatsScreen() {
    }, [user, league]);
 
    // Memoized style objects to prevent recreation on every render
-   const headerButtonStyle = React.useMemo(
-      () => ({
-         shadowColor: '#000000',
-         shadowOffset: { width: 0, height: 4 },
-         shadowOpacity: 0.3,
-         shadowRadius: 8,
-         elevation: 8,
-      }),
-      []
-   );
+   // const headerButtonStyle = React.useMemo(
+   //    () => ({
+   //       shadowColor: '#000000',
+   //       shadowOffset: { width: 0, height: 4 },
+   //       shadowOpacity: 0.3,
+   //       shadowRadius: 8,
+   //       elevation: 8,
+   //    }),
+   //    []
+   // );
 
    const leagueHeaderStyle = React.useMemo(
       () => ({
@@ -175,6 +176,7 @@ export default function LeagueStatsScreen() {
       () => ({
          width: 100,
          height: 100,
+
          borderRadius: 20,
          shadowColor: '#FFFFFF',
          shadowOffset: { width: 0, height: 4 },
@@ -186,60 +188,112 @@ export default function LeagueStatsScreen() {
    );
 
    if (isLoading) {
-      return <GlassmorphismLoader message={t('loadingLeagueStats')} />;
+      return <CyberpunkStatsLoader message={t('loadingLeagueStats')} />;
    }
 
    if (error || !league || !stats) {
       return (
          <LinearGradient
-            colors={['#1a0033', '#0f001a', '#000000']}
+            colors={['#000000', '#1A0B2E', '#FF1493']}
+            locations={[0, 0.7, 1]}
             style={{ flex: 1 }}
          >
-            {/* Modern Dark Header */}
+            {/* Cyberpunk Header with Corner Brackets */}
             <View className="flex-row items-center justify-between px-6 py-12 pt-16 bg-transparent">
+               {/* Corner bracket decoration */}
+               <View className="absolute top-12 left-6 w-6 h-6 border-l-2 border-t-2 border-[#FF1493]" />
+               <View className="absolute top-12 right-6 w-6 h-6 border-r-2 border-t-2 border-[#FF1493]" />
+
                <Pressable
                   onPress={handleBack}
-                  className="w-12 h-12 rounded-2xl bg-white/10 backdrop-blur-xl border border-white/20 items-center justify-center active:scale-95"
-                  style={headerButtonStyle}
+                  className="w-12 h-12 bg-black/90 border border-[#FF1493] items-center justify-center active:scale-95 relative overflow-hidden"
+                  style={{
+                     shadowColor: '#FF1493',
+                     shadowOffset: { width: 0, height: 0 },
+                     shadowOpacity: 0.6,
+                     shadowRadius: 8,
+                     elevation: 8,
+                  }}
                   accessibilityRole="button"
                   accessibilityLabel={t('goBack')}
                >
+                  {/* Corner brackets for button */}
+                  <View className="absolute top-1 left-1 w-2 h-2 border-l border-t border-[#00FFFF]" />
+                  <View className="absolute top-1 right-1 w-2 h-2 border-r border-t border-[#00FFFF]" />
+                  <View className="absolute bottom-1 left-1 w-2 h-2 border-l border-b border-[#00FFFF]" />
+                  <View className="absolute bottom-1 right-1 w-2 h-2 border-r border-b border-[#00FFFF]" />
+
                   <Ionicons
                      name={isRTL ? 'arrow-forward' : 'arrow-back'}
                      size={20}
-                     color="white"
+                     color="#00FFFF"
                   />
                </Pressable>
-               <Text className="text-white text-xl font-semibold">
+
+               <Text
+                  className="text-[#FF1493] text-xl font-mono font-bold tracking-widest uppercase"
+                  style={{
+                     textShadowColor: '#FF1493',
+                     textShadowOffset: { width: 0, height: 0 },
+                     textShadowRadius: 10,
+                  }}
+               >
                   {t('leagueStats')}
                </Text>
+
                <View className="w-12" />
             </View>
 
             <View className="flex-1 items-center justify-center p-8">
                <View
-                  className="bg-red-500/10 backdrop-blur-xl border border-red-500/30 rounded-3xl p-8"
+                  className="bg-black/80 border border-red-500 p-8 relative"
                   style={{
                      shadowColor: '#FF0000',
-                     shadowOffset: { width: 0, height: 8 },
-                     shadowOpacity: 0.2,
+                     shadowOffset: { width: 0, height: 0 },
+                     shadowOpacity: 0.8,
                      shadowRadius: 16,
                      elevation: 16,
                   }}
                >
-                  <Text className="text-red-400 text-center mb-6 font-semibold text-lg">
+                  {/* Cyberpunk corner brackets for error container */}
+                  <View className="absolute top-2 left-2 w-4 h-4 border-l-2 border-t-2 border-red-500" />
+                  <View className="absolute top-2 right-2 w-4 h-4 border-r-2 border-t-2 border-red-500" />
+                  <View className="absolute bottom-2 left-2 w-4 h-4 border-l-2 border-b-2 border-red-500" />
+                  <View className="absolute bottom-2 right-2 w-4 h-4 border-r-2 border-b-2 border-red-500" />
+
+                  <Text
+                     className="text-red-500 text-center mb-6 font-mono font-bold text-lg tracking-wider uppercase"
+                     style={{
+                        textShadowColor: '#FF0000',
+                        textShadowOffset: { width: 0, height: 0 },
+                        textShadowRadius: 10,
+                     }}
+                  >
                      {t('error')}
                   </Text>
-                  <Text className="text-white/80 text-center mb-8 font-medium">
+                  <Text className="text-[#00FFFF] text-center mb-8 font-mono tracking-wide">
                      {error || t('statsNotFound')}
                   </Text>
                   <Pressable
                      onPress={loadLeagueData}
-                     className="bg-red-500/20 backdrop-blur-xl border border-red-500/40 rounded-2xl px-6 py-3 active:scale-95"
+                     className="bg-black/90 border border-red-500 px-6 py-3 active:scale-95 relative"
+                     style={{
+                        shadowColor: '#FF0000',
+                        shadowOffset: { width: 0, height: 0 },
+                        shadowOpacity: 0.6,
+                        shadowRadius: 8,
+                        elevation: 8,
+                     }}
                      accessibilityRole="button"
                      accessibilityLabel={t('retry')}
                   >
-                     <Text className="text-red-400 text-center font-semibold">
+                     {/* Corner brackets for button */}
+                     <View className="absolute top-1 left-1 w-2 h-2 border-l border-t border-[#00FFFF]" />
+                     <View className="absolute top-1 right-1 w-2 h-2 border-r border-t border-[#00FFFF]" />
+                     <View className="absolute bottom-1 left-1 w-2 h-2 border-l border-b border-[#00FFFF]" />
+                     <View className="absolute bottom-1 right-1 w-2 h-2 border-r border-b border-[#00FFFF]" />
+
+                     <Text className="text-red-500 text-center font-mono font-bold tracking-wider uppercase">
                         {t('retry')}
                      </Text>
                   </Pressable>
@@ -250,31 +304,56 @@ export default function LeagueStatsScreen() {
    }
 
    const statCards = createStatCards(stats, t);
-   //   const topPlayers = createTopPlayers(stats, t);
 
    return (
       <LinearGradient
-         colors={['#1a0033', '#0f001a', '#000000']}
+         colors={['#000000', '#1A0B2E', '#FF1493']}
+         locations={[0, 0.7, 1]}
          style={{ flex: 1 }}
       >
-         {/* Modern Dark Header */}
+         {/* Cyberpunk Header with Corner Brackets */}
          <View className="flex-row items-center justify-between px-6 py-12 pt-16 bg-transparent">
+            {/* Corner bracket decoration */}
+            <View className="absolute top-12 left-6 w-6 h-6 border-l-2 border-t-2 border-[#FF1493]" />
+            <View className="absolute top-12 right-6 w-6 h-6 border-r-2 border-t-2 border-[#FF1493]" />
+
             <Pressable
                onPress={handleBack}
-               className="w-12 h-12 rounded-2xl bg-white/10 backdrop-blur-xl border border-white/20 items-center justify-center active:scale-95"
-               style={headerButtonStyle}
+               className="w-12 h-12 bg-black/90 border border-[#FF1493] items-center justify-center active:scale-95 relative overflow-hidden"
+               style={{
+                  shadowColor: '#FF1493',
+                  shadowOffset: { width: 0, height: 0 },
+                  shadowOpacity: 0.6,
+                  shadowRadius: 8,
+                  elevation: 8,
+               }}
                accessibilityRole="button"
                accessibilityLabel={t('goBack')}
             >
+               {/* Corner brackets for button */}
+               <View className="absolute top-1 left-1 w-2 h-2 border-l border-t border-[#00FFFF]" />
+               <View className="absolute top-1 right-1 w-2 h-2 border-r border-t border-[#00FFFF]" />
+               <View className="absolute bottom-1 left-1 w-2 h-2 border-l border-b border-[#00FFFF]" />
+               <View className="absolute bottom-1 right-1 w-2 h-2 border-r border-b border-[#00FFFF]" />
+
                <Ionicons
                   name={isRTL ? 'arrow-forward' : 'arrow-back'}
                   size={20}
-                  color="white"
+                  color="#00FFFF"
                />
             </Pressable>
-            <Text className="text-white text-xl font-semibold">
+
+            <Text
+               className="text-[#FF1493] text-xl font-mono font-bold tracking-widest uppercase"
+               style={{
+                  textShadowColor: '#FF1493',
+                  textShadowOffset: { width: 0, height: 0 },
+                  textShadowRadius: 10,
+               }}
+            >
                {t('leagueStats')}
             </Text>
+
             <View className="w-12" />
          </View>
 
@@ -286,9 +365,9 @@ export default function LeagueStatsScreen() {
                <RefreshControl
                   refreshing={refreshing}
                   onRefresh={handleRefresh}
-                  colors={['#FF1493']}
+                  colors={['#FF1493', '#00FFFF']}
                   tintColor="#FF1493"
-                  progressBackgroundColor="rgba(255, 255, 255, 0.1)"
+                  progressBackgroundColor="rgba(0, 0, 0, 0.9)"
                />
             }
          >
@@ -330,7 +409,7 @@ export default function LeagueStatsScreen() {
                            className="flex-row items-center mt-3 bg-white/10 px-3 py-1.5 rounded-full border border-white/20 active:bg-white/20"
                         >
                            <Ionicons name="pencil" size={12} color="white" />
-                           <Text className="text-white text-xs ml-1.5 font-medium">
+                           <Text className="text-neonGreen text-xs ml-1.5 font-medium">
                               {t('editLeague')}
                            </Text>
                         </Pressable>
@@ -338,7 +417,7 @@ export default function LeagueStatsScreen() {
                   </View>
 
                   <View className="flex-1 justify-center">
-                     <Text className="text-white mb-4 font-semibold text-xl">
+                     <Text className="text-neonGreen mb-4 font-semibold text-xl">
                         {league.name}
                      </Text>
                   </View>
@@ -443,22 +522,24 @@ const styles = StyleSheet.create({
       padding: 32,
    },
    loaderInner: {
-      backgroundColor: 'rgba(255, 255, 255, 0.05)',
-      borderRadius: 24,
+      backgroundColor: 'rgba(0, 0, 0, 0.9)',
       padding: 32,
       alignItems: 'center',
-      borderWidth: 1,
-      borderColor: 'rgba(255, 255, 255, 0.2)',
-      shadowColor: '#FFFFFF',
-      shadowOffset: { width: 0, height: 8 },
-      shadowOpacity: 0.1,
+      borderWidth: 2,
+      borderColor: '#FF1493',
+      shadowColor: '#FF1493',
+      shadowOffset: { width: 0, height: 0 },
+      shadowOpacity: 0.8,
       shadowRadius: 16,
       elevation: 16,
+      position: 'relative',
    },
    loaderText: {
-      color: 'white',
+      color: '#00FFFF',
       fontSize: 16,
       fontWeight: '600',
       marginTop: 16,
+      fontFamily: 'monospace',
+      letterSpacing: 1,
    },
 });

@@ -803,25 +803,25 @@ function LeagueStatsComponent() {
             contentContainerStyle={{ padding: 20, paddingBottom: 96 }}
             showsVerticalScrollIndicator={false}
          >
-            {/* League Card - Cyberpunk style */}
+            {/* League Header - Cyberpunk Neon Magenta Style */}
             <View
                className="rounded-2xl mb-6 overflow-hidden"
-               style={styles.leagueCard}
+               style={styles.leagueHeaderCard}
                accessibilityRole="summary"
                accessibilityLabel={`${t('leagueDetails')}: ${league.name}`}
             >
                <LinearGradient
-                  colors={getCyberpunkGradient('holo')}
+                  colors={[colors.cyberBackground, colors.holoPink, colors.neonPink]}
                   start={{ x: 0, y: 0 }}
                   end={{ x: 1, y: 1 }}
-                  style={styles.leagueCardGradient}
+                  style={styles.leagueHeaderGradient}
                >
-                  {/* Corner brackets for league card */}
+                  {/* Corner brackets for league header - Neon Magenta Theme */}
                   <View
                      style={[
                         styles.cornerBracket,
                         styles.cardTopLeft,
-                        { borderColor: colors.matrixGreen },
+                        { borderColor: colors.neonPink },
                      ]}
                   />
                   <View
@@ -842,72 +842,122 @@ function LeagueStatsComponent() {
                      style={[
                         styles.cornerBracket,
                         styles.cardBottomRight,
-                        { borderColor: colors.matrixGreen },
+                        { borderColor: colors.neonPink },
                      ]}
                   />
 
-                  {/* Holographic overlay for league card */}
+                  {/* Holographic overlay for league header - Neon Magenta */}
                   <LinearGradient
-                     colors={[colors.holoBlue, 'transparent', colors.holoPink]}
+                     colors={[colors.holoPink, 'transparent', colors.neonPink]}
                      start={{ x: 0, y: 0 }}
                      end={{ x: 1, y: 1 }}
-                     style={styles.cardHoloOverlay}
+                     style={styles.headerHoloOverlay}
                   />
 
-                  {/* Top Section: Image + Info */}
+                  {/* League Image + Edit Button Section */}
                   <View className="flex-row">
                      {/* Image + Edit Button Column */}
                      <View className="items-center p-3">
-                        <View style={styles.imageContainer}>
-                           <Image
-                              source={{ uri: league.imageUrl }}
-                              style={styles.leagueImage}
-                              contentFit="cover"
-                              cachePolicy="memory-disk"
-                              priority="high"
-                              placeholder={{
-                                 uri: 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNk+M9QDwADhgGAWjR9awAAAABJRU5ErkJggg==',
-                              }}
-                              placeholderContentFit="cover"
-                              transition={300}
-                              accessible={true}
-                              accessibilityLabel={`${t('leagueImage')}: ${league.name}`}
-                              onError={(error) => {
-                                 captureException(
-                                    new Error('League image loading failed'),
-                                    {
-                                       function: 'Image.onError',
-                                       screen: 'LeagueStats',
-                                       leagueId: league.id,
-                                       imageUri: league.imageUrl,
-                                       error: error.toString(),
-                                    }
-                                 );
-                              }}
-                           />
+                        <View style={styles.leagueImageContainer}>
+                           {league.imageUrl ? (
+                              <Image
+                                 source={{ uri: league.imageUrl }}
+                                 style={styles.leagueImage}
+                                 contentFit="cover"
+                                 cachePolicy="memory-disk"
+                                 priority="high"
+                                 placeholder={{
+                                    uri: 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNk+M9QDwADhgGAWjR9awAAAABJRU5ErkJggg==',
+                                 }}
+                                 placeholderContentFit="cover"
+                                 transition={300}
+                                 accessible={true}
+                                 accessibilityLabel={`${t('leagueImage')}: ${league.name}`}
+                                 onError={(error) => {
+                                    captureException(
+                                       new Error('League image loading failed'),
+                                       {
+                                          function: 'Image.onError',
+                                          screen: 'LeagueStats',
+                                          leagueId: league.id,
+                                          imageUri: league.imageUrl,
+                                          error: error.toString(),
+                                       }
+                                    );
+                                 }}
+                              />
+                           ) : (
+                              <View
+                                 style={styles.leagueImagePlaceholder}
+                                 className="items-center justify-center"
+                              >
+                                 <Ionicons
+                                    name="trophy"
+                                    size={40}
+                                    color={colors.neonPink}
+                                    style={{
+                                       textShadowColor: colors.neonPink,
+                                       textShadowOffset: { width: 0, height: 0 },
+                                       textShadowRadius: 8,
+                                    }}
+                                 />
+                              </View>
+                           )}
                         </View>
 
                         {isMember && (
                            <Pressable
                               onPress={() => setIsEditModalVisible(true)}
-                              className="flex-row items-center mt-2 bg-white/10 px-2.5 py-1 rounded-full active:opacity-70"
-                              style={styles.editButton}
+                              style={styles.cyberpunkEditButton}
+                              accessibilityRole="button"
+                              accessibilityLabel={t('editLeague')}
+                              accessibilityHint={t('editLeagueDetails')}
                            >
-                              <Ionicons
-                                 name="pencil"
-                                 size={10}
-                                 color="rgba(255,255,255,0.8)"
-                              />
-                              <Text className="text-white/80 text-[10px] ml-1 font-medium">
-                                 {t('editLeague')}
-                              </Text>
+                              <LinearGradient
+                                 colors={[colors.cyberBackground, colors.holoPink]}
+                                 start={{ x: 0, y: 0 }}
+                                 end={{ x: 1, y: 1 }}
+                                 style={styles.editButtonGradient}
+                              >
+                                 {/* Corner brackets for edit button */}
+                                 <View
+                                    style={[
+                                       styles.editCornerBracket,
+                                       styles.editTopLeft,
+                                       { borderColor: colors.neonPink },
+                                    ]}
+                                 />
+                                 <View
+                                    style={[
+                                       styles.editCornerBracket,
+                                       styles.editBottomRight,
+                                       { borderColor: colors.neonPink },
+                                    ]}
+                                 />
+
+                                 <View style={styles.editButtonContent}>
+                                    <Ionicons
+                                       name="pencil"
+                                       size={12}
+                                       color={colors.neonPink}
+                                       style={{
+                                          textShadowColor: colors.neonPink,
+                                          textShadowOffset: { width: 0, height: 0 },
+                                          textShadowRadius: 4,
+                                       }}
+                                    />
+                                    <Text style={styles.editButtonText}>
+                                       {t('editLeague')}
+                                    </Text>
+                                 </View>
+                              </LinearGradient>
                            </Pressable>
                         )}
                      </View>
 
-                     {/* Info Column */}
+                     {/* League Info Column */}
                      <View className="flex-1 ml-4 justify-center">
-                        <Text style={styles.leagueName}>{league.name}</Text>
+                        <Text style={styles.leagueNameNeonMagenta}>{league.name}</Text>
                         <View className="flex-row items-center">
                            <Text style={styles.leagueCodeLabel}>
                               {t('leagueCode')}
@@ -929,17 +979,17 @@ function LeagueStatsComponent() {
                      </View>
                   </View>
 
-                  {/* Cyberpunk divider with glow */}
-                  <View style={styles.cyberpunkDivider}>
+                  {/* Cyberpunk divider with neon magenta glow */}
+                  <View style={styles.cyberpunkDividerMagenta}>
                      <LinearGradient
                         colors={[
+                           colors.neonPink,
                            colors.neonCyan,
-                           colors.matrixGreen,
-                           colors.neonCyan,
+                           colors.neonPink,
                         ]}
                         start={{ x: 0, y: 0 }}
                         end={{ x: 1, y: 0 }}
-                        style={styles.dividerGradient}
+                        style={styles.dividerGradientMagenta}
                      />
                   </View>
 
@@ -1215,6 +1265,29 @@ const styles = StyleSheet.create({
    headerSpacer: {
       width: 44,
    } as ViewStyle,
+   // League Header Card Styles
+   leagueHeaderCard: {
+      borderWidth: 2,
+      borderColor: colors.neonPink,
+      shadowColor: colors.neonPink,
+      shadowOffset: { width: 0, height: 0 },
+      shadowOpacity: 0.6,
+      shadowRadius: 16,
+      elevation: 12,
+      position: 'relative',
+   } as ViewStyle,
+   leagueHeaderGradient: {
+      padding: 20,
+      position: 'relative',
+   } as ViewStyle,
+   headerHoloOverlay: {
+      position: 'absolute',
+      top: 0,
+      left: 0,
+      right: 0,
+      bottom: 0,
+      opacity: 0.1,
+   } as ViewStyle,
    // League Card Corner Brackets
    cardTopLeft: {
       top: 4,
@@ -1263,6 +1336,18 @@ const styles = StyleSheet.create({
       borderRadius: 14,
       position: 'relative',
    } as ViewStyle,
+   leagueNameNeonMagenta: {
+      color: colors.neonPink,
+      fontWeight: 'bold',
+      fontSize: 24,
+      fontFamily: 'monospace',
+      letterSpacing: 1,
+      textTransform: 'uppercase',
+      textShadowColor: colors.neonPink,
+      textShadowOffset: { width: 0, height: 0 },
+      textShadowRadius: 8,
+      marginBottom: 8,
+   },
    leagueName: {
       color: colors.neonCyan,
       fontWeight: 'bold',
@@ -1301,6 +1386,37 @@ const styles = StyleSheet.create({
       textTransform: 'uppercase',
       letterSpacing: 1,
    },
+   leagueImageContainer: {
+      width: 80,
+      height: 80,
+      borderRadius: 16,
+      overflow: 'hidden',
+      borderWidth: 2,
+      borderColor: colors.neonPink,
+      shadowColor: colors.neonPink,
+      shadowOffset: { width: 0, height: 0 },
+      shadowOpacity: 0.6,
+      shadowRadius: 12,
+      elevation: 8,
+      position: 'relative',
+   } as ViewStyle,
+   leagueImage: {
+      width: 80,
+      height: 80,
+   },
+   leagueImagePlaceholder: {
+      width: 80,
+      height: 80,
+      backgroundColor: colors.cyberBackground,
+      borderWidth: 2,
+      borderColor: colors.neonPink,
+      borderRadius: 16,
+      shadowColor: colors.neonPink,
+      shadowOffset: { width: 0, height: 0 },
+      shadowOpacity: 0.4,
+      shadowRadius: 8,
+      elevation: 6,
+   } as ViewStyle,
    imageContainer: {
       width: 64,
       height: 64,
@@ -1314,9 +1430,58 @@ const styles = StyleSheet.create({
       shadowRadius: 8,
       elevation: 6,
    } as ViewStyle,
-   leagueImage: {
-      width: 64,
-      height: 64,
+   cyberpunkEditButton: {
+      marginTop: 12,
+      borderRadius: 8,
+      overflow: 'hidden',
+      borderWidth: 1,
+      borderColor: colors.neonPink,
+      shadowColor: colors.neonPink,
+      shadowOffset: { width: 0, height: 0 },
+      shadowOpacity: 0.4,
+      shadowRadius: 6,
+      elevation: 4,
+      position: 'relative',
+   } as ViewStyle,
+   editButtonGradient: {
+      paddingHorizontal: 12,
+      paddingVertical: 8,
+      position: 'relative',
+   } as ViewStyle,
+   editCornerBracket: {
+      position: 'absolute',
+      width: 8,
+      height: 8,
+      borderWidth: 1.5,
+      zIndex: 10,
+   } as ViewStyle,
+   editTopLeft: {
+      top: 2,
+      left: 2,
+      borderRightWidth: 0,
+      borderBottomWidth: 0,
+   } as ViewStyle,
+   editBottomRight: {
+      bottom: 2,
+      right: 2,
+      borderLeftWidth: 0,
+      borderTopWidth: 0,
+   } as ViewStyle,
+   editButtonContent: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      zIndex: 5,
+   } as ViewStyle,
+   editButtonText: {
+      color: colors.neonPink,
+      fontSize: 11,
+      fontFamily: 'monospace',
+      fontWeight: '600',
+      letterSpacing: 0.5,
+      marginLeft: 4,
+      textShadowColor: colors.neonPink,
+      textShadowOffset: { width: 0, height: 0 },
+      textShadowRadius: 2,
    },
    editButton: {
       shadowColor: '#000',
@@ -1511,6 +1676,21 @@ const styles = StyleSheet.create({
    dividerGradient: {
       height: 2,
       opacity: 0.6,
+   } as ViewStyle,
+   // Cyberpunk divider styles - Neon Magenta Theme
+   cyberpunkDividerMagenta: {
+      height: 2,
+      marginVertical: 16,
+      position: 'relative',
+      shadowColor: colors.neonPink,
+      shadowOffset: { width: 0, height: 0 },
+      shadowOpacity: 0.6,
+      shadowRadius: 4,
+      elevation: 4,
+   } as ViewStyle,
+   dividerGradientMagenta: {
+      height: 2,
+      opacity: 0.8,
    } as ViewStyle,
    // Action cards container
    actionCardsContainer: {

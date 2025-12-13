@@ -749,7 +749,7 @@ export default function GameScreen() {
                      textShadowRadius: 8,
                   }}
                >
-                  {t('activePlayers')}
+                  {t('activePlayersLabel')}
                </Text>
                <View style={styles.playersHeaderLine} />
             </View>

@@ -158,83 +158,356 @@ const Summary = ({ leagueId }: Props) => {
 
    if (error)
       return (
-         <View className="bg-errorTint rounded-lg p-4 items-center gap-2">
-            <Text className="text-error text-center font-bold">
-               {t('errorOccurred')}
-            </Text>
-            <Text className="text-error text-center text-sm">
-               {error.message}
-            </Text>
-            <TouchableOpacity
-               onPress={() => refetch()}
-               className="bg-error px-4 py-2 rounded mt-2"
+         <View className="px-6 mb-8">
+            <View
+               className="relative p-5 border-2 items-center gap-4"
+               style={{
+                  backgroundColor: `${colors.cyberBackground}DD`,
+                  borderColor: colors.errorRed,
+                  shadowColor: colors.errorRed,
+                  shadowOffset: { width: 0, height: 0 },
+                  shadowOpacity: 0.8,
+                  shadowRadius: 10,
+                  elevation: 10,
+               }}
             >
-               <Text className="text-white font-bold">{t('retry')}</Text>
-            </TouchableOpacity>
+               {/* Corner Brackets */}
+               <View className="absolute top-0 left-0 w-6 h-6">
+                  <View
+                     className="absolute top-0 left-0 w-4 h-1"
+                     style={{ backgroundColor: colors.errorRed }}
+                  />
+                  <View
+                     className="absolute top-0 left-0 w-1 h-4"
+                     style={{ backgroundColor: colors.errorRed }}
+                  />
+               </View>
+               <View className="absolute top-0 right-0 w-6 h-6">
+                  <View
+                     className="absolute top-0 right-0 w-4 h-1"
+                     style={{ backgroundColor: colors.errorRed }}
+                  />
+                  <View
+                     className="absolute top-0 right-0 w-1 h-4"
+                     style={{ backgroundColor: colors.errorRed }}
+                  />
+               </View>
+               <View className="absolute bottom-0 left-0 w-6 h-6">
+                  <View
+                     className="absolute bottom-0 left-0 w-4 h-1"
+                     style={{ backgroundColor: colors.errorRed }}
+                  />
+                  <View
+                     className="absolute bottom-0 left-0 w-1 h-4"
+                     style={{ backgroundColor: colors.errorRed }}
+                  />
+               </View>
+               <View className="absolute bottom-0 right-0 w-6 h-6">
+                  <View
+                     className="absolute bottom-0 right-0 w-4 h-1"
+                     style={{ backgroundColor: colors.errorRed }}
+                  />
+                  <View
+                     className="absolute bottom-0 right-0 w-1 h-4"
+                     style={{ backgroundColor: colors.errorRed }}
+                  />
+               </View>
+
+               <Text
+                  className="text-center font-bold uppercase tracking-[2px] text-lg"
+                  style={{
+                     color: colors.errorRed,
+                     fontFamily: 'monospace',
+                  }}
+               >
+                  !!! {t('errorOccurred')} !!!
+               </Text>
+
+               <Text
+                  className="text-center text-sm max-w-[300px]"
+                  style={{ color: colors.textSecondary }}
+               >
+                  {error.message}
+               </Text>
+
+               <TouchableOpacity
+                  onPress={() => refetch()}
+                  className="px-6 py-3 border-2 rounded mt-2"
+                  style={{
+                     backgroundColor: colors.cyberBackground,
+                     borderColor: colors.errorRed,
+                     shadowColor: colors.errorRed,
+                     shadowOffset: { width: 0, height: 0 },
+                     shadowOpacity: 0.6,
+                     shadowRadius: 5,
+                     elevation: 5,
+                  }}
+               >
+                  <Text
+                     className="font-bold uppercase tracking-[1px]"
+                     style={{
+                        color: colors.errorRed,
+                        fontFamily: 'monospace',
+                     }}
+                  >
+                     >> {t('retry')} <<
+                  </Text>
+               </TouchableOpacity>
+            </View>
          </View>
       );
 
    return (
       <View className="px-6 mb-8">
-         <View className="flex-row justify-center items-center mb-6 gap-2 relative">
-            <Text 
-               className="text-primary text-center text-2xl font-black uppercase tracking-[3px]"
-               style={{ writingDirection: isRTL ? 'rtl' : 'ltr' }}
-            >
-               <Ionicons
-                  name="sparkles"
-                  size={24}
-                  color={colors.warningGradientEnd}
-               />{' '}
-               {t('aiSummary')}
-            </Text>
-            <TouchableOpacity
-               onPress={() => refetch()}
-               className={`absolute ${isRTL ? 'left-0' : 'right-0'}`}
-               hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
-            >
-               <Ionicons name="refresh" size={20} color={colors.primary} />
-            </TouchableOpacity>
+         {/* Cyberpunk AI Summary Header */}
+         <View
+            className="relative mb-6 p-4 border-2"
+            style={{
+               backgroundColor: colors.cyberBackground,
+               borderColor: colors.neonPink,
+               shadowColor: colors.shadowNeonPink,
+               shadowOffset: { width: 0, height: 0 },
+               shadowOpacity: 1,
+               shadowRadius: 10,
+               elevation: 10,
+            }}
+         >
+            {/* Corner Brackets */}
+            <View className="absolute top-0 left-0 w-6 h-6">
+               <View
+                  className="absolute top-0 left-0 w-4 h-1"
+                  style={{ backgroundColor: colors.neonPink }}
+               />
+               <View
+                  className="absolute top-0 left-0 w-1 h-4"
+                  style={{ backgroundColor: colors.neonPink }}
+               />
+            </View>
+            <View className="absolute top-0 right-0 w-6 h-6">
+               <View
+                  className="absolute top-0 right-0 w-4 h-1"
+                  style={{ backgroundColor: colors.neonPink }}
+               />
+               <View
+                  className="absolute top-0 right-0 w-1 h-4"
+                  style={{ backgroundColor: colors.neonPink }}
+               />
+            </View>
+            <View className="absolute bottom-0 left-0 w-6 h-6">
+               <View
+                  className="absolute bottom-0 left-0 w-4 h-1"
+                  style={{ backgroundColor: colors.neonPink }}
+               />
+               <View
+                  className="absolute bottom-0 left-0 w-1 h-4"
+                  style={{ backgroundColor: colors.neonPink }}
+               />
+            </View>
+            <View className="absolute bottom-0 right-0 w-6 h-6">
+               <View
+                  className="absolute bottom-0 right-0 w-4 h-1"
+                  style={{ backgroundColor: colors.neonPink }}
+               />
+               <View
+                  className="absolute bottom-0 right-0 w-1 h-4"
+                  style={{ backgroundColor: colors.neonPink }}
+               />
+            </View>
+
+            <View className="flex-row justify-center items-center gap-2 relative">
+               <Text
+                  className="text-center text-xl font-black uppercase tracking-[3px]"
+                  style={{
+                     color: colors.neonPink,
+                     writingDirection: isRTL ? 'rtl' : 'ltr',
+                     fontFamily: 'monospace',
+                  }}
+               >
+                  <Ionicons
+                     name="sparkles"
+                     size={20}
+                     color={colors.neonPink}
+                  />{' '}
+                  /// {t('aiSummary')} ///
+               </Text>
+               <TouchableOpacity
+                  onPress={() => refetch()}
+                  className={`absolute ${isRTL ? 'left-0' : 'right-0'} p-2 border-2 rounded`}
+                  style={{
+                     backgroundColor: colors.cyberBackground,
+                     borderColor: colors.neonCyan,
+                  }}
+                  hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
+               >
+                  <Ionicons name="refresh" size={16} color={colors.neonCyan} />
+               </TouchableOpacity>
+            </View>
          </View>
 
          {summary?.summary ? (
-            <View className="gap-4">
-               <View className="bg-primaryTint rounded-lg p-4">
+            <View className="gap-6">
+               {/* Financial Snapshot Card */}
+               <View
+                  className="relative p-5 border-2"
+                  style={{
+                     backgroundColor: `${colors.cyberBackground}CC`,
+                     borderColor: colors.neonCyan,
+                     shadowColor: colors.shadowNeonCyan,
+                     shadowOffset: { width: 0, height: 0 },
+                     shadowOpacity: 0.6,
+                     shadowRadius: 8,
+                     elevation: 8,
+                  }}
+               >
+                  {/* Corner Brackets */}
+                  <View className="absolute top-0 left-0 w-4 h-4">
+                     <View
+                        className="absolute top-0 left-0 w-3 h-0.5"
+                        style={{ backgroundColor: colors.neonCyan }}
+                     />
+                     <View
+                        className="absolute top-0 left-0 w-0.5 h-3"
+                        style={{ backgroundColor: colors.neonCyan }}
+                     />
+                  </View>
+                  <View className="absolute top-0 right-0 w-4 h-4">
+                     <View
+                        className="absolute top-0 right-0 w-3 h-0.5"
+                        style={{ backgroundColor: colors.neonCyan }}
+                     />
+                     <View
+                        className="absolute top-0 right-0 w-0.5 h-3"
+                        style={{ backgroundColor: colors.neonCyan }}
+                     />
+                  </View>
+                  <View className="absolute bottom-0 left-0 w-4 h-4">
+                     <View
+                        className="absolute bottom-0 left-0 w-3 h-0.5"
+                        style={{ backgroundColor: colors.neonCyan }}
+                     />
+                     <View
+                        className="absolute bottom-0 left-0 w-0.5 h-3"
+                        style={{ backgroundColor: colors.neonCyan }}
+                     />
+                  </View>
+                  <View className="absolute bottom-0 right-0 w-4 h-4">
+                     <View
+                        className="absolute bottom-0 right-0 w-3 h-0.5"
+                        style={{ backgroundColor: colors.neonCyan }}
+                     />
+                     <View
+                        className="absolute bottom-0 right-0 w-0.5 h-3"
+                        style={{ backgroundColor: colors.neonCyan }}
+                     />
+                  </View>
+
+                  {/* Holographic overlay */}
+                  <View
+                     className="absolute inset-0 opacity-20"
+                     style={{ backgroundColor: colors.holoBlue }}
+                  />
+
                   <Text
-                     className="text-primary font-bold text-lg mb-2"
-                     style={{ 
+                     className="font-bold text-lg mb-3 uppercase tracking-[2px]"
+                     style={{
+                        color: colors.neonCyan,
                         textAlign: isRTL ? 'right' : 'left',
-                        writingDirection: isRTL ? 'rtl' : 'ltr' 
+                        writingDirection: isRTL ? 'rtl' : 'ltr',
+                        fontFamily: 'monospace',
                      }}
                   >
-                     {t('financialSnapshot')}
+                     {`>> ${t('financialSnapshot')}`}
                   </Text>
                   <Text
-                     className="text-blue-300 font-medium text-base leading-6"
-                     style={{ 
+                     className="font-medium text-base leading-6"
+                     style={{
+                        color: colors.textSecondary,
                         textAlign: isRTL ? 'right' : 'left',
-                        writingDirection: isRTL ? 'rtl' : 'ltr' 
+                        writingDirection: isRTL ? 'rtl' : 'ltr'
                      }}
                   >
                      {summary.summary.financialSnapshot}
                   </Text>
                </View>
 
-               <View className="bg-primaryTint rounded-lg p-4">
+               {/* Last Game Highlights Card */}
+               <View
+                  className="relative p-5 border-2"
+                  style={{
+                     backgroundColor: `${colors.cyberBackground}CC`,
+                     borderColor: colors.neonGreen,
+                     shadowColor: colors.shadowNeonGreen,
+                     shadowOffset: { width: 0, height: 0 },
+                     shadowOpacity: 0.6,
+                     shadowRadius: 8,
+                     elevation: 8,
+                  }}
+               >
+                  {/* Corner Brackets */}
+                  <View className="absolute top-0 left-0 w-4 h-4">
+                     <View
+                        className="absolute top-0 left-0 w-3 h-0.5"
+                        style={{ backgroundColor: colors.neonGreen }}
+                     />
+                     <View
+                        className="absolute top-0 left-0 w-0.5 h-3"
+                        style={{ backgroundColor: colors.neonGreen }}
+                     />
+                  </View>
+                  <View className="absolute top-0 right-0 w-4 h-4">
+                     <View
+                        className="absolute top-0 right-0 w-3 h-0.5"
+                        style={{ backgroundColor: colors.neonGreen }}
+                     />
+                     <View
+                        className="absolute top-0 right-0 w-0.5 h-3"
+                        style={{ backgroundColor: colors.neonGreen }}
+                     />
+                  </View>
+                  <View className="absolute bottom-0 left-0 w-4 h-4">
+                     <View
+                        className="absolute bottom-0 left-0 w-3 h-0.5"
+                        style={{ backgroundColor: colors.neonGreen }}
+                     />
+                     <View
+                        className="absolute bottom-0 left-0 w-0.5 h-3"
+                        style={{ backgroundColor: colors.neonGreen }}
+                     />
+                  </View>
+                  <View className="absolute bottom-0 right-0 w-4 h-4">
+                     <View
+                        className="absolute bottom-0 right-0 w-3 h-0.5"
+                        style={{ backgroundColor: colors.neonGreen }}
+                     />
+                     <View
+                        className="absolute bottom-0 right-0 w-0.5 h-3"
+                        style={{ backgroundColor: colors.neonGreen }}
+                     />
+                  </View>
+
+                  {/* Holographic overlay */}
+                  <View
+                     className="absolute inset-0 opacity-20"
+                     style={{ backgroundColor: colors.holoGreen }}
+                  />
+
                   <Text
-                     className="text-primary font-bold text-lg mb-2"
-                     style={{ 
+                     className="font-bold text-lg mb-3 uppercase tracking-[2px]"
+                     style={{
+                        color: colors.neonGreen,
                         textAlign: isRTL ? 'right' : 'left',
-                        writingDirection: isRTL ? 'rtl' : 'ltr' 
+                        writingDirection: isRTL ? 'rtl' : 'ltr',
+                        fontFamily: 'monospace',
                      }}
                   >
-                     {t('lastGameHighlights')}
+                     {`>> ${t('lastGameHighlights')}`}
                   </Text>
                   <Text
-                     className="text-blue-300 font-medium text-base leading-6"
-                     style={{ 
+                     className="font-medium text-base leading-6"
+                     style={{
+                        color: colors.textSecondary,
                         textAlign: isRTL ? 'right' : 'left',
-                        writingDirection: isRTL ? 'rtl' : 'ltr' 
+                        writingDirection: isRTL ? 'rtl' : 'ltr'
                      }}
                   >
                      {summary.summary.lastGameHighlights}
@@ -242,9 +515,68 @@ const Summary = ({ leagueId }: Props) => {
                </View>
             </View>
          ) : (
-            <View className="bg-primaryTint rounded-lg p-4">
-               <Text className="text-blue-300 font-bold text-lg text-center">
-                  {t('noSummaryYet')}
+            <View
+               className="relative p-5 border-2"
+               style={{
+                  backgroundColor: `${colors.cyberBackground}AA`,
+                  borderColor: colors.neonOrange,
+                  shadowColor: colors.neonOrange,
+                  shadowOffset: { width: 0, height: 0 },
+                  shadowOpacity: 0.4,
+                  shadowRadius: 6,
+                  elevation: 6,
+               }}
+            >
+               {/* Corner Brackets */}
+               <View className="absolute top-0 left-0 w-4 h-4">
+                  <View
+                     className="absolute top-0 left-0 w-3 h-0.5"
+                     style={{ backgroundColor: colors.neonOrange }}
+                  />
+                  <View
+                     className="absolute top-0 left-0 w-0.5 h-3"
+                     style={{ backgroundColor: colors.neonOrange }}
+                  />
+               </View>
+               <View className="absolute top-0 right-0 w-4 h-4">
+                  <View
+                     className="absolute top-0 right-0 w-3 h-0.5"
+                     style={{ backgroundColor: colors.neonOrange }}
+                  />
+                  <View
+                     className="absolute top-0 right-0 w-0.5 h-3"
+                     style={{ backgroundColor: colors.neonOrange }}
+                  />
+               </View>
+               <View className="absolute bottom-0 left-0 w-4 h-4">
+                  <View
+                     className="absolute bottom-0 left-0 w-3 h-0.5"
+                     style={{ backgroundColor: colors.neonOrange }}
+                  />
+                  <View
+                     className="absolute bottom-0 left-0 w-0.5 h-3"
+                     style={{ backgroundColor: colors.neonOrange }}
+                  />
+               </View>
+               <View className="absolute bottom-0 right-0 w-4 h-4">
+                  <View
+                     className="absolute bottom-0 right-0 w-3 h-0.5"
+                     style={{ backgroundColor: colors.neonOrange }}
+                  />
+                  <View
+                     className="absolute bottom-0 right-0 w-0.5 h-3"
+                     style={{ backgroundColor: colors.neonOrange }}
+                  />
+               </View>
+
+               <Text
+                  className="font-bold text-lg text-center uppercase tracking-[2px]"
+                  style={{
+                     color: colors.neonOrange,
+                     fontFamily: 'monospace',
+                  }}
+               >
+                  {`<< ${t('noSummaryYet')} >>`}
                </Text>
             </View>
          )}

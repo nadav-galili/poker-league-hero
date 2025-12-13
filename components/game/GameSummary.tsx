@@ -27,7 +27,7 @@ const GameSummary: React.FC<GameSummaryProps> = ({ game }) => {
             </View>
          </View>
 
-         <View className="flex-row justify-around">
+         <View className="flex-row justify-around flex-wrap gap-2">
             <View className="items-center">
                <Text variant="h2" color={colors.primary}>
                   {t('currency')}
@@ -44,6 +44,15 @@ const GameSummary: React.FC<GameSummaryProps> = ({ game }) => {
                </Text>
                <Text variant="captionSmall" color={theme.textMuted}>
                   {t('totalBuyOuts')}
+               </Text>
+            </View>
+            <View className="items-center">
+               <Text variant="h2" color={colors.success}>
+                  {t('currency')}
+                  {game.totals.totalBuyIns - game.totals.totalBuyOuts}
+               </Text>
+               <Text variant="captionSmall" color={theme.textMuted}>
+                  {t('inBank')}
                </Text>
             </View>
             <View className="items-center">
