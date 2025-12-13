@@ -6,6 +6,10 @@
 Refactor onboarding
 Refactor in game ui
 Add game history
+1.4.0
+Refactored ui to cyberpunk
+add edit league
+add edit profile
 
 # IOS
 

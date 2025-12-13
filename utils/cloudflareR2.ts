@@ -1,6 +1,9 @@
 import { BASE_URL } from '@/constants';
 
-export async function uploadImageToR2(filePath: string): Promise<string> {
+export async function uploadImageToR2(
+   filePath: string,
+   folder: string = 'league-images'
+): Promise<string> {
    try {
       // Create FormData for the upload
       const formData = new FormData();
@@ -11,13 +14,16 @@ export async function uploadImageToR2(filePath: string): Promise<string> {
       } as any);
 
       // Upload to our API endpoint
-      const response = await fetch(`${BASE_URL}/api/upload/image`, {
-         method: 'POST',
-         body: formData,
-         headers: {
-            'Content-Type': 'multipart/form-data',
-         },
-      });
+      const response = await fetch(
+         `${BASE_URL}/api/upload/image?folder=${folder}`,
+         {
+            method: 'POST',
+            body: formData,
+            headers: {
+               'Content-Type': 'multipart/form-data',
+            },
+         }
+      );
 
       if (!response.ok) {
          const errorData = await response.json();

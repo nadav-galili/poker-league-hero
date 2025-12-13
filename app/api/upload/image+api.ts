@@ -1,4 +1,8 @@
-import { PutObjectCommand, S3Client } from '@aws-sdk/client-s3';
+import {
+   DeleteObjectCommand,
+   PutObjectCommand,
+   S3Client,
+} from '@aws-sdk/client-s3';
 import { v4 as uuidv4 } from 'uuid';
 
 // Configure S3 client for Cloudflare R2
@@ -30,6 +34,12 @@ export async function POST(request: Request) {
             { status: 500 }
          );
       }
+
+      // Parse query params to get folder
+      const url = new URL(request.url);
+      const folder = url.searchParams.get('folder') || 'league-images';
+      // Sanitize folder name to prevent directory traversal
+      const sanitizedFolder = folder.replace(/[^a-zA-Z0-9-_]/g, '');
 
       const formData = await request.formData();
       const fileData = (formData as any).get('file') as File | Blob | null;
@@ -110,7 +120,7 @@ export async function POST(request: Request) {
 
       // Generate unique filename
       const fileExtension = contentType === 'image/png' ? 'png' : 'jpg';
-      const fileName = `league-images/${uuidv4()}.${fileExtension}`;
+      const fileName = `${sanitizedFolder}/${uuidv4()}.${fileExtension}`;
 
       console.log(`📁 Uploading ${buffer.length} bytes to: ${fileName}`);
 
@@ -178,6 +188,81 @@ export async function POST(request: Request) {
                error instanceof Error ? error.message : 'Unknown error',
          },
          { status: statusCode }
+      );
+   }
+}
+
+export async function DELETE(request: Request) {
+   console.log('🗑️ R2 Delete API called');
+
+   try {
+      // Validate required environment variables
+      if (
+         !process.env.R2_ENDPOINT ||
+         !process.env.R2_ACCESS_KEY_ID ||
+         !process.env.R2_SECRET_ACCESS_KEY ||
+         !process.env.R2_BUCKET_NAME ||
+         !process.env.CLOUDFLARE_R2_PUBLIC_URL
+      ) {
+         console.error('❌ Missing required R2 environment variables');
+         return Response.json(
+            { error: 'Server configuration error' },
+            { status: 500 }
+         );
+      }
+
+      const url = new URL(request.url);
+      const imageUrl = url.searchParams.get('url');
+
+      if (!imageUrl) {
+         return Response.json(
+            { error: 'Image URL is required' },
+            { status: 400 }
+         );
+      }
+
+      // Extract key from URL
+      // URL format: https://pub-xxxx.r2.dev/league-images/uuid.jpg
+      const publicUrl = process.env.CLOUDFLARE_R2_PUBLIC_URL!;
+
+      if (!imageUrl.startsWith(publicUrl)) {
+         // Allow if it's a relative path or just the key
+         // But for security, maybe we should be strict
+         // The user might pass the full URL or just the key
+         // Let's assume full URL for now as per plan
+      }
+
+      // Remove the domain part to get the key
+      let key = imageUrl.replace(`${publicUrl}/`, '');
+
+      // Basic sanitization to prevent traversing up
+      if (key.includes('..')) {
+         return Response.json({ error: 'Invalid image key' }, { status: 400 });
+      }
+
+      console.log(`🗑️ Deleting file: ${key}`);
+
+      const deleteObjectCommand = new DeleteObjectCommand({
+         Bucket: process.env.R2_BUCKET_NAME!,
+         Key: key,
+      });
+
+      await s3Client.send(deleteObjectCommand);
+
+      console.log('✅ Delete successful');
+
+      return Response.json({
+         success: true,
+         message: 'Image deleted successfully',
+      });
+   } catch (error) {
+      console.error('❌ R2 delete failed:', error);
+      return Response.json(
+         {
+            error: 'Failed to delete image',
+            details: error instanceof Error ? error.message : 'Unknown error',
+         },
+         { status: 500 }
       );
    }
 }

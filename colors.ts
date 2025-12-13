@@ -1,18 +1,49 @@
 // Modern Dark Theme Color System
 // Optimized for glass-morphism effects and gradient backgrounds
 
-// Modern Color Palette - Dark Theme Focus
+// Modern Color Palette - Dark Theme Focus with Cyberpunk Enhancement
 const rawColors = {
    // Deep purple gradient backgrounds
    deepPurple: '#1a0033', // Primary dark purple
    midPurple: '#0f001a', // Mid gradient purple
    voidBlack: '#000000', // Pure black for deepest areas
 
+   // Cyberpunk-specific colors
+   neonCyan: '#00FFFF', // Electric cyan
+   neonPink: '#FF00FF', // Hot magenta
+   neonGreen: '#00FF41', // Acid green
+   neonBlue: '#0080FF', // Electric blue
+   neonPurple: '#8A2BE2', // Bright purple
+   neonOrange: '#FF4500', // Neon orange
+
+   // Cyberpunk backgrounds
+   cyberDarkBlue: '#0A0A23', // Deep cyber blue
+   cyberDarkPurple: '#1A0B2E', // Dark cyber purple
+   cyberBlack: '#000000', // Pure black
+   cyberGray: '#1E1E1E', // Dark gray
+
+   // Holographic effects
+   holoBlue: 'rgba(0, 255, 255, 0.3)', // Semi-transparent cyan
+   holoPink: 'rgba(255, 0, 255, 0.3)', // Semi-transparent magenta
+   holoGreen: 'rgba(0, 255, 65, 0.3)', // Semi-transparent acid green
+   holoWhite: 'rgba(255, 255, 255, 0.15)', // Holographic white
+
+   // Matrix-style effects
+   matrixGreen: '#00FF41', // Classic matrix green
+   matrixGreenDark: '#008F11', // Darker matrix green
+   matrixGreenGlow: 'rgba(0, 255, 65, 0.6)', // Matrix green glow
+
+   // Scan line effects
+   scanlineBlue: 'rgba(0, 128, 255, 0.1)', // Subtle scan line blue
+   scanlineCyan: 'rgba(0, 255, 255, 0.1)', // Subtle scan line cyan
+
    // Glass-morphism colors
    glassWhite: 'rgba(255, 255, 255, 0.1)', // Semi-transparent white
    glassWhiteMedium: 'rgba(255, 255, 255, 0.15)', // Medium opacity glass
    glassWhiteHigh: 'rgba(255, 255, 255, 0.2)', // Higher opacity glass
    glassBlur: 'rgba(255, 255, 255, 0.05)', // Very subtle glass effect
+   glassCyan: 'rgba(0, 255, 255, 0.1)', // Cyan glass
+   glassPink: 'rgba(255, 0, 255, 0.1)', // Pink glass
 
    // Modern accent colors
    primaryPurple: '#7C3AED', // Purple primary (Violet 600)
@@ -41,11 +72,17 @@ const rawColors = {
    textSecondary: 'rgba(255, 255, 255, 0.8)', // Semi-transparent white
    textMuted: 'rgba(255, 255, 255, 0.6)', // More transparent white
    textDisabled: 'rgba(255, 255, 255, 0.4)', // Disabled text
+   textNeonCyan: '#00FFFF', // Neon cyan text
+   textNeonPink: '#FF00FF', // Neon pink text
+   textNeonGreen: '#00FF41', // Neon green text
 
    // Shadow colors with tints
    shadowPurple: 'rgba(139, 92, 246, 0.3)', // Purple tinted shadow
    shadowPink: 'rgba(255, 20, 147, 0.3)', // Pink tinted shadow
    shadowBlack: 'rgba(0, 0, 0, 0.5)', // Standard black shadow
+   shadowNeonCyan: 'rgba(0, 255, 255, 0.5)', // Neon cyan shadow/glow
+   shadowNeonPink: 'rgba(255, 0, 255, 0.5)', // Neon pink shadow/glow
+   shadowNeonGreen: 'rgba(0, 255, 65, 0.5)', // Neon green shadow/glow
 
    // Gradient stops
    gradientStart: '#7C3AED', // Purple gradient start
@@ -58,15 +95,26 @@ const rawColors = {
    warningGradientEnd: '#F59E0B',
    infoGradientStart: '#60A5FA',
    infoGradientEnd: '#3B82F6',
+
+   // Cyberpunk gradients
+   cyberGradientStart: '#00FFFF', // Cyan gradient start
+   cyberGradientEnd: '#FF00FF', // Magenta gradient end
+   matrixGradientStart: '#00FF41', // Matrix green start
+   matrixGradientEnd: '#008F11', // Matrix green end
+   neonGradientStart: '#0080FF', // Neon blue start
+   neonGradientEnd: '#8A2BE2', // Neon purple end
 } as const;
 
-// Semantic color tokens optimized for modern dark theme
+// Semantic color tokens optimized for modern dark theme with cyberpunk enhancement
 export const colors = {
    // Text colors - optimized for dark backgrounds
    text: rawColors.textPrimary,
    textSecondary: rawColors.textSecondary,
    textMuted: rawColors.textMuted,
    textDisabled: rawColors.textDisabled,
+   textNeonCyan: rawColors.textNeonCyan,
+   textNeonPink: rawColors.textNeonPink,
+   textNeonGreen: rawColors.textNeonGreen,
 
    // Background system - dark theme first
    background: rawColors.deepPurple, // Deep purple background
@@ -74,15 +122,26 @@ export const colors = {
    backgroundGradientMid: rawColors.midPurple,
    backgroundGradientEnd: rawColors.voidBlack,
 
+   // Cyberpunk backgrounds
+   cyberBackground: rawColors.cyberBlack,
+   cyberDarkBlue: rawColors.cyberDarkBlue,
+   cyberDarkPurple: rawColors.cyberDarkPurple,
+   cyberGray: rawColors.cyberGray,
+
    // Surface system with glass-morphism
    surface: rawColors.glassWhite, // Semi-transparent surfaces
    surfaceElevated: rawColors.glassWhiteMedium, // Elevated surfaces
    surfaceHighlight: rawColors.glassWhiteHigh, // Highlighted surfaces
    surfaceBlur: rawColors.glassBlur, // Subtle surface tint
+   surfaceCyan: rawColors.glassCyan, // Cyan glass surface
+   surfacePink: rawColors.glassPink, // Pink glass surface
 
    // Border system - subtle and modern
    border: rawColors.glassWhite, // Semi-transparent borders
    borderMuted: rawColors.glassBlur, // Very subtle borders
+   borderNeonCyan: rawColors.neonCyan, // Neon cyan border
+   borderNeonPink: rawColors.neonPink, // Neon pink border
+   borderNeonGreen: rawColors.neonGreen, // Neon green border
 
    // Primary color system
    primary: rawColors.primaryPurple,
@@ -95,6 +154,29 @@ export const colors = {
    secondary: rawColors.pinkAccent,
    secondaryDark: rawColors.pinkAccentDark,
    accent: rawColors.accent, // Add accent color
+
+   // Cyberpunk neon colors
+   neonCyan: rawColors.neonCyan,
+   neonPink: rawColors.neonPink,
+   neonGreen: rawColors.neonGreen,
+   neonBlue: rawColors.neonBlue,
+   neonPurple: rawColors.neonPurple,
+   neonOrange: rawColors.neonOrange,
+
+   // Holographic effects
+   holoBlue: rawColors.holoBlue,
+   holoPink: rawColors.holoPink,
+   holoGreen: rawColors.holoGreen,
+   holoWhite: rawColors.holoWhite,
+
+   // Matrix effects
+   matrixGreen: rawColors.matrixGreen,
+   matrixGreenDark: rawColors.matrixGreenDark,
+   matrixGreenGlow: rawColors.matrixGreenGlow,
+
+   // Scan line effects
+   scanlineBlue: rawColors.scanlineBlue,
+   scanlineCyan: rawColors.scanlineCyan,
 
    // Status colors with gradients
    success: rawColors.successGreen,
@@ -121,6 +203,17 @@ export const colors = {
    shadow: rawColors.shadowBlack,
    shadowPurple: rawColors.shadowPurple,
    shadowPink: rawColors.shadowPink,
+   shadowNeonCyan: rawColors.shadowNeonCyan,
+   shadowNeonPink: rawColors.shadowNeonPink,
+   shadowNeonGreen: rawColors.shadowNeonGreen,
+
+   // Cyberpunk gradients
+   cyberGradientStart: rawColors.cyberGradientStart,
+   cyberGradientEnd: rawColors.cyberGradientEnd,
+   matrixGradientStart: rawColors.matrixGradientStart,
+   matrixGradientEnd: rawColors.matrixGradientEnd,
+   neonGradientStart: rawColors.neonGradientStart,
+   neonGradientEnd: rawColors.neonGradientEnd,
 } as const;
 
 export type ThemeName = 'light' | 'dark';
@@ -286,7 +379,17 @@ export const getTheme = (name: ThemeName = 'dark'): Theme => themes[name];
 
 // Utility function to create gradient arrays for React Native LinearGradient
 export const getGradient = (
-   type: 'primary' | 'success' | 'error' | 'warning' | 'info' | 'background'
+   type:
+      | 'primary'
+      | 'success'
+      | 'error'
+      | 'warning'
+      | 'info'
+      | 'background'
+      | 'cyber'
+      | 'matrix'
+      | 'neon'
+      | 'cyberpunk'
 ) => {
    const theme = getTheme();
    switch (type) {
@@ -306,7 +409,55 @@ export const getGradient = (
             theme.backgroundGradientMid,
             theme.backgroundGradientEnd,
          ];
+      case 'cyber':
+         return [colors.cyberGradientStart, colors.cyberGradientEnd];
+      case 'matrix':
+         return [colors.matrixGradientStart, colors.matrixGradientEnd];
+      case 'neon':
+         return [colors.neonGradientStart, colors.neonGradientEnd];
+      case 'cyberpunk':
+         return [colors.cyberBackground, colors.neonCyan, colors.neonPink];
       default:
          return [theme.primaryGradientStart, theme.primaryGradientEnd];
+   }
+};
+
+// Cyberpunk-specific gradient utility
+export const getCyberpunkGradient = (
+   variant: 'matrix' | 'neon' | 'cyber' | 'holo' | 'dark'
+): readonly [string, string, ...string[]] => {
+   switch (variant) {
+      case 'matrix':
+         return [
+            colors.cyberBackground,
+            colors.matrixGreenDark,
+            colors.matrixGreen,
+         ] as const;
+      case 'neon':
+         return [
+            colors.cyberBackground,
+            colors.neonBlue,
+            colors.neonCyan,
+         ] as const;
+      case 'cyber':
+         return [
+            colors.cyberBackground,
+            colors.neonPink,
+            colors.neonCyan,
+         ] as const;
+      case 'holo':
+         return [
+            colors.cyberBackground,
+            colors.holoBlue,
+            colors.holoPink,
+         ] as const;
+      case 'dark':
+         return [
+            colors.cyberBackground,
+            colors.cyberDarkBlue,
+            colors.cyberDarkPurple,
+         ] as const;
+      default:
+         return [colors.cyberBackground, colors.neonCyan] as const;
    }
 };

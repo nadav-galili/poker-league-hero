@@ -1,6 +1,7 @@
 import StatsLeaderboardHero from '@/components/stats/StatsLeaderboardHero';
 import StatsLeaderboardRow from '@/components/stats/StatsLeaderboardRow';
 import StatsLeaderboardSkeleton from '@/components/stats/StatsLeaderboardSkeleton';
+import { colors } from '@/colors';
 import { useLocalization } from '@/context/localization';
 import { useStatsRankings } from '@/hooks/useStatsRankings';
 import { StatType } from '@/services/leagueStatsService';
@@ -18,9 +19,6 @@ import {
 } from 'react-native';
 import Animated, {
    FadeIn,
-   useAnimatedStyle,
-   useSharedValue,
-   withTiming,
 } from 'react-native-reanimated';
 
 // Animated Pressable
@@ -33,7 +31,7 @@ export default function StatsLeaderboardScreen() {
       statType: StatType;
    }>();
 
-   const { data, isLoading, error, refetch } = useStatsRankings(
+   const { data, isLoading, refetch } = useStatsRankings(
       leagueId,
       statType
    );
@@ -87,37 +85,38 @@ export default function StatsLeaderboardScreen() {
       [statType, t]
    );
 
-   const headerButtonStyle = React.useMemo(
-      () => ({
-         shadowColor: '#000000',
-         shadowOffset: { width: 0, height: 4 },
-         shadowOpacity: 0.3,
-         shadowRadius: 8,
-         elevation: 8,
-      }),
-      []
-   );
 
    if (isLoading && !data) {
       return (
          <LinearGradient
-            colors={['#1a0033', '#0f001a', '#000000']}
+            colors={[colors.cyberBackground, colors.cyberDarkBlue, colors.neonBlue]}
             style={styles.container}
          >
             <Stack.Screen options={{ headerShown: false }} />
+            {/* Scan Lines Overlay */}
+            <View style={styles.scanLinesOverlay} />
+            {/* Corner Brackets */}
+            <View style={styles.topLeftBracket} />
+            <View style={styles.topRightBracket} />
+            <View style={styles.bottomLeftBracket} />
+            <View style={styles.bottomRightBracket} />
             {/* Header */}
             <View style={styles.header}>
                <Pressable
                   onPress={handleBack}
-                  style={[styles.backButton, headerButtonStyle]}
+                  style={[styles.backButton]}
                >
+                  <View style={styles.backButtonBrackets} />
                   <Ionicons
                      name={isRTL ? 'arrow-forward' : 'arrow-back'}
                      size={24}
-                     color="white"
+                     color={colors.neonCyan}
                   />
                </Pressable>
-               <Text style={styles.headerTitle}>{screenTitle}</Text>
+               <View style={styles.headerTitleContainer}>
+                  <Text style={styles.headerTitle}>{screenTitle}</Text>
+                  <View style={styles.headerTitleUnderline} />
+               </View>
                <View style={styles.placeholder} />
             </View>
             <StatsLeaderboardSkeleton />
@@ -127,32 +126,45 @@ export default function StatsLeaderboardScreen() {
 
    return (
       <LinearGradient
-         colors={['#1a0033', '#0f001a', '#000000']}
+         colors={[colors.cyberBackground, colors.cyberDarkBlue, colors.neonBlue]}
          style={styles.container}
       >
          <Stack.Screen options={{ headerShown: false }} />
+
+         {/* Scan Lines Overlay */}
+         <View style={styles.scanLinesOverlay} />
+         {/* Corner Brackets */}
+         <View style={styles.topLeftBracket} />
+         <View style={styles.topRightBracket} />
+         <View style={styles.bottomLeftBracket} />
+         <View style={styles.bottomRightBracket} />
 
          {/* Header */}
          <View style={styles.header}>
             <AnimatedPressable
                onPress={handleBack}
-               style={[styles.backButton, headerButtonStyle]}
+               style={styles.backButton}
                entering={FadeIn.duration(300)}
             >
+               <View style={styles.backButtonBrackets} />
                <Ionicons
                   name={isRTL ? 'arrow-forward' : 'arrow-back'}
                   size={24}
-                  color="white"
+                  color={colors.neonCyan}
                />
             </AnimatedPressable>
-            <Text style={styles.headerTitle} numberOfLines={1}>
-               {screenTitle}
-            </Text>
+            <View style={styles.headerTitleContainer}>
+               <Text style={styles.headerTitle} numberOfLines={1}>
+                  {screenTitle}
+               </Text>
+               <View style={styles.headerTitleUnderline} />
+            </View>
             <View style={styles.placeholder} />
          </View>
 
          {/* Content */}
-         <FlashList
+         <View style={styles.contentContainer}>
+            <FlashList
             data={listData}
             renderItem={renderItem}
             estimatedItemSize={80}
@@ -169,7 +181,12 @@ export default function StatsLeaderboardScreen() {
             ListEmptyComponent={
                !isLoading ? (
                   <View style={styles.emptyContainer}>
+                     <View style={styles.emptyIconContainer}>
+                        <Ionicons name="stats-chart" size={64} color={colors.neonCyan} />
+                        <View style={styles.emptyIconGlow} />
+                     </View>
                      <Text style={styles.emptyText}>{t('noPlayersFound')}</Text>
+                     <Text style={styles.emptySubtext}>SYSTEM STATUS: NO DATA DETECTED</Text>
                   </View>
                ) : null
             }
@@ -177,12 +194,14 @@ export default function StatsLeaderboardScreen() {
                <RefreshControl
                   refreshing={refreshing}
                   onRefresh={onRefresh}
-                  tintColor="#FFFFFF"
-                  colors={['#FFFFFF']}
+                  tintColor={colors.neonCyan}
+                  colors={[colors.neonCyan, colors.neonBlue]}
+                  progressBackgroundColor={colors.cyberGray}
                />
             }
             showsVerticalScrollIndicator={false}
          />
+         </View>
       </LinearGradient>
    );
 }
@@ -191,6 +210,82 @@ const styles = StyleSheet.create({
    container: {
       flex: 1,
    },
+   // Cyberpunk background effects
+   scanLinesOverlay: {
+      position: 'absolute',
+      top: 0,
+      left: 0,
+      right: 0,
+      bottom: 0,
+      backgroundColor: 'transparent',
+      opacity: 0.1,
+      // Scan lines effect using repeating gradient
+      shadowColor: colors.neonCyan,
+      shadowOffset: { width: 0, height: 1 },
+      shadowOpacity: 0.3,
+      shadowRadius: 2,
+   },
+   // Corner brackets
+   topLeftBracket: {
+      position: 'absolute',
+      top: 50,
+      left: 20,
+      width: 20,
+      height: 20,
+      borderTopWidth: 2,
+      borderLeftWidth: 2,
+      borderColor: colors.neonCyan,
+      shadowColor: colors.neonCyan,
+      shadowOffset: { width: 0, height: 0 },
+      shadowOpacity: 0.8,
+      shadowRadius: 4,
+      zIndex: 20,
+   },
+   topRightBracket: {
+      position: 'absolute',
+      top: 50,
+      right: 20,
+      width: 20,
+      height: 20,
+      borderTopWidth: 2,
+      borderRightWidth: 2,
+      borderColor: colors.neonCyan,
+      shadowColor: colors.neonCyan,
+      shadowOffset: { width: 0, height: 0 },
+      shadowOpacity: 0.8,
+      shadowRadius: 4,
+      zIndex: 20,
+   },
+   bottomLeftBracket: {
+      position: 'absolute',
+      bottom: 40,
+      left: 20,
+      width: 20,
+      height: 20,
+      borderBottomWidth: 2,
+      borderLeftWidth: 2,
+      borderColor: colors.neonCyan,
+      shadowColor: colors.neonCyan,
+      shadowOffset: { width: 0, height: 0 },
+      shadowOpacity: 0.8,
+      shadowRadius: 4,
+      zIndex: 20,
+   },
+   bottomRightBracket: {
+      position: 'absolute',
+      bottom: 40,
+      right: 20,
+      width: 20,
+      height: 20,
+      borderBottomWidth: 2,
+      borderRightWidth: 2,
+      borderColor: colors.neonCyan,
+      shadowColor: colors.neonCyan,
+      shadowOffset: { width: 0, height: 0 },
+      shadowOpacity: 0.8,
+      shadowRadius: 4,
+      zIndex: 20,
+   },
    header: {
       flexDirection: 'row',
       alignItems: 'center',
@@ -198,28 +293,68 @@ const styles = StyleSheet.create({
       paddingHorizontal: 24,
       paddingTop: 60,
       paddingBottom: 24,
-      zIndex: 10,
+      zIndex: 15,
    },
    backButton: {
-      width: 44,
-      height: 44,
-      borderRadius: 12,
-      backgroundColor: 'rgba(255, 255, 255, 0.1)',
+      width: 48,
+      height: 48,
       alignItems: 'center',
       justifyContent: 'center',
-      borderWidth: 1,
-      borderColor: 'rgba(255, 255, 255, 0.2)',
+      position: 'relative',
    },
-   headerTitle: {
-      color: 'white',
-      fontSize: 20,
-      fontWeight: 'bold',
+   backButtonBrackets: {
+      position: 'absolute',
+      top: 0,
+      left: 0,
+      right: 0,
+      bottom: 0,
+      borderWidth: 2,
+      borderColor: colors.neonCyan,
+      backgroundColor: colors.holoBlue,
+      // Corner cuts for angular look
+      borderTopLeftRadius: 0,
+      borderTopRightRadius: 8,
+      borderBottomLeftRadius: 8,
+      borderBottomRightRadius: 0,
+      shadowColor: colors.neonCyan,
+      shadowOffset: { width: 0, height: 0 },
+      shadowOpacity: 0.6,
+      shadowRadius: 6,
+   },
+   headerTitleContainer: {
       flex: 1,
-      textAlign: 'center',
+      alignItems: 'center',
+      justifyContent: 'center',
       marginHorizontal: 16,
    },
+   headerTitle: {
+      color: colors.neonCyan,
+      fontSize: 18,
+      fontWeight: '700',
+      textAlign: 'center',
+      textTransform: 'uppercase',
+      letterSpacing: 1.2,
+      fontFamily: 'monospace',
+      textShadowColor: colors.shadowNeonCyan,
+      textShadowOffset: { width: 0, height: 0 },
+      textShadowRadius: 8,
+   },
+   headerTitleUnderline: {
+      marginTop: 4,
+      height: 1,
+      width: '60%',
+      backgroundColor: colors.neonCyan,
+      shadowColor: colors.neonCyan,
+      shadowOffset: { width: 0, height: 0 },
+      shadowOpacity: 0.8,
+      shadowRadius: 3,
+   },
    placeholder: {
-      width: 44,
+      width: 48,
+   },
+   contentContainer: {
+      flex: 1,
+      position: 'relative',
    },
    listContent: {
       paddingHorizontal: 20,
@@ -228,11 +363,46 @@ const styles = StyleSheet.create({
    emptyContainer: {
       alignItems: 'center',
       justifyContent: 'center',
-      paddingVertical: 40,
+      paddingVertical: 60,
+      paddingHorizontal: 40,
+   },
+   emptyIconContainer: {
+      position: 'relative',
+      alignItems: 'center',
+      justifyContent: 'center',
+      marginBottom: 24,
+   },
+   emptyIconGlow: {
+      position: 'absolute',
+      width: 80,
+      height: 80,
+      borderRadius: 40,
+      backgroundColor: colors.neonCyan,
+      opacity: 0.2,
+      shadowColor: colors.neonCyan,
+      shadowOffset: { width: 0, height: 0 },
+      shadowOpacity: 0.6,
+      shadowRadius: 20,
    },
    emptyText: {
-      color: 'rgba(255, 255, 255, 0.5)',
-      fontSize: 16,
+      color: colors.neonCyan,
+      fontSize: 18,
+      fontWeight: '600',
+      textAlign: 'center',
+      marginBottom: 8,
+      fontFamily: 'monospace',
+      textShadowColor: colors.shadowNeonCyan,
+      textShadowOffset: { width: 0, height: 0 },
+      textShadowRadius: 4,
+   },
+   emptySubtext: {
+      color: colors.textSecondary,
+      fontSize: 12,
+      fontWeight: '400',
+      textAlign: 'center',
+      fontFamily: 'monospace',
+      letterSpacing: 0.5,
+      textTransform: 'uppercase',
    },
 });
 

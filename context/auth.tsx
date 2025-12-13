@@ -48,6 +48,7 @@ const AuthContext = React.createContext({
    hasSeenOnboarding: false,
    markOnboardingComplete: async () => {},
    resetOnboarding: async () => {},
+   refreshUser: async () => {},
 });
 
 const config: AuthRequestConfig = {
@@ -838,6 +839,34 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
          console.error('Error during sign in with Apple:', error);
       }
    };
+
+   const refreshUser = async () => {
+      try {
+         console.log('🔄 Refreshing user data...');
+         if (isWeb) {
+            const sessionResponse = await fetch(
+               `${BASE_URL}/api/auth/session`,
+               {
+                  method: 'GET',
+                  credentials: 'include',
+               }
+            );
+
+            if (sessionResponse.ok) {
+               const sessionData = await sessionResponse.json();
+               setUser(sessionData as AuthUser);
+            }
+         } else {
+            // For native: refresh token to get updated user info in new access token
+            if (refreshToken) {
+               await refreshAccessToken(refreshToken);
+            }
+         }
+      } catch (error) {
+         console.error('Error refreshing user data:', error);
+      }
+   };
+
    return (
       <AuthContext.Provider
          value={{
@@ -853,6 +882,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
             hasSeenOnboarding,
             markOnboardingComplete,
             resetOnboarding,
+            refreshUser,
          }}
       >
          {children}

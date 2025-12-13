@@ -45,11 +45,11 @@ export function BuyInSelector({
       const baseStyle = [styles.container];
 
       if (variant === 'horizontal') {
-         baseStyle.push(styles.horizontalContainer);
+         baseStyle.push({ ...styles.horizontalContainer, marginBottom: 8 });
       } else if (variant === 'vertical') {
-         baseStyle.push(styles.verticalContainer);
+         baseStyle.push({ ...styles.verticalContainer, marginBottom: 8 });
       } else if (variant === 'grid') {
-         baseStyle.push(styles.gridContainer);
+         baseStyle.push({ ...styles.gridContainer, marginBottom: 8 });
       }
 
       return baseStyle;
@@ -68,9 +68,9 @@ export function BuyInSelector({
                variant === 'grid' && styles.gridOption,
                {
                   backgroundColor: isSelected
-                     ? colors.primary
+                     ? colors.neonPurple
                      : theme.background,
-                  borderColor: isSelected ? colors.primary : theme.border,
+                  borderColor: isSelected ? colors.neonPurple : theme.border,
                   opacity: disabled ? 0.6 : 1,
                },
             ]}
@@ -80,7 +80,7 @@ export function BuyInSelector({
          >
             <Text
                variant="h4"
-               color={isSelected ? colors.textInverse : theme.text}
+               color={isSelected ? colors.text : theme.text}
                style={styles.buyInOptionText}
             >
                {option.label}

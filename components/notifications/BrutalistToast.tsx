@@ -9,6 +9,9 @@ import { Ionicons } from '@expo/vector-icons';
 import React, { useEffect, useRef } from 'react';
 import { Animated, View, Dimensions, Easing, Pressable } from 'react-native';
 
+// Toast context and hook for easy usage
+import { createContext, useContext, useState, ReactNode } from 'react';
+
 export type ToastType = 'success' | 'error' | 'warning' | 'info';
 
 interface BrutalistToastProps {
@@ -290,9 +293,6 @@ export function BrutalistToast({
       </Animated.View>
    );
 }
-
-// Toast context and hook for easy usage
-import { createContext, useContext, useState, ReactNode } from 'react';
 
 interface ToastContextType {
    showToast: (props: Omit<BrutalistToastProps, 'visible' | 'onHide'>) => void;

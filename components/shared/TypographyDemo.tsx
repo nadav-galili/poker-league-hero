@@ -7,7 +7,7 @@ import { Text } from '../Text';
 export function TypographyDemo() {
    const theme = getTheme('light');
 
-   const variants = Object.keys(Typography) as Array<keyof typeof Typography>;
+   const variants = Object.keys(Typography) as (keyof typeof Typography)[];
 
    return (
       <ScrollView

@@ -1,18 +1,18 @@
+import CyberpunkLoader from '@/components/ui/CyberpunkLoader';
 import { useAuth } from '@/context/auth';
 import { useLocalization } from '@/context/localization';
+import { joinLeagueWithCode } from '@/services/leagueOperationsService';
 import { useFocusEffect } from '@react-navigation/native';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import React, { useCallback } from 'react';
-import { ActivityIndicator, View } from 'react-native';
-import { leagueOperationsService } from '@/services/leagueOperationsService';
+import { View } from 'react-native';
 import Toast from 'react-native-toast-message';
 
 export default function JoinLeagueHandler() {
-   const { user, isLoading: authLoading } = useAuth();
+   const { user, isLoading: authLoading, fetchWithAuth } = useAuth();
    const { t } = useLocalization();
    const router = useRouter();
    const { code, name, id } = useLocalSearchParams();
-   const [joining, setJoining] = React.useState(false);
 
    useFocusEffect(
       useCallback(() => {
@@ -28,7 +28,9 @@ export default function JoinLeagueHandler() {
                   Toast.show({
                      type: 'error',
                      text1: t('error'),
-                     text2: t('joinLeagueRequiresLogin') || 'You must sign in to join a league',
+                     text2:
+                        t('joinLeagueRequiresLogin') ||
+                        'You must sign in to join a league',
                   });
                   router.replace('/');
                   return;
@@ -44,22 +46,26 @@ export default function JoinLeagueHandler() {
                   return;
                }
 
-               setJoining(true);
-
                // Call the API to join the league
-               const result = await leagueOperationsService.joinLeague(code as string);
+               const result = await joinLeagueWithCode(
+                  code as string,
+                  fetchWithAuth,
+                  t
+               );
 
                if (result.success) {
                   Toast.show({
                      type: 'success',
                      text1: t('success'),
-                     text2: t('joinedLeagueSuccess') || `Successfully joined ${name || 'league'}`,
+                     text2:
+                        t('joinedLeagueSuccess') ||
+                        `Successfully joined ${name || 'league'}`,
                   });
 
                   // Redirect to the league page
-                  const leagueId = result.leagueId || id;
+                  const leagueId = result.league?.id || id;
                   if (leagueId) {
-                     router.replace(`/(tabs)/my-leagues/${leagueId}`);
+                     router.replace(`/(tabs)/my-leagues/${leagueId}` as any);
                   } else {
                      router.replace('/(tabs)/my-leagues');
                   }
@@ -79,18 +85,20 @@ export default function JoinLeagueHandler() {
                   text2: 'An error occurred while joining the league',
                });
                router.replace('/');
-            } finally {
-               setJoining(false);
             }
          };
 
          handleJoinLeague();
-      }, [code, user, authLoading, router, t])
+      }, [code, user, authLoading, router, t, fetchWithAuth, id, name])
    );
 
    return (
-      <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
-         <ActivityIndicator size="large" color="#ec4899" />
+      <View className="flex-1 justify-center items-center bg-cyberBackground">
+         <CyberpunkLoader
+            size="large"
+            variant="pink"
+            text="JOINING LEAGUE..."
+         />
       </View>
    );
 }

@@ -14,7 +14,7 @@ export function getDb() {
       throw new Error('DATABASE_URL environment variable is required');
    }
 
-   // Use Neon's HTTP client - works in Cloudflare Workers
+   // Use Neon's HTTP client - works in Expo Server (neon-serverless has compatibility issues)
    const sql = neon(connectionString);
 
    dbInstance = drizzle(sql, {

@@ -4,18 +4,24 @@ import { Ionicons } from '@expo/vector-icons';
 import { FlashList } from '@shopify/flash-list';
 import dayjs from 'dayjs';
 import { Image } from 'expo-image';
+import { LinearGradient } from 'expo-linear-gradient';
 import React, { useEffect, useState } from 'react';
 import { Dimensions, Text, View } from 'react-native';
 import { Gesture, GestureDetector } from 'react-native-gesture-handler';
 import Animated, {
+   Easing,
    runOnJS,
    useAnimatedStyle,
    useSharedValue,
-   withSpring,
+   withTiming,
 } from 'react-native-reanimated';
 
 const SCREEN_WIDTH = Dimensions.get('window').width;
-const SWIPE_THRESHOLD = SCREEN_WIDTH * 0.2;
+const PAGE_WIDTH = SCREEN_WIDTH;
+const SNAP_DISTANCE = SCREEN_WIDTH * 0.25;
+const VELOCITY_THRESHOLD = 900;
+const CARD_OFFSET = 20; // For layered card effect
+const EDGE_RUBBER_BAND = 0.35;
 
 interface RecentGameResultsProps {
    games: GameResult[];
@@ -33,31 +39,67 @@ const PlayerRow = ({
    index: number;
 }) => {
    const { t, isRTL } = useLocalization();
+   const isTopThree = index < 3;
+
    return (
       <View
-         className="flex-row items-center justify-between py-3 border-b border-white/5"
-         style={{ opacity: index < 3 ? 1 : 0.7 }}
+         className="flex-row items-center justify-between py-3 relative"
+         style={{
+            opacity: isTopThree ? 1 : 0.7,
+            borderBottomWidth: 1,
+            borderBottomColor: 'rgba(0, 255, 255, 0.1)',
+         }}
       >
+         {/* Cyberpunk rank indicator for top 3 */}
+         {isTopThree && (
+            <View
+               className="absolute left-0 w-1 h-full bg-gradient-to-b"
+               style={{
+                  backgroundColor:
+                     index === 0
+                        ? '#00FFFF'
+                        : index === 1
+                          ? '#00BFFF'
+                          : '#0099FF',
+               }}
+            />
+         )}
+
          <View
-            className="flex-row items-center flex-1"
+            className="flex-row items-center flex-1 ml-2"
             style={{ marginEnd: 16 }}
          >
-            <Image
-               source={
-                  item.profileImageUrl
-                     ? { uri: item.profileImageUrl }
-                     : require('@/assets/images/anonymous.webp')
-               }
-               style={{
-                  width: 32,
-                  height: 32,
-                  borderRadius: 16,
-                  [isRTL ? 'marginLeft' : 'marginRight']: 12,
-                  borderWidth: 1,
-                  borderColor: 'rgba(255,255,255,0.2)',
-               }}
-               contentFit="cover"
-            />
+            <View className="relative">
+               <Image
+                  source={
+                     item.profileImageUrl
+                        ? { uri: item.profileImageUrl }
+                        : require('@/assets/images/anonymous.webp')
+                  }
+                  style={{
+                     width: 32,
+                     height: 32,
+                     borderRadius: 4, // Sharp cyberpunk edges
+                     [isRTL ? 'marginLeft' : 'marginRight']: 12,
+                     borderWidth: isTopThree ? 2 : 1,
+                     borderColor: isTopThree
+                        ? '#00FFFF'
+                        : 'rgba(0, 255, 255, 0.3)',
+                  }}
+                  contentFit="cover"
+               />
+
+               {/* Cyberpunk corner brackets for top players */}
+               {isTopThree && (
+                  <>
+                     <View className="absolute -top-1 -left-1 w-2 h-2 border-l border-t border-[#00FFFF]" />
+                     <View className="absolute -top-1 -right-1 w-2 h-2 border-r border-t border-[#00FFFF]" />
+                     <View className="absolute -bottom-1 -left-1 w-2 h-2 border-l border-b border-[#00FFFF]" />
+                     <View className="absolute -bottom-1 -right-1 w-2 h-2 border-r border-b border-[#00FFFF]" />
+                  </>
+               )}
+            </View>
+
             <View
                style={{
                   alignItems: isRTL ? 'flex-end' : 'flex-start',
@@ -65,14 +107,21 @@ const PlayerRow = ({
                }}
             >
                <Text
-                  className="text-white font-medium text-sm"
-                  style={{ textAlign: isRTL ? 'right' : 'left' }}
+                  className={`font-medium text-sm font-mono tracking-wider ${
+                     isTopThree ? 'text-[#00FFFF]' : 'text-white'
+                  }`}
+                  style={{
+                     textAlign: isRTL ? 'right' : 'left',
+                     textShadowColor: isTopThree ? '#00FFFF' : 'transparent',
+                     textShadowOffset: { width: 0, height: 0 },
+                     textShadowRadius: isTopThree ? 4 : 0,
+                  }}
                   numberOfLines={1}
                >
                   {item.fullName}
                </Text>
                <Text
-                  className="text-white/50 text-xs"
+                  className="text-[#00BFFF]/70 text-xs font-mono"
                   style={{ textAlign: isRTL ? 'right' : 'left' }}
                >
                   {t('buyIn')}: {t('currency')}
@@ -80,15 +129,26 @@ const PlayerRow = ({
                </Text>
             </View>
          </View>
+
          <View style={{ minWidth: 80, alignItems: 'flex-end' }}>
             <Text
-               className={`font-bold text-sm ${
+               className={`font-bold text-sm font-mono tracking-wider ${
                   item.profit > 0
-                     ? 'text-green-400'
+                     ? 'text-[#00FF88]'
                      : item.profit < 0
-                       ? 'text-red-400'
+                       ? 'text-[#FF4444]'
                        : 'text-gray-400'
                }`}
+               style={{
+                  textShadowColor:
+                     item.profit > 0
+                        ? '#00FF88'
+                        : item.profit < 0
+                          ? '#FF4444'
+                          : 'transparent',
+                  textShadowOffset: { width: 0, height: 0 },
+                  textShadowRadius: item.profit !== 0 ? 4 : 0,
+               }}
             >
                {item.profit > 0 ? '+' : ''}
                {t('currency')}
@@ -99,7 +159,13 @@ const PlayerRow = ({
    );
 };
 
-const GameCard = ({ game }: { game: GameResult }) => {
+const GameCard = ({
+   game,
+   isActive = false,
+}: {
+   game: GameResult;
+   isActive?: boolean;
+}) => {
    const { t } = useLocalization();
 
    const formatTime = (dateString: string) => {
@@ -108,55 +174,115 @@ const GameCard = ({ game }: { game: GameResult }) => {
 
    return (
       <View
-         className="w-full bg-white/5 backdrop-blur-xl border border-white/20 rounded-3xl overflow-hidden"
+         className="w-full bg-black/90 border-2 border-[#00BFFF] relative overflow-hidden"
          style={{
-            shadowColor: '#000',
-            shadowOffset: { width: 0, height: 4 },
-            shadowOpacity: 0.3,
-            shadowRadius: 8,
-            elevation: 8,
+            borderColor: isActive ? '#00FFFF' : '#00BFFF',
+            shadowColor: '#00BFFF',
+            shadowOffset: { width: 0, height: 0 },
+            shadowOpacity: isActive ? 0.8 : 0.6,
+            shadowRadius: isActive ? 16 : 12,
+            elevation: isActive ? 16 : 12,
+            transform: [{ scale: isActive ? 1.02 : 1 }],
          }}
       >
-         {/* Game Header */}
-         <View className="p-4 bg-white/5 border-b border-white/10 flex-row justify-between items-center">
+         {/* Cyberpunk corner brackets */}
+         <View className="absolute top-2 left-2 w-4 h-4 border-l-2 border-t-2 border-[#00FFFF]" />
+         <View className="absolute top-2 right-2 w-4 h-4 border-r-2 border-t-2 border-[#00BFFF]" />
+         <View className="absolute bottom-2 left-2 w-4 h-4 border-l-2 border-b-2 border-[#00BFFF]" />
+         <View className="absolute bottom-2 right-2 w-4 h-4 border-r-2 border-b-2 border-[#00FFFF]" />
+
+         {/* Holographic overlay */}
+         <LinearGradient
+            colors={[
+               'rgba(0, 255, 255, 0.05)',
+               'transparent',
+               'rgba(0, 191, 255, 0.05)',
+            ]}
+            start={{ x: 0, y: 0 }}
+            end={{ x: 1, y: 1 }}
+            style={{
+               position: 'absolute',
+               top: 0,
+               left: 0,
+               right: 0,
+               bottom: 0,
+               opacity: 0.8,
+            }}
+         />
+
+         {/* Game Header - Cyberpunk styled */}
+         <View className="p-4 bg-black/80 border-b border-[#00BFFF]/30 flex-row justify-between items-center relative">
+            {/* Header scan line */}
+            <View
+               className="absolute top-0 left-0 right-0 h-px bg-[#00FFFF]"
+               style={{ opacity: 0.3 }}
+            />
+
             <View>
-               <Text className="text-white text-xs font-medium mb-1">
+               <Text
+                  className="text-[#00FFFF] text-xs font-mono font-bold mb-1 tracking-wider uppercase"
+                  style={{
+                     textShadowColor: '#00FFFF',
+                     textShadowOffset: { width: 0, height: 0 },
+                     textShadowRadius: 4,
+                  }}
+               >
                   {dayjs(game.endedAt).format('MMM DD, YYYY')}
                </Text>
                <View className="flex-row items-center">
-                  <Ionicons name="time-outline" size={12} color="#ffffff60" />
-                  <Text className="text-success text-xs ml-1">
+                  <Ionicons name="time-outline" size={12} color="#00BFFF" />
+                  <Text className="text-[#00FFFF] text-xs ml-1  tracking-wide">
                      {game.startedAt ? formatTime(game.startedAt) : '--:--'} -{' '}
                      {formatTime(game.endedAt)}
                   </Text>
                </View>
             </View>
+
             <View className="items-end">
-               <Text className="text-white/60 text-xs mb-1">
+               <Text className="text-[#00FFFF] text-xs mb-1  uppercase tracking-wider">
                   {t('gameManager')}
                </Text>
                <View className="flex-row items-center">
-                  <Text className="text-white font-medium text-xs mr-2">
+                  <Text className="text-[#00FFFF] font-mono font-bold text-xs mr-2 tracking-wide">
                      {game.creatorName}
                   </Text>
-                  <Image
-                     source={
-                        game.creatorImage
-                           ? { uri: game.creatorImage }
-                           : require('@/assets/images/anonymous.webp')
-                     }
-                     style={{
-                        width: 20,
-                        height: 20,
-                        borderRadius: 10,
-                     }}
-                  />
+                  <View className="relative">
+                     <Image
+                        source={
+                           game.creatorImage
+                              ? { uri: game.creatorImage }
+                              : require('@/assets/images/anonymous.webp')
+                        }
+                        style={{
+                           width: 20,
+                           height: 20,
+                           borderRadius: 2, // Sharp cyberpunk edges
+                           borderWidth: 1,
+                           borderColor: '#00BFFF',
+                        }}
+                     />
+                     {/* Mini corner brackets */}
+                     <View className="absolute -top-0.5 -left-0.5 w-1.5 h-1.5 border-l border-t border-[#00FFFF]" />
+                     <View className="absolute -top-0.5 -right-0.5 w-1.5 h-1.5 border-r border-t border-[#00FFFF]" />
+                     <View className="absolute -bottom-0.5 -left-0.5 w-1.5 h-1.5 border-l border-b border-[#00FFFF]" />
+                     <View className="absolute -bottom-0.5 -right-0.5 w-1.5 h-1.5 border-r border-b border-[#00FFFF]" />
+                  </View>
                </View>
             </View>
          </View>
 
-         {/* Players List */}
-         <View className="p-4" style={{ minHeight: 200 }}>
+         {/* Players List - Cyberpunk styled */}
+         <View className="p-4 relative" style={{ minHeight: 200 }}>
+            {/* Background grid pattern */}
+            <View
+               className="absolute inset-0 opacity-5"
+               style={{
+                  backgroundImage:
+                     'linear-gradient(rgba(0, 255, 255, 0.1) 1px, transparent 1px), linear-gradient(90deg, rgba(0, 255, 255, 0.1) 1px, transparent 1px)',
+                  backgroundSize: '20px 20px',
+               }}
+            />
+
             <FlashList
                data={game.players}
                renderItem={({ item, index }) => (
@@ -164,6 +290,12 @@ const GameCard = ({ game }: { game: GameResult }) => {
                )}
                scrollEnabled={false}
                keyExtractor={(item) => item.id.toString()}
+            />
+
+            {/* Bottom scan line */}
+            <View
+               className="absolute bottom-0 left-0 right-0 h-px bg-[#00BFFF]"
+               style={{ opacity: 0.3 }}
             />
          </View>
       </View>
@@ -177,26 +309,18 @@ export default function RecentGameResults({
    hasMore,
    loadMore,
 }: RecentGameResultsProps) {
-   const { t } = useLocalization();
+   const { t, isRTL } = useLocalization();
    const [currentIndex, setCurrentIndex] = useState(0);
+   const [isTransitioning, setIsTransitioning] = useState(false);
    const translateX = useSharedValue(0);
+   const indexSV = useSharedValue(0);
+   const isAnimatingSV = useSharedValue(false);
 
-   const handleNext = () => {
-      if (currentIndex < games.length - 1) {
-         setCurrentIndex(currentIndex + 1);
-      } else if (hasMore && !isLoading) {
-         loadMore();
-         // We don't increment index immediately here;
-         // the effect below will handle index update if needed or user swipes again
-         // But logically we want to show the newly loaded game, so we'll wait for props update
-      }
-   };
-
-   const handlePrev = () => {
-      if (currentIndex > 0) {
-         setCurrentIndex(currentIndex - 1);
-      }
-   };
+   const setIndexFromWorklet = React.useCallback((nextIndex: number) => {
+      setIsTransitioning(true);
+      setCurrentIndex(nextIndex);
+      setTimeout(() => setIsTransitioning(false), 240);
+   }, []);
 
    // Effect to handle post-loading state: if we just loaded more games, we might want to advance index
    // However, simplest is just letting the user swipe again or stay on current.
@@ -205,22 +329,128 @@ export default function RecentGameResults({
       if (games.length > 0 && currentIndex >= games.length) {
          setCurrentIndex(games.length - 1);
       }
-   }, [games.length, currentIndex]);
+      indexSV.value = Math.min(currentIndex, Math.max(0, games.length - 1));
+   }, [games.length, currentIndex, indexSV]);
 
    // If the user swiped next to trigger a load, and games grew, we can auto-advance
    // For now, let's keep it manual to avoid jarring jumps, or user can swipe again.
 
+   const gamesLength = games.length;
+
    const pan = Gesture.Pan()
+      .activeOffsetX([-12, 12])
+      .failOffsetY([-12, 12])
       .onUpdate((event) => {
-         translateX.value = event.translationX;
+         'worklet';
+         if (isAnimatingSV.value) return;
+
+         const rawTx = Math.max(
+            -PAGE_WIDTH,
+            Math.min(PAGE_WIDTH, event.translationX)
+         );
+         let tx = rawTx;
+
+         // Rubber-band only at edges (prevents "bouncy" feeling mid-carousel)
+         if (indexSV.value <= 0 && tx > 0) tx = tx * EDGE_RUBBER_BAND;
+         if (indexSV.value >= gamesLength - 1 && tx < 0) {
+            // If we can load more, don't rubber-band too hard (user intent is "more")
+            tx = hasMore && !isLoading ? tx * 0.6 : tx * EDGE_RUBBER_BAND;
+         }
+
+         translateX.value = tx;
       })
       .onEnd((event) => {
-         if (event.translationX < -SWIPE_THRESHOLD) {
-            runOnJS(handleNext)();
-         } else if (event.translationX > SWIPE_THRESHOLD) {
-            runOnJS(handlePrev)();
+         'worklet';
+         if (isAnimatingSV.value) return;
+
+         const dir = isRTL ? -1 : 1;
+         const effectiveTx = event.translationX * dir;
+         const effectiveVx = event.velocityX * dir;
+
+         const wantsNext =
+            effectiveTx < -SNAP_DISTANCE || effectiveVx < -VELOCITY_THRESHOLD;
+         const wantsPrev =
+            effectiveTx > SNAP_DISTANCE || effectiveVx > VELOCITY_THRESHOLD;
+
+         const snapBack = () => {
+            translateX.value = withTiming(0, {
+               duration: 180,
+               easing: Easing.out(Easing.cubic),
+            });
+         };
+
+         if (!wantsNext && !wantsPrev) {
+            snapBack();
+            return;
          }
-         translateX.value = withSpring(0);
+
+         // Next
+         if (wantsNext) {
+            if (indexSV.value < gamesLength - 1) {
+               isAnimatingSV.value = true;
+               const exitX = -PAGE_WIDTH * dir; // LTR: left, RTL: right
+
+               translateX.value = withTiming(
+                  exitX,
+                  { duration: 220, easing: Easing.out(Easing.cubic) },
+                  (finished) => {
+                     if (!finished) return;
+
+                     const nextIndex = indexSV.value + 1;
+                     indexSV.value = nextIndex;
+                     runOnJS(setIndexFromWorklet)(nextIndex);
+
+                     // Bring the new card from the opposite side
+                     translateX.value = -exitX;
+                     translateX.value = withTiming(
+                        0,
+                        { duration: 240, easing: Easing.out(Easing.cubic) },
+                        () => {
+                           isAnimatingSV.value = false;
+                        }
+                     );
+                  }
+               );
+               return;
+            }
+
+            // End reached: try to load more, then snap back
+            if (hasMore && !isLoading) runOnJS(loadMore)();
+            snapBack();
+            return;
+         }
+
+         // Prev
+         if (wantsPrev) {
+            if (indexSV.value > 0) {
+               isAnimatingSV.value = true;
+               const exitX = PAGE_WIDTH * dir; // LTR: right, RTL: left
+
+               translateX.value = withTiming(
+                  exitX,
+                  { duration: 220, easing: Easing.out(Easing.cubic) },
+                  (finished) => {
+                     if (!finished) return;
+
+                     const nextIndex = indexSV.value - 1;
+                     indexSV.value = nextIndex;
+                     runOnJS(setIndexFromWorklet)(nextIndex);
+
+                     translateX.value = -exitX;
+                     translateX.value = withTiming(
+                        0,
+                        { duration: 240, easing: Easing.out(Easing.cubic) },
+                        () => {
+                           isAnimatingSV.value = false;
+                        }
+                     );
+                  }
+               );
+               return;
+            }
+
+            snapBack();
+         }
       });
 
    const animatedStyle = useAnimatedStyle(() => {
@@ -255,42 +485,181 @@ export default function RecentGameResults({
 
    return (
       <View className="mb-8">
-         {/* Section Header */}
-         <View className="bg-emerald-500/10 backdrop-blur-xl border border-emerald-400/30 rounded-3xl p-6 mb-6">
-            <Text className="text-emerald-300 text-center text-xl font-semibold">
-               {t('recentGameResults')}
-            </Text>
+         {/* Cyberpunk Section Header - Blue/Teal Theme */}
+         <View className="relative mb-6 overflow-hidden">
+            <View
+               className="bg-black/90 border-2 border-[#00BFFF] px-6 py-4 relative"
+               style={{
+                  shadowColor: '#00BFFF',
+                  shadowOffset: { width: 0, height: 0 },
+                  shadowOpacity: 0.7,
+                  shadowRadius: 16,
+                  elevation: 16,
+               }}
+            >
+               {/* Corner Brackets - Blue/Cyan Theme */}
+               <View className="absolute top-1.5 left-1.5 w-5 h-5 border-l-2 border-t-2 border-[#00FFFF]" />
+               <View className="absolute top-1.5 right-1.5 w-5 h-5 border-r-2 border-t-2 border-[#00BFFF]" />
+               <View className="absolute bottom-1.5 left-1.5 w-5 h-5 border-l-2 border-b-2 border-[#00BFFF]" />
+               <View className="absolute bottom-1.5 right-1.5 w-5 h-5 border-r-2 border-b-2 border-[#00FFFF]" />
+
+               {/* Holographic Overlay - Blue Theme */}
+               <LinearGradient
+                  colors={[
+                     'rgba(0, 255, 255, 0.08)',
+                     'transparent',
+                     'rgba(0, 191, 255, 0.06)',
+                  ]}
+                  start={{ x: 0, y: 0 }}
+                  end={{ x: 1, y: 1 }}
+                  style={{
+                     position: 'absolute',
+                     top: 0,
+                     left: 0,
+                     right: 0,
+                     bottom: 0,
+                     opacity: 0.9,
+                  }}
+               />
+
+               {/* Cyberpunk Title */}
+               <Text
+                  className="text-center text-[#00BFFF] text-xl font-mono font-bold tracking-[4px] uppercase"
+                  style={{
+                     textShadowColor: '#00BFFF',
+                     textShadowOffset: { width: 0, height: 0 },
+                     textShadowRadius: 10,
+                  }}
+               >
+                  {t('recentGameResults')}
+               </Text>
+
+               {/* Scan Lines - Dual Color */}
+               <View
+                  className="absolute top-2 left-0 right-0 h-px bg-[#00BFFF]"
+                  style={{ opacity: 0.4 }}
+               />
+               <View
+                  className="absolute bottom-2 left-0 right-0 h-px bg-[#00FFFF]"
+                  style={{ opacity: 0.4 }}
+               />
+            </View>
          </View>
 
-         {/* Swipeable Content */}
-         <View style={{ flex: 1 }}>
+         {/* Enhanced Swipeable Content with Visual Feedback */}
+         <View className="relative">
+            {/* Background cards for depth effect */}
+            {currentIndex > 0 && (
+               <View
+                  className="absolute inset-0 z-0"
+                  style={{
+                     transform: [{ translateX: -CARD_OFFSET }, { scale: 0.95 }],
+                     opacity: 0.25,
+                  }}
+               >
+                  <GameCard game={games[currentIndex - 1]} />
+               </View>
+            )}
+            {currentIndex < games.length - 1 && (
+               <View
+                  className="absolute inset-0 z-0"
+                  style={{
+                     transform: [{ translateX: CARD_OFFSET }, { scale: 0.95 }],
+                     opacity: 0.3,
+                  }}
+               >
+                  <GameCard game={games[currentIndex + 1]} />
+               </View>
+            )}
+
+            {/* Active card */}
             <GestureDetector gesture={pan}>
-               <Animated.View style={animatedStyle}>
-                  <GameCard game={games[currentIndex]} />
+               <Animated.View style={[animatedStyle, { zIndex: 10 }]}>
+                  <GameCard game={games[currentIndex]} isActive={true} />
                </Animated.View>
             </GestureDetector>
          </View>
 
-         {/* Pagination Dots */}
-         <View className="flex-row justify-center items-center mt-4 space-x-2 gap-2">
-            {games.map((_, index) => (
-               <View
-                  key={index}
-                  className={`w-2 h-2 rounded-full ${
-                     index === currentIndex ? 'bg-emerald-400' : 'bg-white/20'
-                  }`}
-               />
-            ))}
+         {/* Enhanced Pagination with Cyberpunk Styling */}
+         <View className="flex-row justify-center items-center mt-6 space-x-3">
+            {games.map((_, index) => {
+               const isActive = index === currentIndex;
+               const isPast = index < currentIndex;
+
+               return (
+                  <View key={index} className="relative">
+                     {/* Main dot */}
+                     <View
+                        className={`w-3 h-3 border ${
+                           isActive
+                              ? 'bg-[#00FFFF] border-[#00FFFF]'
+                              : isPast
+                                ? 'bg-[#00BFFF]/60 border-[#00BFFF]'
+                                : 'bg-transparent border-[#00BFFF]/40'
+                        }`}
+                        style={{
+                           borderRadius: 2, // Square cyberpunk style
+                           shadowColor: isActive ? '#00FFFF' : 'transparent',
+                           shadowOffset: { width: 0, height: 0 },
+                           shadowOpacity: 0.8,
+                           shadowRadius: isActive ? 6 : 0,
+                           elevation: isActive ? 6 : 0,
+                        }}
+                     />
+
+                     {/* Corner brackets for active dot */}
+                     {isActive && (
+                        <>
+                           <View className="absolute -top-1 -left-1 w-1.5 h-1.5 border-l border-t border-[#00FFFF]" />
+                           <View className="absolute -top-1 -right-1 w-1.5 h-1.5 border-r border-t border-[#00FFFF]" />
+                           <View className="absolute -bottom-1 -left-1 w-1.5 h-1.5 border-l border-b border-[#00FFFF]" />
+                           <View className="absolute -bottom-1 -right-1 w-1.5 h-1.5 border-r border-b border-[#00FFFF]" />
+                        </>
+                     )}
+                  </View>
+               );
+            })}
+
+            {/* Loading indicator */}
             {isLoading && games.length > 0 && (
-               <View className="w-2 h-2 rounded-full bg-emerald-400/50 animate-pulse" />
+               <View className="relative">
+                  <View
+                     className="w-3 h-3 bg-[#00BFFF]/30 border border-[#00BFFF] animate-pulse"
+                     style={{ borderRadius: 2 }}
+                  />
+                  <View className="absolute -top-1 -left-1 w-1.5 h-1.5 border-l border-t border-[#00BFFF] animate-pulse" />
+                  <View className="absolute -top-1 -right-1 w-1.5 h-1.5 border-r border-t border-[#00BFFF] animate-pulse" />
+                  <View className="absolute -bottom-1 -left-1 w-1.5 h-1.5 border-l border-b border-[#00BFFF] animate-pulse" />
+                  <View className="absolute -bottom-1 -right-1 w-1.5 h-1.5 border-r border-b border-[#00BFFF] animate-pulse" />
+               </View>
             )}
          </View>
 
-         <Text className="text-success text-xs text-center mt-2">
-            {hasMore
-               ? t('swipeForMore')
-               : `${currentIndex + 1} / ${games.length}`}
-         </Text>
+         {/* Status Text with Cyberpunk Styling */}
+         <View className="mt-4 items-center">
+            <Text
+               className="text-[#00BFFF] text-xs text-center font-mono tracking-wider uppercase"
+               style={{
+                  textShadowColor: '#00BFFF',
+                  textShadowOffset: { width: 0, height: 0 },
+                  textShadowRadius: 4,
+               }}
+            >
+               {isTransitioning
+                  ? t('switchingData')
+                  : hasMore
+                    ? t('swipeForMore')
+                    : t('gameXofY')
+                         .replace('{current}', String(currentIndex + 1))
+                         .replace('{total}', String(games.length))}
+            </Text>
+
+            {/* Indicator line */}
+            <View
+               className="mt-2 h-px bg-[#00BFFF] animate-pulse"
+               style={{ width: 120, opacity: 0.6 }}
+            />
+         </View>
       </View>
    );
 }

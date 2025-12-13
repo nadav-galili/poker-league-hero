@@ -45,7 +45,7 @@
       "expo-image-picker": "^16.1.4",
       "expo-linear-gradient": "^15.0.7",
       "expo-linking": "~7.1.7",
-      "expo-router": "~5.1.4",
+      "expo-router": "~5.1.10",
       "expo-secure-store": "^14.2.3",
       "expo-splash-screen": "~0.30.10",
       "expo-status-bar": "~2.2.3",
@@ -87,10 +87,14 @@
       "eslint": "^9.25.0",
       "eslint-config-expo": "~9.2.0",
       "husky": "^9.1.7",
+      "jest-expo": "~53.0.13",
       "lint-staged": "^16.1.6",
       "prettier": "^3.6.2",
       "prettier-plugin-tailwindcss": "^0.6.14",
       "typescript": "~5.8.3"
+   },
+   "overrides": {
+      "react-server-dom-webpack": "19.0.3"
    },
    "sideEffects": false,
    "private": true

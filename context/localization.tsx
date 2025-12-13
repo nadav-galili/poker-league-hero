@@ -130,6 +130,8 @@ export interface Translations {
    endTime: string;
    noGamesYet: string;
    swipeForMore: string;
+   switchingData: string;
+   gameXofY: string;
 
    // Select Players Screen
    selectPlayers: string;
@@ -167,6 +169,7 @@ export interface Translations {
    gameInProgress: string;
    totalBuyIns: string;
    totalBuyOuts: string;
+   inBank: string;
    currentProfit: string;
    playerName: string;
    initialBuyIn: string;
@@ -229,6 +232,7 @@ export interface Translations {
    avgGameDuration: string;
 
    // Onboarding
+   onboardingViewAgain: string;
    onboardingWelcomeTitle: string;
    onboardingWelcomeSubtitle: string;
    onboardingLeaguesTitle: string;
@@ -270,6 +274,7 @@ export interface Translations {
    lastGameHighlights: string;
    generatingAnalysis: string;
    noSummaryYet: string;
+   playGameToGetAiSummary: string;
 
    // Game Events
    gameHistory: string;
@@ -277,6 +282,23 @@ export interface Translations {
    hideHistory: string;
    buyInCancelled: string;
    noEventsYet: string;
+
+   // Profile Edit
+   editProfile: string;
+   updateProfile: string;
+   profileImage: string;
+   fullName: string;
+   changeImage: string;
+   profileUpdated: string;
+   profileUpdateFailed: string;
+
+   // Edit League
+   editLeague: string;
+   updateLeague: string;
+   changeLeagueImage: string;
+   leagueUpdatedSuccess: string;
+   failedToUpdateLeague: string;
+   failedToUploadImage: string;
 }
 
 // English translations
@@ -314,8 +336,8 @@ const enTranslations: Translations = {
 
    // Common
    language: 'LANGUAGE',
-   english: 'English',
-   hebrew: 'עברית',
+   english: 'En',
+   hebrew: 'He',
    success: 'Success',
    ok: 'OK',
    currency: '$',
@@ -389,6 +411,8 @@ const enTranslations: Translations = {
    endTime: 'End',
    noGamesYet: 'No completed games yet',
    swipeForMore: 'Swipe for more',
+   switchingData: 'SWITCHING DATA...',
+   gameXofY: 'GAME {current} OF {total}',
 
    // Select Players Screen
    selectPlayersToStartGame: 'Select players to start a new game',
@@ -426,6 +450,7 @@ const enTranslations: Translations = {
    gameInProgress: 'GAME IN PROGRESS',
    totalBuyIns: 'TOTAL BUY-INS',
    totalBuyOuts: 'TOTAL BUY-OUTS',
+   inBank: 'IN BANK',
    currentProfit: 'CURRENT PROFIT',
    playerName: 'PLAYER NAME',
    initialBuyIn: 'INITIAL BUY-IN',
@@ -491,22 +516,28 @@ const enTranslations: Translations = {
    avgGameDuration: 'AVG GAME DURATION',
 
    // Onboarding
-   onboardingWelcomeTitle: 'Welcome to Poker League Hero',
-   onboardingWelcomeSubtitle: 'The ultimate tool for managing your home poker games and leagues.',
+   onboardingViewAgain: 'Re-watch Onboarding',
+   onboardingWelcomeTitle: 'Welcome to Poker AI:HomeStack',
+   onboardingWelcomeSubtitle:
+      'The ultimate tool for managing your home poker games and leagues.',
    onboardingLeaguesTitle: 'Manage Leagues',
-   onboardingLeaguesSubtitle: 'Create private leagues, invite friends, and keep track of who runs the table.',
+   onboardingLeaguesSubtitle:
+      'Create private leagues, invite friends, and keep track of who runs the table.',
    onboardingStatsTitle: 'Track Statistics',
-   onboardingStatsSubtitle: 'Detailed player stats, ROI tracking, and performance history over time.',
+   onboardingStatsSubtitle:
+      'Detailed player stats, ROI tracking, and performance history over time.',
    onboardingGamesTitle: 'Live Game Tracking',
-   onboardingGamesSubtitle: 'Easy buy-ins, re-buys, and cash-outs. Handle the math while you handle the cards.',
+   onboardingGamesSubtitle:
+      'Easy buy-ins, re-buys, and cash-outs. Handle the math while you handle the cards.',
    onboardingAiTitle: 'AI Insights',
-   onboardingAiSubtitle: 'Get smart analysis of your league\'s performance and game trends.',
+   onboardingAiSubtitle:
+      "Get smart analysis of your league's performance and game trends.",
    onboardingGetStartedTitle: 'Ready to Shuffle Up?',
-   onboardingGetStartedSubtitle: 'Start your league today and become a Poker League Hero.',
+   onboardingGetStartedSubtitle:
+      'Start your league today and become a Poker League Hero.',
    onboardingSkip: 'Skip',
    onboardingNext: 'Next',
    onboardingDone: 'Get Started',
-   onboardingViewAgain: 'View Onboarding Again',
    continueWithGoogle: 'Continue with Google',
    termsOfService: 'Terms of Service',
    // Deep linking / Join League
@@ -533,6 +564,7 @@ const enTranslations: Translations = {
    lastGameHighlights: 'Last Game Highlights',
    generatingAnalysis: 'Generating Analysis...',
    noSummaryYet: 'No summary available yet',
+   playGameToGetAiSummary: 'Play a game to get AI summary',
 
    // Game Events
    gameHistory: 'GAME HISTORY',
@@ -540,6 +572,23 @@ const enTranslations: Translations = {
    hideHistory: 'Hide History',
    buyInCancelled: 'Buy-in cancelled',
    noEventsYet: 'No game events yet',
+
+   // Profile Edit
+   editProfile: 'Edit Profile',
+   updateProfile: 'Save',
+   profileImage: 'Profile Image',
+   fullName: 'Name',
+   changeImage: 'Change Image',
+   profileUpdated: 'Profile updated successfully',
+   profileUpdateFailed: 'Failed to update profile',
+
+   // Edit League
+   editLeague: 'Edit League',
+   updateLeague: 'save',
+   changeLeagueImage: 'Change League Image',
+   leagueUpdatedSuccess: 'League updated successfully',
+   failedToUpdateLeague: 'Failed to update league',
+   failedToUploadImage: 'Failed to upload image',
 };
 
 // Hebrew translations
@@ -577,8 +626,8 @@ const heTranslations: Translations = {
 
    // Common
    language: 'שפה',
-   english: 'English',
-   hebrew: 'עברית',
+   english: 'En',
+   hebrew: 'He',
    success: 'הצלחה',
    ok: 'אישור',
    currency: '₪',
@@ -651,6 +700,8 @@ const heTranslations: Translations = {
    endTime: 'סיום',
    noGamesYet: 'אין משחקים שהושלמו עדיין',
    swipeForMore: 'החלק לעוד',
+   switchingData: 'מחליף נתונים...',
+   gameXofY: 'משחק {current} מתוך {total}',
 
    // Select Players Screen
    selectPlayersToStartGame: 'בחר שחקנים להתחיל משחק חדש',
@@ -688,6 +739,7 @@ const heTranslations: Translations = {
    gameInProgress: 'משחק פעיל',
    totalBuyIns: 'סך כל הכניסות',
    totalBuyOuts: 'סך כל היציאות',
+   inBank: 'בבנק',
    currentProfit: 'רווח נוכחי',
    playerName: 'שם השחקן',
    initialBuyIn: 'כניסה ראשונית',
@@ -752,22 +804,27 @@ const heTranslations: Translations = {
    avgGameDuration: 'משך משחק ממוצע',
 
    // Onboarding
-   onboardingWelcomeTitle: 'ברוכים הבאים ל-Poker League Hero',
-   onboardingWelcomeSubtitle: 'הכלי האולטימטיבי לניהול משחקי הפוקר והליגות הביתיות שלך.',
+   onboardingViewAgain: 'הצג מחדש את ההדרכה',
+   onboardingWelcomeTitle: 'ברוכים הבאים ל-Poker AI:HomeStack',
+   onboardingWelcomeSubtitle:
+      'הכלי האולטימטיבי לניהול משחקי הפוקר והליגות הביתיות שלך.',
    onboardingLeaguesTitle: 'ניהול ליגות',
-   onboardingLeaguesSubtitle: 'צור ליגות פרטיות, הזמן חברים ועקוב אחר מי ששולט בשולחן.',
+   onboardingLeaguesSubtitle:
+      'צור ליגות פרטיות, הזמן חברים ועקוב אחר מי ששולט בשולחן.',
    onboardingStatsTitle: 'מעקב סטטיסטיקות',
-   onboardingStatsSubtitle: 'סטטיסטיקות שחקן מפורטות, מעקב ROI והיסטוריית ביצועים לאורך זמן.',
+   onboardingStatsSubtitle:
+      'סטטיסטיקות שחקן מפורטות, מעקב ROI והיסטוריית ביצועים לאורך זמן.',
    onboardingGamesTitle: 'מעקב משחק חי',
-   onboardingGamesSubtitle: 'כניסות קלות, כניסות חוזרות ומשיכות. תן לנו לטפל בחישובים בזמן שאתה משחק.',
+   onboardingGamesSubtitle:
+      'כניסות קלות, כניסות חוזרות ומשיכות. תן לנו לטפל בחישובים בזמן שאתה משחק.',
    onboardingAiTitle: 'תובנות AI',
    onboardingAiSubtitle: 'קבל ניתוח חכם של ביצועי הליגה ומגמות המשחק שלך.',
    onboardingGetStartedTitle: 'מוכנים להתחיל?',
-   onboardingGetStartedSubtitle: 'התחל את הליגה שלך היום והפוך לגיבור ליגת הפוקר.',
+   onboardingGetStartedSubtitle:
+      'התחל את הליגה שלך היום והפוך לגיבור ליגת הפוקר.',
    onboardingSkip: 'דלג',
    onboardingNext: 'הבא',
    onboardingDone: 'התחל',
-   onboardingViewAgain: 'צפה שוב בהדרכה',
    continueWithGoogle: 'המשך עם גוגל',
    termsOfService: 'תנאי שירות',
 
@@ -795,6 +852,7 @@ const heTranslations: Translations = {
    lastGameHighlights: 'דגשי המשחק האחרון',
    generatingAnalysis: 'מייצר ניתוח...',
    noSummaryYet: 'אין סיכום זמין עדיין',
+   playGameToGetAiSummary: 'שחק משחק כדי לקבל סיכום AI',
 
    // Game Events
    gameHistory: 'היסטוריית משחק',
@@ -802,20 +860,37 @@ const heTranslations: Translations = {
    hideHistory: 'הסתר היסטוריה',
    buyInCancelled: 'כניסה בוטלה',
    noEventsYet: 'אין אירועי משחק עדיין',
+
+   // Profile Edit
+   editProfile: 'ערוך פרופיל',
+   updateProfile: 'עדכן פרופיל',
+   profileImage: 'תמונת פרופיל',
+   fullName: 'שם מלא',
+   changeImage: 'שנה תמונה',
+   profileUpdated: 'הפרופיל עודכן בהצלחה',
+   profileUpdateFailed: 'נכשל בעדכון הפרופיל',
+
+   // Edit League
+   editLeague: 'ערוך ליגה',
+   updateLeague: 'עדכן ליגה',
+   changeLeagueImage: 'שנה תמונת ליגה',
+   leagueUpdatedSuccess: 'הליגה עודכנה בהצלחה',
+   failedToUpdateLeague: 'נכשל בעדכון הליגה',
+   failedToUploadImage: 'נכשל בהעלאת התמונה',
 };
 
 const translations = {
    en: enTranslations,
    he: heTranslations,
+   // ... rest of file
 };
 
+// ... rest of file
 const LANGUAGE_STORAGE_KEY = '@poker_league_language';
 
-export function LocalizationProvider({
+export const LocalizationProvider: React.FC<{ children: React.ReactNode }> = ({
    children,
-}: {
-   children: React.ReactNode;
-}) {
+}) => {
    const [language, setLanguageState] = useState<Language>('en');
    const [isInitialized, setIsInitialized] = useState(false);
 
@@ -885,7 +960,9 @@ export function LocalizationProvider({
          {children}
       </LocalizationContext.Provider>
    );
-}
+};
+
+LocalizationProvider.displayName = 'LocalizationProvider';
 
 export function useLocalization() {
    const context = useContext(LocalizationContext);
