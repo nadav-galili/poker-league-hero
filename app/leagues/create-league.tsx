@@ -134,6 +134,7 @@ export default function CreateLeague() {
          return 'League name is required';
       }
       const trimmedName = name.trim();
+      console.log('🚀 ~ CreateLeague ~ trimmedName:', trimmedName);
       if (trimmedName.length < 3) {
          return 'League name must be at least 3 characters';
       }

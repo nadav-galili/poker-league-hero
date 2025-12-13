@@ -1,4 +1,4 @@
-import { colors, getTheme } from '@/colors';
+import { colors } from '@/colors';
 import { EditProfileModal } from '@/components/modals/EditProfileModal';
 import { useAuth } from '@/context/auth';
 import { useLocalization } from '@/context/localization';
@@ -13,7 +13,6 @@ import {
    Animated,
    Dimensions,
    Platform,
-   Pressable,
    ScrollView,
    StyleSheet,
    Text,
@@ -72,11 +71,15 @@ function CyberpunkLanguageSelector() {
       { code: 'he', name: 'עברית', flag: '🇮🇱' },
    ];
 
-   const currentLanguage = languageOptions.find((lang) => lang.code === language);
+   const currentLanguage = languageOptions.find(
+      (lang) => lang.code === language
+   );
 
    return (
       <View style={cyberpunkStyles.languageContainer}>
-         <Text style={cyberpunkStyles.sectionTitle}>{t('language').toUpperCase()}</Text>
+         <Text style={cyberpunkStyles.sectionTitle}>
+            {t('language').toUpperCase()}
+         </Text>
          <Animated.View
             style={[
                cyberpunkStyles.languageSelector,
@@ -96,9 +99,16 @@ function CyberpunkLanguageSelector() {
                <View style={cyberpunkStyles.cornerBL} />
                <View style={cyberpunkStyles.cornerBR} />
 
-               <TouchableOpacity onPress={toggleExpanded} style={cyberpunkStyles.languageButton}>
-                  <Text style={cyberpunkStyles.languageFlag}>{currentLanguage?.flag}</Text>
-                  <Text style={cyberpunkStyles.languageText}>{currentLanguage?.name}</Text>
+               <TouchableOpacity
+                  onPress={toggleExpanded}
+                  style={cyberpunkStyles.languageButton}
+               >
+                  <Text style={cyberpunkStyles.languageFlag}>
+                     {currentLanguage?.flag}
+                  </Text>
+                  <Text style={cyberpunkStyles.languageText}>
+                     {currentLanguage?.name}
+                  </Text>
                   <Animated.View
                      style={{
                         transform: [{ rotate: isExpanded ? '180deg' : '0deg' }],
@@ -108,7 +118,10 @@ function CyberpunkLanguageSelector() {
                         name="chevron-down"
                         size={20}
                         color={colors.neonCyan}
-                        style={{ textShadowColor: colors.neonCyan, textShadowRadius: 8 }}
+                        style={{
+                           textShadowColor: colors.neonCyan,
+                           textShadowRadius: 8,
+                        }}
                      />
                   </Animated.View>
                </TouchableOpacity>
@@ -118,17 +131,23 @@ function CyberpunkLanguageSelector() {
                      {languageOptions.map((lang) => (
                         <TouchableOpacity
                            key={lang.code}
-                           onPress={() => selectLanguage(lang.code as 'en' | 'he')}
+                           onPress={() =>
+                              selectLanguage(lang.code as 'en' | 'he')
+                           }
                            style={[
                               cyberpunkStyles.languageOption,
-                              language === lang.code && cyberpunkStyles.activeLanguageOption,
+                              language === lang.code &&
+                                 cyberpunkStyles.activeLanguageOption,
                            ]}
                         >
-                           <Text style={cyberpunkStyles.languageFlag}>{lang.flag}</Text>
+                           <Text style={cyberpunkStyles.languageFlag}>
+                              {lang.flag}
+                           </Text>
                            <Text
                               style={[
                                  cyberpunkStyles.languageText,
-                                 language === lang.code && cyberpunkStyles.activeLanguageText,
+                                 language === lang.code &&
+                                    cyberpunkStyles.activeLanguageText,
                               ]}
                            >
                               {lang.name}
@@ -155,7 +174,6 @@ function CyberpunkLanguageSelector() {
 }
 
 export default function Account() {
-   const theme = getTheme('light');
    const { user, signOut, fetchWithAuth, refreshUser } = useAuth();
    const { t } = useLocalization();
    const router = useRouter();
@@ -474,7 +492,9 @@ export default function Account() {
                                        color={colors.cyberBackground}
                                        style={{ fontWeight: 'bold' }}
                                     />
-                                    <Text style={cyberpunkStyles.editButtonText}>
+                                    <Text
+                                       style={cyberpunkStyles.editButtonText}
+                                    >
                                        EDIT
                                     </Text>
                                  </LinearGradient>
@@ -515,7 +535,11 @@ export default function Account() {
                      style={cyberpunkStyles.actionButton}
                   >
                      <LinearGradient
-                        colors={[colors.neonPink, colors.errorDark, colors.cyberBackground]}
+                        colors={[
+                           colors.neonPink,
+                           colors.errorDark,
+                           colors.cyberBackground,
+                        ]}
                         style={cyberpunkStyles.actionGradient}
                      >
                         {/* Corner Brackets */}
@@ -527,16 +551,17 @@ export default function Account() {
                         <View style={cyberpunkStyles.actionContent}>
                            <View style={cyberpunkStyles.actionIcon}>
                               <Ionicons
+                                 style={{ color: '#FFFFFF' }}
                                  name="log-out"
                                  size={20}
-                                 color={colors.neonPink}
-                                 style={{
-                                    textShadowColor: colors.neonPink,
-                                    textShadowRadius: 8,
-                                 }}
                               />
                            </View>
-                           <Text style={[cyberpunkStyles.actionText, { color: '#FFFFFF' }]}>
+                           <Text
+                              style={[
+                                 cyberpunkStyles.actionText,
+                                 { color: '#FFFFFF' },
+                              ]}
+                           >
                               {t('signOut').toUpperCase()}
                            </Text>
                         </View>
@@ -549,7 +574,11 @@ export default function Account() {
                      style={cyberpunkStyles.actionButton}
                   >
                      <LinearGradient
-                        colors={[colors.neonBlue, colors.info, colors.cyberBackground]}
+                        colors={[
+                           colors.neonBlue,
+                           colors.info,
+                           colors.cyberBackground,
+                        ]}
                         style={cyberpunkStyles.actionGradient}
                      >
                         {/* Corner Brackets */}
@@ -563,14 +592,19 @@ export default function Account() {
                               <Ionicons
                                  name="play-circle"
                                  size={20}
-                                 color={colors.neonBlue}
                                  style={{
                                     textShadowColor: colors.neonBlue,
                                     textShadowRadius: 8,
+                                    color: '#FFFFFF',
                                  }}
                               />
                            </View>
-                           <Text style={[cyberpunkStyles.actionText, { color: '#FFFFFF' }]}>
+                           <Text
+                              style={[
+                                 cyberpunkStyles.actionText,
+                                 { color: '#FFFFFF' },
+                              ]}
+                           >
                               RE-WATCH ONBOARDING
                            </Text>
                         </View>
@@ -655,17 +689,17 @@ export default function Account() {
                </View>
             </ScrollView>
          </LinearGradient>
-            <EditProfileModal
-               visible={isEditProfileVisible}
-               onClose={() => setIsEditProfileVisible(false)}
-               onSubmit={handleUpdateProfile}
-               currentName={user?.name || ''}
-               currentImage={user?.picture || null}
-               isLoading={isUpdatingProfile}
-            />
-         </View>
-      );
-   }
+         <EditProfileModal
+            visible={isEditProfileVisible}
+            onClose={() => setIsEditProfileVisible(false)}
+            onSubmit={handleUpdateProfile}
+            currentName={user?.name || ''}
+            currentImage={user?.picture || null}
+            isLoading={isUpdatingProfile}
+         />
+      </View>
+   );
+}
 
 // Cyberpunk styles
 const cyberpunkStyles = StyleSheet.create({

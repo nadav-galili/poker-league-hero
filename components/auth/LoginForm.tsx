@@ -93,7 +93,7 @@ export default function LoginForm() {
          matrixAnimation.stop();
          titleAnimation.stop();
       };
-   }, []);
+   }, [scanlineAnim, glowAnim, matrixFade, titleGlow]);
 
    const scanlineTranslateY = scanlineAnim.interpolate({
       inputRange: [0, 1],
@@ -315,73 +315,101 @@ export default function LoginForm() {
                         HomeStack
                      </Animated.Text>
 
-                     {/* Cyberpunk feature tags */}
-                     <View className="flex-row gap-2">
-                        <Animated.View
-                           className="relative"
-                           style={{
-                              transform: [
-                                 {
-                                    scale: glowAnim.interpolate({
-                                       inputRange: [0, 1],
-                                       outputRange: [1, 1.05],
-                                    }),
-                                 },
-                              ],
-                           }}
-                        >
-                           <View className="px-3 py-1 border border-neonCyan bg-neonCyan/10 relative">
-                              <Text className="text-neonCyan font-bold text-sm tracking-wider">
-                                 TRACK
-                              </Text>
-                              <View className="absolute top-0 left-0 w-1 h-1 bg-neonCyan" />
-                              <View className="absolute top-0 right-0 w-1 h-1 bg-neonCyan" />
-                           </View>
-                        </Animated.View>
+                     {/* Cyberpunk feature tags - 2x2 Grid */}
+                     <View className="gap-3">
+                        {/* Row 1: TRACK & COMPETE */}
+                        <View className="flex-row gap-3 justify-center">
+                           <Animated.View
+                              className="relative"
+                              style={{
+                                 transform: [
+                                    {
+                                       scale: glowAnim.interpolate({
+                                          inputRange: [0, 1],
+                                          outputRange: [1, 1.05],
+                                       }),
+                                    },
+                                 ],
+                              }}
+                           >
+                              <View className="px-4 py-1 border border-neonCyan bg-neonCyan/10 relative min-w-[80px] justify-center items-center">
+                                 <Text className="text-neonCyan font-bold text-sm tracking-wider text-center">
+                                    {'TRACK '}
+                                 </Text>
+                                 <View className="absolute top-0 left-0 w-1 h-1 bg-neonCyan" />
+                                 <View className="absolute top-0 right-0 w-1 h-1 bg-neonCyan" />
+                              </View>
+                           </Animated.View>
 
-                        <Animated.View
-                           className="relative"
-                           style={{
-                              transform: [
-                                 {
-                                    scale: glowAnim.interpolate({
-                                       inputRange: [0, 1],
-                                       outputRange: [1.05, 1],
-                                    }),
-                                 },
-                              ],
-                           }}
-                        >
-                           <View className="px-3 py-1 border border-neonGreen bg-neonGreen/10 relative">
-                              <Text className="text-neonGreen font-bold text-sm tracking-wider">
-                                 COMPETE
-                              </Text>
-                              <View className="absolute bottom-0 left-0 w-1 h-1 bg-neonGreen" />
-                              <View className="absolute bottom-0 right-0 w-1 h-1 bg-neonGreen" />
-                           </View>
-                        </Animated.View>
+                           <Animated.View
+                              className="relative"
+                              style={{
+                                 transform: [
+                                    {
+                                       scale: glowAnim.interpolate({
+                                          inputRange: [0, 1],
+                                          outputRange: [1.05, 1],
+                                       }),
+                                    },
+                                 ],
+                              }}
+                           >
+                              <View className="px-4 py-1 border border-neonGreen bg-neonGreen/10 relative min-w-[80px] justify-center items-center">
+                                 <Text className="text-neonGreen font-bold text-sm tracking-wider text-center">
+                                    {'COMPETE '}
+                                 </Text>
+                                 <View className="absolute bottom-0 left-0 w-1 h-1 bg-neonGreen" />
+                                 <View className="absolute bottom-0 right-0 w-1 h-1 bg-neonGreen" />
+                              </View>
+                           </Animated.View>
+                        </View>
 
-                        <Animated.View
-                           className="relative"
-                           style={{
-                              transform: [
-                                 {
-                                    scale: glowAnim.interpolate({
-                                       inputRange: [0, 1],
-                                       outputRange: [1, 1.05],
-                                    }),
-                                 },
-                              ],
-                           }}
-                        >
-                           <View className="px-3 py-1 border border-neonPink bg-neonPink/10 relative">
-                              <Text className="text-neonPink font-bold text-sm tracking-wider">
-                                 DOMINATE
-                              </Text>
-                              <View className="absolute top-0 left-0 w-1 h-1 bg-neonPink" />
-                              <View className="absolute bottom-0 right-0 w-1 h-1 bg-neonPink" />
-                           </View>
-                        </Animated.View>
+                        {/* Row 2: DOMINATE & ANALYZE */}
+                        <View className="flex-row gap-3 justify-center">
+                           <Animated.View
+                              className="relative"
+                              style={{
+                                 transform: [
+                                    {
+                                       scale: glowAnim.interpolate({
+                                          inputRange: [0, 1],
+                                          outputRange: [1, 1.05],
+                                       }),
+                                    },
+                                 ],
+                              }}
+                           >
+                              <View className="px-4 py-1 border border-neonPink bg-neonPink/10 relative min-w-[80px] justify-center items-center">
+                                 <Text className="text-neonPink font-bold text-sm tracking-wider text-center">
+                                    {'DOMINATE '}
+                                 </Text>
+                                 <View className="absolute top-0 left-0 w-1 h-1 bg-neonPink" />
+                                 <View className="absolute bottom-0 right-0 w-1 h-1 bg-neonPink" />
+                              </View>
+                           </Animated.View>
+
+                           <Animated.View
+                              className="relative"
+                              style={{
+                                 transform: [
+                                    {
+                                       scale: glowAnim.interpolate({
+                                          inputRange: [0, 1],
+                                          outputRange: [1.05, 1],
+                                       }),
+                                    },
+                                 ],
+                              }}
+                           >
+                              <View className="px-4 py-1 border border-neonBlue bg-neonBlue/10 relative min-w-[80px] justify-center items-center">
+                                 <Text className="text-neonBlue font-bold text-sm tracking-wider text-center">
+                                    {'ANALYZE '}
+                                 </Text>
+                                 <View className="absolute top-0 left-0 w-1 h-1 bg-neonBlue" />
+                                 <View className="absolute bottom-0 right-0 w-1 h-1 bg-neonBlue" />
+                              </View>
+                           </Animated.View>
+                        </View>
                      </View>
                   </View>
                </View>

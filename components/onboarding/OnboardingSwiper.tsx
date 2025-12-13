@@ -165,28 +165,23 @@ export default function OnboardingSwiper() {
    }, []);
 
    const handleDone = async () => {
-      console.log('Done button pressed');
       track('onboarding_completed');
       await markOnboardingComplete();
       router.replace('/');
    };
 
    const handleSkip = async () => {
-      console.log('Skip button pressed');
       track('onboarding_skipped');
       await markOnboardingComplete();
       router.replace('/');
    };
 
    const handlePageChange = (index: number) => {
-      console.log('Page changed to:', index);
       setActiveIndex(index);
       track('onboarding_slide_viewed', {
          slide_index: index,
       });
    };
-
-   const PAGES_COUNT = 6;
 
    const DoneButton = ({ ...props }) => {
       return (
@@ -224,10 +219,6 @@ export default function OnboardingSwiper() {
                   shadowRadius: 20,
                })}
                {...props}
-               onPress={(e) => {
-                  console.log('Done button internal press');
-                  props.onPress?.(e);
-               }}
             >
                {/* Multiple corner brackets for extra cyberpunk feel */}
                <View
@@ -272,11 +263,6 @@ export default function OnboardingSwiper() {
    };
 
    const NextButton = ({ ...props }) => {
-      // Debug: Log if onPress is present
-      if (!props.onPress) {
-         console.warn('NextButton missing onPress prop!');
-      }
-
       return (
          <Animated.View
             style={{
@@ -305,17 +291,11 @@ export default function OnboardingSwiper() {
                })}
                {...props}
                onPress={(e) => {
-                  console.log(
-                     'Next button pressed. Props:',
-                     Object.keys(props)
-                  );
-
                   // ANDROID FIX: Manually force scroll and state update
                   // This bypasses the library's internal goNext() which fails on Android
                   // if the momentum scroll event was missed or delayed.
                   if (onboardingRef.current && onboardingRef.current.flatList) {
                      const nextIndex = activeIndex + 1;
-                     console.log('Forcing scroll to index:', nextIndex);
 
                      // 1. Force the scroll
                      onboardingRef.current.flatList.scrollToOffset({
@@ -337,10 +317,6 @@ export default function OnboardingSwiper() {
                      // Fallback for iOS/Web or if ref is missing
                      if (props.onPress) {
                         props.onPress(e);
-                     } else {
-                        console.error(
-                           'NextButton onPress prop is missing/undefined'
-                        );
                      }
                   }
                }}
@@ -421,10 +397,8 @@ export default function OnboardingSwiper() {
                })}
                {...props}
                onPress={(e) => {
-                  console.log('Skip button internal press');
                   // Try to force skip via ref first
                   if (onboardingRef.current?.skip) {
-                     console.log('Forcing skip via ref');
                      onboardingRef.current.skip();
                   } else {
                      props.onPress?.(e);
@@ -849,73 +823,117 @@ export default function OnboardingSwiper() {
                                        />
                                     </View>
 
-                                    {/* Cyberpunk feature tags */}
-                                    <View className="flex-row gap-3 mt-4">
-                                       <Animated.View
-                                          className="relative"
-                                          style={{
-                                             transform: [
-                                                {
-                                                   scale: glowAnim.interpolate({
-                                                      inputRange: [0, 1],
-                                                      outputRange: [1, 1.05],
-                                                   }),
-                                                },
-                                             ],
-                                          }}
-                                       >
-                                          <View className="px-3 py-2 border border-neonCyan bg-neonCyan/15 relative rounded">
-                                             <Text className="text-neonCyan font-mono font-bold text-xs tracking-wider">
-                                                LEAGUES
-                                             </Text>
-                                             <View className="absolute top-0 left-0 w-1 h-1 bg-neonCyan" />
-                                             <View className="absolute top-0 right-0 w-1 h-1 bg-neonCyan" />
-                                          </View>
-                                       </Animated.View>
+                                    {/* Cyberpunk feature tags - 2x2 Grid */}
+                                    <View className="gap-3 mt-4">
+                                       {/* Row 1: LEAGUES & STATS */}
+                                       <View className="flex-row gap-3 justify-center">
+                                          <Animated.View
+                                             className="relative"
+                                             style={{
+                                                transform: [
+                                                   {
+                                                      scale: glowAnim.interpolate(
+                                                         {
+                                                            inputRange: [0, 1],
+                                                            outputRange: [
+                                                               1, 1.05,
+                                                            ],
+                                                         }
+                                                      ),
+                                                   },
+                                                ],
+                                             }}
+                                          >
+                                             <View className="px-3 py-2 border border-neonCyan bg-neonCyan/15 relative rounded min-w-[80px] justify-center items-center">
+                                                <Text className="text-neonCyan font-mono font-bold text-xs tracking-wider text-center">
+                                                   {'LEAGUES '}
+                                                </Text>
+                                                <View className="absolute top-0 left-0 w-1 h-1 bg-neonCyan" />
+                                                <View className="absolute top-0 right-0 w-1 h-1 bg-neonCyan" />
+                                             </View>
+                                          </Animated.View>
 
-                                       <Animated.View
-                                          className="relative"
-                                          style={{
-                                             transform: [
-                                                {
-                                                   scale: glowAnim.interpolate({
-                                                      inputRange: [0, 1],
-                                                      outputRange: [1.05, 1],
-                                                   }),
-                                                },
-                                             ],
-                                          }}
-                                       >
-                                          <View className="px-3 py-2 border border-neonGreen bg-neonGreen/15 relative rounded">
-                                             <Text className="text-neonGreen font-mono font-bold text-xs tracking-wider">
-                                                STATS
-                                             </Text>
-                                             <View className="absolute bottom-0 left-0 w-1 h-1 bg-neonGreen" />
-                                             <View className="absolute bottom-0 right-0 w-1 h-1 bg-neonGreen" />
-                                          </View>
-                                       </Animated.View>
+                                          <Animated.View
+                                             className="relative"
+                                             style={{
+                                                transform: [
+                                                   {
+                                                      scale: glowAnim.interpolate(
+                                                         {
+                                                            inputRange: [0, 1],
+                                                            outputRange: [
+                                                               1.05, 1,
+                                                            ],
+                                                         }
+                                                      ),
+                                                   },
+                                                ],
+                                             }}
+                                          >
+                                             <View className="px-3 py-2 border border-neonGreen bg-neonGreen/15 relative rounded min-w-[80px] justify-center items-center">
+                                                <Text className="text-neonGreen font-mono font-bold text-xs tracking-wider text-center">
+                                                   {'STATS '}
+                                                </Text>
+                                                <View className="absolute bottom-0 left-0 w-1 h-1 bg-neonGreen" />
+                                                <View className="absolute bottom-0 right-0 w-1 h-1 bg-neonGreen" />
+                                             </View>
+                                          </Animated.View>
+                                       </View>
 
-                                       <Animated.View
-                                          className="relative"
-                                          style={{
-                                             transform: [
-                                                {
-                                                   scale: glowAnim.interpolate({
-                                                      inputRange: [0, 1],
-                                                      outputRange: [1, 1.05],
-                                                   }),
-                                                },
-                                             ],
-                                          }}
-                                       >
-                                          <View className="px-3 py-2 border border-neonPink bg-neonPink/15 relative rounded">
-                                             <Text className="text-neonPink font-mono font-bold text-xs tracking-wider">
-                                                AI
-                                             </Text>
-                                             <View className="absolute top-0 left-0 w-1 h-1 bg-neonPink" />
-                                             <View className="absolute bottom-0 right-0 w-1 h-1 bg-neonPink" />
-                                          </View>
-                                       </Animated.View>
+                                       {/* Row 2: AI & CLUBS */}
+                                       <View className="flex-row gap-3 justify-center">
+                                          <Animated.View
+                                             className="relative"
+                                             style={{
+                                                transform: [
+                                                   {
+                                                      scale: glowAnim.interpolate(
+                                                         {
+                                                            inputRange: [0, 1],
+                                                            outputRange: [
+                                                               1, 1.05,
+                                                            ],
+                                                         }
+                                                      ),
+                                                   },
+                                                ],
+                                             }}
+                                          >
+                                             <View className="px-3 py-2 border border-neonPink bg-neonPink/15 relative rounded min-w-[80px] justify-center items-center">
+                                                <Text className="text-neonPink font-mono font-bold text-xs tracking-wider text-center">
+                                                   {'AI '}
+                                                </Text>
+                                                <View className="absolute top-0 left-0 w-1 h-1 bg-neonPink" />
+                                                <View className="absolute bottom-0 right-0 w-1 h-1 bg-neonPink" />
+                                             </View>
+                                          </Animated.View>
+
+                                          <Animated.View
+                                             className="relative"
+                                             style={{
+                                                transform: [
+                                                   {
+                                                      scale: glowAnim.interpolate(
+                                                         {
+                                                            inputRange: [0, 1],
+                                                            outputRange: [
+                                                               1.05, 1,
+                                                            ],
+                                                         }
+                                                      ),
+                                                   },
+                                                ],
+                                             }}
+                                          >
+                                             <View className="px-3 py-2 border border-neonBlue bg-neonBlue/15 relative rounded min-w-[80px] justify-center items-center">
+                                                <Text className="text-neonBlue font-mono font-bold text-xs tracking-wider text-center">
+                                                   {'CLUBS '}
+                                                </Text>
+                                                <View className="absolute top-0 left-0 w-1 h-1 bg-neonBlue" />
+                                                <View className="absolute bottom-0 right-0 w-1 h-1 bg-neonBlue" />
+                                             </View>
+                                          </Animated.View>
+                                       </View>
                                     </View>
                                  </View>
                               </CyberpunkImageFrame>
