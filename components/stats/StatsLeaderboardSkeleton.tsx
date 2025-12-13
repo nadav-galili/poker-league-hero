@@ -143,7 +143,7 @@ export default function StatsLeaderboardSkeleton() {
 const styles = StyleSheet.create({
    container: {
       flex: 1,
-      paddingTop: 20,
+      paddingTop: 50,
    },
    heroContainer: {
       alignItems: 'center',
@@ -175,12 +175,14 @@ const styles = StyleSheet.create({
    heroContent: {
       position: 'relative',
       zIndex: 2,
-      padding: 24,
+      paddingTop: 32,
+      paddingBottom: 24,
+      paddingHorizontal: 24,
       height: '100%',
    },
    heroBadge: {
       position: 'absolute',
-      top: -16,
+      top: -8,
       alignSelf: 'center',
       width: 120,
       height: 32,

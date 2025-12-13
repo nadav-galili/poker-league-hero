@@ -1,6 +1,6 @@
 import { colors } from '@/colors';
-import { PlayerStat, StatType } from '@/services/leagueStatsService';
 import { formatCurrency } from '@/services/leagueStatsFormatters';
+import { PlayerStat, StatType } from '@/services/leagueStatsService';
 import { Image } from 'expo-image';
 import { LinearGradient } from 'expo-linear-gradient';
 import React from 'react';
@@ -96,25 +96,45 @@ export default function StatsLeaderboardRow({
 
          {/* Corner indicator for top ranks */}
          {rank <= 3 && (
-            <View style={[styles.topRankIndicator, { borderColor: rankColor }]} />
+            <View
+               style={[styles.topRankIndicator, { borderColor: rankColor }]}
+            />
          )}
 
          {/* Rank Badge */}
-         <View style={[styles.rankBadgeContainer, { shadowColor: rankShadowColor }]}>
+         <View
+            style={[
+               styles.rankBadgeContainer,
+               { shadowColor: rankShadowColor },
+            ]}
+         >
             <View style={[styles.rankBadge, { borderColor: rankColor }]}>
                <LinearGradient
-                  colors={rank <= 3 ? [rankColor, colors.cyberBackground] : [colors.cyberGray, colors.cyberBackground]}
+                  colors={
+                     rank <= 3
+                        ? [rankColor, colors.cyberBackground]
+                        : [colors.cyberGray, colors.cyberBackground]
+                  }
                   style={styles.rankBadgeGradient}
                   start={{ x: 0, y: 0 }}
                   end={{ x: 1, y: 1 }}
                />
-               <Text style={[styles.rankText, { color: rank <= 3 ? colors.cyberBackground : rankColor }]}>{rank}</Text>
+               <Text
+                  style={[
+                     styles.rankText,
+                     { color: rank <= 3 ? colors.cyberBackground : rankColor },
+                  ]}
+               >
+                  {rank}
+               </Text>
             </View>
          </View>
 
          {/* Avatar with cyberpunk styling */}
          <View style={styles.avatarContainer}>
-            <View style={[styles.avatarGlow, { backgroundColor: config.color }]} />
+            <View
+               style={[styles.avatarGlow, { backgroundColor: config.color }]}
+            />
             <View style={[styles.avatarBorder, { borderColor: config.color }]}>
                {player.profileImageUrl || player.additionalData?.isAnonymous ? (
                   <Image
@@ -151,10 +171,40 @@ export default function StatsLeaderboardRow({
 
          {/* Stat Value with cyberpunk styling */}
          <View style={styles.valueContainer}>
-            <Text style={[styles.value, { color: config.color }]}>
+            <Text
+               className="text-lg font-bold"
+               style={[
+                  {
+                     color:
+                        statType === 'top-profit-player' ||
+                        statType === 'highest-single-game-profit' ||
+                        statType === 'biggest-loser'
+                           ? typeof player.value === 'number' &&
+                             player.value < 0
+                              ? colors.neonPink
+                              : config.color
+                           : config.color,
+                  },
+               ]}
+            >
                {config.formatValue(player.value)}
             </Text>
-            <View style={[styles.valueUnderline, { backgroundColor: config.color }]} />
+            <View
+               style={[
+                  styles.valueUnderline,
+                  {
+                     backgroundColor:
+                        statType === 'top-profit-player' ||
+                        statType === 'highest-single-game-profit' ||
+                        statType === 'biggest-loser'
+                           ? typeof player.value === 'number' &&
+                             player.value < 0
+                              ? colors.neonPink
+                              : config.color
+                           : config.color,
+                  },
+               ]}
+            />
          </View>
 
          {/* Side accent line */}
@@ -289,7 +339,7 @@ const styles = StyleSheet.create({
       zIndex: 3,
    },
    name: {
-      color: colors.textPrimary,
+      color: colors.neonCyan,
       fontSize: 16,
       fontWeight: '700',
       marginBottom: 4,
@@ -297,7 +347,7 @@ const styles = StyleSheet.create({
       letterSpacing: 0.3,
       textShadowColor: colors.shadowNeonCyan,
       textShadowOffset: { width: 0, height: 0 },
-      textShadowRadius: 2,
+      textShadowRadius: 4,
    },
    subtext: {
       color: colors.textSecondary,

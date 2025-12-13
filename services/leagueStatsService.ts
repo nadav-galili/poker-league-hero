@@ -4,6 +4,7 @@ export interface PlayerStat {
    fullName: string;
    profileImageUrl: string | null;
    value: number | string;
+   rank?: number;
    additionalData?: Record<string, any>;
 }
 

@@ -48,11 +48,21 @@ const PressableStatCard = ({
       transform: [{ scale: scale.value }],
    }));
 
+   const handlePressIn = React.useCallback(() => {
+      'worklet';
+      scale.value = withSpring(0.95);
+   }, [scale]);
+
+   const handlePressOut = React.useCallback(() => {
+      'worklet';
+      scale.value = withSpring(1);
+   }, [scale]);
+
    return (
       <AnimatedPressable
          onPress={onPress}
-         onPressIn={() => (scale.value = withSpring(0.95))}
-         onPressOut={() => (scale.value = withSpring(1))}
+         onPressIn={handlePressIn}
+         onPressOut={handlePressOut}
          style={animatedStyle}
       >
          {children}

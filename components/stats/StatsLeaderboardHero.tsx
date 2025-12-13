@@ -9,10 +9,10 @@ import { StyleSheet, Text, View } from 'react-native';
 import Animated, {
    useAnimatedStyle,
    useSharedValue,
-   withSpring,
-   withTiming,
    withRepeat,
    withSequence,
+   withSpring,
+   withTiming,
 } from 'react-native-reanimated';
 
 // @ts-ignore - local image import
@@ -86,7 +86,6 @@ export default function StatsLeaderboardHero({
    const scale = useSharedValue(0.8);
    const opacity = useSharedValue(0);
    const glowPulse = useSharedValue(0.8);
-   const scanLinePosition = useSharedValue(-100);
 
    useEffect(() => {
       scale.value = withSpring(1, { damping: 15 });
@@ -101,14 +100,7 @@ export default function StatsLeaderboardHero({
          -1,
          true
       );
-
-      // Scan line animation
-      scanLinePosition.value = withRepeat(
-         withTiming(400, { duration: 3000 }),
-         -1,
-         false
-      );
-   }, [scale, opacity, glowPulse, scanLinePosition]);
+   }, [scale, opacity, glowPulse]);
 
    const animatedStyle = useAnimatedStyle(() => ({
       transform: [{ scale: scale.value }],
@@ -119,29 +111,50 @@ export default function StatsLeaderboardHero({
       transform: [{ scale: glowPulse.value }],
    }));
 
-   const scanLineAnimatedStyle = useAnimatedStyle(() => ({
-      transform: [{ translateX: scanLinePosition.value }],
-   }));
-
    return (
       <View style={styles.container}>
          <Animated.View style={[styles.card, animatedStyle]}>
             {/* Cyberpunk background gradient */}
             <LinearGradient
-               colors={[colors.cyberBackground, colors.holoBlue, colors.cyberGray]}
+               colors={[
+                  colors.cyberBackground,
+                  colors.holoBlue,
+                  colors.cyberGray,
+               ]}
                style={styles.cardGradient}
                start={{ x: 0, y: 0 }}
                end={{ x: 1, y: 1 }}
             />
 
             {/* Corner brackets */}
-            <View style={[styles.cornerBracket, styles.topLeft, { borderColor: config.color }]} />
-            <View style={[styles.cornerBracket, styles.topRight, { borderColor: config.color }]} />
-            <View style={[styles.cornerBracket, styles.bottomLeft, { borderColor: config.color }]} />
-            <View style={[styles.cornerBracket, styles.bottomRight, { borderColor: config.color }]} />
-
-            {/* Scan line effect */}
-            <Animated.View style={[styles.scanLine, scanLineAnimatedStyle, { backgroundColor: config.color }]} />
+            <View
+               style={[
+                  styles.cornerBracket,
+                  styles.topLeft,
+                  { borderColor: config.color },
+               ]}
+            />
+            <View
+               style={[
+                  styles.cornerBracket,
+                  styles.topRight,
+                  { borderColor: config.color },
+               ]}
+            />
+            <View
+               style={[
+                  styles.cornerBracket,
+                  styles.bottomLeft,
+                  { borderColor: config.color },
+               ]}
+            />
+            <View
+               style={[
+                  styles.cornerBracket,
+                  styles.bottomRight,
+                  { borderColor: config.color },
+               ]}
+            />
 
             {/* Champion Badge */}
             <View style={styles.badgeContainer}>
@@ -151,18 +164,35 @@ export default function StatsLeaderboardHero({
                   start={{ x: 0, y: 0 }}
                   end={{ x: 1, y: 0 }}
                >
-                  <Ionicons name="trophy" size={14} color={colors.cyberBackground} />
+                  <Ionicons
+                     name="trophy"
+                     size={14}
+                     color={colors.cyberBackground}
+                  />
                   <Text style={styles.badgeText}>CHAMPION</Text>
                </LinearGradient>
-               <View style={[styles.badgeGlow, { backgroundColor: config.color }]} />
+               <View
+                  style={[styles.badgeGlow, { backgroundColor: config.color }]}
+               />
             </View>
 
             {/* Content Row - Side by Side Layout */}
             <View style={styles.contentRow}>
                {/* Avatar with Cyberpunk Glow */}
                <View style={styles.avatarContainer}>
-                  <Animated.View style={[styles.avatarGlow, glowAnimatedStyle, { backgroundColor: config.color }]} />
-                  <View style={[styles.avatarBorder, { borderColor: config.color }]}>
+                  <Animated.View
+                     style={[
+                        styles.avatarGlow,
+                        glowAnimatedStyle,
+                        { backgroundColor: config.color },
+                     ]}
+                  />
+                  <View
+                     style={[
+                        styles.avatarBorder,
+                        { borderColor: config.color },
+                     ]}
+                  >
                      {player.profileImageUrl ||
                      player.additionalData?.isAnonymous ? (
                         <Image
@@ -185,7 +215,9 @@ export default function StatsLeaderboardHero({
                      )}
                   </View>
                   {/* Holographic overlay */}
-                  <View style={[styles.avatarHolo, { borderColor: config.color }]} />
+                  <View
+                     style={[styles.avatarHolo, { borderColor: config.color }]}
+                  />
                </View>
 
                {/* Player Info */}
@@ -194,10 +226,30 @@ export default function StatsLeaderboardHero({
                      <Text style={styles.name} numberOfLines={1}>
                         {player.fullName}
                      </Text>
-                     <View style={[styles.nameUnderline, { backgroundColor: config.color }]} />
+                     <View
+                        style={[
+                           styles.nameUnderline,
+                           { backgroundColor: config.color },
+                        ]}
+                     />
                   </View>
 
-                  <Text style={[styles.value, { color: config.color }]}>
+                  <Text
+                     className="text-xl font-bold"
+                     style={[
+                        {
+                           color:
+                              statType === 'top-profit-player' ||
+                              statType === 'highest-single-game-profit' ||
+                              statType === 'biggest-loser'
+                                 ? typeof player.value === 'number' &&
+                                   player.value < 0
+                                    ? colors.neonPink
+                                    : config.color
+                                 : config.color,
+                        },
+                     ]}
+                  >
                      {config.formatValue(player.value)}
                   </Text>
 
@@ -207,8 +259,18 @@ export default function StatsLeaderboardHero({
                   {player.additionalData && (
                      <View style={styles.additionalStats}>
                         {player.additionalData.gamesPlayed && (
-                           <View style={[styles.pill, { borderColor: config.color }]}>
-                              <View style={[styles.pillGlow, { backgroundColor: config.color }]} />
+                           <View
+                              style={[
+                                 styles.pill,
+                                 { borderColor: config.color },
+                              ]}
+                           >
+                              <View
+                                 style={[
+                                    styles.pillGlow,
+                                    { backgroundColor: config.color },
+                                 ]}
+                              />
                               <Text style={styles.pillText}>
                                  {player.additionalData.gamesPlayed} GAMES
                               </Text>
@@ -226,14 +288,15 @@ export default function StatsLeaderboardHero({
 const styles = StyleSheet.create({
    container: {
       alignItems: 'center',
-      marginTop: 20,
+      marginTop: 50,
       marginBottom: 30,
       paddingHorizontal: 20,
       zIndex: 10,
    },
    card: {
       width: '100%',
-      paddingVertical: 24,
+      paddingTop: 32,
+      paddingBottom: 24,
       paddingHorizontal: 24,
       borderWidth: 2,
       borderColor: colors.neonCyan,
@@ -288,17 +351,6 @@ const styles = StyleSheet.create({
       borderTopWidth: 0,
       borderLeftWidth: 0,
    },
-   // Scan line effect
-   scanLine: {
-      position: 'absolute',
-      top: 0,
-      width: 2,
-      height: '100%',
-      opacity: 0.6,
-      shadowOpacity: 0.8,
-      shadowRadius: 8,
-      zIndex: 3,
-   },
    contentRow: {
       flexDirection: 'row',
       alignItems: 'center',
@@ -308,7 +360,7 @@ const styles = StyleSheet.create({
    },
    badgeContainer: {
       position: 'absolute',
-      top: -16,
+      top: 0,
       alignSelf: 'center',
       zIndex: 10,
    },
@@ -397,7 +449,7 @@ const styles = StyleSheet.create({
       marginBottom: 8,
    },
    name: {
-      color: colors.textPrimary,
+      color: colors.neonCyan,
       fontSize: 20,
       fontWeight: '700',
       textAlign: 'left',
@@ -406,7 +458,7 @@ const styles = StyleSheet.create({
       textTransform: 'uppercase',
       textShadowColor: colors.shadowNeonCyan,
       textShadowOffset: { width: 0, height: 0 },
-      textShadowRadius: 4,
+      textShadowRadius: 6,
    },
    nameUnderline: {
       height: 2,
@@ -460,7 +512,7 @@ const styles = StyleSheet.create({
       opacity: 0.2,
    },
    pillText: {
-      color: colors.textPrimary,
+      color: colors.text,
       fontSize: 10,
       fontWeight: '700',
       fontFamily: 'monospace',
