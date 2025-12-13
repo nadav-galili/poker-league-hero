@@ -26,9 +26,10 @@ type AISummaryType = {
 };
 
 type getSummaryListResponse = {
-   summary: AISummaryType;
+   summary: AISummaryType | null;
    cached?: boolean; // True if loaded from DB
    needsBackendCache?: boolean; // True if client should cache locally
+   noGames?: boolean; // True if there are no games played yet
 };
 
 const Summary = ({ leagueId }: Props) => {
@@ -163,6 +164,9 @@ const Summary = ({ leagueId }: Props) => {
          </View>
       );
 
+   // Check if there are no games (from the successful response)
+   const hasNoGames = summary?.noGames === true;
+
    if (error)
       return (
          <View className="px-6 mb-8">
@@ -265,6 +269,161 @@ const Summary = ({ leagueId }: Props) => {
             </View>
          </View>
       );
+
+   // If there are no games, show friendly message
+   if (hasNoGames) {
+      return (
+         <View className="px-6 mb-8">
+            {/* Cyberpunk AI Summary Header */}
+            <View
+               className="relative mb-6 p-4 border-2"
+               style={{
+                  backgroundColor: colors.cyberBackground,
+                  borderColor: colors.neonPink,
+                  shadowColor: colors.shadowNeonPink,
+                  shadowOffset: { width: 0, height: 0 },
+                  shadowOpacity: 1,
+                  shadowRadius: 10,
+                  elevation: 10,
+               }}
+            >
+               {/* Corner Brackets */}
+               <View className="absolute top-0 left-0 w-6 h-6">
+                  <View
+                     className="absolute top-0 left-0 w-4 h-1"
+                     style={{ backgroundColor: colors.neonPink }}
+                  />
+                  <View
+                     className="absolute top-0 left-0 w-1 h-4"
+                     style={{ backgroundColor: colors.neonPink }}
+                  />
+               </View>
+               <View className="absolute top-0 right-0 w-6 h-6">
+                  <View
+                     className="absolute top-0 right-0 w-4 h-1"
+                     style={{ backgroundColor: colors.neonPink }}
+                  />
+                  <View
+                     className="absolute top-0 right-0 w-1 h-4"
+                     style={{ backgroundColor: colors.neonPink }}
+                  />
+               </View>
+               <View className="absolute bottom-0 left-0 w-6 h-6">
+                  <View
+                     className="absolute bottom-0 left-0 w-4 h-1"
+                     style={{ backgroundColor: colors.neonPink }}
+                  />
+                  <View
+                     className="absolute bottom-0 left-0 w-1 h-4"
+                     style={{ backgroundColor: colors.neonPink }}
+                  />
+               </View>
+               <View className="absolute bottom-0 right-0 w-6 h-6">
+                  <View
+                     className="absolute bottom-0 right-0 w-4 h-1"
+                     style={{ backgroundColor: colors.neonPink }}
+                  />
+                  <View
+                     className="absolute bottom-0 right-0 w-1 h-4"
+                     style={{ backgroundColor: colors.neonPink }}
+                  />
+               </View>
+
+               <View className="flex-row justify-center items-center gap-2">
+                  <Text
+                     className="text-center text-xl font-black uppercase tracking-[3px]"
+                     style={{
+                        color: colors.neonPink,
+                        writingDirection: isRTL ? 'rtl' : 'ltr',
+                        fontFamily: 'monospace',
+                     }}
+                  >
+                     <Ionicons
+                        name="sparkles"
+                        size={20}
+                        color={colors.neonPink}
+                     />{' '}
+                     {t('aiSummary')}
+                  </Text>
+               </View>
+            </View>
+
+            {/* Friendly no games message */}
+            <View
+               className="relative p-5 border-2"
+               style={{
+                  backgroundColor: `${colors.cyberBackground}AA`,
+                  borderColor: colors.neonCyan,
+                  shadowColor: colors.neonCyan,
+                  shadowOffset: { width: 0, height: 0 },
+                  shadowOpacity: 0.4,
+                  shadowRadius: 6,
+                  elevation: 6,
+               }}
+            >
+               {/* Corner Brackets */}
+               <View className="absolute top-0 left-0 w-4 h-4">
+                  <View
+                     className="absolute top-0 left-0 w-3 h-0.5"
+                     style={{ backgroundColor: colors.neonCyan }}
+                  />
+                  <View
+                     className="absolute top-0 left-0 w-0.5 h-3"
+                     style={{ backgroundColor: colors.neonCyan }}
+                  />
+               </View>
+               <View className="absolute top-0 right-0 w-4 h-4">
+                  <View
+                     className="absolute top-0 right-0 w-3 h-0.5"
+                     style={{ backgroundColor: colors.neonCyan }}
+                  />
+                  <View
+                     className="absolute top-0 right-0 w-0.5 h-3"
+                     style={{ backgroundColor: colors.neonCyan }}
+                  />
+               </View>
+               <View className="absolute bottom-0 left-0 w-4 h-4">
+                  <View
+                     className="absolute bottom-0 left-0 w-3 h-0.5"
+                     style={{ backgroundColor: colors.neonCyan }}
+                  />
+                  <View
+                     className="absolute bottom-0 left-0 w-0.5 h-3"
+                     style={{ backgroundColor: colors.neonCyan }}
+                  />
+               </View>
+               <View className="absolute bottom-0 right-0 w-4 h-4">
+                  <View
+                     className="absolute bottom-0 right-0 w-3 h-0.5"
+                     style={{ backgroundColor: colors.neonCyan }}
+                  />
+                  <View
+                     className="absolute bottom-0 right-0 w-0.5 h-3"
+                     style={{ backgroundColor: colors.neonCyan }}
+                  />
+               </View>
+
+               <View className="flex-row justify-center items-center gap-2 mb-2">
+                  <Ionicons
+                     name="game-controller"
+                     size={24}
+                     color={colors.neonCyan}
+                  />
+               </View>
+
+               <Text
+                  className="font-bold text-lg text-center uppercase tracking-[2px]"
+                  style={{
+                     color: colors.neonCyan,
+                     fontFamily: 'monospace',
+                  }}
+               >
+                  {t('playGameToGetAiSummary')}
+               </Text>
+            </View>
+         </View>
+      );
+   }
 
    return (
       <View className="px-6 mb-8">

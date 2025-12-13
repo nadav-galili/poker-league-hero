@@ -287,16 +287,12 @@ export const POST = withAuth(
          }
 
          if (!stats?.leagueOverall?.totalGames) {
-            captureException(new Error('No games played in this year'), {
-               function: 'getLeagueStatsSummary',
-               screen: 'AiSummary',
-               request: request,
-               user: user,
+            // No games played - return success with empty flag
+            return Response.json({
+               summary: null,
+               noGames: true,
+               cached: false,
             });
-            return Response.json(
-               { error: 'No games played in this year' },
-               { status: 400 }
-            );
          }
 
          // Generate AI summary using OpenAI. If the LLM call fails (including

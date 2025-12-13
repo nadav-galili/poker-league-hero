@@ -811,7 +811,11 @@ function LeagueStatsComponent() {
                accessibilityLabel={`${t('leagueDetails')}: ${league.name}`}
             >
                <LinearGradient
-                  colors={[colors.cyberBackground, colors.holoPink, colors.neonPink]}
+                  colors={[
+                     colors.cyberBackground,
+                     colors.holoPink,
+                     colors.neonPink,
+                  ]}
                   start={{ x: 0, y: 0 }}
                   end={{ x: 1, y: 1 }}
                   style={styles.leagueHeaderGradient}
@@ -897,7 +901,10 @@ function LeagueStatsComponent() {
                                     color={colors.neonPink}
                                     style={{
                                        textShadowColor: colors.neonPink,
-                                       textShadowOffset: { width: 0, height: 0 },
+                                       textShadowOffset: {
+                                          width: 0,
+                                          height: 0,
+                                       },
                                        textShadowRadius: 8,
                                     }}
                                  />
@@ -914,7 +921,10 @@ function LeagueStatsComponent() {
                               accessibilityHint={t('editLeagueDetails')}
                            >
                               <LinearGradient
-                                 colors={[colors.cyberBackground, colors.holoPink]}
+                                 colors={[
+                                    colors.cyberBackground,
+                                    colors.holoPink,
+                                 ]}
                                  start={{ x: 0, y: 0 }}
                                  end={{ x: 1, y: 1 }}
                                  style={styles.editButtonGradient}
@@ -939,10 +949,13 @@ function LeagueStatsComponent() {
                                     <Ionicons
                                        name="pencil"
                                        size={12}
-                                       color={colors.neonPink}
+                                       color={colors.neonCyan}
                                        style={{
-                                          textShadowColor: colors.neonPink,
-                                          textShadowOffset: { width: 0, height: 0 },
+                                          textShadowColor: colors.neonCyan,
+                                          textShadowOffset: {
+                                             width: 0,
+                                             height: 0,
+                                          },
                                           textShadowRadius: 4,
                                        }}
                                     />
@@ -957,7 +970,9 @@ function LeagueStatsComponent() {
 
                      {/* League Info Column */}
                      <View className="flex-1 ml-4 justify-center">
-                        <Text style={styles.leagueNameNeonMagenta}>{league.name}</Text>
+                        <Text style={styles.leagueNameNeonGreen}>
+                           {league.name}
+                        </Text>
                         <View className="flex-row items-center">
                            <Text style={styles.leagueCodeLabel}>
                               {t('leagueCode')}
@@ -1336,32 +1351,21 @@ const styles = StyleSheet.create({
       borderRadius: 14,
       position: 'relative',
    } as ViewStyle,
-   leagueNameNeonMagenta: {
-      color: colors.neonPink,
+   leagueNameNeonGreen: {
+      color: colors.neonGreen,
       fontWeight: 'bold',
-      fontSize: 24,
+      fontSize: 15,
       fontFamily: 'monospace',
       letterSpacing: 1,
       textTransform: 'uppercase',
-      textShadowColor: colors.neonPink,
+      textShadowColor: colors.neonGreen,
       textShadowOffset: { width: 0, height: 0 },
       textShadowRadius: 8,
       marginBottom: 8,
    },
-   leagueName: {
-      color: colors.neonCyan,
-      fontWeight: 'bold',
-      fontSize: 24,
-      fontFamily: 'monospace',
-      letterSpacing: 1,
-      textTransform: 'uppercase',
-      textShadowColor: colors.neonCyan,
-      textShadowOffset: { width: 0, height: 0 },
-      textShadowRadius: 8,
-      marginBottom: 8,
-   },
+
    leagueCodeLabel: {
-      color: colors.textMuted,
+      color: colors.neonCyan,
       fontSize: 12,
       fontFamily: 'monospace',
       textTransform: 'uppercase',
@@ -1435,8 +1439,8 @@ const styles = StyleSheet.create({
       borderRadius: 8,
       overflow: 'hidden',
       borderWidth: 1,
-      borderColor: colors.neonPink,
-      shadowColor: colors.neonPink,
+      borderColor: colors.neonCyan,
+      shadowColor: colors.neonCyan,
       shadowOffset: { width: 0, height: 0 },
       shadowOpacity: 0.4,
       shadowRadius: 6,
@@ -1473,13 +1477,13 @@ const styles = StyleSheet.create({
       zIndex: 5,
    } as ViewStyle,
    editButtonText: {
-      color: colors.neonPink,
+      color: colors.neonCyan,
       fontSize: 11,
       fontFamily: 'monospace',
       fontWeight: '600',
       letterSpacing: 0.5,
       marginLeft: 4,
-      textShadowColor: colors.neonPink,
+      textShadowColor: colors.neonCyan,
       textShadowOffset: { width: 0, height: 0 },
       textShadowRadius: 2,
    },

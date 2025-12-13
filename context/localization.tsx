@@ -272,6 +272,7 @@ export interface Translations {
    lastGameHighlights: string;
    generatingAnalysis: string;
    noSummaryYet: string;
+   playGameToGetAiSummary: string;
 
    // Game Events
    gameHistory: string;
@@ -559,6 +560,7 @@ const enTranslations: Translations = {
    lastGameHighlights: 'Last Game Highlights',
    generatingAnalysis: 'Generating Analysis...',
    noSummaryYet: 'No summary available yet',
+   playGameToGetAiSummary: 'Play a game to get AI summary',
 
    // Game Events
    gameHistory: 'GAME HISTORY',
@@ -844,6 +846,7 @@ const heTranslations: Translations = {
    lastGameHighlights: 'דגשי המשחק האחרון',
    generatingAnalysis: 'מייצר ניתוח...',
    noSummaryYet: 'אין סיכום זמין עדיין',
+   playGameToGetAiSummary: 'שחק משחק כדי לקבל סיכום AI',
 
    // Game Events
    gameHistory: 'היסטוריית משחק',
