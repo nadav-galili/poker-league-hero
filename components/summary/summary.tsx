@@ -333,9 +333,7 @@ const Summary = ({ leagueId }: Props) => {
                   }}
                >
                   <Ionicons name="sparkles" size={20} color={colors.neonPink} />{' '}
-                  {'/// '}
                   {t('aiSummary')}
-                  {' ///'}
                </Text>
                <TouchableOpacity
                   onPress={() => refetch()}
