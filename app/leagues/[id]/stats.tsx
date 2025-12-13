@@ -987,9 +987,6 @@ function LeagueStatsComponent() {
                                  {league.inviteCode}
                               </Text>
                            </View>
-                           {/* <Text className="text-white/50 text-xs">
-                              {league.memberCount} {t('members')}
-                           </Text> */}
                         </View>
                      </View>
                   </View>

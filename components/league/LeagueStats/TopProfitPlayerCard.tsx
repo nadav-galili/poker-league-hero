@@ -1,10 +1,10 @@
+import CyberpunkLoader from '@/components/ui/CyberpunkLoader';
 import { useTopProfitPlayer } from '@/hooks/useTopProfitPlayer';
 import { formatCurrency } from '@/services/leagueStatsFormatters';
 import { Ionicons } from '@expo/vector-icons';
 import { Image } from 'expo-image';
 import React from 'react';
 import { Dimensions, StyleSheet, Text, View } from 'react-native';
-import CyberpunkLoader from '@/components/ui/CyberpunkLoader';
 
 const { width: screenWidth } = Dimensions.get('window');
 
@@ -19,28 +19,6 @@ export default function TopProfitPlayerCard({
 }: TopProfitPlayerCardProps) {
    const { data, isLoading, error } = useTopProfitPlayer(leagueId);
 
-   const cardStyle = React.useMemo(
-      () => ({
-         shadowColor: '#4ADE80', // Green color for top profit
-         shadowOffset: { width: 0, height: 8 },
-         shadowOpacity: 0.2,
-         shadowRadius: 16,
-         elevation: 16,
-      }),
-      []
-   );
-
-   const iconContainerStyle = React.useMemo(
-      () => ({
-         shadowColor: '#4ADE80',
-         shadowOffset: { width: 0, height: 4 },
-         shadowOpacity: 0.3,
-         shadowRadius: 8,
-         elevation: 8,
-      }),
-      []
-   );
-
    if (isLoading) {
       return (
          <View
@@ -49,20 +27,41 @@ export default function TopProfitPlayerCard({
          >
             {/* Corner Brackets */}
             <View style={styles.cornerBrackets}>
-               <View style={[styles.cornerBracket, styles.topLeft, { borderColor: '#00ff88' }]} />
-               <View style={[styles.cornerBracket, styles.topRight, { borderColor: '#00ff88' }]} />
-               <View style={[styles.cornerBracket, styles.bottomLeft, { borderColor: '#00ff88' }]} />
-               <View style={[styles.cornerBracket, styles.bottomRight, { borderColor: '#00ff88' }]} />
+               <View
+                  style={[
+                     styles.cornerBracket,
+                     styles.topLeft,
+                     { borderColor: '#00ff88' },
+                  ]}
+               />
+               <View
+                  style={[
+                     styles.cornerBracket,
+                     styles.topRight,
+                     { borderColor: '#00ff88' },
+                  ]}
+               />
+               <View
+                  style={[
+                     styles.cornerBracket,
+                     styles.bottomLeft,
+                     { borderColor: '#00ff88' },
+                  ]}
+               />
+               <View
+                  style={[
+                     styles.cornerBracket,
+                     styles.bottomRight,
+                     { borderColor: '#00ff88' },
+                  ]}
+               />
             </View>
             <View className="items-center justify-center py-6">
                <View
                   className="w-10 h-10 bg-neonGreen/20 border-2 border-neonGreen items-center justify-center mb-3"
                   style={styles.cyberpunkIcon}
                >
-                  <CyberpunkLoader
-                     size="small"
-                     variant="green"
-                  />
+                  <CyberpunkLoader size="small" variant="green" />
                </View>
                <Text className="text-neonGreen text-xs font-bold tracking-wide">
                   {t('loading')}...
@@ -80,10 +79,34 @@ export default function TopProfitPlayerCard({
          >
             {/* Corner Brackets */}
             <View style={styles.cornerBrackets}>
-               <View style={[styles.cornerBracket, styles.topLeft, { borderColor: '#ff0080' }]} />
-               <View style={[styles.cornerBracket, styles.topRight, { borderColor: '#ff0080' }]} />
-               <View style={[styles.cornerBracket, styles.bottomLeft, { borderColor: '#ff0080' }]} />
-               <View style={[styles.cornerBracket, styles.bottomRight, { borderColor: '#ff0080' }]} />
+               <View
+                  style={[
+                     styles.cornerBracket,
+                     styles.topLeft,
+                     { borderColor: '#ff0080' },
+                  ]}
+               />
+               <View
+                  style={[
+                     styles.cornerBracket,
+                     styles.topRight,
+                     { borderColor: '#ff0080' },
+                  ]}
+               />
+               <View
+                  style={[
+                     styles.cornerBracket,
+                     styles.bottomLeft,
+                     { borderColor: '#ff0080' },
+                  ]}
+               />
+               <View
+                  style={[
+                     styles.cornerBracket,
+                     styles.bottomRight,
+                     { borderColor: '#ff0080' },
+                  ]}
+               />
             </View>
             <View className="items-center justify-center py-6">
                <View
@@ -107,10 +130,34 @@ export default function TopProfitPlayerCard({
       >
          {/* Corner Brackets */}
          <View style={styles.cornerBrackets}>
-            <View style={[styles.cornerBracket, styles.topLeft, { borderColor: '#00ff88' }]} />
-            <View style={[styles.cornerBracket, styles.topRight, { borderColor: '#00ff88' }]} />
-            <View style={[styles.cornerBracket, styles.bottomLeft, { borderColor: '#00ff88' }]} />
-            <View style={[styles.cornerBracket, styles.bottomRight, { borderColor: '#00ff88' }]} />
+            <View
+               style={[
+                  styles.cornerBracket,
+                  styles.topLeft,
+                  { borderColor: '#00ff88' },
+               ]}
+            />
+            <View
+               style={[
+                  styles.cornerBracket,
+                  styles.topRight,
+                  { borderColor: '#00ff88' },
+               ]}
+            />
+            <View
+               style={[
+                  styles.cornerBracket,
+                  styles.bottomLeft,
+                  { borderColor: '#00ff88' },
+               ]}
+            />
+            <View
+               style={[
+                  styles.cornerBracket,
+                  styles.bottomRight,
+                  { borderColor: '#00ff88' },
+               ]}
+            />
          </View>
 
          {/* Header with Icon */}
@@ -139,7 +186,9 @@ export default function TopProfitPlayerCard({
                      contentFit="cover"
                      cachePolicy="memory-disk"
                   />
-                  <View style={[styles.avatarBorder, { borderColor: '#00ff88' }]} />
+                  <View
+                     style={[styles.avatarBorder, { borderColor: '#00ff88' }]}
+                  />
                </View>
             ) : (
                <View
@@ -155,14 +204,22 @@ export default function TopProfitPlayerCard({
          <View className="items-center">
             <Text
                className="text-cyber-white text-base font-black text-center mb-1 tracking-wide"
-               style={{ textShadowColor: '#00ff88', textShadowOffset: { width: 0, height: 0 }, textShadowRadius: 8 }}
+               style={{
+                  textShadowColor: '#00ff88',
+                  textShadowOffset: { width: 0, height: 0 },
+                  textShadowRadius: 8,
+               }}
                numberOfLines={1}
             >
                {data.fullName}
             </Text>
             <Text
                className="text-neonGreen text-xl font-black mb-2 tracking-wider"
-               style={{ textShadowColor: '#00ff88', textShadowOffset: { width: 0, height: 0 }, textShadowRadius: 10 }}
+               style={{
+                  textShadowColor: '#00ff88',
+                  textShadowOffset: { width: 0, height: 0 },
+                  textShadowRadius: 10,
+               }}
             >
                {formatCurrency(data.totalProfit)}
             </Text>
@@ -172,7 +229,11 @@ export default function TopProfitPlayerCard({
             >
                <Text
                   className="text-neonGreen font-bold text-xs tracking-wide"
-                  style={{ textShadowColor: '#00ff88', textShadowOffset: { width: 0, height: 0 }, textShadowRadius: 6 }}
+                  style={{
+                     textShadowColor: '#00ff88',
+                     textShadowOffset: { width: 0, height: 0 },
+                     textShadowRadius: 6,
+                  }}
                >
                   {data.gamesPlayed} {t('gamesPlayed')}
                </Text>

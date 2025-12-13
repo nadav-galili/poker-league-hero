@@ -149,18 +149,6 @@ export default function LeagueStatsScreen() {
       return league.members.some((member) => member.id === user.userId);
    }, [user, league]);
 
-   // Memoized style objects to prevent recreation on every render
-   // const headerButtonStyle = React.useMemo(
-   //    () => ({
-   //       shadowColor: '#000000',
-   //       shadowOffset: { width: 0, height: 4 },
-   //       shadowOpacity: 0.3,
-   //       shadowRadius: 8,
-   //       elevation: 8,
-   //    }),
-   //    []
-   // );
-
    const leagueHeaderStyle = React.useMemo(
       () => ({
          shadowColor: '#FFFFFF',
@@ -700,7 +688,8 @@ export default function LeagueStatsScreen() {
                            key={index}
                            className="relative"
                            style={{
-                              shadowColor: index % 2 === 0 ? '#8A2BE2' : '#00FFFF',
+                              shadowColor:
+                                 index % 2 === 0 ? '#8A2BE2' : '#00FFFF',
                               shadowOffset: { width: 0, height: 0 },
                               shadowOpacity: 0.25,
                               shadowRadius: 6,
