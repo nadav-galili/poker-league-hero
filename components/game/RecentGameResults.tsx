@@ -9,15 +9,19 @@ import React, { useEffect, useState } from 'react';
 import { Dimensions, Text, View } from 'react-native';
 import { Gesture, GestureDetector } from 'react-native-gesture-handler';
 import Animated, {
+   Easing,
    runOnJS,
    useAnimatedStyle,
    useSharedValue,
-   withSpring,
+   withTiming,
 } from 'react-native-reanimated';
 
 const SCREEN_WIDTH = Dimensions.get('window').width;
-const SWIPE_THRESHOLD = SCREEN_WIDTH * 0.2;
+const PAGE_WIDTH = SCREEN_WIDTH;
+const SNAP_DISTANCE = SCREEN_WIDTH * 0.25;
+const VELOCITY_THRESHOLD = 900;
 const CARD_OFFSET = 20; // For layered card effect
+const EDGE_RUBBER_BAND = 0.35;
 
 interface RecentGameResultsProps {
    games: GameResult[];
@@ -305,31 +309,18 @@ export default function RecentGameResults({
    hasMore,
    loadMore,
 }: RecentGameResultsProps) {
-   const { t } = useLocalization();
+   const { t, isRTL } = useLocalization();
    const [currentIndex, setCurrentIndex] = useState(0);
    const [isTransitioning, setIsTransitioning] = useState(false);
    const translateX = useSharedValue(0);
+   const indexSV = useSharedValue(0);
+   const isAnimatingSV = useSharedValue(false);
 
-   const handleNext = () => {
-      if (currentIndex < games.length - 1) {
-         setIsTransitioning(true);
-         setCurrentIndex(currentIndex + 1);
-         setTimeout(() => setIsTransitioning(false), 200);
-      } else if (hasMore && !isLoading) {
-         loadMore();
-         // We don't increment index immediately here;
-         // the effect below will handle index update if needed or user swipes again
-         // But logically we want to show the newly loaded game, so we'll wait for props update
-      }
-   };
-
-   const handlePrev = () => {
-      if (currentIndex > 0) {
-         setIsTransitioning(true);
-         setCurrentIndex(currentIndex - 1);
-         setTimeout(() => setIsTransitioning(false), 200);
-      }
-   };
+   const setIndexFromWorklet = React.useCallback((nextIndex: number) => {
+      setIsTransitioning(true);
+      setCurrentIndex(nextIndex);
+      setTimeout(() => setIsTransitioning(false), 240);
+   }, []);
 
    // Effect to handle post-loading state: if we just loaded more games, we might want to advance index
    // However, simplest is just letting the user swipe again or stay on current.
@@ -338,29 +329,128 @@ export default function RecentGameResults({
       if (games.length > 0 && currentIndex >= games.length) {
          setCurrentIndex(games.length - 1);
       }
-   }, [games.length, currentIndex]);
+      indexSV.value = Math.min(currentIndex, Math.max(0, games.length - 1));
+   }, [games.length, currentIndex, indexSV]);
 
    // If the user swiped next to trigger a load, and games grew, we can auto-advance
    // For now, let's keep it manual to avoid jarring jumps, or user can swipe again.
 
+   const gamesLength = games.length;
+
    const pan = Gesture.Pan()
+      .activeOffsetX([-12, 12])
+      .failOffsetY([-12, 12])
       .onUpdate((event) => {
          'worklet';
-         // Constrain the translation to prevent excessive movement
-         const maxTranslation = 100; // Limit translation to 100px
-         translateX.value = Math.max(
-            -maxTranslation,
-            Math.min(maxTranslation, event.translationX)
+         if (isAnimatingSV.value) return;
+
+         const rawTx = Math.max(
+            -PAGE_WIDTH,
+            Math.min(PAGE_WIDTH, event.translationX)
          );
+         let tx = rawTx;
+
+         // Rubber-band only at edges (prevents "bouncy" feeling mid-carousel)
+         if (indexSV.value <= 0 && tx > 0) tx = tx * EDGE_RUBBER_BAND;
+         if (indexSV.value >= gamesLength - 1 && tx < 0) {
+            // If we can load more, don't rubber-band too hard (user intent is "more")
+            tx = hasMore && !isLoading ? tx * 0.6 : tx * EDGE_RUBBER_BAND;
+         }
+
+         translateX.value = tx;
       })
       .onEnd((event) => {
          'worklet';
-         if (event.translationX < -SWIPE_THRESHOLD) {
-            runOnJS(handleNext)();
-         } else if (event.translationX > SWIPE_THRESHOLD) {
-            runOnJS(handlePrev)();
+         if (isAnimatingSV.value) return;
+
+         const dir = isRTL ? -1 : 1;
+         const effectiveTx = event.translationX * dir;
+         const effectiveVx = event.velocityX * dir;
+
+         const wantsNext =
+            effectiveTx < -SNAP_DISTANCE || effectiveVx < -VELOCITY_THRESHOLD;
+         const wantsPrev =
+            effectiveTx > SNAP_DISTANCE || effectiveVx > VELOCITY_THRESHOLD;
+
+         const snapBack = () => {
+            translateX.value = withTiming(0, {
+               duration: 180,
+               easing: Easing.out(Easing.cubic),
+            });
+         };
+
+         if (!wantsNext && !wantsPrev) {
+            snapBack();
+            return;
          }
-         translateX.value = withSpring(0);
+
+         // Next
+         if (wantsNext) {
+            if (indexSV.value < gamesLength - 1) {
+               isAnimatingSV.value = true;
+               const exitX = -PAGE_WIDTH * dir; // LTR: left, RTL: right
+
+               translateX.value = withTiming(
+                  exitX,
+                  { duration: 220, easing: Easing.out(Easing.cubic) },
+                  (finished) => {
+                     if (!finished) return;
+
+                     const nextIndex = indexSV.value + 1;
+                     indexSV.value = nextIndex;
+                     runOnJS(setIndexFromWorklet)(nextIndex);
+
+                     // Bring the new card from the opposite side
+                     translateX.value = -exitX;
+                     translateX.value = withTiming(
+                        0,
+                        { duration: 240, easing: Easing.out(Easing.cubic) },
+                        () => {
+                           isAnimatingSV.value = false;
+                        }
+                     );
+                  }
+               );
+               return;
+            }
+
+            // End reached: try to load more, then snap back
+            if (hasMore && !isLoading) runOnJS(loadMore)();
+            snapBack();
+            return;
+         }
+
+         // Prev
+         if (wantsPrev) {
+            if (indexSV.value > 0) {
+               isAnimatingSV.value = true;
+               const exitX = PAGE_WIDTH * dir; // LTR: right, RTL: left
+
+               translateX.value = withTiming(
+                  exitX,
+                  { duration: 220, easing: Easing.out(Easing.cubic) },
+                  (finished) => {
+                     if (!finished) return;
+
+                     const nextIndex = indexSV.value - 1;
+                     indexSV.value = nextIndex;
+                     runOnJS(setIndexFromWorklet)(nextIndex);
+
+                     translateX.value = -exitX;
+                     translateX.value = withTiming(
+                        0,
+                        { duration: 240, easing: Easing.out(Easing.cubic) },
+                        () => {
+                           isAnimatingSV.value = false;
+                        }
+                     );
+                  }
+               );
+               return;
+            }
+
+            snapBack();
+         }
       });
 
    const animatedStyle = useAnimatedStyle(() => {
@@ -459,6 +549,17 @@ export default function RecentGameResults({
          {/* Enhanced Swipeable Content with Visual Feedback */}
          <View className="relative">
             {/* Background cards for depth effect */}
+            {currentIndex > 0 && (
+               <View
+                  className="absolute inset-0 z-0"
+                  style={{
+                     transform: [{ translateX: -CARD_OFFSET }, { scale: 0.95 }],
+                     opacity: 0.25,
+                  }}
+               >
+                  <GameCard game={games[currentIndex - 1]} />
+               </View>
+            )}
             {currentIndex < games.length - 1 && (
                <View
                   className="absolute inset-0 z-0"
@@ -484,7 +585,6 @@ export default function RecentGameResults({
             {games.map((_, index) => {
                const isActive = index === currentIndex;
                const isPast = index < currentIndex;
-               const isFuture = index > currentIndex;
 
                return (
                   <View key={index} className="relative">
@@ -546,10 +646,12 @@ export default function RecentGameResults({
                }}
             >
                {isTransitioning
-                  ? 'SWITCHING DATA...'
+                  ? t('switchingData')
                   : hasMore
                     ? t('swipeForMore')
-                    : `GAME ${currentIndex + 1} OF ${games.length}`}
+                    : t('gameXofY')
+                         .replace('{current}', String(currentIndex + 1))
+                         .replace('{total}', String(games.length))}
             </Text>
 
             {/* Indicator line */}

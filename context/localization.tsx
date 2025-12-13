@@ -130,6 +130,8 @@ export interface Translations {
    endTime: string;
    noGamesYet: string;
    swipeForMore: string;
+   switchingData: string;
+   gameXofY: string;
 
    // Select Players Screen
    selectPlayers: string;
@@ -409,6 +411,8 @@ const enTranslations: Translations = {
    endTime: 'End',
    noGamesYet: 'No completed games yet',
    swipeForMore: 'Swipe for more',
+   switchingData: 'SWITCHING DATA...',
+   gameXofY: 'GAME {current} OF {total}',
 
    // Select Players Screen
    selectPlayersToStartGame: 'Select players to start a new game',
@@ -696,6 +700,8 @@ const heTranslations: Translations = {
    endTime: 'סיום',
    noGamesYet: 'אין משחקים שהושלמו עדיין',
    swipeForMore: 'החלק לעוד',
+   switchingData: 'מחליף נתונים...',
+   gameXofY: 'משחק {current} מתוך {total}',
 
    // Select Players Screen
    selectPlayersToStartGame: 'בחר שחקנים להתחיל משחק חדש',
