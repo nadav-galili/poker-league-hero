@@ -9,13 +9,19 @@ import {
    Animated,
    Dimensions,
    Image,
+   Platform,
    Pressable,
    Text,
    View,
 } from 'react-native';
-import Onboarding from 'react-native-onboarding-swiper';
 
 export default function OnboardingSwiper() {
+   // react-native-onboarding-swiper references a global `Platform` in its compiled JS.
+   // Hermes doesn't provide that global, so we polyfill before loading the module.
+   const [OnboardingComponent, setOnboardingComponent] =
+      React.useState<React.ComponentType<any> | null>(null);
+   const onboardingRef = React.useRef<any>(null);
+
    const { markOnboardingComplete } = useAuth();
    const { t } = useLocalization();
    const { track } = useMixpanel();
@@ -137,19 +143,43 @@ export default function OnboardingSwiper() {
       };
    }, [scanlineAnim, glowAnim, matrixFade, titleGlow, hologramFlicker]);
 
+   React.useEffect(() => {
+      let isMounted = true;
+      if (!(globalThis as any).Platform) {
+         (globalThis as any).Platform = Platform;
+      }
+
+      import('react-native-onboarding-swiper')
+         .then((mod) => {
+            if (!isMounted) return;
+            const Component = (mod as any)?.default ?? (mod as any);
+            setOnboardingComponent(() => Component);
+         })
+         .catch((e) => {
+            console.warn('Failed to load onboarding swiper module:', e);
+         });
+
+      return () => {
+         isMounted = false;
+      };
+   }, []);
+
    const handleDone = async () => {
+      console.log('Done button pressed');
       track('onboarding_completed');
       await markOnboardingComplete();
       router.replace('/');
    };
 
    const handleSkip = async () => {
+      console.log('Skip button pressed');
       track('onboarding_skipped');
       await markOnboardingComplete();
       router.replace('/');
    };
 
    const handlePageChange = (index: number) => {
+      console.log('Page changed to:', index);
       setActiveIndex(index);
       track('onboarding_slide_viewed', {
          slide_index: index,
@@ -159,9 +189,6 @@ export default function OnboardingSwiper() {
    const PAGES_COUNT = 6;
 
    const DoneButton = ({ ...props }) => {
-      // Only show done button on the last slide
-      if (activeIndex !== PAGES_COUNT - 1) return null;
-
       return (
          <Animated.View
             style={{
@@ -197,6 +224,10 @@ export default function OnboardingSwiper() {
                   shadowRadius: 20,
                })}
                {...props}
+               onPress={(e) => {
+                  console.log('Done button internal press');
+                  props.onPress?.(e);
+               }}
             >
                {/* Multiple corner brackets for extra cyberpunk feel */}
                <View
@@ -241,8 +272,10 @@ export default function OnboardingSwiper() {
    };
 
    const NextButton = ({ ...props }) => {
-      // Don't show next button on the last slide
-      if (activeIndex === PAGES_COUNT - 1) return null;
+      // Debug: Log if onPress is present
+      if (!props.onPress) {
+         console.warn('NextButton missing onPress prop!');
+      }
 
       return (
          <Animated.View
@@ -271,6 +304,46 @@ export default function OnboardingSwiper() {
                   shadowRadius: 15,
                })}
                {...props}
+               onPress={(e) => {
+                  console.log(
+                     'Next button pressed. Props:',
+                     Object.keys(props)
+                  );
+
+                  // ANDROID FIX: Manually force scroll and state update
+                  // This bypasses the library's internal goNext() which fails on Android
+                  // if the momentum scroll event was missed or delayed.
+                  if (onboardingRef.current && onboardingRef.current.flatList) {
+                     const nextIndex = activeIndex + 1;
+                     console.log('Forcing scroll to index:', nextIndex);
+
+                     // 1. Force the scroll
+                     onboardingRef.current.flatList.scrollToOffset({
+                        offset: nextIndex * screenWidth,
+                        animated: true,
+                     });
+
+                     // 2. Force the library's internal state update
+                     // (This ensures the Done button shows up at the end)
+                     if (onboardingRef.current.setState) {
+                        onboardingRef.current.setState({
+                           currentPage: nextIndex,
+                        });
+                     }
+
+                     // 3. Update our local state
+                     handlePageChange(nextIndex);
+                  } else {
+                     // Fallback for iOS/Web or if ref is missing
+                     if (props.onPress) {
+                        props.onPress(e);
+                     } else {
+                        console.error(
+                           'NextButton onPress prop is missing/undefined'
+                        );
+                     }
+                  }
+               }}
             >
                {/* Corner brackets in white for maximum contrast */}
                <View
@@ -320,9 +393,6 @@ export default function OnboardingSwiper() {
    };
 
    const SkipButton = ({ ...props }) => {
-      // Don't show skip button on the last slide
-      if (activeIndex === PAGES_COUNT - 1) return null;
-
       return (
          <Animated.View
             style={{
@@ -350,6 +420,16 @@ export default function OnboardingSwiper() {
                   shadowRadius: 8,
                })}
                {...props}
+               onPress={(e) => {
+                  console.log('Skip button internal press');
+                  // Try to force skip via ref first
+                  if (onboardingRef.current?.skip) {
+                     console.log('Forcing skip via ref');
+                     onboardingRef.current.skip();
+                  } else {
+                     props.onPress?.(e);
+                  }
+               }}
             >
                {/* Corner accents */}
                <View className="absolute top-0 left-0 w-2 h-2 border-l border-t border-neonPink" />
@@ -473,7 +553,7 @@ export default function OnboardingSwiper() {
    }: {
       variant: 'neon' | 'cyber' | 'matrix' | 'holo' | 'dark';
    }) => (
-      <View className="absolute inset-0">
+      <View pointerEvents="none" className="absolute inset-0">
          {/* Cyberpunk gradient background */}
          <LinearGradient
             colors={getCyberpunkGradient(variant)}
@@ -602,280 +682,295 @@ export default function OnboardingSwiper() {
 
    return (
       <View className="flex-1 relative bg-cyberBackground">
-         <Onboarding
-            pages={[
-               {
-                  backgroundColor: 'transparent',
-                  image: (
-                     <>
-                        <CyberpunkBackground variant={getCyberpunkVariant(0)} />
-                        <View className="items-center justify-center w-full relative z-10">
-                           <CyberpunkImageFrame
+         {OnboardingComponent ? (
+            <OnboardingComponent
+               ref={onboardingRef}
+               pages={[
+                  {
+                     backgroundColor: 'transparent',
+                     image: (
+                        <>
+                           <CyberpunkBackground
                               variant={getCyberpunkVariant(0)}
-                           >
-                              <Image
-                                 source={require('@/assets/images/onboarding/cyberss1.webp')}
-                                 style={{
-                                    width: screenWidth * 0.85,
-                                    height: imageHeight,
-                                 }}
-                                 resizeMode="contain"
-                              />
-                           </CyberpunkImageFrame>
-                        </View>
-                     </>
-                  ),
-                  title: t('onboardingWelcomeTitle'),
-                  subtitle: t('onboardingWelcomeSubtitle'),
-               },
-               {
-                  backgroundColor: 'transparent',
-                  image: (
-                     <>
-                        <CyberpunkBackground variant={getCyberpunkVariant(1)} />
-                        <View className="items-center justify-center w-full relative z-10">
-                           <CyberpunkImageFrame
-                              variant={getCyberpunkVariant(1)}
-                           >
-                              <Image
-                                 source={require('@/assets/images/onboarding/cyberss2.webp')}
-                                 style={{
-                                    width: screenWidth * 0.85,
-                                    height: imageHeight,
-                                 }}
-                                 resizeMode="contain"
-                              />
-                           </CyberpunkImageFrame>
-                        </View>
-                     </>
-                  ),
-                  title: t('onboardingLeaguesTitle'),
-                  subtitle: t('onboardingLeaguesSubtitle'),
-               },
-               {
-                  backgroundColor: 'transparent',
-                  image: (
-                     <>
-                        <CyberpunkBackground variant={getCyberpunkVariant(2)} />
-                        <View className="items-center justify-center w-full relative z-10">
-                           <CyberpunkImageFrame
-                              variant={getCyberpunkVariant(2)}
-                           >
-                              <Image
-                                 source={require('@/assets/images/onboarding/cyberss3.webp')}
-                                 style={{
-                                    width: screenWidth * 0.85,
-                                    height: imageHeight,
-                                 }}
-                                 resizeMode="contain"
-                              />
-                           </CyberpunkImageFrame>
-                        </View>
-                     </>
-                  ),
-                  title: t('onboardingStatsTitle'),
-                  subtitle: t('onboardingStatsSubtitle'),
-               },
-               {
-                  backgroundColor: 'transparent',
-                  image: (
-                     <>
-                        <CyberpunkBackground variant={getCyberpunkVariant(3)} />
-                        <View className="items-center justify-center w-full relative z-10">
-                           <CyberpunkImageFrame
-                              variant={getCyberpunkVariant(3)}
-                           >
-                              <Image
-                                 source={require('@/assets/images/onboarding/cyberss4.webp')}
-                                 style={{
-                                    width: screenWidth * 0.85,
-                                    height: imageHeight,
-                                 }}
-                                 resizeMode="contain"
-                              />
-                           </CyberpunkImageFrame>
-                        </View>
-                     </>
-                  ),
-                  title: t('onboardingGamesTitle'),
-                  subtitle: t('onboardingGamesSubtitle'),
-               },
-               {
-                  backgroundColor: 'transparent',
-                  image: (
-                     <>
-                        <CyberpunkBackground variant={getCyberpunkVariant(4)} />
-                        <View className="items-center justify-center w-full relative z-10">
-                           <CyberpunkImageFrame
-                              variant={getCyberpunkVariant(4)}
-                           >
-                              <Image
-                                 source={require('@/assets/images/onboarding/cyberss5.webp')}
-                                 style={{
-                                    width: screenWidth * 0.85,
-                                    height: imageHeight,
-                                 }}
-                                 resizeMode="contain"
-                              />
-                           </CyberpunkImageFrame>
-                        </View>
-                     </>
-                  ),
-                  title: t('onboardingAiTitle'),
-                  subtitle: t('onboardingAiSubtitle'),
-               },
-               {
-                  backgroundColor: 'transparent',
-                  image: (
-                     <>
-                        <CyberpunkBackground variant={getCyberpunkVariant(5)} />
-                        <View className="items-center justify-center w-full relative z-10">
-                           <CyberpunkImageFrame
-                              variant={getCyberpunkVariant(5)}
-                           >
-                              <View className="items-center justify-center p-8">
-                                 {/* App icon with simplified styling */}
-                                 <View
-                                    className="relative mb-4"
+                           />
+                           <View className="items-center justify-center w-full relative">
+                              <CyberpunkImageFrame
+                                 variant={getCyberpunkVariant(0)}
+                              >
+                                 <Image
+                                    source={require('@/assets/images/onboarding/cyberss1.webp')}
                                     style={{
-                                       shadowColor: colors.neonCyan,
-                                       shadowOffset: { width: 0, height: 0 },
-                                       shadowOpacity: 0.8,
-                                       shadowRadius: 20,
+                                       width: screenWidth * 0.85,
+                                       height: imageHeight,
                                     }}
-                                 >
-                                    <Image
-                                       source={require('@/assets/images/icon.png')}
+                                    resizeMode="contain"
+                                 />
+                              </CyberpunkImageFrame>
+                           </View>
+                        </>
+                     ),
+                     title: t('onboardingWelcomeTitle'),
+                     subtitle: t('onboardingWelcomeSubtitle'),
+                  },
+                  {
+                     backgroundColor: 'transparent',
+                     image: (
+                        <>
+                           <CyberpunkBackground
+                              variant={getCyberpunkVariant(1)}
+                           />
+                           <View className="items-center justify-center w-full relative">
+                              <CyberpunkImageFrame
+                                 variant={getCyberpunkVariant(1)}
+                              >
+                                 <Image
+                                    source={require('@/assets/images/onboarding/cyberss2.webp')}
+                                    style={{
+                                       width: screenWidth * 0.85,
+                                       height: imageHeight,
+                                    }}
+                                    resizeMode="contain"
+                                 />
+                              </CyberpunkImageFrame>
+                           </View>
+                        </>
+                     ),
+                     title: t('onboardingLeaguesTitle'),
+                     subtitle: t('onboardingLeaguesSubtitle'),
+                  },
+                  {
+                     backgroundColor: 'transparent',
+                     image: (
+                        <>
+                           <CyberpunkBackground
+                              variant={getCyberpunkVariant(2)}
+                           />
+                           <View className="items-center justify-center w-full relative">
+                              <CyberpunkImageFrame
+                                 variant={getCyberpunkVariant(2)}
+                              >
+                                 <Image
+                                    source={require('@/assets/images/onboarding/cyberss3.webp')}
+                                    style={{
+                                       width: screenWidth * 0.85,
+                                       height: imageHeight,
+                                    }}
+                                    resizeMode="contain"
+                                 />
+                              </CyberpunkImageFrame>
+                           </View>
+                        </>
+                     ),
+                     title: t('onboardingStatsTitle'),
+                     subtitle: t('onboardingStatsSubtitle'),
+                  },
+                  {
+                     backgroundColor: 'transparent',
+                     image: (
+                        <>
+                           <CyberpunkBackground
+                              variant={getCyberpunkVariant(3)}
+                           />
+                           <View className="items-center justify-center w-full relative">
+                              <CyberpunkImageFrame
+                                 variant={getCyberpunkVariant(3)}
+                              >
+                                 <Image
+                                    source={require('@/assets/images/onboarding/cyberss4.webp')}
+                                    style={{
+                                       width: screenWidth * 0.85,
+                                       height: imageHeight,
+                                    }}
+                                    resizeMode="contain"
+                                 />
+                              </CyberpunkImageFrame>
+                           </View>
+                        </>
+                     ),
+                     title: t('onboardingGamesTitle'),
+                     subtitle: t('onboardingGamesSubtitle'),
+                  },
+                  {
+                     backgroundColor: 'transparent',
+                     image: (
+                        <>
+                           <CyberpunkBackground
+                              variant={getCyberpunkVariant(4)}
+                           />
+                           <View className="items-center justify-center w-full relative">
+                              <CyberpunkImageFrame
+                                 variant={getCyberpunkVariant(4)}
+                              >
+                                 <Image
+                                    source={require('@/assets/images/onboarding/cyberss5.webp')}
+                                    style={{
+                                       width: screenWidth * 0.85,
+                                       height: imageHeight,
+                                    }}
+                                    resizeMode="contain"
+                                 />
+                              </CyberpunkImageFrame>
+                           </View>
+                        </>
+                     ),
+                     title: t('onboardingAiTitle'),
+                     subtitle: t('onboardingAiSubtitle'),
+                  },
+                  {
+                     backgroundColor: 'transparent',
+                     image: (
+                        <>
+                           <CyberpunkBackground
+                              variant={getCyberpunkVariant(5)}
+                           />
+                           <View className="items-center justify-center w-full relative">
+                              <CyberpunkImageFrame
+                                 variant={getCyberpunkVariant(5)}
+                              >
+                                 <View className="items-center justify-center p-8">
+                                    {/* App icon with simplified styling */}
+                                    <View
+                                       className="relative mb-4"
                                        style={{
-                                          width: screenWidth * 0.5,
-                                          height: screenWidth * 0.5,
-                                          borderRadius: 24,
+                                          shadowColor: colors.neonCyan,
+                                          shadowOffset: { width: 0, height: 0 },
+                                          shadowOpacity: 0.8,
+                                          shadowRadius: 20,
                                        }}
-                                       resizeMode="contain"
-                                    />
+                                    >
+                                       <Image
+                                          source={require('@/assets/images/icon.png')}
+                                          style={{
+                                             width: screenWidth * 0.5,
+                                             height: screenWidth * 0.5,
+                                             borderRadius: 24,
+                                          }}
+                                          resizeMode="contain"
+                                       />
+                                    </View>
+
+                                    {/* Cyberpunk feature tags */}
+                                    <View className="flex-row gap-3 mt-4">
+                                       <Animated.View
+                                          className="relative"
+                                          style={{
+                                             transform: [
+                                                {
+                                                   scale: glowAnim.interpolate({
+                                                      inputRange: [0, 1],
+                                                      outputRange: [1, 1.05],
+                                                   }),
+                                                },
+                                             ],
+                                          }}
+                                       >
+                                          <View className="px-3 py-2 border border-neonCyan bg-neonCyan/15 relative rounded">
+                                             <Text className="text-neonCyan font-mono font-bold text-xs tracking-wider">
+                                                LEAGUES
+                                             </Text>
+                                             <View className="absolute top-0 left-0 w-1 h-1 bg-neonCyan" />
+                                             <View className="absolute top-0 right-0 w-1 h-1 bg-neonCyan" />
+                                          </View>
+                                       </Animated.View>
+
+                                       <Animated.View
+                                          className="relative"
+                                          style={{
+                                             transform: [
+                                                {
+                                                   scale: glowAnim.interpolate({
+                                                      inputRange: [0, 1],
+                                                      outputRange: [1.05, 1],
+                                                   }),
+                                                },
+                                             ],
+                                          }}
+                                       >
+                                          <View className="px-3 py-2 border border-neonGreen bg-neonGreen/15 relative rounded">
+                                             <Text className="text-neonGreen font-mono font-bold text-xs tracking-wider">
+                                                STATS
+                                             </Text>
+                                             <View className="absolute bottom-0 left-0 w-1 h-1 bg-neonGreen" />
+                                             <View className="absolute bottom-0 right-0 w-1 h-1 bg-neonGreen" />
+                                          </View>
+                                       </Animated.View>
+
+                                       <Animated.View
+                                          className="relative"
+                                          style={{
+                                             transform: [
+                                                {
+                                                   scale: glowAnim.interpolate({
+                                                      inputRange: [0, 1],
+                                                      outputRange: [1, 1.05],
+                                                   }),
+                                                },
+                                             ],
+                                          }}
+                                       >
+                                          <View className="px-3 py-2 border border-neonPink bg-neonPink/15 relative rounded">
+                                             <Text className="text-neonPink font-mono font-bold text-xs tracking-wider">
+                                                AI
+                                             </Text>
+                                             <View className="absolute top-0 left-0 w-1 h-1 bg-neonPink" />
+                                             <View className="absolute bottom-0 right-0 w-1 h-1 bg-neonPink" />
+                                          </View>
+                                       </Animated.View>
+                                    </View>
                                  </View>
-
-                                 {/* Cyberpunk feature tags */}
-                                 <View className="flex-row gap-3 mt-4">
-                                    <Animated.View
-                                       className="relative"
-                                       style={{
-                                          transform: [
-                                             {
-                                                scale: glowAnim.interpolate({
-                                                   inputRange: [0, 1],
-                                                   outputRange: [1, 1.05],
-                                                }),
-                                             },
-                                          ],
-                                       }}
-                                    >
-                                       <View className="px-3 py-2 border border-neonCyan bg-neonCyan/15 relative rounded">
-                                          <Text className="text-neonCyan font-mono font-bold text-xs tracking-wider">
-                                             LEAGUES
-                                          </Text>
-                                          <View className="absolute top-0 left-0 w-1 h-1 bg-neonCyan" />
-                                          <View className="absolute top-0 right-0 w-1 h-1 bg-neonCyan" />
-                                       </View>
-                                    </Animated.View>
-
-                                    <Animated.View
-                                       className="relative"
-                                       style={{
-                                          transform: [
-                                             {
-                                                scale: glowAnim.interpolate({
-                                                   inputRange: [0, 1],
-                                                   outputRange: [1.05, 1],
-                                                }),
-                                             },
-                                          ],
-                                       }}
-                                    >
-                                       <View className="px-3 py-2 border border-neonGreen bg-neonGreen/15 relative rounded">
-                                          <Text className="text-neonGreen font-mono font-bold text-xs tracking-wider">
-                                             STATS
-                                          </Text>
-                                          <View className="absolute bottom-0 left-0 w-1 h-1 bg-neonGreen" />
-                                          <View className="absolute bottom-0 right-0 w-1 h-1 bg-neonGreen" />
-                                       </View>
-                                    </Animated.View>
-
-                                    <Animated.View
-                                       className="relative"
-                                       style={{
-                                          transform: [
-                                             {
-                                                scale: glowAnim.interpolate({
-                                                   inputRange: [0, 1],
-                                                   outputRange: [1, 1.05],
-                                                }),
-                                             },
-                                          ],
-                                       }}
-                                    >
-                                       <View className="px-3 py-2 border border-neonPink bg-neonPink/15 relative rounded">
-                                          <Text className="text-neonPink font-mono font-bold text-xs tracking-wider">
-                                             AI
-                                          </Text>
-                                          <View className="absolute top-0 left-0 w-1 h-1 bg-neonPink" />
-                                          <View className="absolute bottom-0 right-0 w-1 h-1 bg-neonPink" />
-                                       </View>
-                                    </Animated.View>
-                                 </View>
-                              </View>
-                           </CyberpunkImageFrame>
-                        </View>
-                     </>
-                  ),
-                  title: t('onboardingGetStartedTitle'),
-                  subtitle: t('onboardingGetStartedSubtitle'),
-               },
-            ]}
-            onDone={handleDone}
-            onSkip={handleSkip}
-            pageIndexCallback={handlePageChange}
-            DoneButtonComponent={DoneButton}
-            NextButtonComponent={NextButton}
-            SkipButtonComponent={SkipButton}
-            DotComponent={Dot}
-            bottomBarHighlight={false}
-            titleStyles={{
-               fontSize: Math.min(screenHeight * 0.032, 28),
-               fontWeight: '900',
-               color: colors.text,
-               marginBottom: 12,
-               paddingHorizontal: 24,
-               textAlign: 'center',
-               fontFamily: 'monospace',
-               textShadowColor: colors.neonCyan,
-               textShadowOffset: { width: 0, height: 0 },
-               textShadowRadius: 12,
-               textTransform: 'uppercase',
-               letterSpacing: 1.5,
-            }}
-            subTitleStyles={{
-               fontSize: Math.min(screenHeight * 0.02, 17),
-               color: colors.textSecondary,
-               paddingHorizontal: 32,
-               lineHeight: Math.min(screenHeight * 0.028, 26),
-               textAlign: 'center',
-               marginTop: 8,
-               fontFamily: 'monospace',
-               textShadowColor: colors.neonPink,
-               textShadowOffset: { width: 0, height: 0 },
-               textShadowRadius: 6,
-            }}
-            containerStyles={{
-               paddingBottom: 100,
-               backgroundColor: 'transparent',
-            }}
-            imageContainerStyles={{
-               paddingBottom: 30,
-               flex: 0,
-               backgroundColor: 'transparent',
-            }}
-         />
+                              </CyberpunkImageFrame>
+                           </View>
+                        </>
+                     ),
+                     title: t('onboardingGetStartedTitle'),
+                     subtitle: t('onboardingGetStartedSubtitle'),
+                  },
+               ]}
+               onDone={handleDone}
+               onSkip={handleSkip}
+               pageIndexCallback={handlePageChange}
+               DoneButtonComponent={DoneButton}
+               NextButtonComponent={NextButton}
+               SkipButtonComponent={SkipButton}
+               DotComponent={Dot}
+               bottomBarHighlight={false}
+               titleStyles={{
+                  fontSize: Math.min(screenHeight * 0.032, 28),
+                  fontWeight: '900',
+                  color: colors.text,
+                  marginBottom: 12,
+                  paddingHorizontal: 24,
+                  textAlign: 'center',
+                  fontFamily: 'monospace',
+                  textShadowColor: colors.neonCyan,
+                  textShadowOffset: { width: 0, height: 0 },
+                  textShadowRadius: 12,
+                  textTransform: 'uppercase',
+                  letterSpacing: 1.5,
+               }}
+               subTitleStyles={{
+                  fontSize: Math.min(screenHeight * 0.02, 17),
+                  color: colors.textSecondary,
+                  paddingHorizontal: 32,
+                  lineHeight: Math.min(screenHeight * 0.028, 26),
+                  textAlign: 'center',
+                  marginTop: 8,
+                  fontFamily: 'monospace',
+                  textShadowColor: colors.neonPink,
+                  textShadowOffset: { width: 0, height: 0 },
+                  textShadowRadius: 6,
+               }}
+               containerStyles={{
+                  paddingBottom: 100,
+                  backgroundColor: 'transparent',
+               }}
+               imageContainerStyles={{
+                  paddingBottom: 30,
+                  flex: 0,
+                  backgroundColor: 'transparent',
+               }}
+            />
+         ) : null}
 
          {/* Bottom cyberpunk status bar */}
          <Animated.View
