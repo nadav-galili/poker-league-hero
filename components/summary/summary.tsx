@@ -250,7 +250,7 @@ const Summary = ({ leagueId }: Props) => {
                         fontFamily: 'monospace',
                      }}
                   >
-                     >> {t('retry')} <<
+                     {'>> '}{t('retry')}{' <<'}
                   </Text>
                </TouchableOpacity>
             </View>
@@ -328,7 +328,7 @@ const Summary = ({ leagueId }: Props) => {
                      size={20}
                      color={colors.neonPink}
                   />{' '}
-                  /// {t('aiSummary')} ///
+                  {'/// '}{t('aiSummary')}{' ///'}
                </Text>
                <TouchableOpacity
                   onPress={() => refetch()}
@@ -416,7 +416,7 @@ const Summary = ({ leagueId }: Props) => {
                         fontFamily: 'monospace',
                      }}
                   >
-                     {`>> ${t('financialSnapshot')}`}
+                     {'>> '}{t('financialSnapshot')}
                   </Text>
                   <Text
                      className="font-medium text-base leading-6"
@@ -500,7 +500,7 @@ const Summary = ({ leagueId }: Props) => {
                         fontFamily: 'monospace',
                      }}
                   >
-                     {`>> ${t('lastGameHighlights')}`}
+                     {'>> '}{t('lastGameHighlights')}
                   </Text>
                   <Text
                      className="font-medium text-base leading-6"
@@ -576,7 +576,7 @@ const Summary = ({ leagueId }: Props) => {
                      fontFamily: 'monospace',
                   }}
                >
-                  {`<< ${t('noSummaryYet')} >>`}
+                  {'<< '}{t('noSummaryYet')}{' >>'}
                </Text>
             </View>
          )}
