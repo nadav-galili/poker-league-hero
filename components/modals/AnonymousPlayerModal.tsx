@@ -12,6 +12,7 @@ import {
    KeyboardAvoidingView,
    Modal,
    Platform,
+   ScrollView,
    StyleSheet,
    TouchableOpacity,
    View,
@@ -48,6 +49,7 @@ function MatrixRain() {
 
       animations.forEach((anim) => anim.start());
       return () => animations.forEach((anim) => anim.stop());
+      // eslint-disable-next-line react-hooks/exhaustive-deps
    }, []);
 
    return (
@@ -134,6 +136,7 @@ function HolographicOverlay() {
             useNativeDriver: true,
          })
       ).start();
+      // eslint-disable-next-line react-hooks/exhaustive-deps
    }, []);
 
    return (
@@ -214,6 +217,7 @@ export function AnonymousPlayerModal({
             ])
          ).start();
       }
+      // eslint-disable-next-line react-hooks/exhaustive-deps
    }, [visible]);
 
    const handleAdd = async () => {
@@ -261,99 +265,118 @@ export function AnonymousPlayerModal({
          transparent={true}
          onRequestClose={handleClose}
       >
-         <View style={modalStyles.backdrop}>
-            <KeyboardAvoidingView
-               behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
-               style={modalStyles.modalContainer}
-            >
-               <LinearGradient
-                  colors={getCyberpunkGradient('dark')}
-                  style={modalStyles.gradientContainer}
+         <KeyboardAvoidingView
+            behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+            style={{ flex: 1 }}
+            keyboardVerticalOffset={Platform.OS === 'ios' ? 0 : 20}
+         >
+            <View style={modalStyles.backdrop}>
+               <ScrollView
+                  contentContainerStyle={modalStyles.scrollContent}
+                  keyboardShouldPersistTaps="handled"
+                  showsVerticalScrollIndicator={false}
                >
-                  <MatrixRain />
-                  <HolographicOverlay />
-                  <CornerBrackets color="#FF5722" />
-
-                  {/* Header */}
-                  <View style={modalStyles.header}>
-                     <TouchableOpacity
-                        onPress={handleClose}
-                        style={modalStyles.closeButton}
-                        disabled={isProcessing}
+                  <View style={modalStyles.modalContainer}>
+                     <LinearGradient
+                        colors={getCyberpunkGradient('dark')}
+                        style={modalStyles.gradientContainer}
                      >
-                        <LinearGradient
-                           colors={['#FF5722', '#FF7043']}
-                           style={modalStyles.closeButtonGradient}
-                        >
-                           <Ionicons name="close" size={20} color="#000000" />
-                        </LinearGradient>
-                     </TouchableOpacity>
+                        <MatrixRain />
+                        <HolographicOverlay />
+                        <CornerBrackets color="#FF5722" />
 
-                     <Animated.View
-                        style={[
-                           modalStyles.titleContainer,
-                           {
-                              shadowOpacity: glowAnim.interpolate({
-                                 inputRange: [0, 1],
-                                 outputRange: [0.3, 0.8],
-                              }),
-                           },
-                        ]}
-                     >
-                        <CustomText variant="h3" style={modalStyles.title}>
-                           {t('addAnonymousPlayer')}
-                        </CustomText>
-                     </Animated.View>
-                  </View>
+                        {/* Header */}
+                        <View style={modalStyles.header}>
+                           <TouchableOpacity
+                              onPress={handleClose}
+                              style={modalStyles.closeButton}
+                              disabled={isProcessing}
+                           >
+                              <LinearGradient
+                                 colors={['#FF5722', '#FF7043']}
+                                 style={modalStyles.closeButtonGradient}
+                              >
+                                 <Ionicons
+                                    name="close"
+                                    size={20}
+                                    color="#000000"
+                                 />
+                              </LinearGradient>
+                           </TouchableOpacity>
 
-                  {/* Content */}
-                  <View style={modalStyles.content}>
-                     {/* Anonymous Player Icon */}
-                     <View style={modalStyles.iconContainer}>
-                        <LinearGradient
-                           colors={['#FF5722', '#FF7043']}
-                           style={modalStyles.iconGradient}
-                        >
-                           <Ionicons
-                              name="person-add"
-                              size={32}
-                              color="#000000"
+                           <Animated.View
+                              style={[
+                                 modalStyles.titleContainer,
+                                 {
+                                    shadowOpacity: glowAnim.interpolate({
+                                       inputRange: [0, 1],
+                                       outputRange: [0.3, 0.8],
+                                    }),
+                                 },
+                              ]}
+                           >
+                              <CustomText
+                                 variant="h3"
+                                 style={modalStyles.title}
+                              >
+                                 {t('addAnonymousPlayer')}
+                              </CustomText>
+                           </Animated.View>
+                        </View>
+
+                        {/* Content */}
+                        <View style={modalStyles.content}>
+                           {/* Anonymous Player Icon */}
+                           <View style={modalStyles.iconContainer}>
+                              <LinearGradient
+                                 colors={['#FF5722', '#FF7043']}
+                                 style={modalStyles.iconGradient}
+                              >
+                                 <Ionicons
+                                    name="person-add"
+                                    size={32}
+                                    color="#000000"
+                                 />
+                              </LinearGradient>
+                           </View>
+
+                           <CyberpunkFormField
+                              label={t('anonymousPlayerName')}
+                              placeholder={t('enterPlayerName')}
+                              value={name}
+                              onChangeText={handleNameChange}
+                              autoFocus
+                              required
+                              returnKeyType="done"
+                              onSubmitEditing={handleAdd}
+                              maxLength={50}
+                              errorMessage={error}
+                              validationState={error ? 'error' : 'idle'}
+                              editable={!isProcessing}
+                              keyboardType="default"
+                              autoCapitalize="words"
+                              autoCorrect={false}
                            />
-                        </LinearGradient>
-                     </View>
 
-                     <CyberpunkFormField
-                        label={t('anonymousPlayerName')}
-                        placeholder={t('enterPlayerName')}
-                        value={name}
-                        onChangeText={handleNameChange}
-                        autoFocus
-                        required
-                        returnKeyType="done"
-                        onSubmitEditing={handleAdd}
-                        maxLength={50}
-                        errorMessage={error}
-                        validationState={error ? 'error' : 'idle'}
-                        editable={!isProcessing}
-                     />
-
-                     <AppButton
-                        title={
-                           isProcessing
-                              ? t('processing')
-                              : t('addAnonymousPlayer')
-                        }
-                        onPress={handleAdd}
-                        disabled={!name.trim() || isProcessing}
-                        color="primary"
-                        variant="gradient"
-                        size="large"
-                        loading={isProcessing}
-                     />
+                           <AppButton
+                              title={
+                                 isProcessing
+                                    ? t('processing')
+                                    : t('addAnonymousPlayer')
+                              }
+                              onPress={handleAdd}
+                              disabled={!name.trim() || isProcessing}
+                              color="primary"
+                              variant="gradient"
+                              size="large"
+                              loading={isProcessing}
+                           />
+                        </View>
+                     </LinearGradient>
                   </View>
-               </LinearGradient>
-            </KeyboardAvoidingView>
-         </View>
+               </ScrollView>
+            </View>
+         </KeyboardAvoidingView>
       </Modal>
    );
 }
@@ -365,7 +388,13 @@ const modalStyles = StyleSheet.create({
       justifyContent: 'center',
       alignItems: 'center',
       position: 'relative',
+   },
+   scrollContent: {
+      flexGrow: 1,
+      justifyContent: 'center',
+      alignItems: 'center',
       paddingHorizontal: 20,
+      paddingVertical: 20,
    },
    modalContainer: {
       width: '100%',

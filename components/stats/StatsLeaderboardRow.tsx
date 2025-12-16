@@ -3,9 +3,8 @@ import { formatCurrency } from '@/services/leagueStatsFormatters';
 import { PlayerStat, StatType } from '@/services/leagueStatsService';
 import { Image } from 'expo-image';
 import { LinearGradient } from 'expo-linear-gradient';
-import React from 'react';
-import { StyleSheet, Text, View } from 'react-native';
-import Animated, { FadeInRight } from 'react-native-reanimated';
+import React, { useEffect, useRef } from 'react';
+import { Animated, StyleSheet, Text, View } from 'react-native';
 
 // @ts-ignore - local image import
 import anonymousImage from '@/assets/images/anonymous.webp';
@@ -63,6 +62,26 @@ export default function StatsLeaderboardRow({
 }: StatsLeaderboardRowProps) {
    const config = STAT_CONFIGS[statType];
    const rank = player.rank || index + 2; // Default rank if not provided (assuming hero is #1)
+   
+   const fadeAnim = useRef(new Animated.Value(0)).current;
+   const translateXAnim = useRef(new Animated.Value(50)).current;
+
+   useEffect(() => {
+      Animated.parallel([
+         Animated.timing(fadeAnim, {
+            toValue: 1,
+            duration: 300,
+            delay: index * 50,
+            useNativeDriver: true,
+         }),
+         Animated.spring(translateXAnim, {
+            toValue: 0,
+            friction: 7,
+            delay: index * 50,
+            useNativeDriver: true,
+         }),
+      ]).start();
+   }, [fadeAnim, translateXAnim, index]);
 
    // Cyberpunk rank badge color logic
    const getRankColor = (r: number) => {
@@ -83,8 +102,13 @@ export default function StatsLeaderboardRow({
 
    return (
       <Animated.View
-         entering={FadeInRight.delay(index * 50).springify()}
-         style={styles.container}
+         style={[
+            styles.container,
+            {
+               opacity: fadeAnim,
+               transform: [{ translateX: translateXAnim }],
+            },
+         ]}
       >
          {/* Cyberpunk background gradient */}
          <LinearGradient

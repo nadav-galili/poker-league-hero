@@ -20,6 +20,7 @@ import { LinearGradient } from 'expo-linear-gradient';
 import { router, useLocalSearchParams } from 'expo-router';
 import React from 'react';
 import {
+   Animated,
    Pressable,
    RefreshControl,
    ScrollView,
@@ -27,48 +28,46 @@ import {
    Text,
    View,
 } from 'react-native';
-import Animated, {
-   useAnimatedStyle,
-   useSharedValue,
-   withSpring,
-} from 'react-native-reanimated';
 
-const AnimatedPressable = Animated.createAnimatedComponent(Pressable);
+const PressableStatCard = React.memo(
+   ({
+      children,
+      onPress,
+   }: {
+      children: React.ReactNode;
+      onPress: () => void;
+   }) => {
+      const scaleAnim = React.useRef(new Animated.Value(1)).current;
 
-const PressableStatCard = ({
-   children,
-   onPress,
-}: {
-   children: React.ReactNode;
-   onPress: () => void;
-}) => {
-   const scale = useSharedValue(1);
+      const handlePressIn = React.useCallback(() => {
+         Animated.spring(scaleAnim, {
+            toValue: 0.95,
+            useNativeDriver: true,
+         }).start();
+      }, [scaleAnim]);
 
-   const animatedStyle = useAnimatedStyle(() => ({
-      transform: [{ scale: scale.value }],
-   }));
+      const handlePressOut = React.useCallback(() => {
+         Animated.spring(scaleAnim, {
+            toValue: 1,
+            useNativeDriver: true,
+         }).start();
+      }, [scaleAnim]);
 
-   const handlePressIn = React.useCallback(() => {
-      'worklet';
-      scale.value = withSpring(0.95);
-   }, [scale]);
+      return (
+         <Animated.View style={{ transform: [{ scale: scaleAnim }] }}>
+            <Pressable
+               onPress={onPress}
+               onPressIn={handlePressIn}
+               onPressOut={handlePressOut}
+            >
+               {children}
+            </Pressable>
+         </Animated.View>
+      );
+   }
+);
 
-   const handlePressOut = React.useCallback(() => {
-      'worklet';
-      scale.value = withSpring(1);
-   }, [scale]);
-
-   return (
-      <AnimatedPressable
-         onPress={onPress}
-         onPressIn={handlePressIn}
-         onPressOut={handlePressOut}
-         style={animatedStyle}
-      >
-         {children}
-      </AnimatedPressable>
-   );
-};
+PressableStatCard.displayName = 'PressableStatCard';
 
 // CyberpunkStatsLoader component for league stats screen
 const CyberpunkStatsLoader = React.memo<{ message?: string }>(
@@ -714,7 +713,7 @@ export default function LeagueStatsScreen() {
             </View>
 
             {/* Recent Game Results */}
-            <View className="px-6">
+            <View>
                <RecentGameResults
                   games={games}
                   isLoading={gamesLoading}

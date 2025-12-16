@@ -67,38 +67,43 @@ export const useGameData = (gameId: string | undefined) => {
       LeagueMember[]
    >([]);
 
-   const loadGameData = React.useCallback(async () => {
-      if (!gameId) return;
+   const loadGameData = React.useCallback(
+      async (isBackground = false) => {
+         if (!gameId) return;
 
-      try {
-         setError(null);
-         if (!refreshing) setIsLoading(true);
+         try {
+            setError(null);
+            if (!refreshing && !isBackground) setIsLoading(true);
 
-         const response = await fetchWithAuth(
-            `${BASE_URL}/api/games/${gameId}`,
-            {}
-         );
+            const response = await fetchWithAuth(
+               `${BASE_URL}/api/games/${gameId}`,
+               {}
+            );
 
-         if (!response.ok) {
-            throw new Error('Failed to fetch game details');
+            if (!response.ok) {
+               throw new Error('Failed to fetch game details');
+            }
+
+            const data = await response.json();
+            setGame(data.game);
+         } catch (err) {
+            const errorMessage =
+               err instanceof Error
+                  ? err.message
+                  : 'Failed to load game details';
+            setError(errorMessage);
+            captureException(err as Error, {
+               function: 'loadGameData',
+               screen: 'GameScreen',
+               gameId,
+            });
+         } finally {
+            setIsLoading(false);
+            setRefreshing(false);
          }
-
-         const data = await response.json();
-         setGame(data.game);
-      } catch (err) {
-         const errorMessage =
-            err instanceof Error ? err.message : 'Failed to load game details';
-         setError(errorMessage);
-         captureException(err as Error, {
-            function: 'loadGameData',
-            screen: 'GameScreen',
-            gameId,
-         });
-      } finally {
-         setIsLoading(false);
-         setRefreshing(false);
-      }
-   }, [gameId, fetchWithAuth, refreshing]);
+      },
+      [gameId, fetchWithAuth, refreshing]
+   );
 
    const loadAvailableMembers = React.useCallback(async () => {
       if (!game?.leagueId) return;

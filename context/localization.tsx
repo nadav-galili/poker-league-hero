@@ -465,8 +465,8 @@ const enTranslations: Translations = {
    enterCashOutAmount: 'Enter the amount this player is cashing out with:',
    cashOutAmount: 'Cash Out Amount',
    invalidAmount: 'Please enter a valid amount',
-   playerCashedOut: 'Player cashed out',
-   buyInSuccessful: 'Buy-in successful',
+   playerCashedOut: 'cashed out',
+   buyInSuccessful: 'Buy-in for',
    buyInUndone: 'Buy-in undone',
    selectPlayerToAdd: 'Select a player to add to the game',
    playerAdded: 'Player added to the game',
@@ -754,8 +754,8 @@ const heTranslations: Translations = {
    enterCashOutAmount: 'הכנס את הסכום שהשחקן מושך:',
    cashOutAmount: 'סכום משיכה',
    invalidAmount: 'אנא הכנס סכום תקף',
-   playerCashedOut: 'השחקן משך כסף',
-   buyInSuccessful: 'כניסה בוצעה בהצלחה',
+   playerCashedOut: 'משך כסף',
+   buyInSuccessful: 'כניסה בוצעה  עבור',
    buyInUndone: 'ביטול כניסה בוצע בהצלחה',
    selectPlayerToAdd: 'בחר שחקן להוסיף למשחק',
    playerAdded: 'השחקן נוסף למשחק',
@@ -776,7 +776,7 @@ const heTranslations: Translations = {
    gameEndedSuccessfully: 'המשחק הסתיים בהצלחה',
 
    // Top Profit Player Card
-   topProfitPlayer: 'שחקן עם הרווח הגבוה ביותר',
+   topProfitPlayer: 'טבלת ליגה',
    loadingTopPlayer: 'טוען שחקן מוביל...',
    noTopPlayerData: 'אין נתוני רווח זמינים',
    noCompletedGames: 'עדיין אין משחקים שהסתיימו',
@@ -784,7 +784,7 @@ const heTranslations: Translations = {
 
    // Generic Player Stats
    loadingPlayerStat: 'טוען סטטיסטיקת שחקן...',
-   mostActivePlayer: 'השחקן הכי פעיל',
+   mostActivePlayer: 'כמות משחקים',
    highestSingleGameProfit: 'הרווח הגבוה במשחק בודד',
    biggestLoser: 'המפסיד הכי גדול',
    bestWinningStreak: 'רצף הניצחונות הטוב ביותר',

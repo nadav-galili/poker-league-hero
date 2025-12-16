@@ -1,61 +1,65 @@
 import { colors } from '@/colors';
 import { LinearGradient } from 'expo-linear-gradient';
-import React, { useEffect } from 'react';
-import { StyleSheet, View } from 'react-native';
-import Animated, {
-   useAnimatedStyle,
-   useSharedValue,
-   withRepeat,
-   withSequence,
-   withTiming,
-} from 'react-native-reanimated';
+import React, { useEffect, useRef } from 'react';
+import { Animated, StyleSheet, View } from 'react-native';
 
+const CyberpunkSkeletonItem = React.memo(
+   ({
+      style,
+      gradientColors = [colors.neonCyan, colors.neonBlue],
+   }: {
+      style: any;
+      gradientColors?: readonly [string, string, ...string[]];
+   }) => {
+      const opacityAnim = useRef(new Animated.Value(0.2)).current;
 
-const CyberpunkSkeletonItem = ({ style, gradientColors = [colors.neonCyan, colors.neonBlue] }: { style: any; gradientColors?: string[] }) => {
-   const opacity = useSharedValue(0.2);
-   const glowIntensity = useSharedValue(0.4);
+      useEffect(() => {
+         // Cyberpunk pulsing effect
+         Animated.loop(
+            Animated.sequence([
+               Animated.timing(opacityAnim, {
+                  toValue: 0.6,
+                  duration: 1200,
+                  useNativeDriver: true,
+               }),
+               Animated.timing(opacityAnim, {
+                  toValue: 0.2,
+                  duration: 800,
+                  useNativeDriver: true,
+               }),
+            ])
+         ).start();
+      }, [opacityAnim]);
 
-   useEffect(() => {
-      // Cyberpunk pulsing effect
-      opacity.value = withRepeat(
-         withSequence(
-            withTiming(0.6, { duration: 1200 }),
-            withTiming(0.2, { duration: 800 })
-         ),
-         -1,
-         true
+      return (
+         <Animated.View style={[style, { opacity: opacityAnim }]}>
+            <LinearGradient
+               colors={gradientColors}
+               style={StyleSheet.absoluteFill}
+               start={{ x: 0, y: 0 }}
+               end={{ x: 1, y: 1 }}
+            />
+            {/* Corner brackets for cyberpunk effect */}
+            <View
+               style={[
+                  styles.skeletonBracket,
+                  styles.topLeft,
+                  { borderColor: gradientColors[0] },
+               ]}
+            />
+            <View
+               style={[
+                  styles.skeletonBracket,
+                  styles.bottomRight,
+                  { borderColor: gradientColors[0] },
+               ]}
+            />
+         </Animated.View>
       );
+   }
+);
 
-      // Glow intensity animation
-      glowIntensity.value = withRepeat(
-         withSequence(
-            withTiming(0.8, { duration: 1500 }),
-            withTiming(0.4, { duration: 1000 })
-         ),
-         -1,
-         true
-      );
-   }, [opacity, glowIntensity]);
-
-   const animatedStyle = useAnimatedStyle(() => ({
-      opacity: opacity.value,
-      shadowOpacity: glowIntensity.value,
-   }));
-
-   return (
-      <Animated.View style={[style, animatedStyle]}>
-         <LinearGradient
-            colors={gradientColors}
-            style={StyleSheet.absoluteFill}
-            start={{ x: 0, y: 0 }}
-            end={{ x: 1, y: 1 }}
-         />
-         {/* Corner brackets for cyberpunk effect */}
-         <View style={[styles.skeletonBracket, styles.topLeft, { borderColor: gradientColors[0] }]} />
-         <View style={[styles.skeletonBracket, styles.bottomRight, { borderColor: gradientColors[0] }]} />
-      </Animated.View>
-   );
-};
+CyberpunkSkeletonItem.displayName = 'CyberpunkSkeletonItem';
 
 export default function StatsLeaderboardSkeleton() {
    return (
@@ -65,7 +69,11 @@ export default function StatsLeaderboardSkeleton() {
             <View style={styles.heroCard}>
                <CyberpunkSkeletonItem
                   style={styles.heroCardBg}
-                  gradientColors={[colors.neonCyan, colors.neonBlue, colors.holoBlue]}
+                  gradientColors={[
+                     colors.neonCyan,
+                     colors.neonBlue,
+                     colors.holoBlue,
+                  ]}
                />
                {/* Hero content placeholders */}
                <View style={styles.heroContent}>
@@ -85,7 +93,7 @@ export default function StatsLeaderboardSkeleton() {
                      <View style={styles.heroInfo}>
                         <CyberpunkSkeletonItem
                            style={styles.heroName}
-                           gradientColors={[colors.textPrimary, colors.textSecondary]}
+                           gradientColors={[colors.text, colors.textSecondary]}
                         />
                         <CyberpunkSkeletonItem
                            style={styles.heroValue}
@@ -109,11 +117,25 @@ export default function StatsLeaderboardSkeleton() {
                   />
 
                   {/* Side accent */}
-                  <View style={[styles.listSideAccent, { backgroundColor: index === 0 ? colors.neonCyan : colors.textSecondary }]} />
+                  <View
+                     style={[
+                        styles.listSideAccent,
+                        {
+                           backgroundColor:
+                              index === 0
+                                 ? colors.neonCyan
+                                 : colors.textSecondary,
+                        },
+                     ]}
+                  />
 
                   <CyberpunkSkeletonItem
                      style={styles.rankBadge}
-                     gradientColors={index === 0 ? [colors.neonCyan, colors.neonBlue] : [colors.textSecondary, colors.cyberGray]}
+                     gradientColors={
+                        index === 0
+                           ? [colors.neonCyan, colors.neonBlue]
+                           : [colors.textSecondary, colors.cyberGray]
+                     }
                   />
                   <CyberpunkSkeletonItem
                      style={styles.avatar}
@@ -122,16 +144,23 @@ export default function StatsLeaderboardSkeleton() {
                   <View style={styles.textContainer}>
                      <CyberpunkSkeletonItem
                         style={styles.nameText}
-                        gradientColors={[colors.textPrimary, colors.textSecondary]}
+                        gradientColors={[colors.text, colors.textSecondary]}
                      />
                      <CyberpunkSkeletonItem
                         style={styles.statText}
-                        gradientColors={[colors.textSecondary, colors.textMuted]}
+                        gradientColors={[
+                           colors.textSecondary,
+                           colors.textMuted,
+                        ]}
                      />
                   </View>
                   <CyberpunkSkeletonItem
                      style={styles.value}
-                     gradientColors={index === 0 ? [colors.neonCyan, colors.neonBlue] : [colors.textSecondary, colors.textMuted]}
+                     gradientColors={
+                        index === 0
+                           ? [colors.neonCyan, colors.neonBlue]
+                           : [colors.textSecondary, colors.textMuted]
+                     }
                   />
                </View>
             ))}
@@ -336,4 +365,3 @@ const styles = StyleSheet.create({
       borderLeftWidth: 0,
    },
 });
-

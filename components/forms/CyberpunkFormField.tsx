@@ -280,7 +280,9 @@ export const CyberpunkFormField: React.FC<CyberpunkFormFieldProps> = ({
                className="absolute inset-0"
                style={{
                   borderRadius: sizeStyles.borderRadius,
-                  shadowColor: isFocused ? validationStyles.glowColor : colors.shadowNeonCyan,
+                  shadowColor: isFocused
+                     ? validationStyles.glowColor
+                     : colors.shadowNeonCyan,
                   shadowOffset: { width: 0, height: 0 },
                   shadowOpacity: focusAnim.interpolate({
                      inputRange: [0, 1],
@@ -296,7 +298,11 @@ export const CyberpunkFormField: React.FC<CyberpunkFormFieldProps> = ({
 
             {/* Matrix background grid */}
             <LinearGradient
-               colors={[colors.cyberBackground, validationStyles.backgroundColor, colors.cyberBackground]}
+               colors={[
+                  colors.cyberBackground,
+                  validationStyles.backgroundColor,
+                  colors.cyberBackground,
+               ]}
                start={{ x: 0, y: 0 }}
                end={{ x: 1, y: 1 }}
                style={{
@@ -312,7 +318,9 @@ export const CyberpunkFormField: React.FC<CyberpunkFormFieldProps> = ({
                style={{
                   height: sizeStyles.height,
                   borderWidth: 2,
-                  borderColor: isFocused ? validationStyles.borderColor : colors.borderNeonCyan,
+                  borderColor: isFocused
+                     ? validationStyles.borderColor
+                     : colors.borderNeonCyan,
                   borderRadius: sizeStyles.borderRadius,
                   backgroundColor: colors.cyberBackground,
                   flexDirection: 'row',
@@ -327,9 +335,16 @@ export const CyberpunkFormField: React.FC<CyberpunkFormFieldProps> = ({
                      <Ionicons
                         name={icon}
                         size={sizeStyles.iconSize}
-                        color={validationState === 'error' ? colors.error : colors.neonCyan}
+                        color={
+                           validationState === 'error'
+                              ? colors.error
+                              : colors.neonCyan
+                        }
                         style={{
-                           textShadowColor: validationState === 'error' ? colors.shadowPink : colors.shadowNeonCyan,
+                           textShadowColor:
+                              validationState === 'error'
+                                 ? colors.shadowPink
+                                 : colors.shadowNeonCyan,
                            textShadowOffset: { width: 0, height: 0 },
                            textShadowRadius: 8,
                         }}
@@ -363,9 +378,7 @@ export const CyberpunkFormField: React.FC<CyberpunkFormFieldProps> = ({
 
                {/* Right component */}
                {rightComponent && (
-                  <View className="pr-4">
-                     {rightComponent}
-                  </View>
+                  <View className="pr-4">{rightComponent}</View>
                )}
 
                {/* Corner brackets */}
@@ -446,15 +459,18 @@ export const CyberpunkFormField: React.FC<CyberpunkFormFieldProps> = ({
                {/* Scan line animation for validation */}
                {validationState === 'validating' && (
                   <Animated.View
+                     pointerEvents="none"
                      className="absolute left-0 right-0 h-0.5"
                      style={{
                         backgroundColor: colors.neonBlue,
-                        transform: [{
-                           translateY: scanlineAnim.interpolate({
-                              inputRange: [0, 1],
-                              outputRange: [0, sizeStyles.height],
-                           }),
-                        }],
+                        transform: [
+                           {
+                              translateY: scanlineAnim.interpolate({
+                                 inputRange: [0, 1],
+                                 outputRange: [0, sizeStyles.height],
+                              }),
+                           },
+                        ],
                         shadowColor: colors.shadowNeonCyan,
                         shadowOffset: { width: 0, height: 0 },
                         shadowOpacity: 1,
@@ -465,6 +481,7 @@ export const CyberpunkFormField: React.FC<CyberpunkFormFieldProps> = ({
 
                {/* Matrix effect overlay */}
                <Animated.View
+                  pointerEvents="none"
                   className="absolute inset-0 bg-white"
                   style={{
                      opacity: matrixAnim.interpolate({
@@ -477,6 +494,7 @@ export const CyberpunkFormField: React.FC<CyberpunkFormFieldProps> = ({
 
                {/* Holographic flicker */}
                <Animated.View
+                  pointerEvents="none"
                   className="absolute inset-0"
                   style={{
                      borderRadius: sizeStyles.borderRadius - 2,
@@ -491,8 +509,14 @@ export const CyberpunkFormField: React.FC<CyberpunkFormFieldProps> = ({
             </View>
 
             {/* Data stream indicators */}
-            <View className="absolute -right-1 top-1/2 w-3 h-px bg-neonCyan opacity-50" />
-            <View className="absolute -left-1 top-1/2 w-3 h-px bg-neonPink opacity-50" />
+            <View
+               className="absolute -right-1 top-1/2 w-3 h-px bg-neonCyan opacity-50"
+               pointerEvents="none"
+            />
+            <View
+               className="absolute -left-1 top-1/2 w-3 h-px bg-neonPink opacity-50"
+               pointerEvents="none"
+            />
          </View>
 
          {/* Character count */}
@@ -501,7 +525,10 @@ export const CyberpunkFormField: React.FC<CyberpunkFormFieldProps> = ({
                <Text
                   className="font-mono text-xs"
                   style={{
-                     color: value.length === maxLength ? colors.error : colors.textMuted,
+                     color:
+                        value.length === maxLength
+                           ? colors.error
+                           : colors.textMuted,
                   }}
                >
                   {value.length}/{maxLength}

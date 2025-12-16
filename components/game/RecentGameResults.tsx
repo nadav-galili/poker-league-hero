@@ -5,23 +5,17 @@ import { FlashList } from '@shopify/flash-list';
 import dayjs from 'dayjs';
 import { Image } from 'expo-image';
 import { LinearGradient } from 'expo-linear-gradient';
-import React, { useEffect, useState } from 'react';
-import { Dimensions, Text, View } from 'react-native';
-import { Gesture, GestureDetector } from 'react-native-gesture-handler';
-import Animated, {
-   Easing,
-   runOnJS,
-   useAnimatedStyle,
-   useSharedValue,
-   withTiming,
-} from 'react-native-reanimated';
+import React, { useRef, useState } from 'react';
+import {
+   ActivityIndicator,
+   Dimensions,
+   FlatList,
+   Text,
+   View,
+   ViewToken,
+} from 'react-native';
 
 const SCREEN_WIDTH = Dimensions.get('window').width;
-const PAGE_WIDTH = SCREEN_WIDTH;
-const SNAP_DISTANCE = SCREEN_WIDTH * 0.25;
-const VELOCITY_THRESHOLD = 900;
-const CARD_OFFSET = 20; // For layered card effect
-const EDGE_RUBBER_BAND = 0.35;
 
 interface RecentGameResultsProps {
    games: GameResult[];
@@ -31,276 +25,273 @@ interface RecentGameResultsProps {
    loadMore: () => void;
 }
 
-const PlayerRow = ({
-   item,
-   index,
-}: {
-   item: GameResult['players'][0];
-   index: number;
-}) => {
-   const { t, isRTL } = useLocalization();
-   const isTopThree = index < 3;
+const PlayerRow = React.memo(
+   ({ item, index }: { item: GameResult['players'][0]; index: number }) => {
+      const { t, isRTL } = useLocalization();
+      const isTopThree = index < 3;
 
-   return (
-      <View
-         className="flex-row items-center justify-between py-3 relative"
-         style={{
-            opacity: isTopThree ? 1 : 0.7,
-            borderBottomWidth: 1,
-            borderBottomColor: 'rgba(0, 255, 255, 0.1)',
-         }}
-      >
-         {/* Cyberpunk rank indicator for top 3 */}
-         {isTopThree && (
-            <View
-               className="absolute left-0 w-1 h-full bg-gradient-to-b"
-               style={{
-                  backgroundColor:
-                     index === 0
-                        ? '#00FFFF'
-                        : index === 1
-                          ? '#00BFFF'
-                          : '#0099FF',
-               }}
-            />
-         )}
-
+      return (
          <View
-            className="flex-row items-center flex-1 ml-2"
-            style={{ marginEnd: 16 }}
-         >
-            <View className="relative">
-               <Image
-                  source={
-                     item.profileImageUrl
-                        ? { uri: item.profileImageUrl }
-                        : require('@/assets/images/anonymous.webp')
-                  }
-                  style={{
-                     width: 32,
-                     height: 32,
-                     borderRadius: 4, // Sharp cyberpunk edges
-                     [isRTL ? 'marginLeft' : 'marginRight']: 12,
-                     borderWidth: isTopThree ? 2 : 1,
-                     borderColor: isTopThree
-                        ? '#00FFFF'
-                        : 'rgba(0, 255, 255, 0.3)',
-                  }}
-                  contentFit="cover"
-               />
-
-               {/* Cyberpunk corner brackets for top players */}
-               {isTopThree && (
-                  <>
-                     <View className="absolute -top-1 -left-1 w-2 h-2 border-l border-t border-[#00FFFF]" />
-                     <View className="absolute -top-1 -right-1 w-2 h-2 border-r border-t border-[#00FFFF]" />
-                     <View className="absolute -bottom-1 -left-1 w-2 h-2 border-l border-b border-[#00FFFF]" />
-                     <View className="absolute -bottom-1 -right-1 w-2 h-2 border-r border-b border-[#00FFFF]" />
-                  </>
-               )}
-            </View>
-
-            <View
-               style={{
-                  alignItems: isRTL ? 'flex-end' : 'flex-start',
-                  flex: 1,
-               }}
-            >
-               <Text
-                  className={`font-medium text-sm font-mono tracking-wider ${
-                     isTopThree ? 'text-[#00FFFF]' : 'text-white'
-                  }`}
-                  style={{
-                     textAlign: isRTL ? 'right' : 'left',
-                     textShadowColor: isTopThree ? '#00FFFF' : 'transparent',
-                     textShadowOffset: { width: 0, height: 0 },
-                     textShadowRadius: isTopThree ? 4 : 0,
-                  }}
-                  numberOfLines={1}
-               >
-                  {item.fullName}
-               </Text>
-               <Text
-                  className="text-[#00BFFF]/70 text-xs font-mono"
-                  style={{ textAlign: isRTL ? 'right' : 'left' }}
-               >
-                  {t('buyIn')}: {t('currency')}
-                  {item.totalBuyIns}
-               </Text>
-            </View>
-         </View>
-
-         <View style={{ minWidth: 80, alignItems: 'flex-end' }}>
-            <Text
-               className={`font-bold text-sm font-mono tracking-wider ${
-                  item.profit > 0
-                     ? 'text-[#00FF88]'
-                     : item.profit < 0
-                       ? 'text-[#FF4444]'
-                       : 'text-gray-400'
-               }`}
-               style={{
-                  textShadowColor:
-                     item.profit > 0
-                        ? '#00FF88'
-                        : item.profit < 0
-                          ? '#FF4444'
-                          : 'transparent',
-                  textShadowOffset: { width: 0, height: 0 },
-                  textShadowRadius: item.profit !== 0 ? 4 : 0,
-               }}
-            >
-               {item.profit > 0 ? '+' : ''}
-               {t('currency')}
-               {item.profit.toFixed(2)}
-            </Text>
-         </View>
-      </View>
-   );
-};
-
-const GameCard = ({
-   game,
-   isActive = false,
-}: {
-   game: GameResult;
-   isActive?: boolean;
-}) => {
-   const { t } = useLocalization();
-
-   const formatTime = (dateString: string) => {
-      return dayjs(dateString).format('HH:mm');
-   };
-
-   return (
-      <View
-         className="w-full bg-black/90 border-2 border-[#00BFFF] relative overflow-hidden"
-         style={{
-            borderColor: isActive ? '#00FFFF' : '#00BFFF',
-            shadowColor: '#00BFFF',
-            shadowOffset: { width: 0, height: 0 },
-            shadowOpacity: isActive ? 0.8 : 0.6,
-            shadowRadius: isActive ? 16 : 12,
-            elevation: isActive ? 16 : 12,
-            transform: [{ scale: isActive ? 1.02 : 1 }],
-         }}
-      >
-         {/* Cyberpunk corner brackets */}
-         <View className="absolute top-2 left-2 w-4 h-4 border-l-2 border-t-2 border-[#00FFFF]" />
-         <View className="absolute top-2 right-2 w-4 h-4 border-r-2 border-t-2 border-[#00BFFF]" />
-         <View className="absolute bottom-2 left-2 w-4 h-4 border-l-2 border-b-2 border-[#00BFFF]" />
-         <View className="absolute bottom-2 right-2 w-4 h-4 border-r-2 border-b-2 border-[#00FFFF]" />
-
-         {/* Holographic overlay */}
-         <LinearGradient
-            colors={[
-               'rgba(0, 255, 255, 0.05)',
-               'transparent',
-               'rgba(0, 191, 255, 0.05)',
-            ]}
-            start={{ x: 0, y: 0 }}
-            end={{ x: 1, y: 1 }}
+            className="flex-row items-center justify-between py-3 relative"
             style={{
-               position: 'absolute',
-               top: 0,
-               left: 0,
-               right: 0,
-               bottom: 0,
-               opacity: 0.8,
+               opacity: isTopThree ? 1 : 0.7,
+               borderBottomWidth: 1,
+               borderBottomColor: 'rgba(0, 255, 255, 0.1)',
             }}
-         />
-
-         {/* Game Header - Cyberpunk styled */}
-         <View className="p-4 bg-black/80 border-b border-[#00BFFF]/30 flex-row justify-between items-center relative">
-            {/* Header scan line */}
-            <View
-               className="absolute top-0 left-0 right-0 h-px bg-[#00FFFF]"
-               style={{ opacity: 0.3 }}
-            />
-
-            <View>
-               <Text
-                  className="text-[#00FFFF] text-xs font-mono font-bold mb-1 tracking-wider uppercase"
+         >
+            {/* Cyberpunk rank indicator for top 3 */}
+            {isTopThree && (
+               <View
+                  className="absolute left-0 w-1 h-full bg-gradient-to-b"
                   style={{
-                     textShadowColor: '#00FFFF',
-                     textShadowOffset: { width: 0, height: 0 },
-                     textShadowRadius: 4,
+                     backgroundColor:
+                        index === 0
+                           ? '#00FFFF'
+                           : index === 1
+                             ? '#00BFFF'
+                             : '#0099FF',
+                  }}
+               />
+            )}
+
+            <View
+               className="flex-row items-center flex-1 ml-2"
+               style={{ marginEnd: 16 }}
+            >
+               <View className="relative">
+                  <Image
+                     source={
+                        item.profileImageUrl
+                           ? { uri: item.profileImageUrl }
+                           : require('@/assets/images/anonymous.webp')
+                     }
+                     style={{
+                        width: 32,
+                        height: 32,
+                        borderRadius: 4,
+                        [isRTL ? 'marginLeft' : 'marginRight']: 12,
+                        borderWidth: isTopThree ? 2 : 1,
+                        borderColor: isTopThree
+                           ? '#00FFFF'
+                           : 'rgba(0, 255, 255, 0.3)',
+                     }}
+                     contentFit="cover"
+                  />
+
+                  {/* Cyberpunk corner brackets for top players */}
+                  {isTopThree && (
+                     <>
+                        <View className="absolute -top-1 -left-1 w-2 h-2 border-l border-t border-[#00FFFF]" />
+                        <View className="absolute -top-1 -right-1 w-2 h-2 border-r border-t border-[#00FFFF]" />
+                        <View className="absolute -bottom-1 -left-1 w-2 h-2 border-l border-b border-[#00FFFF]" />
+                        <View className="absolute -bottom-1 -right-1 w-2 h-2 border-r border-b border-[#00FFFF]" />
+                     </>
+                  )}
+               </View>
+
+               <View
+                  style={{
+                     alignItems: isRTL ? 'flex-end' : 'flex-start',
+                     flex: 1,
                   }}
                >
-                  {dayjs(game.endedAt).format('MMM DD, YYYY')}
-               </Text>
-               <View className="flex-row items-center">
-                  <Ionicons name="time-outline" size={12} color="#00BFFF" />
-                  <Text className="text-[#00FFFF] text-xs ml-1  tracking-wide">
-                     {game.startedAt ? formatTime(game.startedAt) : '--:--'} -{' '}
-                     {formatTime(game.endedAt)}
+                  <Text
+                     className={`font-medium text-sm font-mono tracking-wider ${
+                        isTopThree ? 'text-[#00FFFF]' : 'text-white'
+                     }`}
+                     style={{
+                        textAlign: isRTL ? 'right' : 'left',
+                        textShadowColor: isTopThree ? '#00FFFF' : 'transparent',
+                        textShadowOffset: { width: 0, height: 0 },
+                        textShadowRadius: isTopThree ? 4 : 0,
+                     }}
+                     numberOfLines={1}
+                  >
+                     {item.fullName}
+                  </Text>
+                  <Text
+                     className="text-[#00BFFF]/70 text-xs font-mono"
+                     style={{ textAlign: isRTL ? 'right' : 'left' }}
+                  >
+                     {t('buyIn')}: {t('currency')}
+                     {item.totalBuyIns}
                   </Text>
                </View>
             </View>
 
-            <View className="items-end">
-               <Text className="text-[#00FFFF] text-xs mb-1  uppercase tracking-wider">
-                  {t('gameManager')}
+            <View style={{ minWidth: 80, alignItems: 'flex-end' }}>
+               <Text
+                  className={`font-bold text-sm font-mono tracking-wider ${
+                     item.profit > 0
+                        ? 'text-[#00FF88]'
+                        : item.profit < 0
+                          ? 'text-[#FF4444]'
+                          : 'text-gray-400'
+                  }`}
+                  style={{
+                     textShadowColor:
+                        item.profit > 0
+                           ? '#00FF88'
+                           : item.profit < 0
+                             ? '#FF4444'
+                             : 'transparent',
+                     textShadowOffset: { width: 0, height: 0 },
+                     textShadowRadius: item.profit !== 0 ? 4 : 0,
+                  }}
+               >
+                  {item.profit > 0 ? '+' : item.profit < 0 ? '-' : ''}
+                  {t('currency')}
+                  {Math.abs(item.profit).toFixed(2)}
                </Text>
-               <View className="flex-row items-center">
-                  <Text className="text-[#00FFFF] font-mono font-bold text-xs mr-2 tracking-wide">
-                     {game.creatorName}
+            </View>
+         </View>
+      );
+   }
+);
+
+PlayerRow.displayName = 'PlayerRow';
+
+const GameCard = React.memo(
+   ({ game, isActive = false }: { game: GameResult; isActive?: boolean }) => {
+      const { t } = useLocalization();
+
+      const formatTime = (dateString: string) => {
+         return dayjs(dateString).format('HH:mm');
+      };
+
+      return (
+         <View
+            className="bg-black/90 border-2 border-[#00BFFF] relative overflow-hidden w-full"
+            style={{
+               borderColor: isActive ? '#00FFFF' : '#00BFFF',
+               shadowColor: '#00BFFF',
+               shadowOffset: { width: 0, height: 0 },
+               shadowOpacity: isActive ? 0.8 : 0.6,
+               shadowRadius: isActive ? 16 : 12,
+               elevation: isActive ? 16 : 12,
+            }}
+         >
+            {/* Cyberpunk corner brackets */}
+            <View className="absolute top-2 left-2 w-4 h-4 border-l-2 border-t-2 border-[#00FFFF]" />
+            <View className="absolute top-2 right-2 w-4 h-4 border-r-2 border-t-2 border-[#00BFFF]" />
+            <View className="absolute bottom-2 left-2 w-4 h-4 border-l-2 border-b-2 border-[#00BFFF]" />
+            <View className="absolute bottom-2 right-2 w-4 h-4 border-r-2 border-b-2 border-[#00FFFF]" />
+
+            {/* Holographic overlay */}
+            <LinearGradient
+               colors={[
+                  'rgba(0, 255, 255, 0.05)',
+                  'transparent',
+                  'rgba(0, 191, 255, 0.05)',
+               ]}
+               start={{ x: 0, y: 0 }}
+               end={{ x: 1, y: 1 }}
+               style={{
+                  position: 'absolute',
+                  top: 0,
+                  left: 0,
+                  right: 0,
+                  bottom: 0,
+                  opacity: 0.8,
+               }}
+            />
+
+            {/* Game Header - Cyberpunk styled */}
+            <View className="p-4 bg-black/80 border-b border-[#00BFFF]/30 flex-row justify-between items-center relative">
+               {/* Header scan line */}
+               <View
+                  className="absolute top-0 left-0 right-0 h-px bg-[#00FFFF]"
+                  style={{ opacity: 0.3 }}
+               />
+
+               <View>
+                  <Text
+                     className="text-[#00FFFF] text-xs font-mono font-bold mb-1 tracking-wider uppercase"
+                     style={{
+                        textShadowColor: '#00FFFF',
+                        textShadowOffset: { width: 0, height: 0 },
+                        textShadowRadius: 4,
+                     }}
+                  >
+                     {dayjs(game?.endedAt).format('MMM DD, YYYY')}
                   </Text>
-                  <View className="relative">
-                     <Image
-                        source={
-                           game.creatorImage
-                              ? { uri: game.creatorImage }
-                              : require('@/assets/images/anonymous.webp')
-                        }
-                        style={{
-                           width: 20,
-                           height: 20,
-                           borderRadius: 2, // Sharp cyberpunk edges
-                           borderWidth: 1,
-                           borderColor: '#00BFFF',
-                        }}
-                     />
-                     {/* Mini corner brackets */}
-                     <View className="absolute -top-0.5 -left-0.5 w-1.5 h-1.5 border-l border-t border-[#00FFFF]" />
-                     <View className="absolute -top-0.5 -right-0.5 w-1.5 h-1.5 border-r border-t border-[#00FFFF]" />
-                     <View className="absolute -bottom-0.5 -left-0.5 w-1.5 h-1.5 border-l border-b border-[#00FFFF]" />
-                     <View className="absolute -bottom-0.5 -right-0.5 w-1.5 h-1.5 border-r border-b border-[#00FFFF]" />
+                  <View className="flex-row items-center">
+                     <Ionicons name="time-outline" size={12} color="#00BFFF" />
+                     <Text className="text-[#00FFFF] text-xs ml-1 tracking-wide">
+                        {game.startedAt ? formatTime(game.startedAt) : '--:--'}{' '}
+                        - {formatTime(game.endedAt)}
+                     </Text>
+                  </View>
+               </View>
+
+               <View className="items-end">
+                  <Text className="text-[#00FFFF] text-xs mb-1 uppercase tracking-wider">
+                     {t('gameManager')}
+                  </Text>
+                  <View className="flex-row items-center">
+                     <Text className="text-[#00FFFF] font-mono font-bold text-xs mr-2 tracking-wide">
+                        {game.creatorName}
+                     </Text>
+                     <View className="relative">
+                        <Image
+                           source={
+                              game.creatorImage
+                                 ? { uri: game.creatorImage }
+                                 : require('@/assets/images/anonymous.webp')
+                           }
+                           style={{
+                              width: 20,
+                              height: 20,
+                              borderRadius: 2,
+                              borderWidth: 1,
+                              borderColor: '#00BFFF',
+                           }}
+                        />
+                        {/* Mini corner brackets */}
+                        <View className="absolute -top-0.5 -left-0.5 w-1.5 h-1.5 border-l border-t border-[#00FFFF]" />
+                        <View className="absolute -top-0.5 -right-0.5 w-1.5 h-1.5 border-r border-t border-[#00FFFF]" />
+                        <View className="absolute -bottom-0.5 -left-0.5 w-1.5 h-1.5 border-l border-b border-[#00FFFF]" />
+                        <View className="absolute -bottom-0.5 -right-0.5 w-1.5 h-1.5 border-r border-b border-[#00FFFF]" />
+                     </View>
                   </View>
                </View>
             </View>
+
+            {/* Players List - Cyberpunk styled */}
+            <View className="p-4 relative" style={{ minHeight: 200 }}>
+               {/* Background grid pattern */}
+               <View
+                  className="absolute inset-0 opacity-5"
+                  style={{
+                     backgroundImage:
+                        'linear-gradient(rgba(0, 255, 255, 0.1) 1px, transparent 1px), linear-gradient(90deg, rgba(0, 255, 255, 0.1) 1px, transparent 1px)',
+                     backgroundSize: '20px 20px',
+                  }}
+               />
+
+               <FlashList
+                  data={game.players}
+                  renderItem={({ item, index }) => (
+                     <PlayerRow item={item} index={index} />
+                  )}
+                  // @ts-ignore
+                  estimatedItemSize={60}
+                  scrollEnabled={false}
+                  keyExtractor={(item) => item.id.toString()}
+               />
+
+               {/* Bottom scan line */}
+               <View
+                  className="absolute bottom-0 left-0 right-0 h-px bg-[#00BFFF]"
+                  style={{ opacity: 0.3 }}
+               />
+            </View>
          </View>
+      );
+   }
+);
 
-         {/* Players List - Cyberpunk styled */}
-         <View className="p-4 relative" style={{ minHeight: 200 }}>
-            {/* Background grid pattern */}
-            <View
-               className="absolute inset-0 opacity-5"
-               style={{
-                  backgroundImage:
-                     'linear-gradient(rgba(0, 255, 255, 0.1) 1px, transparent 1px), linear-gradient(90deg, rgba(0, 255, 255, 0.1) 1px, transparent 1px)',
-                  backgroundSize: '20px 20px',
-               }}
-            />
-
-            <FlashList
-               data={game.players}
-               renderItem={({ item, index }) => (
-                  <PlayerRow item={item} index={index} />
-               )}
-               scrollEnabled={false}
-               keyExtractor={(item) => item.id.toString()}
-            />
-
-            {/* Bottom scan line */}
-            <View
-               className="absolute bottom-0 left-0 right-0 h-px bg-[#00BFFF]"
-               style={{ opacity: 0.3 }}
-            />
-         </View>
-      </View>
-   );
-};
+GameCard.displayName = 'GameCard';
 
 export default function RecentGameResults({
    games,
@@ -309,160 +300,43 @@ export default function RecentGameResults({
    hasMore,
    loadMore,
 }: RecentGameResultsProps) {
-   const { t, isRTL } = useLocalization();
+   const { t } = useLocalization();
    const [currentIndex, setCurrentIndex] = useState(0);
-   const [isTransitioning, setIsTransitioning] = useState(false);
-   const translateX = useSharedValue(0);
-   const indexSV = useSharedValue(0);
-   const isAnimatingSV = useSharedValue(false);
+   const [isScrolling, setIsScrolling] = useState(false);
+   const flatListRef = useRef<FlatList>(null);
 
-   const setIndexFromWorklet = React.useCallback((nextIndex: number) => {
-      setIsTransitioning(true);
-      setCurrentIndex(nextIndex);
-      setTimeout(() => setIsTransitioning(false), 240);
-   }, []);
+   const onViewableItemsChanged = useRef(
+      ({ viewableItems }: { viewableItems: ViewToken[] }) => {
+         if (viewableItems.length > 0 && viewableItems[0].index !== null) {
+            const newIndex = viewableItems[0].index;
+            setCurrentIndex(newIndex);
 
-   // Effect to handle post-loading state: if we just loaded more games, we might want to advance index
-   // However, simplest is just letting the user swipe again or stay on current.
-   // But we must ensure index is valid if games list shrinks (unlikely here)
-   useEffect(() => {
-      if (games.length > 0 && currentIndex >= games.length) {
-         setCurrentIndex(games.length - 1);
+            // Load more when reaching the last card
+            if (newIndex >= games.length - 1 && hasMore && !isLoading) {
+               loadMore();
+            }
+         }
+         setIsScrolling(false);
       }
-      indexSV.value = Math.min(currentIndex, Math.max(0, games.length - 1));
-   }, [games.length, currentIndex, indexSV]);
+   ).current;
 
-   // If the user swiped next to trigger a load, and games grew, we can auto-advance
-   // For now, let's keep it manual to avoid jarring jumps, or user can swipe again.
+   const viewabilityConfig = useRef({
+      itemVisiblePercentThreshold: 50,
+   }).current;
 
-   const gamesLength = games.length;
+   const handleScrollBeginDrag = () => {
+      setIsScrolling(true);
+   };
 
-   const pan = Gesture.Pan()
-      .activeOffsetX([-12, 12])
-      .failOffsetY([-12, 12])
-      .onUpdate((event) => {
-         'worklet';
-         if (isAnimatingSV.value) return;
-
-         const rawTx = Math.max(
-            -PAGE_WIDTH,
-            Math.min(PAGE_WIDTH, event.translationX)
-         );
-         let tx = rawTx;
-
-         // Rubber-band only at edges (prevents "bouncy" feeling mid-carousel)
-         if (indexSV.value <= 0 && tx > 0) tx = tx * EDGE_RUBBER_BAND;
-         if (indexSV.value >= gamesLength - 1 && tx < 0) {
-            // If we can load more, don't rubber-band too hard (user intent is "more")
-            tx = hasMore && !isLoading ? tx * 0.6 : tx * EDGE_RUBBER_BAND;
-         }
-
-         translateX.value = tx;
-      })
-      .onEnd((event) => {
-         'worklet';
-         if (isAnimatingSV.value) return;
-
-         const dir = isRTL ? -1 : 1;
-         const effectiveTx = event.translationX * dir;
-         const effectiveVx = event.velocityX * dir;
-
-         const wantsNext =
-            effectiveTx < -SNAP_DISTANCE || effectiveVx < -VELOCITY_THRESHOLD;
-         const wantsPrev =
-            effectiveTx > SNAP_DISTANCE || effectiveVx > VELOCITY_THRESHOLD;
-
-         const snapBack = () => {
-            translateX.value = withTiming(0, {
-               duration: 180,
-               easing: Easing.out(Easing.cubic),
-            });
-         };
-
-         if (!wantsNext && !wantsPrev) {
-            snapBack();
-            return;
-         }
-
-         // Next
-         if (wantsNext) {
-            if (indexSV.value < gamesLength - 1) {
-               isAnimatingSV.value = true;
-               const exitX = -PAGE_WIDTH * dir; // LTR: left, RTL: right
-
-               translateX.value = withTiming(
-                  exitX,
-                  { duration: 220, easing: Easing.out(Easing.cubic) },
-                  (finished) => {
-                     if (!finished) return;
-
-                     const nextIndex = indexSV.value + 1;
-                     indexSV.value = nextIndex;
-                     runOnJS(setIndexFromWorklet)(nextIndex);
-
-                     // Bring the new card from the opposite side
-                     translateX.value = -exitX;
-                     translateX.value = withTiming(
-                        0,
-                        { duration: 240, easing: Easing.out(Easing.cubic) },
-                        () => {
-                           isAnimatingSV.value = false;
-                        }
-                     );
-                  }
-               );
-               return;
-            }
-
-            // End reached: try to load more, then snap back
-            if (hasMore && !isLoading) runOnJS(loadMore)();
-            snapBack();
-            return;
-         }
-
-         // Prev
-         if (wantsPrev) {
-            if (indexSV.value > 0) {
-               isAnimatingSV.value = true;
-               const exitX = PAGE_WIDTH * dir; // LTR: right, RTL: left
-
-               translateX.value = withTiming(
-                  exitX,
-                  { duration: 220, easing: Easing.out(Easing.cubic) },
-                  (finished) => {
-                     if (!finished) return;
-
-                     const nextIndex = indexSV.value - 1;
-                     indexSV.value = nextIndex;
-                     runOnJS(setIndexFromWorklet)(nextIndex);
-
-                     translateX.value = -exitX;
-                     translateX.value = withTiming(
-                        0,
-                        { duration: 240, easing: Easing.out(Easing.cubic) },
-                        () => {
-                           isAnimatingSV.value = false;
-                        }
-                     );
-                  }
-               );
-               return;
-            }
-
-            snapBack();
-         }
-      });
-
-   const animatedStyle = useAnimatedStyle(() => {
-      return {
-         transform: [{ translateX: translateX.value }],
-      };
-   });
+   const handleScrollEnd = () => {
+      setIsScrolling(false);
+   };
 
    if (isLoading && games.length === 0) {
       return (
          <View className="w-full h-48 items-center justify-center bg-white/5 rounded-3xl border border-white/10">
-            <Text className="text-white/40">{t('loadingGame')}</Text>
+            <ActivityIndicator size="large" color="#00FFFF" />
+            <Text className="text-white/40 mt-2">{t('loadingGame')}</Text>
          </View>
       );
    }
@@ -486,7 +360,7 @@ export default function RecentGameResults({
    return (
       <View className="mb-8">
          {/* Cyberpunk Section Header - Blue/Teal Theme */}
-         <View className="relative mb-6 overflow-hidden">
+         <View className="relative mb-6 overflow-hidden px-6">
             <View
                className="bg-black/90 border-2 border-[#00BFFF] px-6 py-4 relative"
                style={{
@@ -546,42 +420,59 @@ export default function RecentGameResults({
             </View>
          </View>
 
-         {/* Enhanced Swipeable Content with Visual Feedback */}
-         <View className="relative">
-            {/* Background cards for depth effect */}
-            {currentIndex > 0 && (
-               <View
-                  className="absolute inset-0 z-0"
-                  style={{
-                     transform: [{ translateX: -CARD_OFFSET }, { scale: 0.95 }],
-                     opacity: 0.25,
-                  }}
-               >
-                  <GameCard game={games[currentIndex - 1]} />
-               </View>
-            )}
-            {currentIndex < games.length - 1 && (
-               <View
-                  className="absolute inset-0 z-0"
-                  style={{
-                     transform: [{ translateX: CARD_OFFSET }, { scale: 0.95 }],
-                     opacity: 0.3,
-                  }}
-               >
-                  <GameCard game={games[currentIndex + 1]} />
-               </View>
-            )}
-
-            {/* Active card */}
-            <GestureDetector gesture={pan}>
-               <Animated.View style={[animatedStyle, { zIndex: 10 }]}>
-                  <GameCard game={games[currentIndex]} isActive={true} />
-               </Animated.View>
-            </GestureDetector>
+         {/* FlatList for swipeable cards */}
+         <View style={{ height: 400 }}>
+            <FlatList
+               ref={flatListRef}
+               data={games}
+               horizontal
+               showsHorizontalScrollIndicator={false}
+               onViewableItemsChanged={onViewableItemsChanged}
+               viewabilityConfig={viewabilityConfig}
+               onScrollBeginDrag={handleScrollBeginDrag}
+               onMomentumScrollEnd={handleScrollEnd}
+               onScrollEndDrag={handleScrollEnd}
+               snapToInterval={SCREEN_WIDTH}
+               snapToAlignment="center"
+               decelerationRate="fast"
+               disableIntervalMomentum={true}
+               keyExtractor={(item, index) => `game-${item.id}-${index}`}
+               getItemLayout={(_, index) => ({
+                  length: SCREEN_WIDTH,
+                  offset: SCREEN_WIDTH * index,
+                  index,
+               })}
+               renderItem={({ item, index }) => (
+                  <View style={{ width: SCREEN_WIDTH, paddingHorizontal: 16 }}>
+                     <GameCard game={item} isActive={index === currentIndex} />
+                     {isScrolling && index === currentIndex && (
+                        <View
+                           className="absolute inset-0 items-center justify-center z-20 mx-4"
+                           style={{
+                              backgroundColor: 'rgba(0, 0, 0, 0.85)',
+                              borderRadius: 2,
+                           }}
+                        >
+                           <ActivityIndicator size="large" color="#00FFFF" />
+                           <Text
+                              className="text-[#00FFFF] text-sm font-mono mt-3 tracking-wider"
+                              style={{
+                                 textShadowColor: '#00FFFF',
+                                 textShadowOffset: { width: 0, height: 0 },
+                                 textShadowRadius: 6,
+                              }}
+                           >
+                              {t('loading')}...
+                           </Text>
+                        </View>
+                     )}
+                  </View>
+               )}
+            />
          </View>
 
          {/* Enhanced Pagination with Cyberpunk Styling */}
-         <View className="flex-row justify-center items-center mt-6 space-x-3">
+         <View className="flex-row justify-center items-center mt-6 space-x-3 px-6">
             {games.map((_, index) => {
                const isActive = index === currentIndex;
                const isPast = index < currentIndex;
@@ -598,7 +489,7 @@ export default function RecentGameResults({
                                 : 'bg-transparent border-[#00BFFF]/40'
                         }`}
                         style={{
-                           borderRadius: 2, // Square cyberpunk style
+                           borderRadius: 2,
                            shadowColor: isActive ? '#00FFFF' : 'transparent',
                            shadowOffset: { width: 0, height: 0 },
                            shadowOpacity: 0.8,
@@ -636,7 +527,7 @@ export default function RecentGameResults({
          </View>
 
          {/* Status Text with Cyberpunk Styling */}
-         <View className="mt-4 items-center">
+         <View className="mt-4 items-center px-6">
             <Text
                className="text-[#00BFFF] text-xs text-center font-mono tracking-wider uppercase"
                style={{
@@ -645,13 +536,11 @@ export default function RecentGameResults({
                   textShadowRadius: 4,
                }}
             >
-               {isTransitioning
-                  ? t('switchingData')
-                  : hasMore
-                    ? t('swipeForMore')
-                    : t('gameXofY')
-                         .replace('{current}', String(currentIndex + 1))
-                         .replace('{total}', String(games.length))}
+               {hasMore
+                  ? t('swipeForMore')
+                  : t('gameXofY')
+                       .replace('{current}', String(currentIndex + 1))
+                       .replace('{total}', String(games.length))}
             </Text>
 
             {/* Indicator line */}

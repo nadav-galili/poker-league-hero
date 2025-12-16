@@ -219,7 +219,7 @@ export default Sentry.wrap(function RootLayout() {
 const styles = StyleSheet.create({
    splashContainer: {
       flex: 1,
-      backgroundColor: '#ffffff', // White background as per app.json config
+      backgroundColor: '#000000', // Match native splash background
       justifyContent: 'center',
       alignItems: 'center',
    },

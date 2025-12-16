@@ -9,20 +9,15 @@ import { Ionicons } from '@expo/vector-icons';
 import { FlashList } from '@shopify/flash-list';
 import { LinearGradient } from 'expo-linear-gradient';
 import { router, Stack, useLocalSearchParams } from 'expo-router';
-import React, { useMemo } from 'react';
+import React, { useEffect, useMemo, useRef } from 'react';
 import {
+   Animated,
    Pressable,
    RefreshControl,
    StyleSheet,
    Text,
    View,
 } from 'react-native';
-import Animated, {
-   FadeIn,
-} from 'react-native-reanimated';
-
-// Animated Pressable
-const AnimatedPressable = Animated.createAnimatedComponent(Pressable);
 
 export default function StatsLeaderboardScreen() {
    const { t, isRTL } = useLocalization();
@@ -141,18 +136,14 @@ export default function StatsLeaderboardScreen() {
 
          {/* Header */}
          <View style={styles.header}>
-            <AnimatedPressable
-               onPress={handleBack}
-               style={styles.backButton}
-               entering={FadeIn.duration(300)}
-            >
+            <Pressable onPress={handleBack} style={styles.backButton}>
                <View style={styles.backButtonBrackets} />
                <Ionicons
                   name={isRTL ? 'arrow-forward' : 'arrow-back'}
                   size={24}
                   color={colors.neonCyan}
                />
-            </AnimatedPressable>
+            </Pressable>
             <View style={styles.headerTitleContainer}>
                <Text style={styles.headerTitle} numberOfLines={1}>
                   {screenTitle}

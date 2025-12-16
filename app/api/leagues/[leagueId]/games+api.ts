@@ -127,6 +127,13 @@ export const GET = withAuth(async (request: Request, user) => {
             and(inArray(cashIns.gameId, gameIds), eq(cashIns.type, 'buy_in'))
          );
 
+      // OPTIMIZATION: Create a map for O(1) lookups instead of O(N) filtering
+      const cashInsMap = new Map<number, number>();
+      for (const ci of cashInsResult) {
+         const current = cashInsMap.get(ci.gamePlayerId) || 0;
+         cashInsMap.set(ci.gamePlayerId, current + parseFloat(ci.amount));
+      }
+
       // Process and assemble data
       const processedGames = gamesResult.map((game) => {
          // Get players for this game
@@ -136,11 +143,8 @@ export const GET = withAuth(async (request: Request, user) => {
 
          // Process players with buy-in totals
          const processedPlayers = gamePlayersList.map((player) => {
-            const playerBuyIns = cashInsResult
-               .filter(
-                  (c) => c.gameId === game.id && c.gamePlayerId === player.id
-               )
-               .reduce((sum, c) => sum + parseFloat(c.amount), 0);
+            // OPTIMIZATION: Use the map lookup
+            const totalBuyIns = cashInsMap.get(player.id) || 0;
 
             return {
                id: player.id,
@@ -149,7 +153,7 @@ export const GET = withAuth(async (request: Request, user) => {
                   player.fullName || player.anonymousName || 'Unknown Player',
                profileImageUrl: player.profileImageUrl,
                profit: player.profit ? parseFloat(player.profit) : 0,
-               totalBuyIns: playerBuyIns,
+               totalBuyIns: totalBuyIns,
             };
          });
 

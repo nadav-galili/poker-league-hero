@@ -4,16 +4,8 @@ import { PlayerStat, StatType } from '@/services/leagueStatsService';
 import { Ionicons } from '@expo/vector-icons';
 import { Image } from 'expo-image';
 import { LinearGradient } from 'expo-linear-gradient';
-import React, { useEffect } from 'react';
-import { StyleSheet, Text, View } from 'react-native';
-import Animated, {
-   useAnimatedStyle,
-   useSharedValue,
-   withRepeat,
-   withSequence,
-   withSpring,
-   withTiming,
-} from 'react-native-reanimated';
+import React, { useEffect, useRef } from 'react';
+import { Animated, StyleSheet, Text, View } from 'react-native';
 
 // @ts-ignore - local image import
 import anonymousImage from '@/assets/images/anonymous.webp';
@@ -83,37 +75,53 @@ export default function StatsLeaderboardHero({
    t,
 }: StatsLeaderboardHeroProps) {
    const config = STAT_CONFIGS[statType];
-   const scale = useSharedValue(0.8);
-   const opacity = useSharedValue(0);
-   const glowPulse = useSharedValue(0.8);
+   const scaleAnim = useRef(new Animated.Value(0.8)).current;
+   const opacityAnim = useRef(new Animated.Value(0)).current;
+   const glowPulseAnim = useRef(new Animated.Value(0.8)).current;
 
    useEffect(() => {
-      scale.value = withSpring(1, { damping: 15 });
-      opacity.value = withTiming(1, { duration: 500 });
+      // Scale and fade in animation
+      Animated.parallel([
+         Animated.spring(scaleAnim, {
+            toValue: 1,
+            friction: 7,
+            useNativeDriver: true,
+         }),
+         Animated.timing(opacityAnim, {
+            toValue: 1,
+            duration: 500,
+            useNativeDriver: true,
+         }),
+      ]).start();
 
       // Pulse glow effect
-      glowPulse.value = withRepeat(
-         withSequence(
-            withTiming(1.2, { duration: 1500 }),
-            withTiming(0.8, { duration: 1500 })
-         ),
-         -1,
-         true
-      );
-   }, [scale, opacity, glowPulse]);
-
-   const animatedStyle = useAnimatedStyle(() => ({
-      transform: [{ scale: scale.value }],
-      opacity: opacity.value,
-   }));
-
-   const glowAnimatedStyle = useAnimatedStyle(() => ({
-      transform: [{ scale: glowPulse.value }],
-   }));
+      Animated.loop(
+         Animated.sequence([
+            Animated.timing(glowPulseAnim, {
+               toValue: 1.2,
+               duration: 1500,
+               useNativeDriver: true,
+            }),
+            Animated.timing(glowPulseAnim, {
+               toValue: 0.8,
+               duration: 1500,
+               useNativeDriver: true,
+            }),
+         ])
+      ).start();
+   }, [scaleAnim, opacityAnim, glowPulseAnim]);
 
    return (
       <View style={styles.container}>
-         <Animated.View style={[styles.card, animatedStyle]}>
+         <Animated.View
+            style={[
+               styles.card,
+               {
+                  transform: [{ scale: scaleAnim }],
+                  opacity: opacityAnim,
+               },
+            ]}
+         >
             {/* Cyberpunk background gradient */}
             <LinearGradient
                colors={[
@@ -183,8 +191,10 @@ export default function StatsLeaderboardHero({
                   <Animated.View
                      style={[
                         styles.avatarGlow,
-                        glowAnimatedStyle,
-                        { backgroundColor: config.color },
+                        {
+                           transform: [{ scale: glowPulseAnim }],
+                           backgroundColor: config.color,
+                        },
                      ]}
                   />
                   <View
@@ -399,9 +409,9 @@ const styles = StyleSheet.create({
    },
    avatarGlow: {
       position: 'absolute',
-      width: 80,
-      height: 80,
-      borderRadius: 40,
+      width: 52,
+      height: 52,
+      borderRadius: 26,
       opacity: 0.3,
       shadowOffset: { width: 0, height: 0 },
       shadowOpacity: 0.8,
@@ -409,32 +419,33 @@ const styles = StyleSheet.create({
       zIndex: 1,
    },
    avatarBorder: {
-      width: 72,
-      height: 72,
-      borderRadius: 36,
+      width: 52,
+      height: 52,
+      borderRadius: 26,
       borderWidth: 3,
-      padding: 3,
+      alignItems: 'center',
+      justifyContent: 'center',
       position: 'relative',
       zIndex: 3,
    },
    avatar: {
-      width: 64,
-      height: 64,
-      borderRadius: 32,
+      width: 40,
+      height: 40,
+      borderRadius: 20,
    },
    avatarHolo: {
       position: 'absolute',
-      width: 72,
-      height: 72,
-      borderRadius: 36,
+      width: 52,
+      height: 52,
+      borderRadius: 26,
       borderWidth: 1,
       opacity: 0.4,
       zIndex: 4,
    },
    avatarPlaceholder: {
-      width: 64,
-      height: 64,
-      borderRadius: 32,
+      width: 40,
+      height: 40,
+      borderRadius: 20,
       borderWidth: 2,
       alignItems: 'center',
       justifyContent: 'center',
@@ -450,7 +461,7 @@ const styles = StyleSheet.create({
    },
    name: {
       color: colors.neonCyan,
-      fontSize: 20,
+      fontSize: 16,
       fontWeight: '700',
       textAlign: 'left',
       fontFamily: 'monospace',

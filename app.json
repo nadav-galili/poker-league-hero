@@ -1,7 +1,7 @@
 {
    "name": "HomeStack",
    "slug": "poker-ai-homestack",
-   "version": "1.4.0",
+   "version": "1.4.7",
    "orientation": "portrait",
    "icon": "./assets/images/icon.png",
    "scheme": "pokeraihomestack",
@@ -10,7 +10,7 @@
    "ios": {
       "supportsTablet": false,
       "autoIncrement": true,
-      "buildNumber": "10",
+      "buildNumber": "72",
       "bundleIdentifier": "com.pokeraihomestack.app",
       "usesAppleSignIn": true,
       "infoPlist": {
@@ -22,6 +22,8 @@
       }
    },
    "android": {
+      "jsEngine": "hermes",
+      "newArchEnabled": true,
       "autoIncrement": true,
       "versionCode": 54,
       "adaptiveIcon": {
@@ -92,7 +94,8 @@
             "project": "poker-league-hero",
             "organization": "nadav-g"
          }
-      ]
+      ],
+      "expo-build-properties"
    ],
    "experiments": {
       "typedRoutes": true

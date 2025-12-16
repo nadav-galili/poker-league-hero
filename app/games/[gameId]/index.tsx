@@ -109,9 +109,9 @@ export default function GameScreen() {
          Toast.show({
             type: 'success',
             text1: t('success'),
-            text2: `${t('buyInSuccessful')} for ${player.fullName} - ${t('currency')}${game.buyIn}`,
+            text2: `${t('buyInSuccessful')}  ${player.fullName} - ${t('currency')}${game.buyIn}`,
          });
-         loadGameData();
+         loadGameData(true);
       } catch (error) {
          const errorMessage =
             error instanceof Error ? error.message : 'Failed to process buy-in';
@@ -173,13 +173,13 @@ export default function GameScreen() {
          Toast.show({
             type: 'success',
             text1: t('success'),
-            text2: `${t('playerCashedOut')} - ${t('profit')}: ₪${result.profit}`,
+            text2: ` ${selectedPlayer.fullName} ${t('playerCashedOut')} - ${t('profit')}: ₪${result.profit}`,
          });
 
          setShowCashOutModal(false);
          setSelectedPlayer(null);
          setCashOutAmount('');
-         loadGameData();
+         loadGameData(true);
       } catch (error) {
          const errorMessage =
             error instanceof Error
@@ -211,7 +211,7 @@ export default function GameScreen() {
             text2: t('playerAdded'),
          });
          setShowAddPlayerModal(false);
-         loadGameData();
+         loadGameData(true);
       } catch (error) {
          const errorMessage =
             error instanceof Error ? error.message : 'Failed to add player';
@@ -243,7 +243,7 @@ export default function GameScreen() {
             text1: t('success'),
             text2: t('buyInUndone'),
          });
-         loadGameData();
+         loadGameData(true);
       } catch (error) {
          const errorMessage =
             error instanceof Error ? error.message : 'Failed to undo buy-in';
@@ -280,7 +280,7 @@ export default function GameScreen() {
             text1: t('success'),
             text2: t('playerRemoved'),
          });
-         loadGameData();
+         loadGameData(true);
       } catch (error) {
          const errorMessage =
             error instanceof Error ? error.message : 'Failed to remove player';
@@ -352,7 +352,7 @@ export default function GameScreen() {
             text2: t('gameEndedSuccessfully'),
          });
          createAiSummaryMutation.mutate();
-         await loadGameData();
+         await loadGameData(true);
          router.replace({
             pathname: '/leagues/[id]/stats',
             params: { id: game.leagueId },

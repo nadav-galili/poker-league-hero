@@ -10,6 +10,11 @@ Add game history
 Refactored ui to cyberpunk
 add edit league
 add edit profile
+1.4.1
+refactored ui
+remove animation
+1.4.7
+Refactor ui to cyber punk
 
 # IOS
 

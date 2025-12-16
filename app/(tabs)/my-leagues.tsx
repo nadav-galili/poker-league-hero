@@ -317,6 +317,7 @@ export default function MyLeagues() {
                   data={leagues}
                   renderItem={renderLeagueCard}
                   keyExtractor={(item) => item.id}
+                  estimatedItemSize={140}
                   contentContainerStyle={{
                      padding: 20,
                      paddingLeft: 24,
