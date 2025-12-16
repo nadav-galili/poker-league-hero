@@ -258,9 +258,11 @@ export const CyberpunkImagePicker: React.FC<CyberpunkImagePickerProps> = ({
 
                      {/* Image */}
                      <Image
+                        key={imageUri}
                         source={{ uri: imageUri }}
                         style={{ width: '100%', height: '100%' }}
                         contentFit="cover"
+                        cachePolicy="none"
                      />
 
                      {/* Scan line effect */}

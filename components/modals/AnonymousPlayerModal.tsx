@@ -1,5 +1,4 @@
-import { getCyberpunkGradient } from '@/colors';
-import { CyberpunkFormField } from '@/components/forms/CyberpunkFormField';
+import { colors, getCyberpunkGradient } from '@/colors';
 import { Text as CustomText } from '@/components/Text';
 import { AppButton } from '@/components/ui/AppButton';
 import { useLocalization } from '@/context/localization';
@@ -8,13 +7,15 @@ import { LinearGradient } from 'expo-linear-gradient';
 import React, { useEffect, useRef, useState } from 'react';
 import {
    Animated,
-   Dimensions,
+   Keyboard,
    KeyboardAvoidingView,
    Modal,
    Platform,
-   ScrollView,
    StyleSheet,
+   Text,
+   TextInput,
    TouchableOpacity,
+   TouchableWithoutFeedback,
    View,
 } from 'react-native';
 
@@ -25,180 +26,30 @@ interface AnonymousPlayerModalProps {
    theme?: 'light' | 'dark';
 }
 
-const { width: screenWidth, height: screenHeight } = Dimensions.get('window');
-
-// Matrix Rain Component
-function MatrixRain() {
-   const animatedValues = useRef(
-      Array.from({ length: 8 }, () => new Animated.Value(0))
-   ).current;
-
-   useEffect(() => {
-      const animations = animatedValues.map((value, index) =>
-         Animated.loop(
-            Animated.sequence([
-               Animated.delay(index * 200),
-               Animated.timing(value, {
-                  toValue: 1,
-                  duration: 3000 + Math.random() * 2000,
-                  useNativeDriver: true,
-               }),
-            ])
-         )
-      );
-
-      animations.forEach((anim) => anim.start());
-      return () => animations.forEach((anim) => anim.stop());
-      // eslint-disable-next-line react-hooks/exhaustive-deps
-   }, []);
-
-   return (
-      <View style={StyleSheet.absoluteFill} pointerEvents="none">
-         {animatedValues.map((animValue, index) => (
-            <Animated.View
-               key={index}
-               style={[
-                  {
-                     position: 'absolute',
-                     left: (index * screenWidth) / 8,
-                     width: 2,
-                     height: screenHeight,
-                     backgroundColor: '#FF5722', // Neon orange for anonymous
-                     opacity: animValue.interpolate({
-                        inputRange: [0, 0.5, 1],
-                        outputRange: [0, 0.3, 0],
-                     }),
-                     transform: [
-                        {
-                           translateY: animValue.interpolate({
-                              inputRange: [0, 1],
-                              outputRange: [-screenHeight, screenHeight],
-                           }),
-                        },
-                     ],
-                  },
-               ]}
-            />
-         ))}
-      </View>
-   );
-}
-
-// Corner Brackets Component
-function CornerBrackets({ color = '#FF5722' }: { color?: string }) {
-   return (
-      <View style={StyleSheet.absoluteFill} pointerEvents="none">
-         {/* Top Left */}
-         <View
-            style={[
-               styles.cornerBracket,
-               styles.topLeft,
-               { borderColor: color },
-            ]}
-         />
-         {/* Top Right */}
-         <View
-            style={[
-               styles.cornerBracket,
-               styles.topRight,
-               { borderColor: color },
-            ]}
-         />
-         {/* Bottom Left */}
-         <View
-            style={[
-               styles.cornerBracket,
-               styles.bottomLeft,
-               { borderColor: color },
-            ]}
-         />
-         {/* Bottom Right */}
-         <View
-            style={[
-               styles.cornerBracket,
-               styles.bottomRight,
-               { borderColor: color },
-            ]}
-         />
-      </View>
-   );
-}
-
-// Holographic Overlay Component
-function HolographicOverlay() {
-   const scanLineAnim = useRef(new Animated.Value(0)).current;
-
-   useEffect(() => {
-      Animated.loop(
-         Animated.timing(scanLineAnim, {
-            toValue: 1,
-            duration: 2000,
-            useNativeDriver: true,
-         })
-      ).start();
-      // eslint-disable-next-line react-hooks/exhaustive-deps
-   }, []);
-
-   return (
-      <View style={StyleSheet.absoluteFill} pointerEvents="none">
-         {/* Scan Lines */}
-         <Animated.View
-            style={[
-               {
-                  position: 'absolute',
-                  left: 0,
-                  right: 0,
-                  height: 2,
-                  backgroundColor: '#FF5722',
-                  opacity: 0.6,
-                  shadowColor: '#FF5722',
-                  shadowOffset: { width: 0, height: 0 },
-                  shadowOpacity: 0.8,
-                  shadowRadius: 4,
-                  transform: [
-                     {
-                        translateY: scanLineAnim.interpolate({
-                           inputRange: [0, 1],
-                           outputRange: [0, screenHeight],
-                        }),
-                     },
-                  ],
-               },
-            ]}
-         />
-
-         {/* Static horizontal lines */}
-         {Array.from({ length: 20 }, (_, i) => (
-            <View
-               key={i}
-               style={[
-                  {
-                     position: 'absolute',
-                     left: 0,
-                     right: 0,
-                     height: 1,
-                     top: (i * screenHeight) / 20,
-                     backgroundColor: '#FF5722',
-                     opacity: 0.05,
-                  },
-               ]}
-            />
-         ))}
-      </View>
-   );
-}
-
 export function AnonymousPlayerModal({
    visible,
    onClose,
    onAdd,
-   theme: themeProp = 'light',
 }: AnonymousPlayerModalProps) {
    const { t } = useLocalization();
    const [name, setName] = useState('');
    const [error, setError] = useState('');
    const [isProcessing, setIsProcessing] = useState(false);
+   const [isFocused, setIsFocused] = useState(false);
+   const inputRef = useRef<TextInput>(null);
    const glowAnim = useRef(new Animated.Value(0)).current;
+
+   // Programmatically focus the input when modal becomes visible
+   // This is the reliable way to show keyboard on real devices
+   useEffect(() => {
+      if (visible) {
+         // Small delay to ensure modal is fully rendered before focusing
+         const timer = setTimeout(() => {
+            inputRef.current?.focus();
+         }, 300);
+         return () => clearTimeout(timer);
+      }
+   }, [visible]);
 
    useEffect(() => {
       if (visible) {
@@ -235,7 +86,7 @@ export function AnonymousPlayerModal({
       setError('');
 
       try {
-         await new Promise((resolve) => setTimeout(resolve, 300)); // Brief processing animation
+         await new Promise((resolve) => setTimeout(resolve, 300));
          onAdd(name.trim());
          setName('');
          onClose();
@@ -247,6 +98,7 @@ export function AnonymousPlayerModal({
    };
 
    const handleClose = () => {
+      Keyboard.dismiss();
       setName('');
       setError('');
       setIsProcessing(false);
@@ -265,36 +117,27 @@ export function AnonymousPlayerModal({
          transparent={true}
          onRequestClose={handleClose}
       >
-         <KeyboardAvoidingView
-            behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
-            style={{ flex: 1 }}
-            keyboardVerticalOffset={Platform.OS === 'ios' ? 0 : 20}
-         >
-            <View style={modalStyles.backdrop}>
-               <ScrollView
-                  contentContainerStyle={modalStyles.scrollContent}
-                  keyboardShouldPersistTaps="handled"
-                  showsVerticalScrollIndicator={false}
-               >
-                  <View style={modalStyles.modalContainer}>
+         <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
+            <KeyboardAvoidingView
+               behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+               style={styles.container}
+            >
+               <View style={styles.backdrop}>
+                  <View style={styles.modalContainer}>
                      <LinearGradient
                         colors={getCyberpunkGradient('dark')}
-                        style={modalStyles.gradientContainer}
+                        style={styles.gradientContainer}
                      >
-                        <MatrixRain />
-                        <HolographicOverlay />
-                        <CornerBrackets color="#FF5722" />
-
                         {/* Header */}
-                        <View style={modalStyles.header}>
+                        <View style={styles.header}>
                            <TouchableOpacity
                               onPress={handleClose}
-                              style={modalStyles.closeButton}
+                              style={styles.closeButton}
                               disabled={isProcessing}
                            >
                               <LinearGradient
                                  colors={['#FF5722', '#FF7043']}
-                                 style={modalStyles.closeButtonGradient}
+                                 style={styles.closeButtonGradient}
                               >
                                  <Ionicons
                                     name="close"
@@ -306,7 +149,7 @@ export function AnonymousPlayerModal({
 
                            <Animated.View
                               style={[
-                                 modalStyles.titleContainer,
+                                 styles.titleContainer,
                                  {
                                     shadowOpacity: glowAnim.interpolate({
                                        inputRange: [0, 1],
@@ -315,22 +158,19 @@ export function AnonymousPlayerModal({
                                  },
                               ]}
                            >
-                              <CustomText
-                                 variant="h3"
-                                 style={modalStyles.title}
-                              >
+                              <CustomText variant="h3" style={styles.title}>
                                  {t('addAnonymousPlayer')}
                               </CustomText>
                            </Animated.View>
                         </View>
 
                         {/* Content */}
-                        <View style={modalStyles.content}>
+                        <View style={styles.content}>
                            {/* Anonymous Player Icon */}
-                           <View style={modalStyles.iconContainer}>
+                           <View style={styles.iconContainer}>
                               <LinearGradient
                                  colors={['#FF5722', '#FF7043']}
-                                 style={modalStyles.iconGradient}
+                                 style={styles.iconGradient}
                               >
                                  <Ionicons
                                     name="person-add"
@@ -340,23 +180,42 @@ export function AnonymousPlayerModal({
                               </LinearGradient>
                            </View>
 
-                           <CyberpunkFormField
-                              label={t('anonymousPlayerName')}
-                              placeholder={t('enterPlayerName')}
-                              value={name}
-                              onChangeText={handleNameChange}
-                              autoFocus
-                              required
-                              returnKeyType="done"
-                              onSubmitEditing={handleAdd}
-                              maxLength={50}
-                              errorMessage={error}
-                              validationState={error ? 'error' : 'idle'}
-                              editable={!isProcessing}
-                              keyboardType="default"
-                              autoCapitalize="words"
-                              autoCorrect={false}
-                           />
+                           {/* Input Field - Simplified for reliable keyboard behavior */}
+                           <View style={styles.inputWrapper}>
+                              <Text style={styles.label}>
+                                 {t('anonymousPlayerName')}{' '}
+                                 <Text style={styles.required}>*</Text>
+                              </Text>
+                              <View
+                                 style={[
+                                    styles.inputContainer,
+                                    isFocused && styles.inputContainerFocused,
+                                    error && styles.inputContainerError,
+                                 ]}
+                              >
+                                 <TextInput
+                                    ref={inputRef}
+                                    style={styles.input}
+                                    value={name}
+                                    onChangeText={handleNameChange}
+                                    placeholder={t('enterPlayerName')}
+                                    placeholderTextColor={colors.textMuted}
+                                    returnKeyType="done"
+                                    onSubmitEditing={handleAdd}
+                                    maxLength={50}
+                                    editable={!isProcessing}
+                                    keyboardType="default"
+                                    autoCapitalize="words"
+                                    autoCorrect={false}
+                                    onFocus={() => setIsFocused(true)}
+                                    onBlur={() => setIsFocused(false)}
+                                    selectionColor={colors.neonCyan}
+                                 />
+                              </View>
+                              {error ? (
+                                 <Text style={styles.errorText}>⚠ {error}</Text>
+                              ) : null}
+                           </View>
 
                            <AppButton
                               title={
@@ -374,34 +233,30 @@ export function AnonymousPlayerModal({
                         </View>
                      </LinearGradient>
                   </View>
-               </ScrollView>
-            </View>
-         </KeyboardAvoidingView>
+               </View>
+            </KeyboardAvoidingView>
+         </TouchableWithoutFeedback>
       </Modal>
    );
 }
 
-const modalStyles = StyleSheet.create({
+const styles = StyleSheet.create({
+   container: {
+      flex: 1,
+   },
    backdrop: {
       flex: 1,
-      backgroundColor: 'rgba(0, 0, 0, 0.95)',
-      justifyContent: 'center',
-      alignItems: 'center',
-      position: 'relative',
-   },
-   scrollContent: {
-      flexGrow: 1,
+      backgroundColor: 'rgba(0, 0, 0, 0.9)',
       justifyContent: 'center',
       alignItems: 'center',
       paddingHorizontal: 20,
-      paddingVertical: 20,
    },
    modalContainer: {
       width: '100%',
       maxWidth: 380,
    },
    gradientContainer: {
-      borderRadius: 0,
+      borderRadius: 4,
       borderWidth: 2,
       borderColor: '#FF5722',
       shadowColor: '#FF5722',
@@ -409,7 +264,6 @@ const modalStyles = StyleSheet.create({
       shadowOpacity: 0.5,
       shadowRadius: 10,
       elevation: 10,
-      position: 'relative',
       overflow: 'hidden',
    },
    header: {
@@ -424,7 +278,7 @@ const modalStyles = StyleSheet.create({
       backgroundColor: 'rgba(0, 0, 0, 0.3)',
    },
    closeButton: {
-      borderRadius: 0,
+      borderRadius: 4,
       borderWidth: 1,
       borderColor: '#FF5722',
       overflow: 'hidden',
@@ -476,44 +330,55 @@ const modalStyles = StyleSheet.create({
       alignItems: 'center',
       justifyContent: 'center',
    },
-   input: {
+   inputWrapper: {
       width: '100%',
    },
-   addButton: {
-      width: '100%',
-      marginTop: 8,
+   label: {
+      color: colors.neonCyan,
+      fontSize: 14,
+      fontWeight: '700',
+      textTransform: 'uppercase',
+      letterSpacing: 1,
+      marginBottom: 8,
+      textShadowColor: colors.shadowNeonCyan,
+      textShadowOffset: { width: 0, height: 0 },
+      textShadowRadius: 6,
    },
-});
-
-const styles = StyleSheet.create({
-   cornerBracket: {
-      position: 'absolute',
-      width: 20,
-      height: 20,
+   required: {
+      color: colors.error,
+   },
+   inputContainer: {
+      height: 56,
       borderWidth: 2,
+      borderColor: colors.borderNeonCyan,
+      borderRadius: 8,
+      backgroundColor: colors.cyberBackground,
+      justifyContent: 'center',
    },
-   topLeft: {
-      top: 10,
-      left: 10,
-      borderRightWidth: 0,
-      borderBottomWidth: 0,
+   inputContainerFocused: {
+      borderColor: colors.neonCyan,
+      shadowColor: colors.neonCyan,
+      shadowOffset: { width: 0, height: 0 },
+      shadowOpacity: 0.5,
+      shadowRadius: 8,
+      elevation: 5,
    },
-   topRight: {
-      top: 10,
-      right: 10,
-      borderLeftWidth: 0,
-      borderBottomWidth: 0,
+   inputContainerError: {
+      borderColor: colors.error,
    },
-   bottomLeft: {
-      bottom: 10,
-      left: 10,
-      borderRightWidth: 0,
-      borderTopWidth: 0,
+   input: {
+      flex: 1,
+      paddingHorizontal: 16,
+      fontSize: 16,
+      color: colors.neonCyan,
+      fontWeight: '600',
    },
-   bottomRight: {
-      bottom: 10,
-      right: 10,
-      borderLeftWidth: 0,
-      borderTopWidth: 0,
+   errorText: {
+      color: colors.error,
+      fontSize: 13,
+      marginTop: 8,
+      textShadowColor: colors.shadowPink,
+      textShadowOffset: { width: 0, height: 0 },
+      textShadowRadius: 4,
    },
 });

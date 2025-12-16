@@ -36,6 +36,8 @@ export default function CreateLeague() {
       image: null as string | null,
       adminUserEmail: '',
    });
+   // Use a ref for image to avoid stale closure issues
+   const imageRef = useRef<string | null>(null);
    const [validationStates, setValidationStates] = useState<{
       name: ValidationState;
    }>({
@@ -223,10 +225,10 @@ export default function CreateLeague() {
          }
 
          console.log('✅ Form validation passed');
-         formData.adminUserEmail = user.email;
 
          // Upload image to R2 if it's a local file path
-         let imageUrl = formData.image;
+         // Use ref to get the current image (avoids stale closure issues)
+         let imageUrl = imageRef.current;
          console.log('🖼️ Image handling:', { originalImage: imageUrl });
 
          if (imageUrl && imageUrl.startsWith('file://')) {
@@ -326,10 +328,11 @@ export default function CreateLeague() {
             }
          }
 
-         // Clean up form data - use uploaded image URL
+         // Clean up form data - use uploaded image URL and add admin email
          const cleanFormData = {
-            ...formData,
+            name: formData.name,
             image: imageUrl && imageUrl.trim() ? imageUrl : undefined,
+            adminUserEmail: user.email,
          };
 
          console.log('🚀 Sending league creation request:', {
@@ -446,7 +449,8 @@ export default function CreateLeague() {
          if (!result.canceled && result.assets[0]) {
             const imageUri = result.assets[0].uri;
             console.log('✅ Image selected:', imageUri);
-            setFormData({ ...formData, image: imageUri });
+            imageRef.current = imageUri; // Store in ref for immediate access
+            setFormData((prev) => ({ ...prev, image: imageUri }));
 
             // Log successful image selection to Sentry
             captureException(new Error('Image selected successfully'), {
@@ -495,7 +499,8 @@ export default function CreateLeague() {
    };
 
    const removeImage = () => {
-      setFormData({ ...formData, image: null });
+      imageRef.current = null;
+      setFormData((prev) => ({ ...prev, image: null }));
    };
    if (isLoading) {
       return (

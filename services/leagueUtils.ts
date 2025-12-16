@@ -1,15 +1,5 @@
-import {
-   and,
-   count,
-   desc,
-   eq,
-   gte,
-   inArray,
-   lte,
-   sql,
-   sum,
-   or,
-} from 'drizzle-orm';
+import dayjs from 'dayjs';
+import { and, count, desc, eq, gte, inArray, lte, sql, sum } from 'drizzle-orm';
 import {
    cashIns,
    gamePlayers,
@@ -19,7 +9,6 @@ import {
    leagues,
    users,
 } from '../db';
-import dayjs from 'dayjs';
 
 /**
  * Generate a secure, unique 5-character invite code
@@ -181,7 +170,7 @@ export async function createLeague(data: {
       }
       if (!imageUrl) {
          imageUrl =
-            'https://pub-6908906fe4c24b7b82ff61e803190c28.r2.dev/icon.png';
+            'https://pub-6908906fe4c24b7b82ff61e803190c28.r2.dev/cyberpunkIcon-removebg-preview.png';
       }
 
       // Generate invite code with reduced attempts for faster execution
