@@ -1,5 +1,5 @@
 import { withAuth } from '@/utils/middleware';
-import { and, desc, eq, inArray, sql } from 'drizzle-orm';
+import { and, eq, inArray, sql } from 'drizzle-orm';
 import {
    anonymousPlayers,
    cashIns,
@@ -62,7 +62,8 @@ export const GET = withAuth(async (request: Request, user) => {
          );
       }
 
-      // Fetch completed games with creator info
+      // Fetch all games (active and completed) with creator info
+      // Order: active games first (by startedAt DESC), then completed games (by endedAt DESC)
       const gamesResult = await db
          .select({
             id: games.id,
@@ -70,16 +71,19 @@ export const GET = withAuth(async (request: Request, user) => {
             buyIn: games.buyIn,
             startedAt: games.startedAt,
             endedAt: games.endedAt,
+            status: games.status,
             createdBy: games.createdBy,
             creatorName: users.fullName,
             creatorImage: users.profileImageUrl,
          })
          .from(games)
          .leftJoin(users, eq(games.createdBy, users.id))
-         .where(
-            and(eq(games.leagueId, leagueId), eq(games.status, 'completed'))
+         .where(eq(games.leagueId, leagueId))
+         .orderBy(
+            // Order by status first (active games first), then by date
+            sql`CASE WHEN ${games.status} = 'active' THEN 0 ELSE 1 END ASC`,
+            sql`CASE WHEN ${games.status} = 'active' THEN ${games.startedAt} ELSE COALESCE(${games.endedAt}, ${games.startedAt}) END DESC`
          )
-         .orderBy(desc(games.endedAt))
          .limit(limit)
          .offset(offset);
 
@@ -172,19 +176,27 @@ export const GET = withAuth(async (request: Request, user) => {
       const totalCountResult = await db
          .select({ count: sql<number>`count(*)` })
          .from(games)
-         .where(
-            and(eq(games.leagueId, leagueId), eq(games.status, 'completed'))
-         );
+         .where(eq(games.leagueId, leagueId));
 
       const totalCount = Number(totalCountResult[0]?.count || 0);
       const hasMore = offset + gamesResult.length < totalCount;
 
-      return Response.json({
-         success: true,
-         games: processedGames,
-         hasMore,
-         total: totalCount,
-      });
+      return Response.json(
+         {
+            success: true,
+            games: processedGames,
+            hasMore,
+            total: totalCount,
+         },
+         {
+            headers: {
+               'Cache-Control':
+                  'no-store, no-cache, must-revalidate, proxy-revalidate',
+               Pragma: 'no-cache',
+               Expires: '0',
+            },
+         }
+      );
    } catch (error) {
       console.error('Error fetching league games:', error);
       return Response.json(

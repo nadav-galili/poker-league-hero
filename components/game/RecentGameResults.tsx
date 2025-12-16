@@ -154,9 +154,12 @@ PlayerRow.displayName = 'PlayerRow';
 const GameCard = React.memo(
    ({ game, isActive = false }: { game: GameResult; isActive?: boolean }) => {
       const { t } = useLocalization();
+      const isGameActive = !game.endedAt;
 
-      const formatTime = (dateString: string) => {
-         return dayjs(dateString).format('HH:mm');
+      const formatTime = (dateString: string | null | undefined) => {
+         if (!dateString) return '--:--';
+         const date = dayjs(dateString);
+         return date.isValid() ? date.format('HH:mm') : '--:--';
       };
 
       return (
@@ -176,6 +179,54 @@ const GameCard = React.memo(
             <View className="absolute top-2 right-2 w-4 h-4 border-r-2 border-t-2 border-[#00BFFF]" />
             <View className="absolute bottom-2 left-2 w-4 h-4 border-l-2 border-b-2 border-[#00BFFF]" />
             <View className="absolute bottom-2 right-2 w-4 h-4 border-r-2 border-b-2 border-[#00FFFF]" />
+
+            {/* Active Badge - Green Cyberpunk Style - Positioned at top-right of card */}
+            {isGameActive && (
+               <View
+                  className="absolute z-20"
+                  style={{
+                     top: 12,
+                     right: 12,
+                     backgroundColor: 'rgba(0, 0, 0, 0.95)',
+                     borderWidth: 2,
+                     borderColor: '#00FF88',
+                     paddingHorizontal: 10,
+                     paddingVertical: 6,
+                     shadowColor: '#00FF88',
+                     shadowOffset: { width: 0, height: 0 },
+                     shadowOpacity: 0.9,
+                     shadowRadius: 10,
+                     elevation: 15,
+                  }}
+               >
+                  {/* Corner brackets for badge */}
+                  <View className="absolute -top-0.5 -left-0.5 w-2 h-2 border-l border-t border-[#00FF88]" />
+                  <View className="absolute -top-0.5 -right-0.5 w-2 h-2 border-r border-t border-[#00FF88]" />
+                  <View className="absolute -bottom-0.5 -left-0.5 w-2 h-2 border-l border-b border-[#00FF88]" />
+                  <View className="absolute -bottom-0.5 -right-0.5 w-2 h-2 border-r border-b border-[#00FF88]" />
+
+                  {/* Badge text */}
+                  <Text
+                     className="text-[#00FF88] text-xs font-mono font-bold tracking-wider uppercase"
+                     style={{
+                        textShadowColor: '#00FF88',
+                        textShadowOffset: { width: 0, height: 0 },
+                        textShadowRadius: 8,
+                     }}
+                  >
+                     {t('active').toUpperCase()}
+                  </Text>
+
+                  {/* Pulsing glow effect */}
+                  <View
+                     className="absolute inset-0"
+                     style={{
+                        backgroundColor: '#00FF88',
+                        opacity: 0.15,
+                     }}
+                  />
+               </View>
+            )}
 
             {/* Holographic overlay */}
             <LinearGradient
@@ -197,14 +248,14 @@ const GameCard = React.memo(
             />
 
             {/* Game Header - Cyberpunk styled */}
-            <View className="p-4 bg-black/80 border-b border-[#00BFFF]/30 flex-row justify-between items-center relative">
+            <View className="p-4 bg-black/80 border-b border-[#00BFFF]/30 flex-row justify-between items-start relative" style={{ paddingTop: isGameActive ? 48 : 16 }}>
                {/* Header scan line */}
                <View
                   className="absolute top-0 left-0 right-0 h-px bg-[#00FFFF]"
                   style={{ opacity: 0.3 }}
                />
 
-               <View>
+               <View style={{ flex: 1, marginRight: 12 }}>
                   <Text
                      className="text-[#00FFFF] text-xs font-mono font-bold mb-1 tracking-wider uppercase"
                      style={{
@@ -213,23 +264,23 @@ const GameCard = React.memo(
                         textShadowRadius: 4,
                      }}
                   >
-                     {dayjs(game?.endedAt).format('MMM DD, YYYY')}
+                     {dayjs(game?.endedAt || game?.startedAt).format('MMM DD, YYYY')}
                   </Text>
                   <View className="flex-row items-center">
                      <Ionicons name="time-outline" size={12} color="#00BFFF" />
                      <Text className="text-[#00FFFF] text-xs ml-1 tracking-wide">
-                        {game.startedAt ? formatTime(game.startedAt) : '--:--'}{' '}
-                        - {formatTime(game.endedAt)}
+                        {formatTime(game.startedAt)}{' '}
+                        - {game.endedAt && game.endedAt !== null ? formatTime(game.endedAt) : t('ongoing')}
                      </Text>
                   </View>
                </View>
 
-               <View className="items-end">
+               <View className="items-end" style={{ flexShrink: 0, marginTop: isGameActive ? 0 : 0 }}>
                   <Text className="text-[#00FFFF] text-xs mb-1 uppercase tracking-wider">
                      {t('gameManager')}
                   </Text>
                   <View className="flex-row items-center">
-                     <Text className="text-[#00FFFF] font-mono font-bold text-xs mr-2 tracking-wide">
+                     <Text className="text-[#00FFFF] font-mono font-bold text-xs mr-2 tracking-wide" numberOfLines={1} style={{ maxWidth: 100 }}>
                         {game.creatorName}
                      </Text>
                      <View className="relative">
@@ -258,7 +309,7 @@ const GameCard = React.memo(
             </View>
 
             {/* Players List - Cyberpunk styled */}
-            <View className="p-4 relative" style={{ minHeight: 200 }}>
+            <View className="p-4 relative" style={{ minHeight: 220, maxHeight: 300 }}>
                {/* Background grid pattern */}
                <View
                   className="absolute inset-0 opacity-5"
@@ -421,7 +472,7 @@ export default function RecentGameResults({
          </View>
 
          {/* FlatList for swipeable cards */}
-         <View style={{ height: 400 }}>
+         <View style={{ height: 450 }}>
             <FlatList
                ref={flatListRef}
                data={games}
@@ -442,6 +493,7 @@ export default function RecentGameResults({
                   offset: SCREEN_WIDTH * index,
                   index,
                })}
+               contentContainerStyle={{ paddingVertical: 8 }}
                renderItem={({ item, index }) => (
                   <View style={{ width: SCREEN_WIDTH, paddingHorizontal: 16 }}>
                      <GameCard game={item} isActive={index === currentIndex} />

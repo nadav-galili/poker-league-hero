@@ -17,7 +17,8 @@ export interface GameResult {
    leagueId: number;
    buyIn: string;
    startedAt: string;
-   endedAt: string;
+   endedAt: string | null;
+   status?: 'active' | 'completed';
    createdBy: number;
    creatorName: string;
    creatorImage: string | null;
@@ -46,15 +47,20 @@ export function useLeagueGames(
    const [total, setTotal] = React.useState(0);
 
    const loadGames = React.useCallback(
-      async (page: number = initialPage, abortSignal?: AbortSignal) => {
+      async (page?: number, abortSignal?: AbortSignal) => {
          if (!leagueId || abortSignal?.aborted) return;
 
          try {
             setError(null);
             setIsLoading(true);
 
+            // Use provided page or default to 1 (always start fresh)
+            const pageToLoad = page ?? 1;
+
+            // Add cache-busting timestamp to prevent stale data
+            const cacheBuster = Date.now();
             const response = await fetchWithAuth(
-               `${BASE_URL}/api/leagues/${leagueId}/games?page=${page}&limit=${limit}`,
+               `${BASE_URL}/api/leagues/${leagueId}/games?page=${pageToLoad}&limit=${limit}&_t=${cacheBuster}`,
                { signal: abortSignal }
             );
 
@@ -69,9 +75,11 @@ export function useLeagueGames(
             if (abortSignal?.aborted) return;
 
             if (data.success) {
-               if (page === 1) {
+               if (pageToLoad === 1) {
+                  // Always replace games when loading page 1 (fresh data)
                   setGames(data.games);
                } else {
+                  // Append games for pagination
                   setGames((prev) => [...prev, ...data.games]);
                }
                setHasMore(data.hasMore);
@@ -97,7 +105,7 @@ export function useLeagueGames(
             }
          }
       },
-      [leagueId, limit, initialPage, fetchWithAuth]
+      [leagueId, limit, fetchWithAuth]
    );
 
    React.useEffect(() => {

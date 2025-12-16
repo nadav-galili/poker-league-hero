@@ -17,7 +17,7 @@ import { StatType } from '@/services/leagueStatsService';
 import { Ionicons } from '@expo/vector-icons';
 import { Image } from 'expo-image';
 import { LinearGradient } from 'expo-linear-gradient';
-import { router, useLocalSearchParams } from 'expo-router';
+import { router, useFocusEffect, useLocalSearchParams } from 'expo-router';
 import React from 'react';
 import {
    Animated,
@@ -141,6 +141,13 @@ export default function LeagueStatsScreen() {
          loadGames(nextPage);
       }
    }, [gamesLoading, gamesHasMore, games.length, loadGames]);
+
+   // Refresh games when screen comes into focus (e.g., after deleting a game)
+   useFocusEffect(
+      React.useCallback(() => {
+         loadGames(1); // Always refresh from page 1 when screen is focused
+      }, [loadGames])
+   );
 
    const handleStatPress = React.useCallback(
       (statType: StatType) => {

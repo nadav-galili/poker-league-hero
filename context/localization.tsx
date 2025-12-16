@@ -129,6 +129,7 @@ export interface Translations {
    startTime: string;
    endTime: string;
    noGamesYet: string;
+   ongoing: string;
    swipeForMore: string;
    switchingData: string;
    gameXofY: string;
@@ -410,6 +411,7 @@ const enTranslations: Translations = {
    startTime: 'Start',
    endTime: 'End',
    noGamesYet: 'No completed games yet',
+   ongoing: 'Ongoing',
    swipeForMore: 'Swipe for more',
    switchingData: 'SWITCHING DATA...',
    gameXofY: 'GAME {current} OF {total}',
@@ -699,6 +701,7 @@ const heTranslations: Translations = {
    startTime: 'התחלה',
    endTime: 'סיום',
    noGamesYet: 'אין משחקים שהושלמו עדיין',
+   ongoing: 'בתהליך',
    swipeForMore: 'החלק לעוד',
    switchingData: 'מחליף נתונים...',
    gameXofY: 'משחק {current} מתוך {total}',
@@ -747,7 +750,7 @@ const heTranslations: Translations = {
    cancelBuyIn: 'בטל כניסה',
    buyOut: 'יציאה',
    profit: 'רווח',
-   cashOut: 'משיכת כסף',
+   cashOut: 'יציאה',
    addPlayer: 'הוסף שחקן',
    removePlayer: 'הסר שחקן',
    confirmCashOut: 'אשר משיכת כסף',
@@ -797,7 +800,7 @@ const heTranslations: Translations = {
    negativeProfit: 'תשואה שלילית',
    totalMoneyIn: 'כסף נכנס',
    totalMoneyOut: 'כסף יוצא',
-   active: 'פעילים',
+   active: 'פעיל',
    finished: 'הסתיימו',
    uniquePlayers: 'שחקנים ייחודיים',
    perGame: 'למשחק',
