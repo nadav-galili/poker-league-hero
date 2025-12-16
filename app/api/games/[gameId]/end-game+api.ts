@@ -46,12 +46,12 @@ export const POST = withAuth(async (request: Request, user) => {
       }
 
       // Optional: Check if user has permission to end the game (is the creator)
-      if (game.createdBy !== user.userId) {
-         return Response.json(
-            { error: 'Only the game creator can end the game' },
-            { status: 403 }
-         );
-      }
+      // if (game.createdBy !== user.userId) {
+      //    return Response.json(
+      //       { error: 'Only the game creator can end the game' },
+      //       { status: 403 }
+      //    );
+      // }
 
       // Validation: Check if all players are cashed out (not active)
       const activePlayers = await db
