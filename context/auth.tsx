@@ -149,6 +149,16 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
       const restoreSession = async () => {
          setIsLoading(true);
          try {
+            // On web, check if we're on privacy/terms route - skip onboarding for these
+            if (isWeb && typeof window !== 'undefined') {
+               const currentPath = window.location.pathname;
+               if (currentPath === '/privacy' || currentPath === '/terms') {
+                  // Automatically mark onboarding as seen for privacy/terms routes (used for store listings)
+                  setHasSeenOnboarding(true);
+                  return; // Skip the rest of the session restore for these routes
+               }
+            }
+
             // Restore onboarding flag first
             let storedOnboarding: string | null = null;
             if (isWeb) {
