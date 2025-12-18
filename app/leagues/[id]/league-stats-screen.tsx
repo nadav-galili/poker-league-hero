@@ -136,8 +136,8 @@ export default function LeagueStatsScreen() {
 
    const handleLoadMoreGames = React.useCallback(() => {
       if (!gamesLoading && gamesHasMore) {
-         // Calculate next page based on current length and limit (default 3)
-         const nextPage = Math.ceil(games.length / 3) + 1;
+         // Calculate next page based on current length and limit (default 10)
+         const nextPage = Math.ceil(games.length / 10) + 1;
          loadGames(nextPage);
       }
    }, [gamesLoading, gamesHasMore, games.length, loadGames]);

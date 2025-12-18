@@ -37,7 +37,7 @@ interface UseLeagueGamesReturn {
 export function useLeagueGames(
    leagueId: string | undefined,
    initialPage: number = 1,
-   limit: number = 3
+   limit: number = 10
 ): UseLeagueGamesReturn {
    const { fetchWithAuth } = useAuth();
    const [games, setGames] = React.useState<GameResult[]>([]);

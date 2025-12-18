@@ -23,7 +23,7 @@ export const GET = withAuth(async (request: Request, user) => {
             : null;
 
       const page = parseInt(url.searchParams.get('page') || '1', 10);
-      const limit = parseInt(url.searchParams.get('limit') || '3', 10);
+      const limit = parseInt(url.searchParams.get('limit') || '10', 10);
       const offset = (page - 1) * limit;
 
       if (!leagueId) {
