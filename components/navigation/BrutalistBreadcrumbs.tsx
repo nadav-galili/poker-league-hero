@@ -3,17 +3,17 @@
  * Provides visual context showing navigation depth and current location
  */
 
-import { colors, getTheme } from '@/colors';
+import { getTheme } from '@/colors';
 import { Text } from '@/components/Text';
 import { Ionicons } from '@expo/vector-icons';
-import React, { useRef, useEffect, useMemo, useCallback } from 'react';
+import React, { useCallback, useEffect, useMemo, useRef } from 'react';
 import {
-   View,
-   TouchableOpacity,
    Animated,
    Easing,
-   ScrollView,
    I18nManager,
+   ScrollView,
+   TouchableOpacity,
+   View,
 } from 'react-native';
 
 export interface BreadcrumbItem {
@@ -118,33 +118,45 @@ export function BrutalistBreadcrumbs({
 
    const getItemHeight = () => {
       switch (variant) {
-         case 'compact': return 32;
-         case 'minimal': return 24;
-         default: return 40;
+         case 'compact':
+            return 32;
+         case 'minimal':
+            return 24;
+         default:
+            return 40;
       }
    };
 
    const getItemPadding = () => {
       switch (variant) {
-         case 'compact': return 8;
-         case 'minimal': return 6;
-         default: return 12;
+         case 'compact':
+            return 8;
+         case 'minimal':
+            return 6;
+         default:
+            return 12;
       }
    };
 
    const getFontVariant = () => {
       switch (variant) {
-         case 'compact': return 'captionSmall';
-         case 'minimal': return 'captionSmall';
-         default: return 'caption';
+         case 'compact':
+            return 'captionSmall';
+         case 'minimal':
+            return 'captionSmall';
+         default:
+            return 'caption';
       }
    };
 
    const getIconSize = () => {
       switch (variant) {
-         case 'compact': return 14;
-         case 'minimal': return 12;
-         default: return 16;
+         case 'compact':
+            return 14;
+         case 'minimal':
+            return 12;
+         default:
+            return 16;
       }
    };
 
@@ -189,14 +201,6 @@ export function BrutalistBreadcrumbs({
          extrapolate: 'clamp',
       });
 
-      if (!showStackIndicator || stackDepth === 0) return null;
-
-      const stackOffset = stackAnim.interpolate({
-         inputRange: [0, 5],
-         outputRange: [0, 20],
-         extrapolate: 'clamp',
-      });
-
       return (
          <Animated.View
             className="flex-row items-center mr-3"
@@ -205,20 +209,22 @@ export function BrutalistBreadcrumbs({
             }}
          >
             <View className="flex-row items-center">
-               {Array.from({ length: Math.min(stackDepth, 3) }).map((_, index) => (
-                  <View
-                     key={index}
-                     className="w-2 h-6 rounded-sm mr-1"
-                     style={{
-                        backgroundColor: theme.accent,
-                        opacity: 0.6 + (index * 0.2),
-                        transform: [
-                           { translateX: -index * 2 },
-                           { rotate: `${index * 2}deg` }
-                        ],
-                     }}
-                  />
-               ))}
+               {Array.from({ length: Math.min(stackDepth, 3) }).map(
+                  (_, index) => (
+                     <View
+                        key={index}
+                        className="w-2 h-6 rounded-sm mr-1"
+                        style={{
+                           backgroundColor: theme.accent,
+                           opacity: 0.6 + index * 0.2,
+                           transform: [
+                              { translateX: -index * 2 },
+                              { rotate: `${index * 2}deg` },
+                           ],
+                        }}
+                     />
+                  )
+               )}
                {stackDepth > 3 && (
                   <Text
                      variant="captionSmall"
@@ -268,7 +274,9 @@ export function BrutalistBreadcrumbs({
             {visibleItems.length > 0 && (
                <View className="mx-2">
                   <Ionicons
-                     name={I18nManager.isRTL ? "chevron-back" : "chevron-forward"}
+                     name={
+                        I18nManager.isRTL ? 'chevron-back' : 'chevron-forward'
+                     }
                      size={getIconSize()}
                      color={theme.textMuted}
                   />
@@ -276,97 +284,130 @@ export function BrutalistBreadcrumbs({
             )}
          </>
       );
-   }, [showHome, onHomePress, getItemHeight, getItemPadding, theme, getIconSize, visibleItems.length, I18nManager.isRTL]);
+   }, [
+      showHome,
+      onHomePress,
+      getItemHeight,
+      getItemPadding,
+      theme,
+      getIconSize,
+      visibleItems.length,
+      I18nManager.isRTL,
+   ]);
 
    // Memoize breadcrumb item renderer for better performance
-   const renderBreadcrumbItem = useCallback((item: BreadcrumbItem, index: number) => {
-      const isLast = index === visibleItems.length - 1;
-      const isActive = item.isActive || isLast;
+   const renderBreadcrumbItem = useCallback(
+      (item: BreadcrumbItem, index: number) => {
+         const isLast = index === visibleItems.length - 1;
+         const isActive = item.isActive || isLast;
 
-      return (
-         <Animated.View
-            key={item.id}
-            className="flex-row items-center"
-            style={{
-               transform: [
-                  {
-                     translateY: slideAnim.interpolate({
-                        inputRange: [0, 1],
-                        outputRange: [20, 0],
-                     }),
-                  },
-                  {
-                     scale: isLast ? bounceAnim : 1,
-                  },
-               ],
-               opacity: slideAnim,
-            }}
-         >
-            <TouchableOpacity
-               onPress={item.onPress}
-               disabled={!item.onPress || isActive}
-               activeOpacity={0.7}
+         return (
+            <Animated.View
+               key={item.id}
+               className="flex-row items-center"
                style={{
-                  height: getItemHeight(),
-                  paddingHorizontal: getItemPadding(),
-                  borderRadius: 8,
-                  borderWidth: 2,
-                  borderColor: isActive ? theme.primary : theme.border,
-                  backgroundColor: isActive ? theme.primaryTint : theme.surface,
-                  flexDirection: 'row',
-                  alignItems: 'center',
-                  shadowColor: theme.shadow,
-                  shadowOffset: { width: 2, height: 2 },
-                  shadowOpacity: isActive ? 0.8 : 0.5,
-                  shadowRadius: 0,
-                  elevation: isActive ? 6 : 3,
+                  transform: [
+                     {
+                        translateY: slideAnim.interpolate({
+                           inputRange: [0, 1],
+                           outputRange: [20, 0],
+                        }),
+                     },
+                     {
+                        scale: isLast ? bounceAnim : 1,
+                     },
+                  ],
+                  opacity: slideAnim,
                }}
             >
-               {item.icon && (
-                  <Ionicons
-                     name={item.icon}
-                     size={getIconSize()}
-                     color={isActive ? theme.primary : theme.textSecondary}
-                     style={{ marginRight: item.label ? 6 : 0 }}
-                  />
+               <TouchableOpacity
+                  onPress={item.onPress}
+                  disabled={!item.onPress || isActive}
+                  activeOpacity={0.7}
+                  style={{
+                     height: getItemHeight(),
+                     paddingHorizontal: getItemPadding(),
+                     borderRadius: 8,
+                     borderWidth: 2,
+                     borderColor: isActive ? theme.primary : theme.border,
+                     backgroundColor: isActive
+                        ? theme.primary
+                        : theme.primaryLight,
+                     flexDirection: 'row',
+                     alignItems: 'center',
+                     shadowColor: theme.shadow,
+                     shadowOffset: { width: 2, height: 2 },
+                     shadowOpacity: isActive ? 0.8 : 0.5,
+                     shadowRadius: 0,
+                     elevation: isActive ? 6 : 3,
+                  }}
+               >
+                  {item.icon && (
+                     <Ionicons
+                        name={item.icon}
+                        size={getIconSize()}
+                        color={isActive ? theme.primary : theme.textSecondary}
+                        style={{ marginRight: item.label ? 6 : 0 }}
+                     />
+                  )}
+
+                  {item.label && (
+                     <Text
+                        variant={getFontVariant() as any}
+                        className="font-semibold uppercase tracking-wide"
+                        style={{
+                           color: isActive
+                              ? theme.primary
+                              : theme.textSecondary,
+                        }}
+                        numberOfLines={1}
+                     >
+                        {item.label}
+                     </Text>
+                  )}
+               </TouchableOpacity>
+
+               {!isLast && item.id !== 'ellipsis' && (
+                  <View className="mx-2">
+                     <Ionicons
+                        name={
+                           I18nManager.isRTL
+                              ? 'chevron-back'
+                              : 'chevron-forward'
+                        }
+                        size={getIconSize()}
+                        color={theme.textMuted}
+                     />
+                  </View>
                )}
 
-               {item.label && (
-                  <Text
-                     variant={getFontVariant() as any}
-                     className="font-semibold uppercase tracking-wide"
-                     style={{
-                        color: isActive ? theme.primary : theme.textSecondary,
-                     }}
-                     numberOfLines={1}
-                  >
-                     {item.label}
-                  </Text>
+               {item.id === 'ellipsis' && (
+                  <View className="mx-2">
+                     <Ionicons
+                        name={
+                           I18nManager.isRTL
+                              ? 'chevron-back'
+                              : 'chevron-forward'
+                        }
+                        size={getIconSize()}
+                        color={theme.textMuted}
+                     />
+                  </View>
                )}
-            </TouchableOpacity>
-
-            {!isLast && item.id !== 'ellipsis' && (
-               <View className="mx-2">
-                  <Ionicons
-                     name={I18nManager.isRTL ? "chevron-back" : "chevron-forward"}
-                     size={getIconSize()}
-                     color={theme.textMuted}
-                  />
-               </View>
-            )}
-
-            {item.id === 'ellipsis' && (
-               <View className="mx-2">
-                  <Ionicons
-                     name={I18nManager.isRTL ? "chevron-back" : "chevron-forward"}
-                     size={getIconSize()}
-                     color={theme.textMuted}
-                  />
-               </View>
-            )}
-         </Animated.View>
-      );
-   }, [slideAnim, bounceAnim, getItemHeight, getItemPadding, theme, getIconSize, getFontVariant, I18nManager.isRTL]);
+            </Animated.View>
+         );
+      },
+      [
+         slideAnim,
+         bounceAnim,
+         getItemHeight,
+         getItemPadding,
+         theme,
+         getIconSize,
+         getFontVariant,
+         I18nManager.isRTL,
+      ]
+   );
 
    if (visibleItems.length === 0 && !showHome) {
       return null;
@@ -392,7 +433,9 @@ export function BrutalistBreadcrumbs({
             {renderStackIndicator()}
             {renderHomeButton()}
 
-            {visibleItems.map((item, index) => renderBreadcrumbItem(item, index))}
+            {visibleItems.map((item, index) =>
+               renderBreadcrumbItem(item, index)
+            )}
          </ScrollView>
       </View>
    );
@@ -401,7 +444,7 @@ export function BrutalistBreadcrumbs({
 // Stack depth indicator for showing navigation nesting
 export function NavigationStackIndicator({
    depth = 0,
-   variant = 'default'
+   variant = 'default',
 }: {
    depth: number;
    variant?: 'default' | 'minimal';
