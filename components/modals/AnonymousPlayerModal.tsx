@@ -189,7 +189,7 @@ export function AnonymousPlayerModal({
                               <View
                                  style={[
                                     styles.inputContainer,
-                                    isFocused && styles.inputContainerFocused,
+                                    // isFocused && styles.inputContainerFocused,
                                     error && styles.inputContainerError,
                                  ]}
                               >
@@ -207,13 +207,15 @@ export function AnonymousPlayerModal({
                                     keyboardType="default"
                                     autoCapitalize="words"
                                     autoCorrect={false}
-                                    onFocus={() => setIsFocused(true)}
-                                    onBlur={() => setIsFocused(false)}
+                                    // onFocus={() => setIsFocused(true)}
+                                    // onBlur={() => setIsFocused(false)}
                                     selectionColor={colors.neonCyan}
                                  />
                               </View>
                               {error ? (
-                                 <Text style={styles.errorText}>⚠ {error}</Text>
+                                 <Text style={styles.errorText}>
+                                    ⚠ {error}
+                                 </Text>
                               ) : null}
                            </View>
 

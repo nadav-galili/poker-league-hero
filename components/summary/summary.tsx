@@ -261,9 +261,7 @@ const Summary = ({ leagueId }: Props) => {
                         fontFamily: 'monospace',
                      }}
                   >
-                     {'>> '}
                      {t('retry')}
-                     {' <<'}
                   </Text>
                </TouchableOpacity>
             </View>
@@ -494,17 +492,6 @@ const Summary = ({ leagueId }: Props) => {
                   <Ionicons name="sparkles" size={20} color={colors.neonPink} />{' '}
                   {t('aiSummary')}
                </Text>
-               <TouchableOpacity
-                  onPress={() => refetch()}
-                  className={`absolute ${isRTL ? 'left-0' : 'right-0'} p-2 border-2 rounded`}
-                  style={{
-                     backgroundColor: colors.cyberBackground,
-                     borderColor: colors.neonCyan,
-                  }}
-                  hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
-               >
-                  <Ionicons name="refresh" size={16} color={colors.neonCyan} />
-               </TouchableOpacity>
             </View>
          </View>
 

@@ -163,7 +163,6 @@ poker-league-hero/
 │   │   └── InputModal.tsx
 │   │
 │   ├── navigation/             # Navigation components
-│   │   └── BrutalistBreadcrumbs.tsx
 │   │
 │   ├── notifications/          # Notification components
 │   │   └── BrutalistToast.tsx
@@ -214,8 +213,7 @@ poker-league-hero/
 │
 ├── context/                     # React contexts
 │   ├── auth.tsx                # Authentication state
-│   ├── localization.tsx        # i18n with Hebrew support
-│   └── navigation.tsx         # Navigation state
+│   └── localization.tsx        # i18n with Hebrew support
 │
 ├── db/                          # Database layer
 │   ├── connection.ts           # Database connection (web)
@@ -333,7 +331,7 @@ poker-league-hero/
 
 - **`app/`** - Expo Router file-based routing (pages and API routes)
 - **`components/`** - Reusable UI components organized by feature
-- **`context/`** - React Context providers (auth, localization, navigation)
+- **`context/`** - React Context providers (auth, localization)
 - **`db/`** - Database schema and migrations (Drizzle ORM)
 - **`hooks/`** - Custom React hooks for data fetching and state management
 - **`services/`** - Business logic and API service layers

@@ -3,7 +3,6 @@ import ErrorBoundary from '@/components/shared/ErrorBoundary';
 import LocalizedErrorFallback from '@/components/shared/LocalizedErrorFallback';
 import { AuthProvider } from '@/context/auth';
 import { LocalizationProvider } from '@/context/localization';
-import { NavigationProvider } from '@/context/navigation';
 import { mixpanel } from '@/services/mixpanel';
 import { loadFonts } from '@/utils/fonts';
 import * as Sentry from '@sentry/react-native';
@@ -192,7 +191,6 @@ export default Sentry.wrap(function RootLayout() {
             <SafeAreaProvider>
                <QueryClientProvider client={queryClient}>
                <LocalizationProvider>
-                  <NavigationProvider>
                      <ErrorBoundary
                         fallback={
                            <LocalizedErrorFallback onRetry={handleRetry} />
@@ -206,7 +204,6 @@ export default Sentry.wrap(function RootLayout() {
                            />
                         </AuthProvider>
                      </ErrorBoundary>
-                  </NavigationProvider>
                </LocalizationProvider>
             </QueryClientProvider>
          </SafeAreaProvider>
