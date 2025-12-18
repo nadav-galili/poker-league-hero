@@ -309,7 +309,7 @@ const GameCard = React.memo(
             </View>
 
             {/* Players List - Cyberpunk styled */}
-            <View className="p-4 relative" style={{ minHeight: 220, maxHeight: 300 }}>
+            <View className="p-4 relative" style={{ minHeight: game.players.length * 60 + 40 }}>
                {/* Background grid pattern */}
                <View
                   className="absolute inset-0 opacity-5"
@@ -409,7 +409,7 @@ export default function RecentGameResults({
    }
 
    return (
-      <View className="mb-8">
+      <View className="mb-4">
          {/* Cyberpunk Section Header - Blue/Teal Theme */}
          <View className="relative mb-6 overflow-hidden px-6">
             <View
@@ -472,7 +472,7 @@ export default function RecentGameResults({
          </View>
 
          {/* FlatList for swipeable cards */}
-         <View style={{ height: 450 }}>
+         <View style={{ minHeight: 300 }}>
             <FlatList
                ref={flatListRef}
                data={games}
@@ -524,7 +524,7 @@ export default function RecentGameResults({
          </View>
 
          {/* Enhanced Pagination with Cyberpunk Styling */}
-         <View className="flex-row justify-center items-center mt-6 space-x-3 px-6">
+         <View className="flex-row justify-center items-center mt-3 space-x-3 px-6">
             {games.map((_, index) => {
                const isActive = index === currentIndex;
                const isPast = index < currentIndex;
@@ -579,7 +579,7 @@ export default function RecentGameResults({
          </View>
 
          {/* Status Text with Cyberpunk Styling */}
-         <View className="mt-4 items-center px-6">
+         <View className="mt-2 items-center px-6">
             <Text
                className="text-[#00BFFF] text-xs text-center font-mono tracking-wider uppercase"
                style={{
