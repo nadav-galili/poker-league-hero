@@ -16,6 +16,7 @@ type Props = {
 type AISummaryType = {
    financialSnapshot: string;
    lastGameHighlights: string;
+   outlook: string;
    stats: {
       totalProfit: number;
       totalBuyIns: number;
@@ -102,7 +103,6 @@ const Summary = ({ leagueId }: Props) => {
          );
 
          const data = await response.json();
-         console.log('AI Summary API Response:', data);
 
          if (!response.ok) {
             console.error('AI Summary API Error:', data);
@@ -567,7 +567,6 @@ const Summary = ({ leagueId }: Props) => {
                         fontFamily: 'monospace',
                      }}
                   >
-                     {'>> '}
                      {t('financialSnapshot')}
                   </Text>
                   <Text
@@ -652,7 +651,6 @@ const Summary = ({ leagueId }: Props) => {
                         fontFamily: 'monospace',
                      }}
                   >
-                     {'>> '}
                      {t('lastGameHighlights')}
                   </Text>
                   <Text
@@ -664,6 +662,90 @@ const Summary = ({ leagueId }: Props) => {
                      }}
                   >
                      {summary.summary.lastGameHighlights}
+                  </Text>
+               </View>
+
+               {/* Outlook & Prediction Card */}
+               <View
+                  className="relative p-5 border-2"
+                  style={{
+                     backgroundColor: `${colors.cyberBackground}CC`,
+                     borderColor: colors.neonPurple,
+                     shadowColor: colors.shadowPurple,
+                     shadowOffset: { width: 0, height: 0 },
+                     shadowOpacity: 0.6,
+                     shadowRadius: 8,
+                     elevation: 8,
+                  }}
+               >
+                  {/* Corner Brackets */}
+                  <View className="absolute top-0 left-0 w-4 h-4">
+                     <View
+                        className="absolute top-0 left-0 w-3 h-0.5"
+                        style={{ backgroundColor: colors.neonPurple }}
+                     />
+                     <View
+                        className="absolute top-0 left-0 w-0.5 h-3"
+                        style={{ backgroundColor: colors.neonPurple }}
+                     />
+                  </View>
+                  <View className="absolute top-0 right-0 w-4 h-4">
+                     <View
+                        className="absolute top-0 right-0 w-3 h-0.5"
+                        style={{ backgroundColor: colors.neonPurple }}
+                     />
+                     <View
+                        className="absolute top-0 right-0 w-0.5 h-3"
+                        style={{ backgroundColor: colors.neonPurple }}
+                     />
+                  </View>
+                  <View className="absolute bottom-0 left-0 w-4 h-4">
+                     <View
+                        className="absolute bottom-0 left-0 w-3 h-0.5"
+                        style={{ backgroundColor: colors.neonPurple }}
+                     />
+                     <View
+                        className="absolute bottom-0 left-0 w-0.5 h-3"
+                        style={{ backgroundColor: colors.neonPurple }}
+                     />
+                  </View>
+                  <View className="absolute bottom-0 right-0 w-4 h-4">
+                     <View
+                        className="absolute bottom-0 right-0 w-3 h-0.5"
+                        style={{ backgroundColor: colors.neonPurple }}
+                     />
+                     <View
+                        className="absolute bottom-0 right-0 w-0.5 h-3"
+                        style={{ backgroundColor: colors.neonPurple }}
+                     />
+                  </View>
+
+                  {/* Holographic overlay */}
+                  <View
+                     className="absolute inset-0 opacity-20"
+                     style={{ backgroundColor: 'rgba(138, 43, 226, 0.3)' }}
+                  />
+
+                  <Text
+                     className="font-bold text-lg mb-3 uppercase tracking-[2px]"
+                     style={{
+                        color: colors.neonPurple,
+                        textAlign: isRTL ? 'right' : 'left',
+                        writingDirection: isRTL ? 'rtl' : 'ltr',
+                        fontFamily: 'monospace',
+                     }}
+                  >
+                     {t('outlook')}
+                  </Text>
+                  <Text
+                     className="font-medium text-base leading-6"
+                     style={{
+                        color: colors.textSecondary,
+                        textAlign: isRTL ? 'right' : 'left',
+                        writingDirection: isRTL ? 'rtl' : 'ltr',
+                     }}
+                  >
+                     {summary.summary.outlook}
                   </Text>
                </View>
             </View>
@@ -729,9 +811,7 @@ const Summary = ({ leagueId }: Props) => {
                      fontFamily: 'monospace',
                   }}
                >
-                  {'<< '}
                   {t('noSummaryYet')}
-                  {' >>'}
                </Text>
             </View>
          )}

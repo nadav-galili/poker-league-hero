@@ -23,12 +23,19 @@ import { validateDatabaseId } from '@/utils/validation';
 import dayjs from 'dayjs';
 import { eq, sql } from 'drizzle-orm';
 
-// Template for AI summary generation
-const template = `You are an enthusiastic and friendly AI poker analyst analyzing a home poker league.
+// Template for AI summary generation (ChatGPT-5 nano optimized)
+const template = `You are an enthusiastic, friendly, and supportive AI poker analyst analyzing a home poker league.
+Your tone must always be POSITIVE, encouraging, and respectful to all players.
 
-**IMPORTANT**: Poker is a zero-sum game. Money won by one player = money lost by others. Do NOT report "league profit" - instead focus on INDIVIDUAL player performances.
+**IMPORTANT PRINCIPLES**
+- Poker is a zero-sum game. Money won by one player equals money lost by others.
+- NEVER criticize, shame, or portray players negatively.
+- Avoid words like "lost badly", "worst", or "biggest loser".
+- Focus on achievements, improvement, momentum, and learning opportunities.
+- If mentioning losses, frame them as experience, variance, or future potential.
 
-**Response Format**: Return ONLY valid JSON:
+**Response Format**
+Return ONLY valid JSON:
 {
   "financialSnapshot": "string (max 50 words)",
   "lastGameHighlights": "string (max 50 words)",
@@ -38,22 +45,31 @@ const template = `You are an enthusiastic and friendly AI poker analyst analyzin
     "totalGames": number,
     "highestSingleGameProfit": number,
     "highestSingleGamePlayer": "string"
-  }
+  },
+  "outlook": "string (max 40 words)"
 }
 
 **Paragraph 1: Financial Snapshot (financialSnapshot)**
-- Report: total games played, total buy-ins amount, number of active players
-- Highlight the TOP WINNER (player with highest cumulative profit) and their profit amount
-- Mention the biggest loser if relevant
-- DO NOT say "the league profited" - individual players profit/lose, not the league
+- Report total games played, total buy-ins amount, and number of active players
+- Highlight the TOP PERFORMER (highest cumulative profit) and their achievement
+- Optionally mention another player showing consistency or improvement
+- Never describe any player negatively
+- Do NOT say the league profited
 
-**Paragraph 2: Last Game Results (lastGameHighlights)**
-- Who won the last game and how much they won
-- Notable performances (big wins/losses)
-- If no last game data, say "No recent game data available"
+**Paragraph 2: Last Game Highlights (lastGameHighlights)**
+- Who led the last game and how much they earned
+- Highlight smart plays, comebacks, or strong participation
+- If no last game data exists, say: "No recent game data available"
+- Keep tone exciting and optimistic
 
-**Stats object**:
-- totalProfit: ALWAYS set to 0 (poker is zero-sum)
+**Paragraph 3: Outlook & Prediction (outlook)**
+- Provide a short forward-looking insight
+- Predict who may perform well next or what trend may continue
+- Base prediction on momentum, consistency, or recent participation
+- Keep it light, speculative, and positive
+
+**Stats Object Rules**
+- totalProfit: ALWAYS 0 (zero-sum)
 - totalBuyIns: sum of all buy-ins
 - totalGames: number of completed games
 - highestSingleGameProfit: biggest single-game win
@@ -63,8 +79,14 @@ const template = `You are an enthusiastic and friendly AI poker analyst analyzin
 {{leagues_stats}}
 
 **Language**: {{language}}
-**Word Limit**: 50 words per paragraph.
-**Use player names for engagement.**`;
+**Word Limits**
+- financialSnapshot: max 50 words
+- lastGameHighlights: max 50 words
+- outlook: max 40 words
+
+**Engagement Rule**
+- Always use player names when available
+- Celebrate skill, momentum, and fun competition`;
 
 export const POST = withAuth(
    withRateLimit(async (request: Request, user) => {
@@ -304,16 +326,65 @@ export const POST = withAuth(
                .replace('{{leagues_stats}}', JSON.stringify(stats))
                .replaceAll('{{language}}', languageName);
 
+            console.log('🤖 Calling LLM with model: gpt-4o-mini');
+            console.log('📝 Prompt length:', prompt.length);
+
             const result = await llmClient.generateText({
                model: 'gpt-4o-mini',
                prompt,
                temperature: 0.2,
                maxTokens: 400,
+               responseFormat: { type: 'json_object' },
+            });
+
+            console.log('✅ LLM Response received:', {
+               id: result.id,
+               textLength: result.text.length,
+               textPreview: result.text.substring(0, 200),
             });
 
             // Parse and validate response
-            const parsed = JSON.parse(result.text);
-            const validated = aiSummarySchema.parse(parsed);
+            let parsed;
+            try {
+               parsed = JSON.parse(result.text);
+               console.log('✅ JSON parsed successfully:', {
+                  keys: Object.keys(parsed),
+                  hasFinancialSnapshot: 'financialSnapshot' in parsed,
+                  hasLastGameHighlights: 'lastGameHighlights' in parsed,
+                  hasOutlook: 'outlook' in parsed,
+                  hasStats: 'stats' in parsed,
+               });
+            } catch (parseError) {
+               console.error('❌ JSON Parse Error:', {
+                  error:
+                     parseError instanceof Error
+                        ? parseError.message
+                        : String(parseError),
+                  rawText: result.text,
+                  textLength: result.text.length,
+               });
+               throw new Error(
+                  `Failed to parse LLM response as JSON: ${parseError instanceof Error ? parseError.message : String(parseError)}`
+               );
+            }
+
+            let validated;
+            try {
+               validated = aiSummarySchema.parse(parsed);
+               console.log('✅ Schema validation passed');
+            } catch (validationError) {
+               console.error('❌ Schema Validation Error:', {
+                  error:
+                     validationError instanceof Error
+                        ? validationError.message
+                        : String(validationError),
+                  parsedData: JSON.stringify(parsed, null, 2),
+               });
+               throw new Error(
+                  `Schema validation failed: ${validationError instanceof Error ? validationError.message : String(validationError)}`
+               );
+            }
+
             // Enforce totalProfit = 0 (poker is zero-sum)
             summary = {
                ...validated,
@@ -322,10 +393,13 @@ export const POST = withAuth(
                   totalProfit: 0,
                },
             };
+
+            console.log('✅ Summary generated successfully');
          } catch (error) {
             console.error(
                '❌ Error generating AI summary, using fallback:',
-               error
+               error instanceof Error ? error.message : String(error),
+               error instanceof Error ? error.stack : undefined
             );
             captureException(
                new Error(
@@ -363,9 +437,14 @@ export const POST = withAuth(
                ? 'ניתוח ה־AI אינו זמין כרגע בגלל מגבלות שרת.'
                : 'AI analysis is temporarily unavailable due to server limits.';
 
+            const outlook = isHebrew
+               ? 'הליגה ממשיכה לגדול עם משחקים פעילים. צפו לעוד פעילות מרגשת!'
+               : 'The league continues to grow with active games. Expect more exciting action ahead!';
+
             summary = {
                financialSnapshot,
                lastGameHighlights,
+               outlook,
                stats: {
                   totalProfit,
                   totalBuyIns,

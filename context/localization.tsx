@@ -273,6 +273,7 @@ export interface Translations {
    aiSummary: string;
    financialSnapshot: string;
    lastGameHighlights: string;
+   outlook: string;
    generatingAnalysis: string;
    noSummaryYet: string;
    playGameToGetAiSummary: string;
@@ -564,6 +565,7 @@ const enTranslations: Translations = {
    aiSummary: 'AI Summary',
    financialSnapshot: 'Financial Snapshot',
    lastGameHighlights: 'Last Game Highlights',
+   outlook: 'Outlook & Prediction',
    generatingAnalysis: 'Generating Analysis...',
    noSummaryYet: 'No summary available yet',
    playGameToGetAiSummary: 'Play a game to get AI summary',
@@ -853,6 +855,7 @@ const heTranslations: Translations = {
    aiSummary: 'סיכום AI',
    financialSnapshot: 'מצב פיננסי',
    lastGameHighlights: 'דגשי המשחק האחרון',
+   outlook: 'תחזית והערכה',
    generatingAnalysis: 'מייצר ניתוח...',
    noSummaryYet: 'אין סיכום זמין עדיין',
    playGameToGetAiSummary: 'שחק משחק כדי לקבל סיכום AI',
