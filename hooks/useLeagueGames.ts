@@ -40,6 +40,14 @@ export function useLeagueGames(
    limit: number = 10
 ): UseLeagueGamesReturn {
    const { fetchWithAuth } = useAuth();
+   // `fetchWithAuth` is currently not memoized in AuthProvider, so its identity can
+   // change on every render. If we depend on it directly, `loadGames` becomes unstable,
+   // which can trigger infinite effect loops (Maximum update depth exceeded).
+   const fetchWithAuthRef = React.useRef(fetchWithAuth);
+   React.useEffect(() => {
+      fetchWithAuthRef.current = fetchWithAuth;
+   }, [fetchWithAuth]);
+
    const [games, setGames] = React.useState<GameResult[]>([]);
    const [isLoading, setIsLoading] = React.useState(true);
    const [error, setError] = React.useState<string | null>(null);
@@ -59,7 +67,7 @@ export function useLeagueGames(
 
             // Add cache-busting timestamp to prevent stale data
             const cacheBuster = Date.now();
-            const response = await fetchWithAuth(
+            const response = await fetchWithAuthRef.current(
                `${BASE_URL}/api/leagues/${leagueId}/games?page=${pageToLoad}&limit=${limit}&_t=${cacheBuster}`,
                { signal: abortSignal }
             );
@@ -105,7 +113,7 @@ export function useLeagueGames(
             }
          }
       },
-      [leagueId, limit, fetchWithAuth]
+      [leagueId, limit]
    );
 
    React.useEffect(() => {

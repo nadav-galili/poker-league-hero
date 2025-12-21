@@ -15,6 +15,9 @@ refactored ui
 remove animation
 1.4.7
 Refactor ui to cyber punk
+1.4.9
+CYBERPUNK version
+1.4.91
 
 # IOS
 
@@ -56,6 +59,10 @@ changed icon , refactored some ui
 Add anonymouse player and Fix mixpanel tracking for opt out users
 1.3.0
 Refactored ai , added detailed game stats, added games list
+
+## privacy policy url:
+
+https://nadav-galili.github.io/poker-ai-t-n-c/privacy-policy.html
 
 ## Deploy to expo routes
 

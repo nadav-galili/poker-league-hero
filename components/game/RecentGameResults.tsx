@@ -397,6 +397,36 @@ export default function RecentGameResults({
       setIsScrolling(false);
    };
 
+   const renderItem = React.useCallback(
+      ({ item, index }: { item: GameResult; index: number }) => (
+         <View style={{ width: SCREEN_WIDTH, paddingHorizontal: 16 }}>
+            <GameCard game={item} isActive={index === currentIndex} />
+            {isScrolling && index === currentIndex && (
+               <View
+                  className="absolute inset-0 items-center justify-center z-20 mx-4"
+                  style={{
+                     backgroundColor: 'rgba(0, 0, 0, 0.85)',
+                     borderRadius: 2,
+                  }}
+               >
+                  <ActivityIndicator size="large" color="#00FFFF" />
+                  <Text
+                     className="text-[#00FFFF] text-sm font-mono mt-3 tracking-wider"
+                     style={{
+                        textShadowColor: '#00FFFF',
+                        textShadowOffset: { width: 0, height: 0 },
+                        textShadowRadius: 6,
+                     }}
+                  >
+                     {t('loading')}...
+                  </Text>
+               </View>
+            )}
+         </View>
+      ),
+      [currentIndex, isScrolling, t]
+   );
+
    if (isLoading && games.length === 0) {
       return (
          <View className="w-full h-48 items-center justify-center bg-white/5 rounded-3xl border border-white/10">
@@ -578,39 +608,18 @@ export default function RecentGameResults({
                snapToAlignment="center"
                decelerationRate="fast"
                disableIntervalMomentum={true}
-               keyExtractor={(item, index) => `game-${item.id}-${index}`}
+               keyExtractor={(item) => item.id.toString()}
                getItemLayout={(_, index) => ({
                   length: SCREEN_WIDTH,
                   offset: SCREEN_WIDTH * index,
                   index,
                })}
+               initialNumToRender={1}
+               maxToRenderPerBatch={1}
+               windowSize={3}
+               removeClippedSubviews={true}
                contentContainerStyle={{ paddingVertical: 8 }}
-               renderItem={({ item, index }) => (
-                  <View style={{ width: SCREEN_WIDTH, paddingHorizontal: 16 }}>
-                     <GameCard game={item} isActive={index === currentIndex} />
-                     {isScrolling && index === currentIndex && (
-                        <View
-                           className="absolute inset-0 items-center justify-center z-20 mx-4"
-                           style={{
-                              backgroundColor: 'rgba(0, 0, 0, 0.85)',
-                              borderRadius: 2,
-                           }}
-                        >
-                           <ActivityIndicator size="large" color="#00FFFF" />
-                           <Text
-                              className="text-[#00FFFF] text-sm font-mono mt-3 tracking-wider"
-                              style={{
-                                 textShadowColor: '#00FFFF',
-                                 textShadowOffset: { width: 0, height: 0 },
-                                 textShadowRadius: 6,
-                              }}
-                           >
-                              {t('loading')}...
-                           </Text>
-                        </View>
-                     )}
-                  </View>
-               )}
+               renderItem={renderItem}
             />
          </View>
       </View>
