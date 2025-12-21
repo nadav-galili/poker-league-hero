@@ -5,7 +5,7 @@ import { useLocalization } from '@/context/localization';
 import { Ionicons } from '@expo/vector-icons';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useQuery } from '@tanstack/react-query';
-import React, { useEffect, useState } from 'react';
+import React from 'react';
 import { Text, TouchableOpacity, View } from 'react-native';
 import { LeagueCardSkeleton } from '../shared/LeagueCardSkeleton';
 
@@ -36,12 +36,7 @@ type getSummaryListResponse = {
 const Summary = ({ leagueId }: Props) => {
    const { fetchWithAuth } = useAuth();
    const { t, language, isRTL } = useLocalization();
-   const [refreshKey, setRefreshKey] = useState(0);
    const cacheKey = `ai_summary_${leagueId}`;
-
-   useEffect(() => {
-      setRefreshKey((prev) => prev + 1);
-   }, [leagueId, language]); // Refetch when language changes
 
    // Helper to persist summary via separate lightweight endpoint
    const persistSummaryToBackend = async (summaryData: AISummaryType) => {
@@ -75,7 +70,7 @@ const Summary = ({ leagueId }: Props) => {
       error,
       refetch,
    } = useQuery<getSummaryListResponse, Error>({
-      queryKey: ['summary', leagueId, language, refreshKey],
+      queryKey: ['summary', leagueId, language],
       queryFn: async () => {
          // First, try to persist any locally cached summary via separate endpoint
          try {
@@ -332,7 +327,6 @@ const Summary = ({ leagueId }: Props) => {
                      className="text-center text-xl font-black uppercase tracking-[3px]"
                      style={{
                         color: colors.neonPink,
-                        writingDirection: isRTL ? 'rtl' : 'ltr',
                         fontFamily: 'monospace',
                      }}
                   >
@@ -485,7 +479,6 @@ const Summary = ({ leagueId }: Props) => {
                   className="text-center text-xl font-black uppercase tracking-[3px]"
                   style={{
                      color: colors.neonPink,
-                     writingDirection: isRTL ? 'rtl' : 'ltr',
                      fontFamily: 'monospace',
                   }}
                >
@@ -563,7 +556,6 @@ const Summary = ({ leagueId }: Props) => {
                      style={{
                         color: colors.neonCyan,
                         textAlign: isRTL ? 'right' : 'left',
-                        writingDirection: isRTL ? 'rtl' : 'ltr',
                         fontFamily: 'monospace',
                      }}
                   >
@@ -574,7 +566,7 @@ const Summary = ({ leagueId }: Props) => {
                      style={{
                         color: colors.textSecondary,
                         textAlign: isRTL ? 'right' : 'left',
-                        writingDirection: isRTL ? 'rtl' : 'ltr',
+                        width: '100%',
                      }}
                   >
                      {summary.summary.financialSnapshot}
@@ -647,7 +639,6 @@ const Summary = ({ leagueId }: Props) => {
                      style={{
                         color: colors.neonGreen,
                         textAlign: isRTL ? 'right' : 'left',
-                        writingDirection: isRTL ? 'rtl' : 'ltr',
                         fontFamily: 'monospace',
                      }}
                   >
@@ -658,7 +649,7 @@ const Summary = ({ leagueId }: Props) => {
                      style={{
                         color: colors.textSecondary,
                         textAlign: isRTL ? 'right' : 'left',
-                        writingDirection: isRTL ? 'rtl' : 'ltr',
+                        width: '100%',
                      }}
                   >
                      {summary.summary.lastGameHighlights}
@@ -731,7 +722,6 @@ const Summary = ({ leagueId }: Props) => {
                      style={{
                         color: colors.neonPurple,
                         textAlign: isRTL ? 'right' : 'left',
-                        writingDirection: isRTL ? 'rtl' : 'ltr',
                         fontFamily: 'monospace',
                      }}
                   >
@@ -742,7 +732,7 @@ const Summary = ({ leagueId }: Props) => {
                      style={{
                         color: colors.textSecondary,
                         textAlign: isRTL ? 'right' : 'left',
-                        writingDirection: isRTL ? 'rtl' : 'ltr',
+                        width: '100%',
                      }}
                   >
                      {summary.summary.outlook}

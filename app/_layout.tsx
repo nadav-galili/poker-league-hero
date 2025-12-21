@@ -20,6 +20,18 @@ import Toast, {
 } from 'react-native-toast-message';
 import '../global.css';
 
+// Configure Reanimated to suppress warnings about accessing shared values during render
+// This is safe because NativeWind's animate-pulse uses Reanimated internally
+// and may access shared values during render
+import { configureReanimatedLogger, ReanimatedLogLevel } from 'react-native-reanimated';
+
+// Disable strict mode to suppress warnings about writing to value during component render
+// This is needed because NativeWind v4 uses Reanimated internally for CSS animations
+configureReanimatedLogger({
+   level: ReanimatedLogLevel.warn,
+   strict: false,
+});
+
 Sentry.init({
    dsn: 'https://80a1df1974c168c03b552dea7be0c3ed@o4508240875618304.ingest.de.sentry.io/4509824848101456',
 
