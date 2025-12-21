@@ -248,7 +248,10 @@ const GameCard = React.memo(
             />
 
             {/* Game Header - Cyberpunk styled */}
-            <View className="p-4 bg-black/80 border-b border-[#00BFFF]/30 flex-row justify-between items-start relative" style={{ paddingTop: isGameActive ? 48 : 16 }}>
+            <View
+               className="p-4 bg-black/80 border-b border-[#00BFFF]/30 flex-row justify-between items-start relative"
+               style={{ paddingTop: isGameActive ? 48 : 16 }}
+            >
                {/* Header scan line */}
                <View
                   className="absolute top-0 left-0 right-0 h-px bg-[#00FFFF]"
@@ -264,23 +267,34 @@ const GameCard = React.memo(
                         textShadowRadius: 4,
                      }}
                   >
-                     {dayjs(game?.endedAt || game?.startedAt).format('MMM DD, YYYY')}
+                     {dayjs(game?.endedAt || game?.startedAt).format(
+                        'MMM DD, YYYY'
+                     )}
                   </Text>
                   <View className="flex-row items-center">
                      <Ionicons name="time-outline" size={12} color="#00BFFF" />
                      <Text className="text-[#00FFFF] text-xs ml-1 tracking-wide">
-                        {formatTime(game.startedAt)}{' '}
-                        - {game.endedAt && game.endedAt !== null ? formatTime(game.endedAt) : t('ongoing')}
+                        {formatTime(game.startedAt)} -{' '}
+                        {game.endedAt && game.endedAt !== null
+                           ? formatTime(game.endedAt)
+                           : t('ongoing')}
                      </Text>
                   </View>
                </View>
 
-               <View className="items-end" style={{ flexShrink: 0, marginTop: isGameActive ? 0 : 0 }}>
+               <View
+                  className="items-end"
+                  style={{ flexShrink: 0, marginTop: isGameActive ? 0 : 0 }}
+               >
                   <Text className="text-[#00FFFF] text-xs mb-1 uppercase tracking-wider">
                      {t('gameManager')}
                   </Text>
                   <View className="flex-row items-center">
-                     <Text className="text-[#00FFFF] font-mono font-bold text-xs mr-2 tracking-wide" numberOfLines={1} style={{ maxWidth: 100 }}>
+                     <Text
+                        className="text-[#00FFFF] font-mono font-bold text-xs mr-2 tracking-wide"
+                        numberOfLines={1}
+                        style={{ maxWidth: 100 }}
+                     >
                         {game.creatorName}
                      </Text>
                      <View className="relative">
@@ -309,7 +323,7 @@ const GameCard = React.memo(
             </View>
 
             {/* Players List - Cyberpunk styled */}
-            <View className="p-4 relative" style={{ minHeight: game.players.length * 60 + 40 }}>
+            <View className="p-4 relative">
                {/* Background grid pattern */}
                <View
                   className="absolute inset-0 opacity-5"
@@ -470,59 +484,29 @@ export default function RecentGameResults({
                />
             </View>
          </View>
+         {/* Status Text with Cyberpunk Styling */}
+         <View className="mt-2 items-center px-6">
+            <Text
+               className="text-[#00BFFF] text-xs text-center font-mono tracking-wider uppercase"
+               style={{
+                  textShadowColor: '#00BFFF',
+                  textShadowOffset: { width: 0, height: 0 },
+                  textShadowRadius: 4,
+               }}
+            >
+               {hasMore
+                  ? t('swipeForMore')
+                  : t('gameXofY')
+                       .replace('{current}', String(currentIndex + 1))
+                       .replace('{total}', String(games.length))}
+            </Text>
 
-         {/* FlatList for swipeable cards */}
-         <View style={{ minHeight: 300 }}>
-            <FlatList
-               ref={flatListRef}
-               data={games}
-               horizontal
-               showsHorizontalScrollIndicator={false}
-               onViewableItemsChanged={onViewableItemsChanged}
-               viewabilityConfig={viewabilityConfig}
-               onScrollBeginDrag={handleScrollBeginDrag}
-               onMomentumScrollEnd={handleScrollEnd}
-               onScrollEndDrag={handleScrollEnd}
-               snapToInterval={SCREEN_WIDTH}
-               snapToAlignment="center"
-               decelerationRate="fast"
-               disableIntervalMomentum={true}
-               keyExtractor={(item, index) => `game-${item.id}-${index}`}
-               getItemLayout={(_, index) => ({
-                  length: SCREEN_WIDTH,
-                  offset: SCREEN_WIDTH * index,
-                  index,
-               })}
-               contentContainerStyle={{ paddingVertical: 8 }}
-               renderItem={({ item, index }) => (
-                  <View style={{ width: SCREEN_WIDTH, paddingHorizontal: 16 }}>
-                     <GameCard game={item} isActive={index === currentIndex} />
-                     {isScrolling && index === currentIndex && (
-                        <View
-                           className="absolute inset-0 items-center justify-center z-20 mx-4"
-                           style={{
-                              backgroundColor: 'rgba(0, 0, 0, 0.85)',
-                              borderRadius: 2,
-                           }}
-                        >
-                           <ActivityIndicator size="large" color="#00FFFF" />
-                           <Text
-                              className="text-[#00FFFF] text-sm font-mono mt-3 tracking-wider"
-                              style={{
-                                 textShadowColor: '#00FFFF',
-                                 textShadowOffset: { width: 0, height: 0 },
-                                 textShadowRadius: 6,
-                              }}
-                           >
-                              {t('loading')}...
-                           </Text>
-                        </View>
-                     )}
-                  </View>
-               )}
+            {/* Indicator line */}
+            <View
+               className="mt-2 h-px bg-[#00BFFF] animate-pulse"
+               style={{ width: 120, opacity: 0.6 }}
             />
          </View>
-
          {/* Enhanced Pagination with Cyberpunk Styling */}
          <View className="flex-row justify-center items-center mt-3 space-x-3 px-6">
             {games.map((_, index) => {
@@ -578,27 +562,55 @@ export default function RecentGameResults({
             )}
          </View>
 
-         {/* Status Text with Cyberpunk Styling */}
-         <View className="mt-2 items-center px-6">
-            <Text
-               className="text-[#00BFFF] text-xs text-center font-mono tracking-wider uppercase"
-               style={{
-                  textShadowColor: '#00BFFF',
-                  textShadowOffset: { width: 0, height: 0 },
-                  textShadowRadius: 4,
-               }}
-            >
-               {hasMore
-                  ? t('swipeForMore')
-                  : t('gameXofY')
-                       .replace('{current}', String(currentIndex + 1))
-                       .replace('{total}', String(games.length))}
-            </Text>
-
-            {/* Indicator line */}
-            <View
-               className="mt-2 h-px bg-[#00BFFF] animate-pulse"
-               style={{ width: 120, opacity: 0.6 }}
+         {/* FlatList for swipeable cards */}
+         <View style={{ minHeight: 300 }}>
+            <FlatList
+               ref={flatListRef}
+               data={games}
+               horizontal
+               showsHorizontalScrollIndicator={false}
+               onViewableItemsChanged={onViewableItemsChanged}
+               viewabilityConfig={viewabilityConfig}
+               onScrollBeginDrag={handleScrollBeginDrag}
+               onMomentumScrollEnd={handleScrollEnd}
+               onScrollEndDrag={handleScrollEnd}
+               snapToInterval={SCREEN_WIDTH}
+               snapToAlignment="center"
+               decelerationRate="fast"
+               disableIntervalMomentum={true}
+               keyExtractor={(item, index) => `game-${item.id}-${index}`}
+               getItemLayout={(_, index) => ({
+                  length: SCREEN_WIDTH,
+                  offset: SCREEN_WIDTH * index,
+                  index,
+               })}
+               contentContainerStyle={{ paddingVertical: 8 }}
+               renderItem={({ item, index }) => (
+                  <View style={{ width: SCREEN_WIDTH, paddingHorizontal: 16 }}>
+                     <GameCard game={item} isActive={index === currentIndex} />
+                     {isScrolling && index === currentIndex && (
+                        <View
+                           className="absolute inset-0 items-center justify-center z-20 mx-4"
+                           style={{
+                              backgroundColor: 'rgba(0, 0, 0, 0.85)',
+                              borderRadius: 2,
+                           }}
+                        >
+                           <ActivityIndicator size="large" color="#00FFFF" />
+                           <Text
+                              className="text-[#00FFFF] text-sm font-mono mt-3 tracking-wider"
+                              style={{
+                                 textShadowColor: '#00FFFF',
+                                 textShadowOffset: { width: 0, height: 0 },
+                                 textShadowRadius: 6,
+                              }}
+                           >
+                              {t('loading')}...
+                           </Text>
+                        </View>
+                     )}
+                  </View>
+               )}
             />
          </View>
       </View>

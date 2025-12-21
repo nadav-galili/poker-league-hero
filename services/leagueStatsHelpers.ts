@@ -27,14 +27,14 @@ export const createStatCards = (
 ): StatCard[] => [
    {
       title: t('totalGames'),
-      value: stats.totalGames.toString(),
+      value: stats?.totalGames?.toString() || '0',
       icon: 'game-controller',
       color: colors.primary,
       subtitle: `${stats.activeGames} ${t('active')}, ${stats.completedGames} ${t('finished')}`,
    },
    {
       title: t('totalProfit'),
-      value: formatCurrency(stats.totalProfit || 0),
+      value: formatCurrency(stats?.totalProfit || 0),
       icon: 'trending-up',
       color: (stats.totalProfit || 0) >= 0 ? colors.success : colors.error,
       subtitle:
@@ -44,28 +44,28 @@ export const createStatCards = (
    },
    {
       title: t('totalBuyIns'),
-      value: formatCurrency(stats.totalBuyIns || 0),
+      value: formatCurrency(stats?.totalBuyIns || 0),
       icon: 'arrow-down-circle',
       color: colors.secondary,
       subtitle: t('totalMoneyIn'),
    },
    {
       title: t('totalBuyOuts'),
-      value: formatCurrency(stats.totalBuyOuts || 0),
+      value: formatCurrency(stats?.totalBuyOuts || 0),
       icon: 'arrow-up-circle',
       color: colors.accent,
       subtitle: t('totalMoneyOut'),
    },
    {
       title: t('totalPlayers'),
-      value: stats.totalPlayers.toString(),
+      value: stats?.totalPlayers?.toString() || '0',
       icon: 'people',
       color: colors.info,
       subtitle: t('uniquePlayers'),
    },
    {
       title: t('avgGameDuration'),
-      value: formatDuration(stats.averageGameDuration),
+      value: formatDuration(stats?.averageGameDuration || 0),
       icon: 'time',
       color: colors.primary,
       subtitle: t('perGame'),

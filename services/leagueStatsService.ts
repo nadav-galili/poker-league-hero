@@ -28,7 +28,6 @@ export type StatType =
    | 'top-profit-player'
    | 'most-active-player'
    | 'highest-single-game-profit'
-   | 'biggest-loser'
    | 'best-winning-streak';
 
 // Legacy interface for backward compatibility
@@ -126,13 +125,6 @@ export class LeagueStatsService {
       year?: number
    ): Promise<StatResponse> {
       return this.getPlayerStat(leagueId, 'highest-single-game-profit', year);
-   }
-
-   async getBiggestLoser(
-      leagueId: string,
-      year?: number
-   ): Promise<StatResponse> {
-      return this.getPlayerStat(leagueId, 'biggest-loser', year);
    }
 
    async getBestWinningStreak(

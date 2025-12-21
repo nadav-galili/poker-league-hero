@@ -503,7 +503,7 @@ const enTranslations: Translations = {
    biggestLoser: 'BIGGEST LOSER',
    bestWinningStreak: 'BEST WINNING STREAK',
    winningStreak: 'games in a row',
-   totalProfit: 'Total Profit',
+   totalProfit: 'Total Bank Balance',
    avgProfit: 'Avg Profit',
 
    // League Overview Card Subtitles
@@ -790,9 +790,9 @@ const heTranslations: Translations = {
    mostActivePlayer: 'כמות משחקים',
    highestSingleGameProfit: 'הרווח הגבוה במשחק בודד',
    biggestLoser: 'המפסיד הכי גדול',
-   bestWinningStreak: 'רצף הניצחונות הטוב ביותר',
+   bestWinningStreak: 'רצף הניצחונות',
    winningStreak: 'משחקים ברצף',
-   totalProfit: 'סך הרווח',
+   totalProfit: 'איזון הקופה',
    avgProfit: 'ממוצע רווח',
 
    // League Overview Card Subtitles
