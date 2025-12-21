@@ -35,7 +35,6 @@ export function AnonymousPlayerModal({
    const [name, setName] = useState('');
    const [error, setError] = useState('');
    const [isProcessing, setIsProcessing] = useState(false);
-   const [isFocused, setIsFocused] = useState(false);
    const inputRef = useRef<TextInput>(null);
    const glowAnim = useRef(new Animated.Value(0)).current;
 
@@ -52,8 +51,10 @@ export function AnonymousPlayerModal({
    }, [visible]);
 
    useEffect(() => {
+      let animation: Animated.CompositeAnimation | null = null;
+
       if (visible) {
-         Animated.loop(
+         animation = Animated.loop(
             Animated.sequence([
                Animated.timing(glowAnim, {
                   toValue: 1,
@@ -66,10 +67,17 @@ export function AnonymousPlayerModal({
                   useNativeDriver: false,
                }),
             ])
-         ).start();
+         );
+         animation.start();
       }
-      // eslint-disable-next-line react-hooks/exhaustive-deps
-   }, [visible]);
+
+      return () => {
+         if (animation) {
+            animation.stop();
+         }
+         glowAnim.stopAnimation();
+      };
+   }, [visible, glowAnim]);
 
    const handleAdd = async () => {
       if (!name.trim()) {
@@ -189,7 +197,6 @@ export function AnonymousPlayerModal({
                               <View
                                  style={[
                                     styles.inputContainer,
-                                    isFocused && styles.inputContainerFocused,
                                     error && styles.inputContainerError,
                                  ]}
                               >
@@ -207,13 +214,13 @@ export function AnonymousPlayerModal({
                                     keyboardType="default"
                                     autoCapitalize="words"
                                     autoCorrect={false}
-                                    onFocus={() => setIsFocused(true)}
-                                    onBlur={() => setIsFocused(false)}
                                     selectionColor={colors.neonCyan}
                                  />
                               </View>
                               {error ? (
-                                 <Text style={styles.errorText}>⚠ {error}</Text>
+                                 <Text style={styles.errorText}>
+                                    ⚠ {error}
+                                 </Text>
                               ) : null}
                            </View>
 
@@ -354,14 +361,6 @@ const styles = StyleSheet.create({
       borderRadius: 8,
       backgroundColor: colors.cyberBackground,
       justifyContent: 'center',
-   },
-   inputContainerFocused: {
-      borderColor: colors.neonCyan,
-      shadowColor: colors.neonCyan,
-      shadowOffset: { width: 0, height: 0 },
-      shadowOpacity: 0.5,
-      shadowRadius: 8,
-      elevation: 5,
    },
    inputContainerError: {
       borderColor: colors.error,

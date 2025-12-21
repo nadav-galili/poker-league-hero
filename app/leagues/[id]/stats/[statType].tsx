@@ -1,7 +1,7 @@
+import { colors } from '@/colors';
 import StatsLeaderboardHero from '@/components/stats/StatsLeaderboardHero';
 import StatsLeaderboardRow from '@/components/stats/StatsLeaderboardRow';
 import StatsLeaderboardSkeleton from '@/components/stats/StatsLeaderboardSkeleton';
-import { colors } from '@/colors';
 import { useLocalization } from '@/context/localization';
 import { useStatsRankings } from '@/hooks/useStatsRankings';
 import { StatType } from '@/services/leagueStatsService';
@@ -9,9 +9,8 @@ import { Ionicons } from '@expo/vector-icons';
 import { FlashList } from '@shopify/flash-list';
 import { LinearGradient } from 'expo-linear-gradient';
 import { router, Stack, useLocalSearchParams } from 'expo-router';
-import React, { useEffect, useMemo, useRef } from 'react';
+import React, { useMemo } from 'react';
 import {
-   Animated,
    Pressable,
    RefreshControl,
    StyleSheet,
@@ -26,10 +25,7 @@ export default function StatsLeaderboardScreen() {
       statType: StatType;
    }>();
 
-   const { data, isLoading, refetch } = useStatsRankings(
-      leagueId,
-      statType
-   );
+   const { data, isLoading, refetch } = useStatsRankings(leagueId, statType);
 
    const [refreshing, setRefreshing] = React.useState(false);
 
@@ -48,8 +44,8 @@ export default function StatsLeaderboardScreen() {
       if (!data?.data || data.data.length === 0) {
          return { heroPlayer: null, listData: [] };
       }
-      
-      // If we already have a topPlayer in response, we could use that, 
+
+      // If we already have a topPlayer in response, we could use that,
       // but let's just take the first one from data for consistency
       const [first, ...rest] = data.data;
       return { heroPlayer: first, listData: rest };
@@ -61,8 +57,7 @@ export default function StatsLeaderboardScreen() {
          'top-profit-player': 'topProfitPlayer',
          'most-active-player': 'mostActivePlayer',
          'highest-single-game-profit': 'highestSingleGameProfit',
-         'most-consistent-player': 'mostConsistentPlayer',
-         'biggest-loser': 'biggestLoser',
+         'best-winning-streak': 'bestWinningStreak',
       };
       return t(titles[statType] || 'leaderboard');
    }, [statType, t]);
@@ -80,11 +75,14 @@ export default function StatsLeaderboardScreen() {
       [statType, t]
    );
 
-
    if (isLoading && !data) {
       return (
          <LinearGradient
-            colors={[colors.cyberBackground, colors.cyberDarkBlue, colors.neonBlue]}
+            colors={[
+               colors.cyberBackground,
+               colors.cyberDarkBlue,
+               colors.neonBlue,
+            ]}
             style={styles.container}
          >
             <Stack.Screen options={{ headerShown: false }} />
@@ -97,10 +95,7 @@ export default function StatsLeaderboardScreen() {
             <View style={styles.bottomRightBracket} />
             {/* Header */}
             <View style={styles.header}>
-               <Pressable
-                  onPress={handleBack}
-                  style={[styles.backButton]}
-               >
+               <Pressable onPress={handleBack} style={[styles.backButton]}>
                   <View style={styles.backButtonBrackets} />
                   <Ionicons
                      name={isRTL ? 'arrow-forward' : 'arrow-back'}
@@ -121,7 +116,11 @@ export default function StatsLeaderboardScreen() {
 
    return (
       <LinearGradient
-         colors={[colors.cyberBackground, colors.cyberDarkBlue, colors.neonBlue]}
+         colors={[
+            colors.cyberBackground,
+            colors.cyberDarkBlue,
+            colors.neonBlue,
+         ]}
          style={styles.container}
       >
          <Stack.Screen options={{ headerShown: false }} />
@@ -156,42 +155,49 @@ export default function StatsLeaderboardScreen() {
          {/* Content */}
          <View style={styles.contentContainer}>
             <FlashList
-            data={listData}
-            renderItem={renderItem}
-            estimatedItemSize={80}
-            contentContainerStyle={styles.listContent}
-            ListHeaderComponent={
-               heroPlayer ? (
-                  <StatsLeaderboardHero
-                     player={heroPlayer}
-                     statType={statType}
-                     t={t}
-                  />
-               ) : null
-            }
-            ListEmptyComponent={
-               !isLoading ? (
-                  <View style={styles.emptyContainer}>
-                     <View style={styles.emptyIconContainer}>
-                        <Ionicons name="stats-chart" size={64} color={colors.neonCyan} />
-                        <View style={styles.emptyIconGlow} />
+               data={listData}
+               renderItem={renderItem}
+               contentContainerStyle={styles.listContent}
+               ListHeaderComponent={
+                  heroPlayer ? (
+                     <StatsLeaderboardHero
+                        player={heroPlayer}
+                        statType={statType}
+                        t={t}
+                     />
+                  ) : null
+               }
+               ListEmptyComponent={
+                  !isLoading ? (
+                     <View style={styles.emptyContainer}>
+                        <View style={styles.emptyIconContainer}>
+                           <Ionicons
+                              name="stats-chart"
+                              size={64}
+                              color={colors.neonCyan}
+                           />
+                           <View style={styles.emptyIconGlow} />
+                        </View>
+                        <Text style={styles.emptyText}>
+                           {t('noPlayersFound')}
+                        </Text>
+                        <Text style={styles.emptySubtext}>
+                           SYSTEM STATUS: NO DATA DETECTED
+                        </Text>
                      </View>
-                     <Text style={styles.emptyText}>{t('noPlayersFound')}</Text>
-                     <Text style={styles.emptySubtext}>SYSTEM STATUS: NO DATA DETECTED</Text>
-                  </View>
-               ) : null
-            }
-            refreshControl={
-               <RefreshControl
-                  refreshing={refreshing}
-                  onRefresh={onRefresh}
-                  tintColor={colors.neonCyan}
-                  colors={[colors.neonCyan, colors.neonBlue]}
-                  progressBackgroundColor={colors.cyberGray}
-               />
-            }
-            showsVerticalScrollIndicator={false}
-         />
+                  ) : null
+               }
+               refreshControl={
+                  <RefreshControl
+                     refreshing={refreshing}
+                     onRefresh={onRefresh}
+                     tintColor={colors.neonCyan}
+                     colors={[colors.neonCyan, colors.neonBlue]}
+                     progressBackgroundColor={colors.cyberGray}
+                  />
+               }
+               showsVerticalScrollIndicator={false}
+            />
          </View>
       </LinearGradient>
    );
@@ -396,4 +402,3 @@ const styles = StyleSheet.create({
       textTransform: 'uppercase',
    },
 });
-

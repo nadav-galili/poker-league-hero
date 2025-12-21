@@ -10,6 +10,7 @@ export const aiSummarySchema = z.object({
       highestSingleGameProfit: z.number(),
       highestSingleGamePlayer: z.string(),
    }),
+   outlook: z.string(),
 });
 
 export type AISummary = z.infer<typeof aiSummarySchema>;

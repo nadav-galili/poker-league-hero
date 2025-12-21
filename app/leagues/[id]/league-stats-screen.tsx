@@ -136,8 +136,8 @@ export default function LeagueStatsScreen() {
 
    const handleLoadMoreGames = React.useCallback(() => {
       if (!gamesLoading && gamesHasMore) {
-         // Calculate next page based on current length and limit (default 3)
-         const nextPage = Math.ceil(games.length / 3) + 1;
+         // Calculate next page based on current length and limit (default 10)
+         const nextPage = Math.ceil(games.length / 10) + 1;
          loadGames(nextPage);
       }
    }, [gamesLoading, gamesHasMore, games.length, loadGames]);
@@ -164,32 +164,6 @@ export default function LeagueStatsScreen() {
       if (!user || !league?.members) return false;
       return league.members.some((member) => member.id === user.userId);
    }, [user, league]);
-
-   const leagueHeaderStyle = React.useMemo(
-      () => ({
-         shadowColor: '#FFFFFF',
-         shadowOffset: { width: 0, height: 8 },
-         shadowOpacity: 0.1,
-         shadowRadius: 16,
-         elevation: 16,
-      }),
-      []
-   );
-
-   const imageStyle = React.useMemo(
-      () => ({
-         width: 100,
-         height: 100,
-
-         borderRadius: 20,
-         shadowColor: '#FFFFFF',
-         shadowOffset: { width: 0, height: 4 },
-         shadowOpacity: 0.2,
-         shadowRadius: 8,
-         elevation: 8,
-      }),
-      []
-   );
 
    if (isLoading) {
       return <CyberpunkStatsLoader message={t('loadingLeagueStats')} />;
@@ -375,55 +349,176 @@ export default function LeagueStatsScreen() {
                />
             }
          >
-            {/* League Header with modern glass effect */}
+            {/* League Header - Cyberpunk Elite Command Interface */}
             <View className="px-6 mb-6">
-               <View
-                  className="flex-row p-6 rounded-3xl bg-white/5 backdrop-blur-xl border border-white/20"
-                  style={leagueHeaderStyle}
-                  accessibilityRole="summary"
-                  accessibilityLabel={`${t('leagueDetails')}: ${league.name}`}
-               >
-                  <View className="mr-6 items-center">
-                     {league.imageUrl ? (
-                        <Image
-                           source={{ uri: league.imageUrl }}
-                           style={imageStyle}
-                           contentFit="cover"
-                           cachePolicy="memory-disk"
-                           priority="high"
-                           accessible={true}
-                           accessibilityLabel={`${t('leagueImage')}: ${league.name}`}
-                        />
-                     ) : (
-                        <View
-                           style={imageStyle}
-                           className="bg-white/10 items-center justify-center border border-white/20"
-                        >
-                           <Ionicons
-                              name="trophy"
-                              size={40}
-                              color="rgba(255,255,255,0.5)"
-                           />
+               <View className="relative overflow-hidden">
+                  <View
+                     className="flex-row p-6 bg-black/90 border-2 border-[#00FFFF] relative"
+                     style={{
+                        shadowColor: '#00FFFF',
+                        shadowOffset: { width: 0, height: 0 },
+                        shadowOpacity: 0.8,
+                        shadowRadius: 16,
+                        elevation: 16,
+                     }}
+                     accessibilityRole="summary"
+                     accessibilityLabel={`${t('leagueDetails')}: ${league.name}`}
+                  >
+                     {/* Corner Brackets - Cyan/Magenta Theme */}
+                     <View className="absolute top-2 left-2 w-6 h-6 border-l-2 border-t-2 border-[#00FFFF]" />
+                     <View className="absolute top-2 right-2 w-6 h-6 border-r-2 border-t-2 border-[#FF1493]" />
+                     <View className="absolute bottom-2 left-2 w-6 h-6 border-l-2 border-b-2 border-[#FF1493]" />
+                     <View className="absolute bottom-2 right-2 w-6 h-6 border-r-2 border-b-2 border-[#00FFFF]" />
+
+                     {/* Holographic Data Stream Overlay */}
+                     <LinearGradient
+                        colors={[
+                           'rgba(0, 255, 255, 0.08)',
+                           'transparent',
+                           'rgba(255, 20, 147, 0.08)',
+                        ]}
+                        start={{ x: 0, y: 0 }}
+                        end={{ x: 1, y: 1 }}
+                        style={{
+                           position: 'absolute',
+                           top: 0,
+                           left: 0,
+                           right: 0,
+                           bottom: 0,
+                           opacity: 0.9,
+                        }}
+                     />
+
+                     {/* Cyberpunk Scan Lines */}
+                     <View
+                        className="absolute top-3 left-0 right-0 h-px bg-[#00FFFF]"
+                        style={{ opacity: 0.3 }}
+                     />
+                     <View
+                        className="absolute bottom-3 left-0 right-0 h-px bg-[#FF1493]"
+                        style={{ opacity: 0.3 }}
+                     />
+
+                     <View className="mr-6 items-center relative">
+                        {/* Image Container with Cyberpunk Frame */}
+                        <View className="relative">
+                           {league.imageUrl ? (
+                              <Image
+                                 source={{ uri: league.imageUrl }}
+                                 style={{
+                                    width: 100,
+                                    height: 100,
+                                    borderWidth: 2,
+                                    borderColor: '#00FFFF',
+                                 }}
+                                 contentFit="cover"
+                                 cachePolicy="memory-disk"
+                                 priority="high"
+                                 accessible={true}
+                                 accessibilityLabel={`${t('leagueImage')}: ${league.name}`}
+                              />
+                           ) : (
+                              <View
+                                 className="bg-black/80 border-2 border-[#00FFFF] items-center justify-center relative"
+                                 style={{
+                                    width: 100,
+                                    height: 100,
+                                    shadowColor: '#00FFFF',
+                                    shadowOffset: { width: 0, height: 0 },
+                                    shadowOpacity: 0.6,
+                                    shadowRadius: 8,
+                                    elevation: 8,
+                                 }}
+                              >
+                                 {/* Inner corner brackets for image frame */}
+                                 <View className="absolute top-1 left-1 w-3 h-3 border-l border-t border-[#FF1493]" />
+                                 <View className="absolute top-1 right-1 w-3 h-3 border-r border-t border-[#FF1493]" />
+                                 <View className="absolute bottom-1 left-1 w-3 h-3 border-l border-b border-[#FF1493]" />
+                                 <View className="absolute bottom-1 right-1 w-3 h-3 border-r border-b border-[#FF1493]" />
+
+                                 <Ionicons
+                                    name="trophy"
+                                    size={40}
+                                    color="#00FFFF"
+                                 />
+                              </View>
+                           )}
+
+                           {/* Outer corner accents for image */}
+                           <View className="absolute -top-1 -left-1 w-2 h-2 border-l-2 border-t-2 border-[#FF1493]" />
+                           <View className="absolute -top-1 -right-1 w-2 h-2 border-r-2 border-t-2 border-[#FF1493]" />
+                           <View className="absolute -bottom-1 -left-1 w-2 h-2 border-l-2 border-b-2 border-[#FF1493]" />
+                           <View className="absolute -bottom-1 -right-1 w-2 h-2 border-r-2 border-b-2 border-[#FF1493]" />
                         </View>
-                     )}
 
-                     {isMember && (
-                        <Pressable
-                           onPress={() => setIsEditModalVisible(true)}
-                           className="flex-row items-center mt-3 bg-white/10 px-3 py-1.5 rounded-full border border-white/20 active:bg-white/20"
+                        {/* Cyberpunk Edit Command Interface */}
+                        {isMember && (
+                           <Pressable
+                              onPress={() => setIsEditModalVisible(true)}
+                              className="flex-row items-center mt-4 bg-black/90 border border-[#FF1493] px-3 py-2 active:scale-95 relative"
+                              style={{
+                                 shadowColor: '#FF1493',
+                                 shadowOffset: { width: 0, height: 0 },
+                                 shadowOpacity: 0.6,
+                                 shadowRadius: 6,
+                                 elevation: 6,
+                              }}
+                              accessibilityRole="button"
+                              accessibilityLabel={t('editLeague')}
+                           >
+                              {/* Corner brackets for edit button */}
+                              <View className="absolute top-0.5 left-0.5 w-1.5 h-1.5 border-l border-t border-[#00FFFF]" />
+                              <View className="absolute top-0.5 right-0.5 w-1.5 h-1.5 border-r border-t border-[#00FFFF]" />
+                              <View className="absolute bottom-0.5 left-0.5 w-1.5 h-1.5 border-l border-b border-[#00FFFF]" />
+                              <View className="absolute bottom-0.5 right-0.5 w-1.5 h-1.5 border-r border-b border-[#00FFFF]" />
+
+                              <Ionicons
+                                 name="pencil"
+                                 size={12}
+                                 color="#00FFFF"
+                              />
+                              <Text
+                                 className="text-[#00FFFF] text-xs ml-2 font-mono font-bold tracking-wide uppercase"
+                                 style={{
+                                    textShadowColor: '#00FFFF',
+                                    textShadowOffset: { width: 0, height: 0 },
+                                    textShadowRadius: 4,
+                                 }}
+                              >
+                                 {t('editLeague')}
+                              </Text>
+                           </Pressable>
+                        )}
+                     </View>
+
+                     {/* League Name Display with Cyberpunk Typography */}
+                     <View className="flex-1 justify-center relative">
+                        <Text
+                           className="text-[#00FFFF] font-mono font-bold text-2xl tracking-[2px] uppercase mb-2"
+                           style={{
+                              textShadowColor: '#00FFFF',
+                              textShadowOffset: { width: 0, height: 0 },
+                              textShadowRadius: 8,
+                           }}
                         >
-                           <Ionicons name="pencil" size={12} color="white" />
-                           <Text className="text-neonGreen text-xs ml-1.5 font-medium">
-                              {t('editLeague')}
-                           </Text>
-                        </Pressable>
-                     )}
-                  </View>
+                           {league.name}
+                        </Text>
 
-                  <View className="flex-1 justify-center">
-                     <Text className="text-neonGreen mb-4 font-semibold text-xl">
-                        {league.name}
-                     </Text>
+                        {/* Data Classification Tag */}
+                        <View className="flex-row items-center">
+                           <View className="w-2 h-2 bg-[#FF1493] mr-2" />
+                           <Text
+                              className="text-[#FF1493] text-xs font-mono font-bold tracking-widest uppercase"
+                              style={{
+                                 textShadowColor: '#FF1493',
+                                 textShadowOffset: { width: 0, height: 0 },
+                                 textShadowRadius: 4,
+                              }}
+                           >
+                              {t('league')}
+                           </Text>
+                        </View>
+                     </View>
                   </View>
                </View>
             </View>

@@ -368,10 +368,6 @@ export async function POST(request: Request) {
          userId: completeUserInfo.userId || userId, // Preserve the database user ID (BACKWARD COMPATIBLE)
       };
 
-      console.log(
-         `🎫 Creating new access token with: name="${userInfoWithUserId.name}", email="${userInfoWithUserId.email}"`
-      );
-
       // Create a new access token with complete user info
       const newAccessToken = await new jose.SignJWT({
          ...userInfoWithUserId,

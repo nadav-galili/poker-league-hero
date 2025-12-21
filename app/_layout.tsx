@@ -3,7 +3,6 @@ import ErrorBoundary from '@/components/shared/ErrorBoundary';
 import LocalizedErrorFallback from '@/components/shared/LocalizedErrorFallback';
 import { AuthProvider } from '@/context/auth';
 import { LocalizationProvider } from '@/context/localization';
-import { NavigationProvider } from '@/context/navigation';
 import { mixpanel } from '@/services/mixpanel';
 import { loadFonts } from '@/utils/fonts';
 import * as Sentry from '@sentry/react-native';
@@ -20,6 +19,18 @@ import Toast, {
    InfoToast,
 } from 'react-native-toast-message';
 import '../global.css';
+
+// Configure Reanimated to suppress warnings about accessing shared values during render
+// This is safe because NativeWind's animate-pulse uses Reanimated internally
+// and may access shared values during render
+import { configureReanimatedLogger, ReanimatedLogLevel } from 'react-native-reanimated';
+
+// Disable strict mode to suppress warnings about writing to value during component render
+// This is needed because NativeWind v4 uses Reanimated internally for CSS animations
+configureReanimatedLogger({
+   level: ReanimatedLogLevel.warn,
+   strict: false,
+});
 
 Sentry.init({
    dsn: 'https://80a1df1974c168c03b552dea7be0c3ed@o4508240875618304.ingest.de.sentry.io/4509824848101456',
@@ -192,7 +203,6 @@ export default Sentry.wrap(function RootLayout() {
             <SafeAreaProvider>
                <QueryClientProvider client={queryClient}>
                <LocalizationProvider>
-                  <NavigationProvider>
                      <ErrorBoundary
                         fallback={
                            <LocalizedErrorFallback onRetry={handleRetry} />
@@ -206,7 +216,6 @@ export default Sentry.wrap(function RootLayout() {
                            />
                         </AuthProvider>
                      </ErrorBoundary>
-                  </NavigationProvider>
                </LocalizationProvider>
             </QueryClientProvider>
          </SafeAreaProvider>

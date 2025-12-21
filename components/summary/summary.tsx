@@ -5,7 +5,7 @@ import { useLocalization } from '@/context/localization';
 import { Ionicons } from '@expo/vector-icons';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useQuery } from '@tanstack/react-query';
-import React, { useEffect, useState } from 'react';
+import React from 'react';
 import { Text, TouchableOpacity, View } from 'react-native';
 import { LeagueCardSkeleton } from '../shared/LeagueCardSkeleton';
 
@@ -16,6 +16,7 @@ type Props = {
 type AISummaryType = {
    financialSnapshot: string;
    lastGameHighlights: string;
+   outlook: string;
    stats: {
       totalProfit: number;
       totalBuyIns: number;
@@ -35,12 +36,7 @@ type getSummaryListResponse = {
 const Summary = ({ leagueId }: Props) => {
    const { fetchWithAuth } = useAuth();
    const { t, language, isRTL } = useLocalization();
-   const [refreshKey, setRefreshKey] = useState(0);
    const cacheKey = `ai_summary_${leagueId}`;
-
-   useEffect(() => {
-      setRefreshKey((prev) => prev + 1);
-   }, [leagueId, language]); // Refetch when language changes
 
    // Helper to persist summary via separate lightweight endpoint
    const persistSummaryToBackend = async (summaryData: AISummaryType) => {
@@ -74,7 +70,7 @@ const Summary = ({ leagueId }: Props) => {
       error,
       refetch,
    } = useQuery<getSummaryListResponse, Error>({
-      queryKey: ['summary', leagueId, language, refreshKey],
+      queryKey: ['summary', leagueId, language],
       queryFn: async () => {
          // First, try to persist any locally cached summary via separate endpoint
          try {
@@ -102,7 +98,6 @@ const Summary = ({ leagueId }: Props) => {
          );
 
          const data = await response.json();
-         console.log('AI Summary API Response:', data);
 
          if (!response.ok) {
             console.error('AI Summary API Error:', data);
@@ -261,9 +256,7 @@ const Summary = ({ leagueId }: Props) => {
                         fontFamily: 'monospace',
                      }}
                   >
-                     {'>> '}
                      {t('retry')}
-                     {' <<'}
                   </Text>
                </TouchableOpacity>
             </View>
@@ -334,7 +327,6 @@ const Summary = ({ leagueId }: Props) => {
                      className="text-center text-xl font-black uppercase tracking-[3px]"
                      style={{
                         color: colors.neonPink,
-                        writingDirection: isRTL ? 'rtl' : 'ltr',
                         fontFamily: 'monospace',
                      }}
                   >
@@ -487,24 +479,12 @@ const Summary = ({ leagueId }: Props) => {
                   className="text-center text-xl font-black uppercase tracking-[3px]"
                   style={{
                      color: colors.neonPink,
-                     writingDirection: isRTL ? 'rtl' : 'ltr',
                      fontFamily: 'monospace',
                   }}
                >
                   <Ionicons name="sparkles" size={20} color={colors.neonPink} />{' '}
                   {t('aiSummary')}
                </Text>
-               <TouchableOpacity
-                  onPress={() => refetch()}
-                  className={`absolute ${isRTL ? 'left-0' : 'right-0'} p-2 border-2 rounded`}
-                  style={{
-                     backgroundColor: colors.cyberBackground,
-                     borderColor: colors.neonCyan,
-                  }}
-                  hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
-               >
-                  <Ionicons name="refresh" size={16} color={colors.neonCyan} />
-               </TouchableOpacity>
             </View>
          </View>
 
@@ -576,11 +556,9 @@ const Summary = ({ leagueId }: Props) => {
                      style={{
                         color: colors.neonCyan,
                         textAlign: isRTL ? 'right' : 'left',
-                        writingDirection: isRTL ? 'rtl' : 'ltr',
                         fontFamily: 'monospace',
                      }}
                   >
-                     {'>> '}
                      {t('financialSnapshot')}
                   </Text>
                   <Text
@@ -588,7 +566,7 @@ const Summary = ({ leagueId }: Props) => {
                      style={{
                         color: colors.textSecondary,
                         textAlign: isRTL ? 'right' : 'left',
-                        writingDirection: isRTL ? 'rtl' : 'ltr',
+                        width: '100%',
                      }}
                   >
                      {summary.summary.financialSnapshot}
@@ -661,11 +639,9 @@ const Summary = ({ leagueId }: Props) => {
                      style={{
                         color: colors.neonGreen,
                         textAlign: isRTL ? 'right' : 'left',
-                        writingDirection: isRTL ? 'rtl' : 'ltr',
                         fontFamily: 'monospace',
                      }}
                   >
-                     {'>> '}
                      {t('lastGameHighlights')}
                   </Text>
                   <Text
@@ -673,10 +649,93 @@ const Summary = ({ leagueId }: Props) => {
                      style={{
                         color: colors.textSecondary,
                         textAlign: isRTL ? 'right' : 'left',
-                        writingDirection: isRTL ? 'rtl' : 'ltr',
+                        width: '100%',
                      }}
                   >
                      {summary.summary.lastGameHighlights}
+                  </Text>
+               </View>
+
+               {/* Outlook & Prediction Card */}
+               <View
+                  className="relative p-5 border-2"
+                  style={{
+                     backgroundColor: `${colors.cyberBackground}CC`,
+                     borderColor: colors.neonPurple,
+                     shadowColor: colors.shadowPurple,
+                     shadowOffset: { width: 0, height: 0 },
+                     shadowOpacity: 0.6,
+                     shadowRadius: 8,
+                     elevation: 8,
+                  }}
+               >
+                  {/* Corner Brackets */}
+                  <View className="absolute top-0 left-0 w-4 h-4">
+                     <View
+                        className="absolute top-0 left-0 w-3 h-0.5"
+                        style={{ backgroundColor: colors.neonPurple }}
+                     />
+                     <View
+                        className="absolute top-0 left-0 w-0.5 h-3"
+                        style={{ backgroundColor: colors.neonPurple }}
+                     />
+                  </View>
+                  <View className="absolute top-0 right-0 w-4 h-4">
+                     <View
+                        className="absolute top-0 right-0 w-3 h-0.5"
+                        style={{ backgroundColor: colors.neonPurple }}
+                     />
+                     <View
+                        className="absolute top-0 right-0 w-0.5 h-3"
+                        style={{ backgroundColor: colors.neonPurple }}
+                     />
+                  </View>
+                  <View className="absolute bottom-0 left-0 w-4 h-4">
+                     <View
+                        className="absolute bottom-0 left-0 w-3 h-0.5"
+                        style={{ backgroundColor: colors.neonPurple }}
+                     />
+                     <View
+                        className="absolute bottom-0 left-0 w-0.5 h-3"
+                        style={{ backgroundColor: colors.neonPurple }}
+                     />
+                  </View>
+                  <View className="absolute bottom-0 right-0 w-4 h-4">
+                     <View
+                        className="absolute bottom-0 right-0 w-3 h-0.5"
+                        style={{ backgroundColor: colors.neonPurple }}
+                     />
+                     <View
+                        className="absolute bottom-0 right-0 w-0.5 h-3"
+                        style={{ backgroundColor: colors.neonPurple }}
+                     />
+                  </View>
+
+                  {/* Holographic overlay */}
+                  <View
+                     className="absolute inset-0 opacity-20"
+                     style={{ backgroundColor: 'rgba(138, 43, 226, 0.3)' }}
+                  />
+
+                  <Text
+                     className="font-bold text-lg mb-3 uppercase tracking-[2px]"
+                     style={{
+                        color: colors.neonPurple,
+                        textAlign: isRTL ? 'right' : 'left',
+                        fontFamily: 'monospace',
+                     }}
+                  >
+                     {t('outlook')}
+                  </Text>
+                  <Text
+                     className="font-medium text-base leading-6"
+                     style={{
+                        color: colors.textSecondary,
+                        textAlign: isRTL ? 'right' : 'left',
+                        width: '100%',
+                     }}
+                  >
+                     {summary.summary.outlook}
                   </Text>
                </View>
             </View>
@@ -742,9 +801,7 @@ const Summary = ({ leagueId }: Props) => {
                      fontFamily: 'monospace',
                   }}
                >
-                  {'<< '}
                   {t('noSummaryYet')}
-                  {' >>'}
                </Text>
             </View>
          )}

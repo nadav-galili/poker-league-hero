@@ -140,7 +140,7 @@ export function EmptyState({
             <Animated.View
                className="w-32 h-32 border-6 border-primary rounded-3xl items-center justify-center relative"
                style={{
-                  backgroundColor: theme.primaryTint,
+                  backgroundColor: theme.primary,
                   shadowColor: colors.shadow,
                   shadowOffset: { width: 12, height: 12 },
                   shadowOpacity: 1,
@@ -222,7 +222,6 @@ export function EmptyState({
                onPress={onCreateLeague}
                variant="primary"
                size="large"
-               className="bg-secondary"
                icon="add-circle"
                fullWidth
             />
@@ -231,7 +230,6 @@ export function EmptyState({
                onPress={onJoinLeague}
                variant="secondary"
                size="large"
-               className="bg-primary"
                icon="enter"
                fullWidth
             />

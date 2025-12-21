@@ -69,12 +69,15 @@ export const llmClient = {
          }
 
          const data = await response.json();
+         const content = data.choices?.[0]?.message?.content || '';
+
          console.log('✅ OpenAI API response received:', {
             id: data.id,
-            contentLength: data.choices?.[0]?.message?.content?.length || 0,
+            model: data.model,
+            contentLength: content.length,
+            finishReason: data.choices?.[0]?.finish_reason,
+            contentPreview: content.substring(0, 200),
          });
-
-         const content = data.choices?.[0]?.message?.content || '';
 
          return {
             id: data.id || 'unknown',
