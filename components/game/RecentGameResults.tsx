@@ -508,7 +508,7 @@ export default function RecentGameResults({
             />
          </View>
          {/* Enhanced Pagination with Cyberpunk Styling */}
-         <View className="flex-row justify-center items-center mt-3 space-x-3 px-6">
+         <View className="flex-row justify-center items-center my-3 space-x-3 px-6">
             {games.map((_, index) => {
                const isActive = index === currentIndex;
                const isPast = index < currentIndex;
