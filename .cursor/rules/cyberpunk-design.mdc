@@ -1,0 +1,8 @@
+---
+globs: *.tsx
+alwaysApply: false
+---
+
+if you create or update a ui component, follow the design style of cyberpunk ,
+as described in the cyberpunk-ui-designer.md
+if you cab use claude opus model for this task , i prefer it.

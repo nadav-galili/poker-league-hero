@@ -1,0 +1,21 @@
+---
+description: Guidelines for error handling and Sentry logging
+globs: **/*.{ts,tsx}
+---
+
+# Error Handling & Logging
+
+## API/Server-Side
+
+- Every `catch` block in an API route must log the error.
+- Use `apiErrorHandler` utility for mapping database errors to user-friendly messages.
+
+## Client-Side
+
+- Use `captureException` from `@/utils/sentry` in all `onPress` or async event handlers.
+- Always provide context to `captureException` (e.g., `{ screen: 'LeagueDetails', action: 'JoinLeague' }`).
+- Use `BrutalistToast` or equivalent UI to notify users of errors.
+
+## Promises
+
+- Never leave a Promise unhandled. Always use `.catch()` or `try/catch`.

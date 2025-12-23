@@ -1,0 +1,23 @@
+---
+description: Standards for creating and maintaining Expo Router API routes (+api.ts)
+globs: app/api/**/*.ts
+---
+# API Standards
+
+## Core Principles
+- Always use the `withAuth` and `withRateLimit` middlewares for protected routes.
+- Prefer `secureResponse` from `@/utils/rateLimiting` over raw `Response.json` for consistent security headers.
+- Always validate path parameters (e.g., `leagueId`) using `validateDatabaseId` or Zod schemas.
+
+## Response Format
+- Success: `{ success: true, data: ..., message?: string }`
+- Error: `{ success: false, error: string, code?: string }`
+
+## Error Handling
+- Use `try/catch` blocks in every handler.
+- Log server-side errors using `console.error` (which is captured by Sentry in production).
+- Return appropriate HTTP status codes (400 for bad input, 401/403 for auth, 404 for missing resources, 500 for server errors).
+
+## Request Validation
+- Use Zod schemas from `@/utils/validation.ts` to validate `request.json()` and query parameters.
+- Sanitize all string inputs using `sanitizeString`.

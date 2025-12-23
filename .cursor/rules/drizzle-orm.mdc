@@ -1,0 +1,22 @@
+---
+description: Best practices for database interactions using Drizzle ORM
+globs: db/**/*.ts, app/api/**/*.ts
+---
+
+# Drizzle ORM Patterns
+
+## Usage
+
+- Always use the `getDb()` helper to access the database instance.
+- Prefer the "Select" and "Insert" types generated from the schema for type safety.
+- Use `.returning()` for all `INSERT`, `UPDATE`, and `DELETE` operations to get the modified data back.
+
+## Transactions
+
+- Use `db.transaction()` for operations involving multiple related table updates (e.g., creating a game and its initial players).
+
+## Performance
+
+- Use `.limit(1)` when expecting a single record.
+- Use `.leftJoin` or `.innerJoin` instead of multiple separate queries where possible.
+- Index frequently queried columns in `db/schema.ts`.

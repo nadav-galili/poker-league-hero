@@ -1,0 +1,23 @@
+---
+description: Performance optimization guidelines for React Native components
+globs: components/**/*.tsx, app/**/*.tsx
+---
+
+# React Native Performance
+
+## Memoization
+
+- Use `React.memo()` for list items (like `LeagueCard.tsx`) to prevent unnecessary re-renders.
+- Use `useCallback` for functions passed as props to memoized components.
+- Use `useMemo` for expensive calculations (like formatting league stats).
+
+## Images
+
+- Always use `expo-image` instead of the standard `Image` component.
+- Provide a `placeholder` and set a `cachePolicy` (prefer `memory-disk`).
+- Handle `onError` events by logging to Sentry.
+
+## Layout
+
+- Avoid inline objects in props (e.g., `style={{ margin: 10 }}`) inside loops; define them outside or use NativeWind.
+- Use `NativeWind` classes (Tailwind) as they are optimized for React Native performance.

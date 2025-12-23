@@ -1,0 +1,54 @@
+---
+description: Rule to enforce using NativeWind (Tailwind CSS) for styling UI components instead of React Native StyleSheet.
+globs: components/**/*.tsx, app/**/*.tsx
+---
+# Styling with NativeWind
+
+## Core Rule
+- Always prefer using **NativeWind** (Tailwind CSS utility classes) via the `className` prop for styling UI components.
+- **Avoid** using `StyleSheet.create()` or inline `style` objects unless absolutely necessary (e.g., for dynamic values that cannot be handled by Tailwind classes or third-party library requirements).
+
+## Implementation Details
+- Use utility classes for layout, spacing, colors, and typography.
+- For dynamic styles that depend on props or state, use conditional class names (e.g., with `clsx` or template literals).
+- If a style MUST be dynamic (like a calculated animation value), use the `style` prop for ONLY that specific property and keep everything else in `className`.
+
+## Why NativeWind?
+- **Consistency**: Ensures a uniform design language based on the project's Tailwind configuration.
+- **Performance**: NativeWind is optimized for React Native and helps avoid unnecessary object creation during renders.
+- **Maintainability**: Utility classes are easier to read and modify directly within the component structure.
+
+## Examples
+
+### Good (NativeWind)
+```tsx
+<View className="flex-1 bg-cyberBackground p-4 rounded-xl border border-neonCyan">
+  <Text className="text-white text-lg font-bold">
+    Cyberpunk Header
+  </Text>
+</View>
+```
+
+### Bad (StyleSheet)
+```tsx
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    backgroundColor: '#0D0D0D',
+    padding: 16,
+    borderRadius: 12,
+    borderWidth: 1,
+    borderColor: '#00FFFF',
+  },
+  text: {
+    color: '#FFFFFF',
+    fontSize: 18,
+    fontWeight: 'bold',
+  },
+});
+
+// ... inside component
+<View style={styles.container}>
+  <Text style={styles.text}>Cyberpunk Header</Text>
+</View>
+```
