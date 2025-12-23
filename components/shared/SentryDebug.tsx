@@ -8,7 +8,8 @@ import {
    setUser,
 } from '@/utils/sentry';
 import React from 'react';
-import { Alert, StyleSheet, View } from 'react-native';
+import { StyleSheet, View } from 'react-native';
+import Toast from 'react-native-toast-message';
 
 /**
  * Debug component for testing Sentry integration
@@ -24,7 +25,11 @@ const SentryDebug: React.FC = () => {
             component: 'SentryDebug',
             timestamp: new Date().toISOString(),
          });
-         Alert.alert('Error Sent', 'Test error has been sent to Sentry');
+         Toast.show({
+            type: 'success',
+            text1: 'Error Sent',
+            text2: 'Test error has been sent to Sentry',
+         });
       }
    };
 
@@ -33,7 +38,11 @@ const SentryDebug: React.FC = () => {
          testType: 'manual_message',
          component: 'SentryDebug',
       });
-      Alert.alert('Message Sent', 'Test message has been sent to Sentry');
+      Toast.show({
+         type: 'success',
+         text1: 'Message Sent',
+         text2: 'Test message has been sent to Sentry',
+      });
    };
 
    const testBreadcrumb = () => {
@@ -41,7 +50,11 @@ const SentryDebug: React.FC = () => {
          component: 'SentryDebug',
          buttonType: 'breadcrumb_test',
       });
-      Alert.alert('Breadcrumb Added', 'Breadcrumb has been added to Sentry');
+      Toast.show({
+         type: 'info',
+         text1: 'Breadcrumb Added',
+         text2: 'Breadcrumb has been added to Sentry',
+      });
    };
 
    const testUserContext = () => {
@@ -50,13 +63,21 @@ const SentryDebug: React.FC = () => {
          email: 'test@example.com',
          username: 'testuser',
       });
-      Alert.alert('User Set', 'User context has been set in Sentry');
+      Toast.show({
+         type: 'success',
+         text1: 'User Set',
+         text2: 'User context has been set in Sentry',
+      });
    };
 
    const testTags = () => {
       setTag('test_component', 'SentryDebug');
       setTag('environment', __DEV__ ? 'development' : 'production');
-      Alert.alert('Tags Set', 'Tags have been set in Sentry');
+      Toast.show({
+         type: 'success',
+         text1: 'Tags Set',
+         text2: 'Tags have been set in Sentry',
+      });
    };
 
    const testPerformance = () => {
@@ -65,7 +86,11 @@ const SentryDebug: React.FC = () => {
       // Simulate some work
       setTimeout(() => {
          addBreadcrumb('Performance test completed', 'performance');
-         Alert.alert('Performance Tracked', 'Performance breadcrumbs added');
+         Toast.show({
+            type: 'success',
+            text1: 'Performance Tracked',
+            text2: 'Performance breadcrumbs added',
+         });
       }, 1000);
    };
 
@@ -82,7 +107,11 @@ const SentryDebug: React.FC = () => {
             testType: 'async_error',
             operation: 'simulated_async_failure',
          });
-         Alert.alert('Async Error Sent', 'Async error has been sent to Sentry');
+         Toast.show({
+            type: 'success',
+            text1: 'Async Error Sent',
+            text2: 'Async error has been sent to Sentry',
+         });
       }
    };
 

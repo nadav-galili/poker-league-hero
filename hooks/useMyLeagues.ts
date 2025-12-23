@@ -17,7 +17,6 @@ import {
 } from '@/utils/sentry';
 import { router, useFocusEffect } from 'expo-router';
 import React from 'react';
-import { Alert } from 'react-native';
 import Toast from 'react-native-toast-message';
 
 export function useMyLeagues() {
@@ -131,7 +130,11 @@ export function useMyLeagues() {
             function: 'handleCreateLeague',
             screen: 'MyLeagues',
          });
-         Alert.alert(t('error'), 'Failed to open create league dialog');
+         Toast.show({
+            type: 'error',
+            text1: t('error'),
+            text2: 'Failed to open create league dialog',
+         });
       }
    }, [t, track]);
 
@@ -145,7 +148,11 @@ export function useMyLeagues() {
             function: 'handleJoinLeague',
             screen: 'MyLeagues',
          });
-         Alert.alert(t('error'), 'Failed to open join league dialog');
+         Toast.show({
+            type: 'error',
+            text1: t('error'),
+            text2: 'Failed to open join league dialog',
+         });
       }
    }, [t]);
 
@@ -158,7 +165,11 @@ export function useMyLeagues() {
       async (code?: string) => {
          try {
             if (!code) {
-               Alert.alert(t('error'), 'Please enter a league code');
+               Toast.show({
+                  type: 'error',
+                  text1: t('error'),
+                  text2: 'Please enter a league code',
+               });
                return;
             }
 
@@ -196,12 +207,20 @@ export function useMyLeagues() {
                const abortController = new AbortController();
                loadLeagues(abortController.signal);
             } else {
-               Alert.alert(t('error'), result.error || 'Failed to join league');
+               Toast.show({
+                  type: 'error',
+                  text1: t('error'),
+                  text2: result.error || 'Failed to join league',
+               });
             }
          } catch (error) {
             const errorMessage =
                error instanceof Error ? error.message : 'Failed to join league';
-            Alert.alert(t('error'), errorMessage);
+            Toast.show({
+               type: 'error',
+               text1: t('error'),
+               text2: errorMessage,
+            });
 
             // Refresh leagues on error to ensure consistency
             const abortController = new AbortController();
@@ -228,7 +247,11 @@ export function useMyLeagues() {
          const result = await shareLeague(league, t);
 
          if (!result.success && !result.cancelled && result.error) {
-            Alert.alert(t('error'), t('failedToShare'));
+            Toast.show({
+               type: 'error',
+               text1: t('error'),
+               text2: t('failedToShare'),
+            });
          } else if (result.success) {
             // Track share event in Mixpanel
             trackLeagueEvent('league_shared', league.id, league.name, {

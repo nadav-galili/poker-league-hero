@@ -283,26 +283,23 @@ export default function Account() {
                      }
 
                      track('user_profile_updated', { action: 'delete_data_success' });
-                     Alert.alert(
-                        'Data Deleted',
-                        'Your personal data has been successfully deleted. You will be signed out now.',
-                        [
-                           {
-                              text: 'OK',
-                              onPress: () => handleSignOut(),
-                           },
-                        ]
-                     );
+                     Toast.show({
+                        type: 'success',
+                        text1: t('success'),
+                        text2: 'Your personal data has been successfully deleted.',
+                     });
+                     handleSignOut();
                   } catch (error) {
                      console.error('Error deleting data:', error);
                      track('api_error', { 
                         error: error instanceof Error ? error.message : String(error),
                         endpoint: '/api/user/delete'
                      });
-                     Alert.alert(
-                        'Error',
-                        'Failed to delete your data. Please try again later or contact support.'
-                     );
+                     Toast.show({
+                        type: 'error',
+                        text1: t('error'),
+                        text2: 'Failed to delete your data. Please try again later.',
+                     });
                   } finally {
                      setIsDeletingData(false);
                   }
@@ -332,13 +329,17 @@ export default function Account() {
                   imageUri,
                   'profile-images'
                );
-            } catch (error) {
+               } catch (error) {
                console.error('Failed to upload image:', error);
                track('api_error', { 
                   error: error instanceof Error ? error.message : String(error),
                   endpoint: 'R2_upload_profile_image'
                });
-               Alert.alert('Error', 'Failed to upload image');
+               Toast.show({
+                  type: 'error',
+                  text1: t('error'),
+                  text2: 'Failed to upload image',
+               });
                setIsUpdatingProfile(false);
                return;
             }

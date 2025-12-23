@@ -10,7 +10,8 @@ import { CreateGameRequest } from '@/types';
 import { addBreadcrumb, captureException } from '@/utils/sentry';
 import { router } from 'expo-router';
 import React from 'react';
-import { Alert } from 'react-native';
+import { View } from 'react-native';
+import Toast from 'react-native-toast-message';
 
 interface UseGameCreationResult {
    showGameSetup: boolean;
@@ -55,9 +56,11 @@ export function useGameCreation({
 
    const handleStartGame = React.useCallback(() => {
       if (selectedCount < minPlayers) {
-         Alert.alert(t('invalidSelection'), t('selectAtLeastTwoPlayers'), [
-            { text: t('ok') },
-         ]);
+         Toast.show({
+            type: 'error',
+            text1: t('invalidSelection'),
+            text2: t('selectAtLeastTwoPlayers'),
+         });
          return;
       }
 
@@ -126,13 +129,14 @@ export function useGameCreation({
          const errorMessage =
             err instanceof Error ? err.message : 'Unknown error occurred';
 
-         Alert.alert(
-            t('error'),
-            errorMessage === 'Unknown error occurred'
-               ? t('failedToCreateGame')
-               : errorMessage,
-            [{ text: t('ok') }]
-         );
+         Toast.show({
+            type: 'error',
+            text1: t('error'),
+            text2:
+               errorMessage === 'Unknown error occurred'
+                  ? t('failedToCreateGame')
+                  : errorMessage,
+         });
 
          captureException(
             err instanceof Error ? err : new Error(errorMessage),

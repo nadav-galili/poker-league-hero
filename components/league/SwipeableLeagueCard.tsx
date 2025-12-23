@@ -19,6 +19,7 @@ import {
    Dimensions,
    I18nManager,
 } from 'react-native';
+import Toast from 'react-native-toast-message';
 import {
    PanGestureHandler,
    LongPressGestureHandler,
@@ -230,7 +231,11 @@ export const SwipeableLeagueCard = ({
             screen: 'MyLeagues',
             leagueId: league.id,
          });
-         Alert.alert(t('error'), 'Failed to initiate share');
+         Toast.show({
+            type: 'error',
+            text1: t('error'),
+            text2: 'Failed to initiate share',
+         });
       }
    }, [league, onShare, resetCard, t]);
 
