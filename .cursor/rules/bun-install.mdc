@@ -18,7 +18,6 @@ alwaysApply: true
 - The app structure is clean and consistent with bun
 - Only `bun.lock` should exist (no `package-lock.json` or `yarn.lock`)
 - All dependencies should be installed via bun to maintain consistency
-- Use `bun run start` to start the Expo development server
 
 ## Troubleshooting:
 

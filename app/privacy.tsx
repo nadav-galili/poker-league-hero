@@ -1,9 +1,17 @@
 import { AppButton } from '@/components/ui/AppButton';
+import { useMixpanel } from '@/hooks/useMixpanel';
 import { LinearGradient } from 'expo-linear-gradient';
 import { router } from 'expo-router';
-import React from 'react';
+import React, { useEffect } from 'react';
 import { SafeAreaView, ScrollView, Text, View } from 'react-native';
+
 export default function PrivacyPolicy() {
+   const { trackScreenView } = useMixpanel();
+
+   useEffect(() => {
+      trackScreenView('privacy_policy_screen');
+   }, [trackScreenView]);
+
    return (
       <SafeAreaView className="flex-1">
          <LinearGradient colors={['#3730a3', '#581c87']} className="flex-1">

@@ -12,6 +12,7 @@ import { useLocalization } from '@/context/localization';
 import { useEditLeague } from '@/hooks/useEditLeague';
 import { useLeagueGames } from '@/hooks/useLeagueGames';
 import { useLeagueStats } from '@/hooks/useLeagueStats';
+import { useMixpanel } from '@/hooks/useMixpanel';
 import { createStatCards } from '@/services/leagueStatsHelpers';
 import { StatType } from '@/services/leagueStatsService';
 import { Ionicons } from '@expo/vector-icons';
@@ -94,6 +95,7 @@ export default function LeagueStatsScreen() {
    const { t, isRTL } = useLocalization();
    const { id: leagueId } = useLocalSearchParams<{ id: string }>();
    const { user } = useAuth();
+   const { trackScreenView, trackLeagueEvent } = useMixpanel();
 
    const {
       league,
@@ -104,6 +106,12 @@ export default function LeagueStatsScreen() {
       loadLeagueData,
       handleRefresh: refreshStats,
    } = useLeagueStats(leagueId);
+
+   React.useEffect(() => {
+      if (leagueId) {
+         trackScreenView('league_stats_detail_screen', { league_id: leagueId });
+      }
+   }, [leagueId, trackScreenView]);
 
    const {
       games,
@@ -151,12 +159,17 @@ export default function LeagueStatsScreen() {
 
    const handleStatPress = React.useCallback(
       (statType: StatType) => {
+         if (leagueId && league) {
+            trackLeagueEvent('league_stats_viewed', leagueId, league.name, {
+               stat_type: statType,
+            });
+         }
          router.push({
             pathname: '/leagues/[id]/stats/[statType]',
             params: { id: leagueId!, statType },
          });
       },
-      [leagueId]
+      [leagueId, league, trackLeagueEvent]
    );
 
    // Check if user is a member of the league

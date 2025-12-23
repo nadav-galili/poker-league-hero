@@ -3,13 +3,14 @@ import StatsLeaderboardHero from '@/components/stats/StatsLeaderboardHero';
 import StatsLeaderboardRow from '@/components/stats/StatsLeaderboardRow';
 import StatsLeaderboardSkeleton from '@/components/stats/StatsLeaderboardSkeleton';
 import { useLocalization } from '@/context/localization';
+import { useMixpanel } from '@/hooks/useMixpanel';
 import { useStatsRankings } from '@/hooks/useStatsRankings';
 import { StatType } from '@/services/leagueStatsService';
 import { Ionicons } from '@expo/vector-icons';
 import { FlashList } from '@shopify/flash-list';
 import { LinearGradient } from 'expo-linear-gradient';
 import { router, Stack, useLocalSearchParams } from 'expo-router';
-import React, { useMemo } from 'react';
+import React, { useEffect, useMemo } from 'react';
 import {
    Pressable,
    RefreshControl,
@@ -24,6 +25,16 @@ export default function StatsLeaderboardScreen() {
       id: string;
       statType: StatType;
    }>();
+   const { trackScreenView } = useMixpanel();
+
+   useEffect(() => {
+      if (leagueId && statType) {
+         trackScreenView('stats_leaderboard_screen', {
+            league_id: leagueId,
+            stat_type: statType,
+         });
+      }
+   }, [leagueId, statType, trackScreenView]);
 
    const { data, isLoading, refetch } = useStatsRankings(leagueId, statType);
 

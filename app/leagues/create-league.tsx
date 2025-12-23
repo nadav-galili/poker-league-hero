@@ -9,6 +9,7 @@ import { CyberpunkButton } from '@/components/ui/CyberpunkButton';
 import CyberpunkLoader from '@/components/ui/CyberpunkLoader';
 import { useAuth } from '@/context/auth';
 import { useLocalization } from '@/context/localization';
+import { useMixpanel } from '@/hooks/useMixpanel';
 import { captureException } from '@/utils/sentry';
 import { Ionicons } from '@expo/vector-icons';
 import * as ImagePicker from 'expo-image-picker';
@@ -30,7 +31,14 @@ const { height: screenHeight } = Dimensions.get('window');
 
 export default function CreateLeague() {
    const { t, isRTL } = useLocalization();
+   const { trackScreenView, track, trackLeagueEvent } = useMixpanel();
    const [isLoading, setIsLoading] = useState(false);
+   
+   // ...
+   
+   useEffect(() => {
+      trackScreenView('create_league_screen');
+   }, [trackScreenView]);
    const [formData, setFormData] = useState({
       name: '',
       image: null as string | null,
@@ -383,6 +391,14 @@ export default function CreateLeague() {
 
          const data = await response.json();
          console.log('✅ League created successfully:', data);
+
+         // Track league creation in Mixpanel
+         if (data.league?.id) {
+            trackLeagueEvent('league_created', data.league.id, data.league.name, {
+               has_image: !!cleanFormData.image,
+            });
+         }
+
          captureException(new Error('League created successfully'), {
             function: 'handleCreateLeague',
             screen: 'CreateLeague',

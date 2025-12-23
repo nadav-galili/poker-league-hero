@@ -4,6 +4,7 @@ import { BASE_URL } from '@/constants';
 import { useAuth } from '@/context/auth';
 import { useLocalization } from '@/context/localization';
 import { useEditLeague } from '@/hooks/useEditLeague';
+import { useMixpanel } from '@/hooks/useMixpanel';
 
 import { captureException } from '@/utils/sentry';
 import { Ionicons } from '@expo/vector-icons';
@@ -473,6 +474,7 @@ function LeagueStatsComponent() {
    const { t, isRTL } = useLocalization();
    const { fetchWithAuth, user } = useAuth();
    const { id } = useLocalSearchParams<{ id: string }>();
+   const { trackScreenView, trackLeagueEvent, trackGameEvent } = useMixpanel();
 
    const [league, setLeague] = React.useState<LeagueData | null>(null);
    const [isLoading, setIsLoading] = React.useState(true);
@@ -679,10 +681,14 @@ function LeagueStatsComponent() {
       const abortController = new AbortController();
       loadLeagueDetails(abortController.signal);
 
+      if (id) {
+         trackScreenView('league_stats_overview_screen', { league_id: id });
+      }
+
       return () => {
          abortController.abort();
       };
-   }, [loadLeagueDetails]);
+   }, [loadLeagueDetails, id, trackScreenView]);
 
    // Check for active game when league is loaded with proper cleanup
    React.useEffect(() => {
@@ -725,19 +731,27 @@ function LeagueStatsComponent() {
 
    const handleStartGame = React.useCallback(() => {
       if (!league) return;
+      trackLeagueEvent('game_started', league.id, league.name, {
+         action_source: 'league_stats_overview',
+      });
       router.push(`/games/${league.id}/select-players`);
-   }, [league]);
+   }, [league, trackLeagueEvent]);
 
    const handleContinueGame = React.useCallback(() => {
-      if (activeGame) {
+      if (activeGame && league) {
+         trackGameEvent('game_viewed', activeGame.id, league.id, {
+            action_source: 'league_stats_overview',
+            is_active: true,
+         });
          router.push(`/games/${activeGame.id}`);
       }
-   }, [activeGame]);
+   }, [activeGame, league, trackGameEvent]);
 
    const handleViewStats = React.useCallback(() => {
       if (!league) return;
+      trackLeagueEvent('league_stats_viewed', league.id, league.name);
       router.push(`/leagues/${league.id}/league-stats-screen`);
-   }, [league]);
+   }, [league, trackLeagueEvent]);
 
    const handleRetry = React.useCallback(() => {
       const abortController = new AbortController();

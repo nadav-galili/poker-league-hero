@@ -1,13 +1,19 @@
 import { colors, getTheme } from '@/colors';
 import { Text } from '@/components/Text';
 import { useLocalization } from '@/context/localization';
+import { useMixpanel } from '@/hooks/useMixpanel';
 import { Ionicons } from '@expo/vector-icons';
-import React from 'react';
+import React, { useEffect } from 'react';
 import { StyleSheet, View } from 'react-native';
 
 export default function PersonalStats() {
    const theme = getTheme('light');
    const { t } = useLocalization();
+   const { trackScreenView } = useMixpanel();
+
+   useEffect(() => {
+      trackScreenView('personal_stats_screen');
+   }, [trackScreenView]);
 
    return (
       <View style={[styles.container, { backgroundColor: theme.background }]}>
@@ -18,7 +24,7 @@ export default function PersonalStats() {
          </View>
 
          <View style={styles.content}>
-            <Ionicons name="person" size={64} color={theme.highlight} />
+            <Ionicons name="person" size={64} color={theme.text} />
             <Text style={[styles.subtitle, { color: theme.textSecondary }]}>
                Personal statistics coming soon!
             </Text>

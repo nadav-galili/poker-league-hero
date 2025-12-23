@@ -1,0 +1,27 @@
+---
+alwaysApply: false
+---
+
+# Mixpanel Tracking
+
+When creating or updating screens:
+
+1. Import `useMixpanel` from `hooks/useMixpanel.ts`
+2. Track relevant user events (screen views, interactions, conversions)
+3. If event type doesn't exist in the hook, add it there first — don't inline custom events
+
+## Example
+
+```tsx
+const { trackScreenView, trackButtonPress } = useMixpanel();
+
+useEffect(() => {
+   trackScreenView('ProfileScreen');
+}, []);
+```
+
+## Event Naming Convention
+
+- Screen views: `screen_<name>` (e.g., `screen_profile`)
+- Actions: `<action>_<target>` (e.g., `tap_save_button`, `submit_form`)
+- Keep snake_case, lowercase

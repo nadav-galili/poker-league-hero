@@ -1,13 +1,19 @@
 import { colors, getTheme } from '@/colors';
 import { Text } from '@/components/Text';
 import { useLocalization } from '@/context/localization';
+import { useMixpanel } from '@/hooks/useMixpanel';
 import { Ionicons } from '@expo/vector-icons';
-import React from 'react';
+import React, { useEffect } from 'react';
 import { StyleSheet, View } from 'react-native';
 
 export default function Stats() {
    const theme = getTheme('light');
    const { t } = useLocalization();
+   const { trackScreenView } = useMixpanel();
+
+   useEffect(() => {
+      trackScreenView('stats_overview_screen');
+   }, [trackScreenView]);
 
    return (
       <View style={[styles.container, { backgroundColor: theme.background }]}>

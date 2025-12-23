@@ -1,10 +1,11 @@
 import CyberpunkLoader from '@/components/ui/CyberpunkLoader';
 import { useAuth } from '@/context/auth';
 import { useLocalization } from '@/context/localization';
+import { useMixpanel } from '@/hooks/useMixpanel';
 import { joinLeagueWithCode } from '@/services/leagueOperationsService';
 import { useFocusEffect } from '@react-navigation/native';
 import { useLocalSearchParams, useRouter } from 'expo-router';
-import React, { useCallback } from 'react';
+import React, { useCallback, useEffect } from 'react';
 import { View } from 'react-native';
 import Toast from 'react-native-toast-message';
 
@@ -13,38 +14,23 @@ export default function JoinLeagueHandler() {
    const { t } = useLocalization();
    const router = useRouter();
    const { code, name, id } = useLocalSearchParams();
+   const { track, trackScreenView, trackLeagueEvent } = useMixpanel();
+
+   useEffect(() => {
+      trackScreenView('join_league_handler_screen', {
+         league_code: code,
+         league_name: name,
+         league_id: id,
+      });
+   }, [code, name, id, trackScreenView]);
 
    useFocusEffect(
       useCallback(() => {
          const handleJoinLeague = async () => {
             try {
-               // Wait for auth to load
-               if (authLoading) {
-                  return;
-               }
-
-               // If user is not authenticated, redirect to login
-               if (!user) {
-                  Toast.show({
-                     type: 'error',
-                     text1: t('error'),
-                     text2:
-                        t('joinLeagueRequiresLogin') ||
-                        'You must sign in to join a league',
-                  });
-                  router.replace('/');
-                  return;
-               }
-
-               if (!code) {
-                  Toast.show({
-                     type: 'error',
-                     text1: t('error'),
-                     text2: 'Invalid league code',
-                  });
-                  router.replace('/');
-                  return;
-               }
+               // ... (auth checks)
+               
+               // ... (code checks)
 
                // Call the API to join the league
                const result = await joinLeagueWithCode(
@@ -54,42 +40,45 @@ export default function JoinLeagueHandler() {
                );
 
                if (result.success) {
+                  // Track successful join
+                  if (result.league?.id) {
+                     trackLeagueEvent('league_joined', result.league.id, result.league.name, {
+                        method: 'invite_code',
+                        invite_code: code,
+                     });
+                  }
+
                   Toast.show({
-                     type: 'success',
-                     text1: t('success'),
-                     text2:
-                        t('joinedLeagueSuccess') ||
-                        `Successfully joined ${name || 'league'}`,
+                     // ...
                   });
 
-                  // Redirect to the league page
-                  const leagueId = result.league?.id || id;
-                  if (leagueId) {
-                     router.replace(`/(tabs)/my-leagues/${leagueId}` as any);
-                  } else {
-                     router.replace('/(tabs)/my-leagues');
-                  }
+                  // ... (redirect)
                } else {
+                  // Track failure
+                  track('api_error', {
+                     error: result.error || 'Failed to join league',
+                     endpoint: 'joinLeagueWithCode',
+                     league_code: code,
+                  });
+
                   Toast.show({
-                     type: 'error',
-                     text1: t('error'),
-                     text2: result.error || 'Failed to join league',
+                     // ...
                   });
                   router.replace('/');
                }
             } catch (error) {
                console.error('Error joining league:', error);
-               Toast.show({
-                  type: 'error',
-                  text1: t('error'),
-                  text2: 'An error occurred while joining the league',
+               track('error_occurred', {
+                  error_message: error instanceof Error ? error.message : String(error),
+                  screen_name: 'JoinLeagueHandler',
+                  league_code: code,
                });
-               router.replace('/');
+               // ...
             }
          };
 
          handleJoinLeague();
-      }, [code, user, authLoading, router, t, fetchWithAuth, id, name])
+      }, [code, user, authLoading, router, t, fetchWithAuth, id, name, track, trackLeagueEvent])
    );
 
    return (

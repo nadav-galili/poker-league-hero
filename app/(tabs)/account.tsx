@@ -2,12 +2,13 @@ import { colors } from '@/colors';
 import { EditProfileModal } from '@/components/modals/EditProfileModal';
 import { useAuth } from '@/context/auth';
 import { useLocalization } from '@/context/localization';
+import { useMixpanel } from '@/hooks/useMixpanel';
 import { uploadImageToR2 } from '@/utils/cloudflareR2';
 import { Ionicons } from '@expo/vector-icons';
 import { Image } from 'expo-image';
 import { LinearGradient } from 'expo-linear-gradient';
 import { useRouter } from 'expo-router';
-import { useEffect, useRef, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import {
    Alert,
    Animated,
@@ -25,6 +26,7 @@ import Toast from 'react-native-toast-message';
 // Cyberpunk Language Selection Component
 function CyberpunkLanguageSelector() {
    const { language, setLanguage, t } = useLocalization();
+   const { track } = useMixpanel();
    const glowAnim = useRef(new Animated.Value(0)).current;
    const [isExpanded, setIsExpanded] = useState(false);
 
@@ -64,6 +66,10 @@ function CyberpunkLanguageSelector() {
    const selectLanguage = async (lang: 'en' | 'he') => {
       await setLanguage(lang);
       setIsExpanded(false);
+      track('user_profile_updated', {
+         updated_field: 'language',
+         value: lang,
+      });
    };
 
    const languageOptions = [
@@ -177,10 +183,21 @@ export default function Account() {
    const { user, signOut, fetchWithAuth, refreshUser } = useAuth();
    const { t } = useLocalization();
    const router = useRouter();
+   const { trackScreenView, track, reset } = useMixpanel();
    const [isDeletingData, setIsDeletingData] = useState(false);
    const [isEditProfileVisible, setIsEditProfileVisible] = useState(false);
    const [isUpdatingProfile, setIsUpdatingProfile] = useState(false);
    const insets = useSafeAreaInsets();
+
+   useEffect(() => {
+      trackScreenView('account_screen');
+   }, [trackScreenView]);
+
+   const handleSignOut = useCallback(async () => {
+      await track('user_logged_out');
+      await reset();
+      signOut();
+   }, [track, reset, signOut]);
    const { width } = Dimensions.get('window');
    const isIPad =
       Platform.OS === 'ios' && ((Platform as any).isPad || width >= 768);
@@ -253,6 +270,7 @@ export default function Account() {
                onPress: async () => {
                   setIsDeletingData(true);
                   try {
+                     track('user_profile_updated', { action: 'delete_data_start' });
                      const response = await fetchWithAuth('/api/user/delete', {
                         method: 'PUT',
                         headers: {
@@ -264,18 +282,23 @@ export default function Account() {
                         throw new Error('Failed to delete data');
                      }
 
+                     track('user_profile_updated', { action: 'delete_data_success' });
                      Alert.alert(
                         'Data Deleted',
                         'Your personal data has been successfully deleted. You will be signed out now.',
                         [
                            {
                               text: 'OK',
-                              onPress: () => signOut(),
+                              onPress: () => handleSignOut(),
                            },
                         ]
                      );
                   } catch (error) {
                      console.error('Error deleting data:', error);
+                     track('api_error', { 
+                        error: error instanceof Error ? error.message : String(error),
+                        endpoint: '/api/user/delete'
+                     });
                      Alert.alert(
                         'Error',
                         'Failed to delete your data. Please try again later or contact support.'
@@ -295,6 +318,7 @@ export default function Account() {
    ) => {
       try {
          setIsUpdatingProfile(true);
+         track('user_profile_updated', { action: 'update_profile_start' });
 
          // 1. Upload image if changed
          let uploadedImageUrl = imageUri;
@@ -310,6 +334,10 @@ export default function Account() {
                );
             } catch (error) {
                console.error('Failed to upload image:', error);
+               track('api_error', { 
+                  error: error instanceof Error ? error.message : String(error),
+                  endpoint: 'R2_upload_profile_image'
+               });
                Alert.alert('Error', 'Failed to upload image');
                setIsUpdatingProfile(false);
                return;
@@ -331,6 +359,7 @@ export default function Account() {
             throw new Error(errorData.error || 'Failed to update profile');
          }
 
+         track('user_profile_updated', { action: 'update_profile_success' });
          // 3. Refresh user context
          await refreshUser();
 
@@ -341,6 +370,10 @@ export default function Account() {
          });
       } catch (error) {
          console.error('Error updating profile:', error);
+         track('api_error', { 
+            error: error instanceof Error ? error.message : String(error),
+            endpoint: '/api/user/update'
+         });
          Toast.show({
             type: 'error',
             text1: t('profileUpdateFailed'),
@@ -531,7 +564,7 @@ export default function Account() {
 
                   {/* Sign Out Button */}
                   <TouchableOpacity
-                     onPress={signOut}
+                     onPress={handleSignOut}
                      style={cyberpunkStyles.actionButton}
                   >
                      <LinearGradient
@@ -618,7 +651,10 @@ export default function Account() {
 
                   <View style={cyberpunkStyles.legalLinks}>
                      <TouchableOpacity
-                        onPress={() => router.push('/terms')}
+                        onPress={() => {
+                           track('screen_viewed', { screen_name: 'terms_of_service' });
+                           router.push('/terms');
+                        }}
                         style={cyberpunkStyles.legalButton}
                      >
                         <View style={cyberpunkStyles.legalButtonBorder} />
@@ -637,7 +673,10 @@ export default function Account() {
                      </TouchableOpacity>
 
                      <TouchableOpacity
-                        onPress={() => router.push('/privacy')}
+                        onPress={() => {
+                           track('screen_viewed', { screen_name: 'privacy_policy' });
+                           router.push('/privacy');
+                        }}
                         style={cyberpunkStyles.legalButton}
                      >
                         <View style={cyberpunkStyles.legalButtonBorder} />

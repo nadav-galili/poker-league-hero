@@ -3,7 +3,9 @@ import LoginForm from '@/components/auth/LoginForm';
 import OnboardingSwiper from '@/components/onboarding/OnboardingSwiper';
 import { LoadingState } from '@/components/shared/LoadingState';
 import { useAuth } from '@/context/auth';
+import { useMixpanel } from '@/hooks/useMixpanel';
 import { Redirect, usePathname, useSegments } from 'expo-router';
+import { useEffect } from 'react';
 import { Platform, ScrollView } from 'react-native';
 
 export default function Index() {
@@ -12,6 +14,17 @@ export default function Index() {
    const pathname = usePathname();
    const segments = useSegments();
    const isWeb = Platform.OS === 'web';
+   const { trackScreenView } = useMixpanel();
+
+   useEffect(() => {
+      if (!isLoading && !user) {
+         if (!hasSeenOnboarding) {
+            trackScreenView('onboarding_swiper');
+         } else {
+            trackScreenView('login_screen');
+         }
+      }
+   }, [isLoading, user, hasSeenOnboarding, trackScreenView]);
 
    // On web, check the actual browser URL synchronously to catch privacy/terms routes
    // This needs to happen before any auth checks to prevent onboarding from showing
