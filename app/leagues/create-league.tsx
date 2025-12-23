@@ -208,7 +208,7 @@ export default function CreateLeague() {
             Toast.show({
                type: 'error',
                text1: t('error'),
-               text2: 'Please login to create a league',
+               text2: t('loginRequiredToCreateLeague'),
             });
             return;
          }
@@ -227,7 +227,7 @@ export default function CreateLeague() {
             Toast.show({
                type: 'error',
                text1: t('error'),
-               text2: 'Please fix the form errors',
+               text2: t('fixFormErrors'),
             });
             return;
          }
@@ -245,7 +245,7 @@ export default function CreateLeague() {
                Toast.show({
                   type: 'info',
                   text1: t('uploadingImage'),
-                  text2: 'Please wait...',
+                  text2: t('pleaseWait'),
                });
 
                const uploadFormData = new FormData();
@@ -409,7 +409,7 @@ export default function CreateLeague() {
          Toast.show({
             type: 'success',
             text1: t('success'),
-            text2: 'League created successfully',
+            text2: t('leagueCreatedSuccess'),
          });
          // Navigate to the leagues list
          router.replace('/(tabs)/my-leagues');

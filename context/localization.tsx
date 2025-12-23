@@ -81,6 +81,12 @@ export interface Translations {
    leagueImage: string;
    selectImage: string;
    uploadingImage: string;
+   leagueCreatedSuccess: string;
+   loginRequiredToCreateLeague: string;
+   fixFormErrors: string;
+   pleaseWait: string;
+   dataDeletedSuccess: string;
+   dataDeletionFailed: string;
 
    // New Screens
    games: string;
@@ -363,6 +369,12 @@ const enTranslations: Translations = {
    leagueImage: 'League Image',
    selectImage: 'Select Image',
    uploadingImage: 'Uploading Image',
+   leagueCreatedSuccess: 'League created successfully',
+   loginRequiredToCreateLeague: 'Please login to create a league',
+   fixFormErrors: 'Please fix the form errors',
+   pleaseWait: 'Please wait...',
+   dataDeletedSuccess: 'Your personal data has been successfully deleted.',
+   dataDeletionFailed: 'Failed to delete your data. Please try again later.',
 
    // New Screens
    games: 'GAMES',
@@ -655,6 +667,12 @@ const heTranslations: Translations = {
    leagueImage: 'תמונת הליגה',
    selectImage: 'בחר תמונה',
    uploadingImage: 'מעלה תמונה',
+   leagueCreatedSuccess: 'הליגה נוצרה בהצלחה',
+   loginRequiredToCreateLeague: 'עליך להתחבר כדי ליצור ליגה',
+   fixFormErrors: 'אנא תקן את השגיאות בטופס',
+   pleaseWait: 'אנא המתן...',
+   dataDeletedSuccess: 'המידע האישי שלך נמחק בהצלחה.',
+   dataDeletionFailed: 'נכשל במחיקת המידע שלך. אנא נסה שוב מאוחר יותר.',
 
    // New Screens
    games: 'משחקים',

@@ -286,7 +286,7 @@ export default function Account() {
                      Toast.show({
                         type: 'success',
                         text1: t('success'),
-                        text2: 'Your personal data has been successfully deleted.',
+                        text2: t('dataDeletedSuccess'),
                      });
                      handleSignOut();
                   } catch (error) {
@@ -298,7 +298,7 @@ export default function Account() {
                      Toast.show({
                         type: 'error',
                         text1: t('error'),
-                        text2: 'Failed to delete your data. Please try again later.',
+                        text2: t('dataDeletionFailed'),
                      });
                   } finally {
                      setIsDeletingData(false);
@@ -338,7 +338,7 @@ export default function Account() {
                Toast.show({
                   type: 'error',
                   text1: t('error'),
-                  text2: 'Failed to upload image',
+                  text2: t('failedToUploadImage'),
                });
                setIsUpdatingProfile(false);
                return;
