@@ -3,4 +3,4 @@ alwaysApply: true
 ---
 
 For calculating and displaying dates objects or functions ,
-use the daysjs npm instead of vanilla new Date()
+use the daysjs package instead of vanilla new Date()
