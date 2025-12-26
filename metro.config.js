@@ -18,17 +18,6 @@ const isServerExport =
       (arg) => arg.includes('getServerManifest') || arg.includes('export:embed')
    );
 
-console.log(
-   'Metro Config - Platform:',
-   platform,
-   'EAS Platform:',
-   process.env.EAS_BUILD_PLATFORM,
-   'Is Mobile:',
-   isMobileBuild,
-   'Is Server Export:',
-   isServerExport
-);
-
 // Custom resolver function to redirect database imports for mobile builds
 const path = require('path');
 const customResolver = (context, moduleName, platform) => {

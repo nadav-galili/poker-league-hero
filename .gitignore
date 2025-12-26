@@ -41,7 +41,7 @@ setup-eas-secrets.sh
 
 app-example
 
-/ios
-/android
+ios/
+android/
 .env.local
 *.apk
