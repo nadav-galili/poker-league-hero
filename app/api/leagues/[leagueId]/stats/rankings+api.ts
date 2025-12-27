@@ -46,7 +46,8 @@ type StatType =
    | 'most-active-player'
    | 'highest-single-game-profit'
    | 'biggest-loser'
-   | 'best-winning-streak';
+   | 'best-winning-streak'
+   | 'monthly-profit-leader';
 
 export const GET = withAuth(
    withRateLimit(async (request: Request, user) => {
@@ -121,6 +122,7 @@ export const GET = withAuth(
                'highest-single-game-profit',
                'biggest-loser',
                'best-winning-streak',
+               'monthly-profit-leader',
             ];
             if (!validTypes.includes(typeParam)) {
                return secureResponse(
@@ -690,6 +692,103 @@ async function calculateRankings(
                );
             })
             .map((player: any, index: number) => ({
+               ...player,
+               rank: index + 1,
+            }));
+      }
+
+      case 'monthly-profit-leader': {
+         // Calculate monthly profit rankings (current month only)
+         const currentMonth = dayjs().startOf('month').toDate();
+         const nextMonth = dayjs().add(1, 'month').startOf('month').toDate();
+
+         const monthlyConditions = and(
+            eq(games.leagueId, parsedLeagueId),
+            eq(games.status, 'completed'),
+            gte(games.endedAt, currentMonth),
+            lte(games.endedAt, nextMonth)
+         );
+
+         const userMonthlyWhere = and(
+            monthlyConditions,
+            eq(leagueMembers.isActive, true)
+         );
+
+         const anonMonthlyWhere = and(
+            monthlyConditions,
+            isNotNull(gamePlayers.anonymousPlayerId)
+         );
+
+         // Regular users for current month
+         const userResults = await db
+            .select({
+               userId: users.id,
+               fullName: users.fullName,
+               profileImageUrl: users.profileImageUrl,
+               value: sum(gamePlayers.profit).as('monthly_profit'),
+               gamesPlayed:
+                  sql<number>`count(distinct ${gamePlayers.gameId})`.as(
+                     'games_played'
+                  ),
+            })
+            .from(gamePlayers)
+            .innerJoin(games, eq(gamePlayers.gameId, games.id))
+            .innerJoin(users, eq(gamePlayers.userId, users.id))
+            .innerJoin(
+               leagueMembers,
+               and(
+                  eq(leagueMembers.userId, users.id),
+                  eq(leagueMembers.leagueId, parsedLeagueId)
+               )
+            )
+            .where(userMonthlyWhere)
+            .groupBy(users.id, users.fullName, users.profileImageUrl)
+            .having(sql`sum(${gamePlayers.profit}) IS NOT NULL`);
+
+         // Anonymous players for current month
+         const anonResult = await db
+            .select({
+               value: sum(gamePlayers.profit).as('monthly_profit'),
+               gamesPlayed:
+                  sql<number>`count(distinct ${gamePlayers.gameId})`.as(
+                     'games_played'
+                  ),
+            })
+            .from(gamePlayers)
+            .innerJoin(games, eq(gamePlayers.gameId, games.id))
+            .where(anonMonthlyWhere);
+
+         // Combine results
+         const allResults: PlayerStat[] = [
+            ...userResults.map((r) => ({
+               userId: r.userId,
+               fullName: r.fullName,
+               profileImageUrl: r.profileImageUrl,
+               value: parseFloat(r.value || '0'),
+               additionalData: {
+                  gamesPlayed: r.gamesPlayed,
+                  label: 'Monthly Profit',
+               },
+            })),
+         ];
+
+         // Add anonymous if they have data
+         if (anonResult[0] && parseFloat(anonResult[0].value || '0') !== 0) {
+            allResults.push({
+               ...anonymousPlayerProfile,
+               value: parseFloat(anonResult[0].value || '0'),
+               additionalData: {
+                  gamesPlayed: anonResult[0].gamesPlayed,
+                  label: 'Monthly Profit',
+                  isAnonymous: true,
+               },
+            });
+         }
+
+         // Sort by monthly profit descending
+         return allResults
+            .sort((a, b) => b.value - a.value)
+            .map((player, index) => ({
                ...player,
                rank: index + 1,
             }));
