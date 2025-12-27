@@ -25,7 +25,13 @@
       "Bash(eas deploy:*)",
       "Bash(node:*)",
       "Bash(git add:*)",
-      "Bash(git commit:*)"
+      "Bash(git commit:*)",
+      "Bash(gh label list:*)",
+      "Bash(gh issue view:*)",
+      "Bash(gh issue comment:*)",
+      "Bash(wc:*)",
+      "Bash(grep:*)",
+      "Bash(gh issue list:*)"
     ],
     "deny": [],
     "ask": []

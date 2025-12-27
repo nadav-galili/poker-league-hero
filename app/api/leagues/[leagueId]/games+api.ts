@@ -11,7 +11,6 @@ import {
 } from '../../../../db';
 
 export const GET = withAuth(async (request: Request, user) => {
-   console.log('📡 [LeagueGamesAPI] Fetching games...');
    try {
       const url = new URL(request.url);
       // Robust way to extract leagueId from path: /api/leagues/[id]/games
