@@ -85,8 +85,16 @@ export const useGameData = (gameId: string | undefined) => {
             }
 
             const data = await response.json();
-            setGame(data.game);
+
+            // Create a new object reference to ensure React detects the change
+            const updatedGame = {
+               ...data.game,
+               players: data.game.players.map((p: GamePlayer) => ({ ...p })),
+            };
+
+            setGame(updatedGame);
          } catch (err) {
+            console.error('[useGameData] Error loading game data:', err);
             const errorMessage =
                err instanceof Error
                   ? err.message

@@ -115,6 +115,7 @@ export const colors = {
    textNeonCyan: rawColors.textNeonCyan,
    textNeonPink: rawColors.textNeonPink,
    textNeonGreen: rawColors.textNeonGreen,
+   textInverse: '#FFFFFF',
 
    // Background system - dark theme first
    background: rawColors.deepPurple, // Deep purple background
@@ -235,6 +236,7 @@ export type Theme = {
    textSecondary: string;
    textMuted: string;
    textDisabled: string;
+   textInverse: string;
    // Borders
    border: string;
    borderMuted: string;
@@ -291,6 +293,7 @@ export const themes: Record<ThemeName, Theme> = {
       textSecondary: colors.textSecondary,
       textMuted: colors.textMuted,
       textDisabled: colors.textDisabled,
+      textInverse: colors.textInverse,
       // Borders
       border: colors.border,
       borderMuted: colors.borderMuted,
@@ -343,6 +346,7 @@ export const themes: Record<ThemeName, Theme> = {
       textSecondary: colors.textSecondary,
       textMuted: colors.textMuted,
       textDisabled: colors.textDisabled,
+      textInverse: colors.textInverse,
       border: colors.border,
       borderMuted: colors.borderMuted,
       shadow: colors.shadow,

@@ -184,6 +184,37 @@ export class GameService {
       }
    }
 
+   async addAnonymousPlayer(name: string, buyInAmount: string): Promise<void> {
+      try {
+         const response = await this.deps.fetchWithAuth(
+            `${BASE_URL}/api/games/${this.deps.gameId}/add-anonymous-player`,
+            {
+               method: 'POST',
+               headers: { 'Content-Type': 'application/json' },
+               body: JSON.stringify({
+                  name,
+                  buyInAmount,
+               }),
+            }
+         );
+
+         if (!response.ok) {
+            const errorData = await response.json();
+            throw new Error(
+               errorData.error || 'Failed to add anonymous player'
+            );
+         }
+      } catch (error) {
+         captureException(error as Error, {
+            function: 'addAnonymousPlayer',
+            screen: 'GameScreen',
+            gameId: this.deps.gameId,
+            name,
+         });
+         throw error;
+      }
+   }
+
    async removePlayer(player: GamePlayer): Promise<void> {
       try {
          const response = await this.deps.fetchWithAuth(
@@ -242,16 +273,18 @@ export class GameService {
       totalBuyOuts: string
    ): Promise<{ profit: string }> {
       try {
+         const requestBody = {
+            gamePlayerId: player.id,
+            totalBuyIns: totalBuyIns,
+            totalBuyOuts: totalBuyOuts,
+         };
+
          const response = await this.deps.fetchWithAuth(
             `${BASE_URL}/api/games/${this.deps.gameId}/edit-player`,
             {
                method: 'POST',
                headers: { 'Content-Type': 'application/json' },
-               body: JSON.stringify({
-                  gamePlayerId: player.id,
-                  totalBuyIns: totalBuyIns,
-                  totalBuyOuts: totalBuyOuts,
-               }),
+               body: JSON.stringify(requestBody),
             }
          );
 
@@ -267,7 +300,6 @@ export class GameService {
                   errorMessage = text || errorMessage;
                }
             } catch (parseError) {
-               console.error('Error parsing error response:', parseError);
                errorMessage = `Server error: ${response.status} ${response.statusText}`;
             }
             throw new Error(errorMessage);
@@ -281,7 +313,8 @@ export class GameService {
             );
          }
 
-         return await response.json();
+         const result = await response.json();
+         return result;
       } catch (error) {
          captureException(error as Error, {
             function: 'editPlayerAmounts',

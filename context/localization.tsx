@@ -201,6 +201,7 @@ export interface Translations {
    playerRemoved: string;
    endGame: string;
    cannotEndGame: string;
+   playersStillActive: string;
    confirmEndGame: string;
    endGameMessage: string;
    endGameConfirmationTitle: string;
@@ -502,6 +503,7 @@ const enTranslations: Translations = {
    playerRemoved: 'Player removed from the game',
    endGame: 'END GAME',
    cannotEndGame: 'Cannot end game with active players',
+   playersStillActive: 'Players still active',
    confirmEndGame: 'End Game',
    endGameMessage:
       'Are you sure you want to end this game? This action cannot be undone.',
@@ -810,6 +812,7 @@ const heTranslations: Translations = {
    playerRemoved: 'השחקן הוסר מהמשחק',
    endGame: 'סיים משחק',
    cannotEndGame: 'יש עדיין שחקנים פעילים',
+   playersStillActive: 'עדיין יש שחקנים פעילים',
    confirmEndGame: 'סיים משחק',
    endGameMessage:
       'האם אתה בטוח שברצונך לסיים את המשחק? פעולה זו לא ניתנת לביטול.',

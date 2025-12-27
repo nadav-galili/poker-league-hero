@@ -78,6 +78,11 @@ export const POST = withAuth(async (request: Request, user) => {
       const { id: actualGamePlayerId, userId: playerUserId } =
          gamePlayerResult[0];
 
+      // Calculate profit
+      const profit = buyOutAmount - buyInAmount;
+
+      // Execute database operations sequentially
+      // Note: neon-http driver doesn't support transactions, so operations are sequential
       // Delete existing cash-ins and cash-outs for this player
       await db
          .delete(cashIns)
@@ -110,9 +115,6 @@ export const POST = withAuth(async (request: Request, user) => {
          });
       }
 
-      // Calculate profit
-      const profit = buyOutAmount - buyInAmount;
-
       // Update player's final amount and profit
       await db
          .update(gamePlayers)
@@ -137,13 +139,14 @@ export const POST = withAuth(async (request: Request, user) => {
          }
       );
    } catch (error) {
-      console.error('Error editing player amounts:', error);
       const errorMessage =
          error instanceof Error
             ? error.message
             : 'Failed to edit player amounts';
       return Response.json(
-         { error: errorMessage },
+         {
+            error: errorMessage,
+         },
          {
             status: 500,
             headers: {

@@ -31,6 +31,7 @@ export type MixpanelEventName =
    | 'game_started'
    | 'game_ended'
    | 'game_player_added'
+   | 'game_anonymous_player_added'
    | 'game_player_removed'
    | 'game_buy_in'
    | 'game_cash_out'

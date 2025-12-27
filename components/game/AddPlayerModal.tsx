@@ -4,8 +4,9 @@ import { useLocalization } from '@/context/localization';
 import { LeagueMember } from '@/hooks/useGameData';
 import { Ionicons } from '@expo/vector-icons';
 import { Image } from 'expo-image';
-import React from 'react';
+import React, { useState } from 'react';
 import { FlatList, Modal, TouchableOpacity, View } from 'react-native';
+import { AnonymousPlayerModal } from '../modals/AnonymousPlayerModal';
 
 interface AddPlayerModalProps {
    visible: boolean;
@@ -13,6 +14,7 @@ interface AddPlayerModalProps {
    isProcessing: boolean;
    onClose: () => void;
    onAddPlayer: (member: LeagueMember) => void;
+   onAddAnonymousPlayer: (name: string) => void;
 }
 
 const AddPlayerModal: React.FC<AddPlayerModalProps> = ({
@@ -21,9 +23,11 @@ const AddPlayerModal: React.FC<AddPlayerModalProps> = ({
    isProcessing,
    onClose,
    onAddPlayer,
+   onAddAnonymousPlayer,
 }) => {
    const theme = getTheme('light');
    const { t, isRTL } = useLocalization();
+   const [showAnonymousModal, setShowAnonymousModal] = useState(false);
 
    const renderMemberItem = ({ item }: { item: LeagueMember }) => (
       <TouchableOpacity
@@ -97,6 +101,39 @@ const AddPlayerModal: React.FC<AddPlayerModalProps> = ({
                contentContainerStyle={{ padding: 16 }}
                showsVerticalScrollIndicator={false}
                ItemSeparatorComponent={() => <View className="h-2" />}
+               ListHeaderComponent={
+                  <TouchableOpacity
+                     className="flex-row items-center p-4 rounded-xl border-3 border-black shadow-sm elevation-4 mb-4"
+                     style={{ backgroundColor: colors.accent }}
+                     onPress={() => setShowAnonymousModal(true)}
+                     disabled={isProcessing}
+                  >
+                     <View
+                        className="w-12.5 h-12.5 rounded-lg border-2 border-black mr-3 items-center justify-center"
+                        style={{ backgroundColor: colors.surface }}
+                     >
+                        <Ionicons
+                           name="person-add"
+                           size={28}
+                           color={colors.primary}
+                        />
+                     </View>
+                     <View className="flex-1">
+                        <Text
+                           variant="h4"
+                           color={colors.textInverse}
+                           className="tracking-wide"
+                        >
+                           {t('addAnonymousPlayer')}
+                        </Text>
+                     </View>
+                     <Ionicons
+                        name={isRTL ? 'chevron-back' : 'chevron-forward'}
+                        size={24}
+                        color={colors.textInverse}
+                     />
+                  </TouchableOpacity>
+               }
                ListEmptyComponent={
                   <View className="items-center py-15 px-5">
                      <Text
@@ -117,6 +154,15 @@ const AddPlayerModal: React.FC<AddPlayerModalProps> = ({
                }
             />
          </View>
+
+         <AnonymousPlayerModal
+            visible={showAnonymousModal}
+            onClose={() => setShowAnonymousModal(false)}
+            onAdd={(name) => {
+               setShowAnonymousModal(false);
+               onAddAnonymousPlayer(name);
+            }}
+         />
       </Modal>
    );
 };

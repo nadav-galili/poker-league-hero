@@ -103,7 +103,6 @@ export default function GameScreen() {
       React.useState<GamePlayer | null>(null);
    const [selectedPlayer, setSelectedPlayer] =
       React.useState<GamePlayer | null>(null);
-   const [cashOutAmount, setCashOutAmount] = React.useState('');
    const [cashOutError, setCashOutError] = React.useState<string>('');
    const [editBuyInAmount, setEditBuyInAmount] = React.useState('');
    const [editCashOutAmount, setEditCashOutAmount] = React.useState('');
@@ -111,6 +110,10 @@ export default function GameScreen() {
    const [isProcessing, setIsProcessing] = React.useState(false);
    const [isAdmin, setIsAdmin] = React.useState(false);
    const [isGameManager, setIsGameManager] = React.useState(false);
+
+   // Use refs to ensure we always read the latest state values (avoid stale closure)
+   const editBuyInAmountRef = React.useRef('');
+   const editCashOutAmountRef = React.useRef('');
 
    const createAiSummaryMutation = useMutation<getSummaryListResponse, Error>({
       mutationFn: async () => {
@@ -173,29 +176,20 @@ export default function GameScreen() {
 
    const handleCashOut = (player: GamePlayer) => {
       setSelectedPlayer(player);
-      setCashOutAmount('');
       setCashOutError('');
       setShowCashOutModal(true);
    };
 
-   const handleCashOutAmountChange = (amount: string) => {
-      setCashOutAmount(amount);
-      // Clear error when user starts typing
-      if (cashOutError) {
-         setCashOutError('');
-      }
-   };
-
-   const processCashOut = async () => {
+   const processCashOut = async (amountStr: string) => {
       // Clear any previous error
       setCashOutError('');
 
-      if (!selectedPlayer || !cashOutAmount.trim() || !gameService) {
+      if (!selectedPlayer || !amountStr.trim() || !gameService) {
          setCashOutError(t('invalidAmount'));
          return;
       }
 
-      const amount = parseFloat(cashOutAmount);
+      const amount = parseFloat(amountStr);
       if (isNaN(amount) || amount < 0) {
          setCashOutError(t('invalidAmount'));
          return;
@@ -223,7 +217,6 @@ export default function GameScreen() {
 
          setShowCashOutModal(false);
          setSelectedPlayer(null);
-         setCashOutAmount('');
          loadGameData(true);
       } catch (error) {
          const errorMessage =
@@ -261,6 +254,46 @@ export default function GameScreen() {
          const errorMessage =
             error instanceof Error ? error.message : 'Failed to add player';
          trackError(error as Error, 'game_screen_add_player');
+         Toast.show({
+            type: 'error',
+            text1: t('error'),
+            text2: errorMessage,
+         });
+      } finally {
+         setIsProcessing(false);
+      }
+   };
+
+   const handleAddAnonymousPlayer = async (name: string) => {
+      if (!game || !gameService) return;
+
+      try {
+         setIsProcessing(true);
+         await gameService.addAnonymousPlayer(name, game.buyIn);
+
+         trackGameEvent(
+            'game_anonymous_player_added',
+            gameId || '',
+            game.leagueId,
+            {
+               player_name: name,
+               buy_in_amount: game.buyIn,
+            }
+         );
+
+         Toast.show({
+            type: 'success',
+            text1: t('success'),
+            text2: t('playerAdded'),
+         });
+         setShowAddPlayerModal(false);
+         loadGameData(true);
+      } catch (error) {
+         const errorMessage =
+            error instanceof Error
+               ? error.message
+               : 'Failed to add anonymous player';
+         trackError(error as Error, 'game_screen_add_anonymous_player');
          Toast.show({
             type: 'error',
             text1: t('error'),
@@ -349,14 +382,19 @@ export default function GameScreen() {
 
    const handleEditPlayer = (player: GamePlayer) => {
       setSelectedPlayer(player);
-      setEditBuyInAmount(player.totalBuyIns.toString());
-      setEditCashOutAmount(player.totalBuyOuts.toString());
+      const buyInStr = player.totalBuyIns.toString();
+      const cashOutStr = player.totalBuyOuts.toString();
+      setEditBuyInAmount(buyInStr);
+      setEditCashOutAmount(cashOutStr);
+      editBuyInAmountRef.current = buyInStr;
+      editCashOutAmountRef.current = cashOutStr;
       setEditPlayerError('');
       setShowEditPlayerModal(true);
    };
 
    const handleEditBuyInAmountChange = (amount: string) => {
       setEditBuyInAmount(amount);
+      editBuyInAmountRef.current = amount;
       if (editPlayerError) {
          setEditPlayerError('');
       }
@@ -364,6 +402,7 @@ export default function GameScreen() {
 
    const handleEditCashOutAmountChange = (amount: string) => {
       setEditCashOutAmount(amount);
+      editCashOutAmountRef.current = amount;
       if (editPlayerError) {
          setEditPlayerError('');
       }
@@ -372,18 +411,22 @@ export default function GameScreen() {
    const processEditPlayer = async () => {
       setEditPlayerError('');
 
+      // Read from refs to ensure we get the latest values (avoid stale closure)
+      const currentBuyInAmount = editBuyInAmountRef.current;
+      const currentCashOutAmount = editCashOutAmountRef.current;
+
       if (
          !selectedPlayer ||
-         !editBuyInAmount.trim() ||
-         !editCashOutAmount.trim() ||
+         !currentBuyInAmount.trim() ||
+         !currentCashOutAmount.trim() ||
          !gameService
       ) {
          setEditPlayerError(t('invalidAmount'));
          return;
       }
 
-      const buyIn = parseFloat(editBuyInAmount);
-      const cashOut = parseFloat(editCashOutAmount);
+      const buyIn = parseFloat(currentBuyInAmount);
+      const cashOut = parseFloat(currentCashOutAmount);
 
       if (isNaN(buyIn) || buyIn < 0 || isNaN(cashOut) || cashOut < 0) {
          setEditPlayerError(t('invalidAmount'));
@@ -392,6 +435,7 @@ export default function GameScreen() {
 
       try {
          setIsProcessing(true);
+
          const result = await gameService.editPlayerAmounts(
             selectedPlayer,
             buyIn.toString(),
@@ -421,7 +465,9 @@ export default function GameScreen() {
          setSelectedPlayer(null);
          setEditBuyInAmount('');
          setEditCashOutAmount('');
-         loadGameData(true);
+
+         // Await data refresh to ensure UI updates with latest data
+         await loadGameData(true);
       } catch (error) {
          const errorMessage =
             error instanceof Error
@@ -510,19 +556,21 @@ export default function GameScreen() {
          ? game.players.every((player) => !player.isActive)
          : false;
 
-   const renderPlayerCard = ({ item }: { item: GamePlayer }) => (
-      <PlayerCard
-         player={item}
-         gameBaseAmount={game?.buyIn || '0'}
-         isProcessing={isProcessing}
-         isAdmin={isAdmin || isGameManager}
-         onBuyIn={handleBuyIn}
-         onCashOut={handleCashOut}
-         onRemovePlayer={handleRemovePlayer}
-         onUndoBuyIn={handleUndoBuyIn}
-         onEditPlayer={handleEditPlayer}
-      />
-   );
+   const renderPlayerCard = ({ item }: { item: GamePlayer }) => {
+      return (
+         <PlayerCard
+            player={item}
+            gameBaseAmount={game?.buyIn || '0'}
+            isProcessing={isProcessing}
+            isAdmin={isAdmin || isGameManager}
+            onBuyIn={handleBuyIn}
+            onCashOut={handleCashOut}
+            onRemovePlayer={handleRemovePlayer}
+            onUndoBuyIn={handleUndoBuyIn}
+            onEditPlayer={handleEditPlayer}
+         />
+      );
+   };
 
    if (isLoading) {
       return <LoadingState />;
@@ -866,6 +914,7 @@ export default function GameScreen() {
             isProcessing={isProcessing}
             onClose={() => setShowAddPlayerModal(false)}
             onAddPlayer={handleAddPlayer}
+            onAddAnonymousPlayer={handleAddAnonymousPlayer}
          />
          {/* Cyberpunk Players List */}
          <View style={styles.playersContainer}>
@@ -888,23 +937,27 @@ export default function GameScreen() {
             <FlatList
                data={game.players}
                renderItem={renderPlayerCard}
-               keyExtractor={(item) => item.id}
+               keyExtractor={(item) =>
+                  `${item.id}-${item.totalBuyIns}-${item.totalBuyOuts}`
+               }
                contentContainerStyle={{ padding: 16, paddingTop: 8 }}
                showsVerticalScrollIndicator={false}
                refreshing={refreshing}
                onRefresh={handleRefresh}
                ItemSeparatorComponent={() => <View className="h-3" />}
+               extraData={game.players
+                  .map((p) => `${p.id}-${p.totalBuyIns}-${p.totalBuyOuts}`)
+                  .join(',')}
             />
          </View>
          {/* Cash Out Modal */}
          <CashOutModal
             visible={showCashOutModal}
             selectedPlayer={selectedPlayer}
-            cashOutAmount={cashOutAmount}
+            cashOutAmount=""
             isProcessing={isProcessing}
             errorMessage={cashOutError}
             onClose={() => setShowCashOutModal(false)}
-            onCashOutAmountChange={handleCashOutAmountChange}
             onConfirm={processCashOut}
          />
          {/* End Game Confirmation Modal */}
