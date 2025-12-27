@@ -1,5 +1,6 @@
 import RecentGameResults from '@/components/game/RecentGameResults';
 import {
+   MonthlyProfitLeaderCard,
    PlayerStatCard,
    StatCard,
    TopProfitPlayerCard,
@@ -703,6 +704,25 @@ export default function LeagueStatsScreen() {
                            statType="best-winning-streak"
                            t={t}
                         />
+                     </PressableStatCard>
+                  </View>
+
+                  <View
+                     className="relative"
+                     style={{
+                        shadowColor: '#FF1493',
+                        shadowOffset: { width: 0, height: 0 },
+                        shadowOpacity: 0.2,
+                        shadowRadius: 4,
+                        elevation: 4,
+                     }}
+                  >
+                     <PressableStatCard
+                        onPress={() =>
+                           handleStatPress('monthly-profit-leader')
+                        }
+                     >
+                        <MonthlyProfitLeaderCard leagueId={leagueId!} t={t} />
                      </PressableStatCard>
                   </View>
                </View>

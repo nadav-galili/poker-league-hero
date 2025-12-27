@@ -69,6 +69,7 @@ export default function StatsLeaderboardScreen() {
          'most-active-player': 'mostActivePlayer',
          'highest-single-game-profit': 'highestSingleGameProfit',
          'best-winning-streak': 'bestWinningStreak',
+         'monthly-profit-leader': 'monthlyProfitLeader',
       };
       return t(titles[statType] || 'leaderboard');
    }, [statType, t]);
