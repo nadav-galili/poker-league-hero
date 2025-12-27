@@ -8,6 +8,9 @@ import { LinearGradient } from 'expo-linear-gradient';
 import React, { useEffect, useState } from 'react';
 import { Animated, Dimensions, StyleSheet, Text, View } from 'react-native';
 
+// @ts-ignore - local image import
+import anonymousImage from '@/assets/images/anonymous.webp';
+
 const { width: screenWidth } = Dimensions.get('window');
 
 interface MonthlyProfitLeaderCardProps {
@@ -313,10 +316,14 @@ export default function MonthlyProfitLeaderCard({
 
          {/* Player Avatar */}
          <View className="items-center mb-3">
-            {data.profileImageUrl ? (
+            {data.profileImageUrl || data.additionalData?.isAnonymous ? (
                <View style={styles.avatarContainer}>
                   <Image
-                     source={{ uri: data.profileImageUrl }}
+                     source={
+                        data.profileImageUrl
+                           ? { uri: data.profileImageUrl }
+                           : anonymousImage
+                     }
                      style={styles.avatar}
                      contentFit="cover"
                      cachePolicy="memory-disk"
