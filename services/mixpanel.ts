@@ -38,6 +38,7 @@ export type MixpanelEventName =
    | 'game_buy_in_undone'
    | 'game_history_expanded'
    | 'game_history_collapsed'
+   | 'game_player_amounts_edited'
 
    // Player Selection Events
    | 'players_selected'

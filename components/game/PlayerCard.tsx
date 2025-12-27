@@ -11,20 +11,24 @@ interface PlayerCardProps {
    player: GamePlayer;
    gameBaseAmount: string;
    isProcessing: boolean;
+   isAdmin?: boolean;
    onBuyIn: (player: GamePlayer) => void;
    onCashOut: (player: GamePlayer) => void;
    onRemovePlayer: (player: GamePlayer) => void;
    onUndoBuyIn: (player: GamePlayer) => void;
+   onEditPlayer?: (player: GamePlayer) => void;
 }
 
 const PlayerCard: React.FC<PlayerCardProps> = ({
    player,
    gameBaseAmount,
    isProcessing,
+   isAdmin = false,
    onBuyIn,
    onCashOut,
    onRemovePlayer,
    onUndoBuyIn,
+   onEditPlayer,
 }) => {
    const { t } = useLocalization();
    const theme = getTheme();
@@ -198,6 +202,22 @@ const PlayerCard: React.FC<PlayerCardProps> = ({
                      size="small"
                   />
                </View>
+            </View>
+         )}
+
+         {/* Edit Button for Cashed Out Players (Admin Only) */}
+         {!player.isActive && isAdmin && onEditPlayer && (
+            <View className="mt-2">
+               <AppButton
+                  title={t('edit')}
+                  onPress={() => onEditPlayer(player)}
+                  variant="solid"
+                  color="primary"
+                  disabled={isProcessing}
+                  width="100%"
+                  icon="pencil"
+                  size="small"
+               />
             </View>
          )}
       </View>

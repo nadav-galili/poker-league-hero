@@ -61,7 +61,7 @@
          {
             "origin": "https://poker-ai-homestack.expo.app",
             "asyncRoutes": {
-               "web": true,
+               "web": false,
                "default": false
             }
          }
@@ -104,7 +104,7 @@
       "router": {
          "origin": "https://poker-ai-homestack.expo.app",
          "asyncRoutes": {
-            "web": true,
+            "web": false,
             "default": false
          }
       },

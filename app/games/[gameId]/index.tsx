@@ -13,6 +13,7 @@ import Toast from 'react-native-toast-message';
 
 import AddPlayerModal from '@/components/game/AddPlayerModal';
 import CashOutModal from '@/components/game/CashOutModal';
+import EditPlayerModal from '@/components/game/EditPlayerModal';
 import GameEventsList from '@/components/game/GameEventsList';
 import GameSummary from '@/components/game/GameSummary';
 import PlayerCard from '@/components/game/PlayerCard';
@@ -29,7 +30,7 @@ type getSummaryListResponse = {
 
 export default function GameScreen() {
    const { t, isRTL } = useLocalization();
-   const { fetchWithAuth } = useAuth();
+   const { fetchWithAuth, user } = useAuth();
    const { gameId } = useLocalSearchParams<{ gameId: string }>();
    const { trackScreenView, trackGameEvent, trackError } = useMixpanel();
 
@@ -50,9 +51,49 @@ export default function GameScreen() {
       }
    }, [gameId, trackScreenView]);
 
+   // Check if user is admin of the league or game manager
+   React.useEffect(() => {
+      const checkPermissions = async () => {
+         if (!game || !user?.userId) {
+            setIsAdmin(false);
+            setIsGameManager(false);
+            return;
+         }
+
+         // Check if user is the game creator
+         const gameCreatorId =
+            typeof game.createdBy === 'string'
+               ? parseInt(game.createdBy)
+               : game.createdBy;
+         setIsGameManager(gameCreatorId === user.userId);
+
+         // Check if user is league admin
+         try {
+            const response = await fetchWithAuth(
+               `${BASE_URL}/api/leagues/${game.leagueId}`,
+               {}
+            );
+
+            if (response.ok) {
+               const data = await response.json();
+               const currentUserMember = data.league?.members?.find(
+                  (member: LeagueMember) => parseInt(member.id) === user.userId
+               );
+               setIsAdmin(currentUserMember?.role === 'admin');
+            }
+         } catch (error) {
+            console.error('Error checking admin status:', error);
+            setIsAdmin(false);
+         }
+      };
+
+      checkPermissions();
+   }, [game, user?.userId, fetchWithAuth]);
+
    // Modal states
    const [showCashOutModal, setShowCashOutModal] = React.useState(false);
    const [showAddPlayerModal, setShowAddPlayerModal] = React.useState(false);
+   const [showEditPlayerModal, setShowEditPlayerModal] = React.useState(false);
    const [showHistory, setShowHistory] = React.useState(false);
    const [showEndGameConfirmation, setShowEndGameConfirmation] =
       React.useState(false);
@@ -64,7 +105,12 @@ export default function GameScreen() {
       React.useState<GamePlayer | null>(null);
    const [cashOutAmount, setCashOutAmount] = React.useState('');
    const [cashOutError, setCashOutError] = React.useState<string>('');
+   const [editBuyInAmount, setEditBuyInAmount] = React.useState('');
+   const [editCashOutAmount, setEditCashOutAmount] = React.useState('');
+   const [editPlayerError, setEditPlayerError] = React.useState<string>('');
    const [isProcessing, setIsProcessing] = React.useState(false);
+   const [isAdmin, setIsAdmin] = React.useState(false);
+   const [isGameManager, setIsGameManager] = React.useState(false);
 
    const createAiSummaryMutation = useMutation<getSummaryListResponse, Error>({
       mutationFn: async () => {
@@ -301,6 +347,93 @@ export default function GameScreen() {
       setShowAddPlayerModal(true);
    };
 
+   const handleEditPlayer = (player: GamePlayer) => {
+      setSelectedPlayer(player);
+      setEditBuyInAmount(player.totalBuyIns.toString());
+      setEditCashOutAmount(player.totalBuyOuts.toString());
+      setEditPlayerError('');
+      setShowEditPlayerModal(true);
+   };
+
+   const handleEditBuyInAmountChange = (amount: string) => {
+      setEditBuyInAmount(amount);
+      if (editPlayerError) {
+         setEditPlayerError('');
+      }
+   };
+
+   const handleEditCashOutAmountChange = (amount: string) => {
+      setEditCashOutAmount(amount);
+      if (editPlayerError) {
+         setEditPlayerError('');
+      }
+   };
+
+   const processEditPlayer = async () => {
+      setEditPlayerError('');
+
+      if (
+         !selectedPlayer ||
+         !editBuyInAmount.trim() ||
+         !editCashOutAmount.trim() ||
+         !gameService
+      ) {
+         setEditPlayerError(t('invalidAmount'));
+         return;
+      }
+
+      const buyIn = parseFloat(editBuyInAmount);
+      const cashOut = parseFloat(editCashOutAmount);
+
+      if (isNaN(buyIn) || buyIn < 0 || isNaN(cashOut) || cashOut < 0) {
+         setEditPlayerError(t('invalidAmount'));
+         return;
+      }
+
+      try {
+         setIsProcessing(true);
+         const result = await gameService.editPlayerAmounts(
+            selectedPlayer,
+            buyIn.toString(),
+            cashOut.toString()
+         );
+
+         trackGameEvent(
+            'game_player_amounts_edited',
+            gameId || '',
+            game?.leagueId || '',
+            {
+               player_id: selectedPlayer.id,
+               player_name: selectedPlayer.fullName,
+               new_buy_in: buyIn,
+               new_cash_out: cashOut,
+               new_profit: result.profit,
+            }
+         );
+
+         Toast.show({
+            type: 'success',
+            text1: t('success'),
+            text2: t('playerAmountsUpdated'),
+         });
+
+         setShowEditPlayerModal(false);
+         setSelectedPlayer(null);
+         setEditBuyInAmount('');
+         setEditCashOutAmount('');
+         loadGameData(true);
+      } catch (error) {
+         const errorMessage =
+            error instanceof Error
+               ? error.message
+               : t('failedToUpdatePlayerAmounts');
+         trackError(error as Error, 'game_screen_edit_player');
+         setEditPlayerError(errorMessage);
+      } finally {
+         setIsProcessing(false);
+      }
+   };
+
    const handleEndGame = () => {
       const activePlayers = game?.players.filter((player) => player.isActive);
 
@@ -382,10 +515,12 @@ export default function GameScreen() {
          player={item}
          gameBaseAmount={game?.buyIn || '0'}
          isProcessing={isProcessing}
+         isAdmin={isAdmin || isGameManager}
          onBuyIn={handleBuyIn}
          onCashOut={handleCashOut}
          onRemovePlayer={handleRemovePlayer}
          onUndoBuyIn={handleUndoBuyIn}
+         onEditPlayer={handleEditPlayer}
       />
    );
 
@@ -625,6 +760,7 @@ export default function GameScreen() {
                               size={20}
                               color={colors.neonCyan}
                            />
+
                            {allPlayersCashedOut && (
                               <Text
                                  className="text-xs font-mono font-bold uppercase tracking-wide"
@@ -648,7 +784,6 @@ export default function GameScreen() {
             {/* Bottom border with cyber effect */}
             <View style={styles.headerBorder} />
          </LinearGradient>
-
          {/* Game Summary */}
          <GameSummary game={game} />
          <View className="px-4 pb-2 items-center my-4">
@@ -662,7 +797,6 @@ export default function GameScreen() {
                icon="person-add"
             />
          </View>
-
          {/* Cyberpunk Game Events History */}
          <View className="px-4 mb-2">
             <TouchableOpacity
@@ -725,7 +859,6 @@ export default function GameScreen() {
                </View>
             )}
          </View>
-
          {/* Add Player Modal */}
          <AddPlayerModal
             visible={showAddPlayerModal}
@@ -734,7 +867,6 @@ export default function GameScreen() {
             onClose={() => setShowAddPlayerModal(false)}
             onAddPlayer={handleAddPlayer}
          />
-
          {/* Cyberpunk Players List */}
          <View style={styles.playersContainer}>
             {/* Players list header */}
@@ -764,7 +896,6 @@ export default function GameScreen() {
                ItemSeparatorComponent={() => <View className="h-3" />}
             />
          </View>
-
          {/* Cash Out Modal */}
          <CashOutModal
             visible={showCashOutModal}
@@ -776,7 +907,6 @@ export default function GameScreen() {
             onCashOutAmountChange={handleCashOutAmountChange}
             onConfirm={processCashOut}
          />
-
          {/* End Game Confirmation Modal */}
          <ConfirmationModal
             visible={showEndGameConfirmation}
@@ -786,7 +916,6 @@ export default function GameScreen() {
             onCancel={() => setShowEndGameConfirmation(false)}
             isProcessing={isProcessing}
          />
-
          {/* Remove Player Confirmation Modal */}
          <ConfirmationModal
             visible={showRemovePlayerConfirmation}
@@ -798,6 +927,25 @@ export default function GameScreen() {
                setPlayerToRemove(null);
             }}
             isProcessing={isProcessing}
+         />
+         {/* Edit Player Modal */}
+         <EditPlayerModal
+            visible={showEditPlayerModal}
+            selectedPlayer={selectedPlayer}
+            buyInAmount={editBuyInAmount}
+            cashOutAmount={editCashOutAmount}
+            isProcessing={isProcessing}
+            errorMessage={editPlayerError}
+            onClose={() => {
+               setShowEditPlayerModal(false);
+               setSelectedPlayer(null);
+               setEditBuyInAmount('');
+               setEditCashOutAmount('');
+               setEditPlayerError('');
+            }}
+            onBuyInAmountChange={handleEditBuyInAmountChange}
+            onCashOutAmountChange={handleEditCashOutAmountChange}
+            onConfirm={processEditPlayer}
          />
       </View>
    );

@@ -211,8 +211,28 @@ export async function fetchUserLeagues(
       );
 
       if (!response.ok) {
-         const errorData = await response.json();
-         throw new Error(errorData.error || 'Failed to fetch leagues');
+         let errorMessage = 'Failed to fetch leagues';
+         try {
+            const contentType = response.headers.get('content-type');
+            if (contentType && contentType.includes('application/json')) {
+               const errorData = await response.json();
+               errorMessage = errorData.error || errorMessage;
+            } else {
+               const text = await response.text();
+               errorMessage =
+                  text || `${response.status} ${response.statusText}`;
+            }
+         } catch (parseError) {
+            console.error('Error parsing error response:', parseError);
+            errorMessage = `Server error: ${response.status} ${response.statusText}`;
+         }
+         throw new Error(errorMessage);
+      }
+
+      const contentType = response.headers.get('content-type');
+      if (!contentType || !contentType.includes('application/json')) {
+         const text = await response.text();
+         throw new Error(`Invalid response format: ${text.substring(0, 100)}`);
       }
 
       const data = await response.json();

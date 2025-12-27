@@ -235,6 +235,63 @@ export class GameService {
          throw error;
       }
    }
+
+   async editPlayerAmounts(
+      player: GamePlayer,
+      totalBuyIns: string,
+      totalBuyOuts: string
+   ): Promise<{ profit: string }> {
+      try {
+         const response = await this.deps.fetchWithAuth(
+            `${BASE_URL}/api/games/${this.deps.gameId}/edit-player`,
+            {
+               method: 'POST',
+               headers: { 'Content-Type': 'application/json' },
+               body: JSON.stringify({
+                  gamePlayerId: player.id,
+                  totalBuyIns: totalBuyIns,
+                  totalBuyOuts: totalBuyOuts,
+               }),
+            }
+         );
+
+         if (!response.ok) {
+            let errorMessage = 'Failed to edit player amounts';
+            try {
+               const contentType = response.headers.get('content-type');
+               if (contentType && contentType.includes('application/json')) {
+                  const errorData = await response.json();
+                  errorMessage = errorData.error || errorMessage;
+               } else {
+                  const text = await response.text();
+                  errorMessage = text || errorMessage;
+               }
+            } catch (parseError) {
+               console.error('Error parsing error response:', parseError);
+               errorMessage = `Server error: ${response.status} ${response.statusText}`;
+            }
+            throw new Error(errorMessage);
+         }
+
+         const contentType = response.headers.get('content-type');
+         if (!contentType || !contentType.includes('application/json')) {
+            const text = await response.text();
+            throw new Error(
+               `Invalid response format: ${text.substring(0, 100)}`
+            );
+         }
+
+         return await response.json();
+      } catch (error) {
+         captureException(error as Error, {
+            function: 'editPlayerAmounts',
+            screen: 'GameScreen',
+            gameId: this.deps.gameId,
+            playerId: player.userId,
+         });
+         throw error;
+      }
+   }
 }
 
 // Factory function to create GameService instance

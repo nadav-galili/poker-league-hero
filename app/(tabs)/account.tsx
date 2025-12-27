@@ -318,7 +318,7 @@ export default function Account() {
          track('user_profile_updated', { action: 'update_profile_start' });
 
          // 1. Upload image if changed
-         let uploadedImageUrl = imageUri;
+         let uploadedImageUrl: string | null = imageUri;
          if (
             imageUri &&
             imageUri !== user?.picture &&
@@ -345,19 +345,55 @@ export default function Account() {
             }
          }
 
+         // Normalize empty strings to null
+         if (uploadedImageUrl === '') {
+            uploadedImageUrl = null;
+         }
+
+         // 2. Prepare request body - only include fields that changed
+         const requestBody: {
+            fullName?: string;
+            profileImageUrl?: string | null;
+         } = {};
+
+         // Only include fullName if it's different from current
+         const trimmedName = name.trim();
+         if (trimmedName && trimmedName !== user?.name) {
+            requestBody.fullName = trimmedName;
+         }
+
+         // Only include profileImageUrl if it's different from current
+         if (uploadedImageUrl !== user?.picture) {
+            requestBody.profileImageUrl = uploadedImageUrl;
+         }
+
+         // Validate that at least one field is being updated
+         if (!requestBody.fullName && requestBody.profileImageUrl === undefined) {
+            Toast.show({
+               type: 'error',
+               text1: t('error'),
+               text2: 'No changes to save',
+            });
+            setIsUpdatingProfile(false);
+            return;
+         }
+
+         console.log('📤 Sending update request:', JSON.stringify(requestBody, null, 2));
+
          // 2. Call update API
          const response = await fetchWithAuth('/api/user/update', {
             method: 'PUT',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({
-               fullName: name,
-               profileImageUrl: uploadedImageUrl,
-            }),
+            body: JSON.stringify(requestBody),
          });
 
          if (!response.ok) {
             const errorData = await response.json();
-            throw new Error(errorData.error || 'Failed to update profile');
+            console.error('❌ Profile update error:', errorData);
+            const errorMessage = errorData.details
+               ? `${errorData.error}: ${JSON.stringify(errorData.details)}`
+               : errorData.error || 'Failed to update profile';
+            throw new Error(errorMessage);
          }
 
          track('user_profile_updated', { action: 'update_profile_success' });

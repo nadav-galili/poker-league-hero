@@ -307,6 +307,17 @@ export interface Translations {
    leagueUpdatedSuccess: string;
    failedToUpdateLeague: string;
    failedToUploadImage: string;
+
+   // Edit Player
+   edit: string;
+   editPlayerAmounts: string;
+   editPlayerAmountsDescription: string;
+   updatePlayerAmounts: string;
+   currentAmount: string;
+   playerAmountsUpdated: string;
+   failedToUpdatePlayerAmounts: string;
+   buyout: string;
+   buyoutDescription: string;
 }
 
 // English translations
@@ -605,6 +616,18 @@ const enTranslations: Translations = {
    leagueUpdatedSuccess: 'League updated successfully',
    failedToUpdateLeague: 'Failed to update league',
    failedToUploadImage: 'Failed to upload image',
+
+   // Edit Player
+   edit: 'Edit',
+   editPlayerAmounts: 'Edit Player Amounts',
+   editPlayerAmountsDescription:
+      'Update the buy-in and buyout amounts for this player',
+   updatePlayerAmounts: 'Update Amounts',
+   currentAmount: 'Current',
+   playerAmountsUpdated: 'Player amounts updated successfully',
+   failedToUpdatePlayerAmounts: 'Failed to update player amounts',
+   buyout: 'Buyout',
+   buyoutDescription: 'Current cash amount the player has left (≥ 0)',
 };
 
 // Hebrew translations
@@ -901,6 +924,17 @@ const heTranslations: Translations = {
    leagueUpdatedSuccess: 'הליגה עודכנה בהצלחה',
    failedToUpdateLeague: 'נכשל בעדכון הליגה',
    failedToUploadImage: 'נכשל בהעלאת התמונה',
+
+   // Edit Player
+   edit: 'ערוך',
+   editPlayerAmounts: 'ערוך סכומי שחקן',
+   editPlayerAmountsDescription: 'עדכן את סכומי הכניסה והמשיכה של השחקן הזה',
+   updatePlayerAmounts: 'עדכן סכומים',
+   currentAmount: 'נוכחי',
+   playerAmountsUpdated: 'סכומי השחקן עודכנו בהצלחה',
+   failedToUpdatePlayerAmounts: 'נכשל בעדכון סכומי השחקן',
+   buyout: 'משיכה',
+   buyoutDescription: 'סכום הכסף הנוכחי שנשאר לשחקן (≥ 0)',
 };
 
 const translations = {

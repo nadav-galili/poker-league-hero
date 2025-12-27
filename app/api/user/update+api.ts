@@ -14,11 +14,13 @@ import { z } from 'zod';
 const updateProfileSchema = z.object({
    fullName: z
       .string()
-      .min(3, 'Name must be at least 3 characters')
-      .max(50, 'Name must be less than 50 characters')
-      .regex(/^[a-zA-Z0-9 \-_.,'&()]+$/, 'Name contains invalid characters')
+      .min(1, 'Name must be at least 1 character')
+      .max(100, 'Name must be less than 100 characters')
+      .trim()
       .optional(),
-   profileImageUrl: z.string().url('Invalid image URL').nullable().optional(),
+   profileImageUrl: z
+      .union([z.string().url('Invalid image URL'), z.null()])
+      .optional(),
 });
 
 export const PUT = withAuth(
@@ -49,9 +51,17 @@ export const PUT = withAuth(
 
          // Parse and validate request body
          const body = await request.json();
+         console.log(
+            '📝 Update profile request body:',
+            JSON.stringify(body, null, 2)
+         );
          const validationResult = updateProfileSchema.safeParse(body);
 
          if (!validationResult.success) {
+            console.error(
+               '❌ Validation errors:',
+               validationResult.error.errors
+            );
             return secureResponse(
                {
                   error: 'Validation failed',
@@ -63,9 +73,27 @@ export const PUT = withAuth(
 
          const { fullName, profileImageUrl } = validationResult.data;
 
-         if (!fullName && profileImageUrl === undefined) {
+         // Normalize fullName - trim and check if it's actually provided
+         const normalizedFullName = fullName?.trim() || undefined;
+
+         if (!normalizedFullName && profileImageUrl === undefined) {
             return secureResponse(
                { error: 'No fields to update provided' },
+               { status: 400 }
+            );
+         }
+
+         // Validate fullName length if provided
+         if (normalizedFullName && normalizedFullName.length < 1) {
+            return secureResponse(
+               { error: 'Name must be at least 1 character' },
+               { status: 400 }
+            );
+         }
+
+         if (normalizedFullName && normalizedFullName.length > 100) {
+            return secureResponse(
+               { error: 'Name must be less than 100 characters' },
                { status: 400 }
             );
          }
@@ -88,8 +116,8 @@ export const PUT = withAuth(
             updatedAt: new Date(),
          };
 
-         if (fullName) {
-            updateData.fullName = fullName;
+         if (normalizedFullName) {
+            updateData.fullName = normalizedFullName;
          }
 
          if (profileImageUrl !== undefined) {
