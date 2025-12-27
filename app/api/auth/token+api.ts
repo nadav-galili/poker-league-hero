@@ -53,6 +53,13 @@ export async function POST(request: Request) {
 
       // Insert/update user in database
       let dbUserId: number | null = null;
+      let dbUserData: {
+         id: number;
+         fullName: string | null;
+         profileImageUrl: string | null;
+         email: string;
+      } | null = null;
+
       try {
          const db = getDb();
 
@@ -65,18 +72,39 @@ export async function POST(request: Request) {
 
          let result;
          if (existingUser.length > 0) {
-            // Update existing user
+            // Update existing user - preserve custom profile data
+            const existing = existingUser[0];
+            const updateData: any = {
+               updatedAt: new Date(),
+               lastLoginAt: new Date(),
+            };
+
+            // Only update fullName if it's null/empty (preserve user customizations)
+            if (!existing.fullName || existing.fullName.trim() === '') {
+               updateData.fullName = userInfo.name;
+            }
+
+            // Only update profileImageUrl if it's null/empty or still using default Google image (preserve user customizations)
+            if (
+               !existing.profileImageUrl ||
+               existing.profileImageUrl === userInfo.picture ||
+               existing.profileImageUrl.includes('googleusercontent.com')
+            ) {
+               updateData.profileImageUrl = userInfo.picture;
+            }
+
             result = await db
                .update(users)
-               .set({
-                  fullName: userInfo.name,
-                  profileImageUrl: userInfo.picture,
-                  updatedAt: new Date(),
-                  lastLoginAt: new Date(),
-               })
+               .set(updateData)
                .where(eq(users.googleId, userInfo.sub))
-               .returning();
+               .returning({
+                  id: users.id,
+                  fullName: users.fullName,
+                  profileImageUrl: users.profileImageUrl,
+                  email: users.email,
+               });
             dbUserId = result[0]?.id || existingUser[0].id;
+            dbUserData = result[0] || null;
          } else {
             // Insert new user
             const newUserResult = await db
@@ -89,11 +117,18 @@ export async function POST(request: Request) {
                   provider: 'google',
                   lastLoginAt: new Date(),
                })
-               .returning();
+               .returning({
+                  id: users.id,
+                  fullName: users.fullName,
+                  profileImageUrl: users.profileImageUrl,
+                  email: users.email,
+               });
             dbUserId = newUserResult[0]?.id;
+            dbUserData = newUserResult[0] || null;
          }
       } catch (error) {
          console.error('Error saving user to database:', error);
+         // dbUserData remains null if DB operation failed
       }
 
       const { exp, ...userInfoWithoutExp } = userInfo as any;
@@ -101,10 +136,14 @@ export async function POST(request: Request) {
       const sub = (userInfo as { sub: string }).sub;
       const issuedAt = Math.floor(Date.now() / 1000);
 
-      // Enhanced user info with database ID
+      // Enhanced user info with database values (preserves custom profile data)
+      // Use data from RETURNING clause if available, otherwise fall back to OAuth data
       const enhancedUserInfo = {
          ...userInfoWithoutExp,
          userId: dbUserId, // Add the database user ID
+         name: dbUserData?.fullName || userInfo.name, // Use database name if available
+         picture: dbUserData?.profileImageUrl || userInfo.picture, // Use database image if available
+         email: dbUserData?.email || userInfo.email, // Use database email if available
       };
 
       ///create access token short lived

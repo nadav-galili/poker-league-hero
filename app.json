@@ -1,7 +1,7 @@
 {
    "name": "Poker AI",
    "slug": "poker-ai-homestack",
-   "version": "1.4.91",
+   "version": "1.4.92",
    "orientation": "portrait",
    "icon": "./assets/images/icon.png",
    "scheme": "pokeraihomestack",

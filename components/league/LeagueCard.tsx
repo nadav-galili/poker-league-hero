@@ -32,20 +32,6 @@ const LeagueCardComponent = ({ league, onPress, onShare }: LeagueCardProps) => {
       }
    };
 
-   // const handleShare = () => {
-   //    try {
-   //       onShare(league);
-   //    } catch (error) {
-   //       captureException(error as Error, {
-   //          function: 'LeagueCard.onShare',
-   //          screen: 'MyLeagues',
-   //          leagueId: league.id,
-   //       });
-   //       Alert.alert(t('error'), 'Failed to initiate share');
-   //    }
-   // };
-
-   // Mock data for statistics - you can replace with actual data from league object
    const stats = {
       members: league.memberCount || 0,
    };
@@ -106,7 +92,9 @@ const LeagueCardComponent = ({ league, onPress, onShare }: LeagueCardProps) => {
                      <View
                         className="px-3 py-1 rounded-lg border border-neonPink/50"
                         style={{
-                           backgroundColor: league.themeColor ? `${league.themeColor}20` : '#6366F120',
+                           backgroundColor: league.themeColor
+                              ? `${league.themeColor}20`
+                              : '#6366F120',
                         }}
                      >
                         <Text className="text-white text-sm font-bold font-mono tracking-widest">
@@ -143,7 +131,9 @@ const LeagueCardComponent = ({ league, onPress, onShare }: LeagueCardProps) => {
                   {/* Status indicator */}
                   <View className="flex-row items-center gap-1">
                      <View className="w-2 h-2 rounded-full bg-neonGreen animate-pulse" />
-                     <Text className="text-neonGreen text-xs font-mono">ONLINE</Text>
+                     <Text className="text-neonGreen text-xs font-mono">
+                        ONLINE
+                     </Text>
                   </View>
                </View>
             </View>

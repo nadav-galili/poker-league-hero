@@ -151,8 +151,8 @@ export default function CreateLeague() {
       if (trimmedName.length > 50) {
          return 'League name must be less than 50 characters';
       }
-      // Allow letters, numbers, spaces, hyphens, underscores, periods, commas, apostrophes, ampersands, and parentheses
-      if (!/^[a-zA-Z0-9 \-_.,'&()]+$/.test(trimmedName)) {
+      // Allow Unicode letters (including Hebrew), numbers, spaces, hyphens, underscores, periods, commas, apostrophes, ampersands, and parentheses
+      if (!/^[\p{L}\p{N}\s\-_.,'&()]+$/u.test(trimmedName)) {
          return 'League name contains invalid characters';
       }
       return null;

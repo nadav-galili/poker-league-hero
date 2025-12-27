@@ -33,6 +33,13 @@ export async function POST(req: Request) {
 
       // Save/update user in database
       let dbUserId: number | null = null;
+      let dbUserData: {
+         id: number;
+         fullName: string | null;
+         profileImageUrl: string | null;
+         email: string;
+      } | null = null;
+
       try {
          const db = getDb();
 
@@ -45,21 +52,42 @@ export async function POST(req: Request) {
 
          let result;
          if (existingUser.length > 0) {
-            // Update existing user
+            // Update existing user - preserve custom profile data
+            const existing = existingUser[0];
+            const updateData: any = {
+               email: email || existing.email,
+               updatedAt: new Date(),
+               lastLoginAt: new Date(),
+            };
+
+            // Only update fullName if:
+            // 1. User hasn't customized it (null/empty), OR
+            // 2. This is first sign-in (givenName/familyName provided) and name is still default
+            if (givenName && familyName) {
+               // First sign-in - only update if name is null/empty or still default
+               const defaultName = `${givenName} ${familyName}`;
+               if (
+                  !existing.fullName ||
+                  existing.fullName.trim() === '' ||
+                  existing.fullName === 'Apple User'
+               ) {
+                  updateData.fullName = defaultName;
+               }
+            }
+            // On subsequent sign-ins (no givenName/familyName), preserve existing name
+
             result = await db
                .update(users)
-               .set({
-                  fullName:
-                     givenName && familyName
-                        ? `${givenName} ${familyName}`
-                        : existingUser[0].fullName,
-                  email: email || existingUser[0].email,
-                  updatedAt: new Date(),
-                  lastLoginAt: new Date(),
-               })
+               .set(updateData)
                .where(eq(users.appleId, appleUserId))
-               .returning();
+               .returning({
+                  id: users.id,
+                  fullName: users.fullName,
+                  profileImageUrl: users.profileImageUrl,
+                  email: users.email,
+               });
             dbUserId = result[0]?.id || existingUser[0].id;
+            dbUserData = result[0] || null;
          } else {
             // Insert new user
             const newUserResult = await db
@@ -76,8 +104,14 @@ export async function POST(req: Request) {
                      'https://pub-6908906fe4c24b7b82ff61e803190c28.r2.dev/user-images/Gemini%20Generated%20Image%20(3).png',
                   lastLoginAt: new Date(),
                })
-               .returning();
+               .returning({
+                  id: users.id,
+                  fullName: users.fullName,
+                  profileImageUrl: users.profileImageUrl,
+                  email: users.email,
+               });
             dbUserId = newUserResult[0]?.id;
+            dbUserData = newUserResult[0] || null;
          }
       } catch (error) {
          console.error('Error saving user to database:', error);
@@ -96,15 +130,17 @@ export async function POST(req: Request) {
          );
       }
 
-      // Create new tokens with userId included
+      // Create new tokens with userId included and database profile values
       const issuedAt = Math.floor(Date.now() / 1000);
-      const profileImageUrl =
+      const defaultProfileImageUrl =
          'https://pub-6908906fe4c24b7b82ff61e803190c28.r2.dev/user-images/Gemini%20Generated%20Image%20(3).png';
 
       const enhancedAccessToken = await new jose.SignJWT({
          ...tokenPayload,
          userId: dbUserId, // Add the database user ID
-         picture: profileImageUrl,
+         name: dbUserData?.fullName || tokenPayload.name || 'Apple User', // Use database name if available
+         picture: dbUserData?.profileImageUrl || defaultProfileImageUrl, // Use database image if available
+         email: dbUserData?.email || tokenPayload.email, // Use database email if available
       })
          .setProtectedHeader({ alg: 'HS256' })
          .setExpirationTime(issuedAt + 3600) // 1 hour
@@ -115,7 +151,9 @@ export async function POST(req: Request) {
       const enhancedRefreshToken = await new jose.SignJWT({
          ...tokenPayload,
          userId: dbUserId,
-         picture: profileImageUrl,
+         name: dbUserData?.fullName || tokenPayload.name || 'Apple User', // Use database name if available
+         picture: dbUserData?.profileImageUrl || defaultProfileImageUrl, // Use database image if available
+         email: dbUserData?.email || tokenPayload.email, // Use database email if available
          jti: uuidv4(),
          type: 'refresh',
       })
