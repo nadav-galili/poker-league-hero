@@ -6,6 +6,9 @@ import { Image } from 'expo-image';
 import React from 'react';
 import { Dimensions, StyleSheet, Text, View } from 'react-native';
 
+// @ts-ignore - local image import
+import anonymousImage from '@/assets/images/anonymous.webp';
+
 const { width: screenWidth } = Dimensions.get('window');
 
 interface TopProfitPlayerCardProps {
@@ -178,10 +181,14 @@ export default function TopProfitPlayerCard({
 
          {/* Player Avatar */}
          <View className="items-center mb-3">
-            {data.profileImageUrl ? (
+            {data.profileImageUrl || !data.userId ? (
                <View style={styles.avatarContainer}>
                   <Image
-                     source={{ uri: data.profileImageUrl }}
+                     source={
+                        data.profileImageUrl
+                           ? { uri: data.profileImageUrl }
+                           : anonymousImage
+                     }
                      style={styles.avatar}
                      contentFit="cover"
                      cachePolicy="memory-disk"
