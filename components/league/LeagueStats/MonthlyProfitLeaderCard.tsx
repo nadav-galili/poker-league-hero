@@ -432,6 +432,7 @@ const styles = StyleSheet.create({
       width: getCardWidth(),
       minWidth: 140,
       maxWidth: 170,
+      minHeight: 240,
    },
    holographicOverlay: {
       position: 'absolute',

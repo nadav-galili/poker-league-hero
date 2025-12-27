@@ -263,6 +263,7 @@ const styles = StyleSheet.create({
       width: getCardWidth(),
       minWidth: 140,
       maxWidth: 170,
+      minHeight: 240,
    },
    cyberpunkCard: {
       shadowColor: '#00ff88',
