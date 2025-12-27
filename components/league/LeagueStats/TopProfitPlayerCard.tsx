@@ -181,7 +181,7 @@ export default function TopProfitPlayerCard({
 
          {/* Player Avatar */}
          <View className="items-center mb-3">
-            {data.profileImageUrl || !data.userId ? (
+            {data.profileImageUrl || data.userId === -1 ? (
                <View style={styles.avatarContainer}>
                   <Image
                      source={
