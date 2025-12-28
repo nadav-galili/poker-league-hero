@@ -227,6 +227,12 @@ export interface Translations {
    winningStreak: string;
    totalProfit: string;
    avgProfit: string;
+   monthlyProfitLeader: string;
+   monthlyProfitLeaderDescription: string;
+   currentMonthRankings: string;
+   noGamesThisMonth: string;
+   monthlyProfit: string;
+   currentMonth: string;
 
    // League Overview Card Subtitles
    positiveProfit: string;
@@ -531,6 +537,12 @@ const enTranslations: Translations = {
    winningStreak: 'games in a row',
    totalProfit: 'Total Profit',
    avgProfit: 'Avg Profit',
+   monthlyProfitLeader: 'MONTHLY PROFIT LEADER',
+   monthlyProfitLeaderDescription: 'Top earner this month',
+   currentMonthRankings: 'Current Month Rankings',
+   noGamesThisMonth: 'No games played this month',
+   monthlyProfit: 'Monthly Profit',
+   currentMonth: 'Current Month',
 
    // League Overview Card Subtitles
    positiveProfit: 'Positive Return',
@@ -840,6 +852,12 @@ const heTranslations: Translations = {
    winningStreak: 'משחקים ברצף',
    totalProfit: 'סה״כ רווח',
    avgProfit: 'ממוצע רווח',
+   monthlyProfitLeader: 'מוביל החודש',
+   monthlyProfitLeaderDescription: 'המרוויח הכי הרבה החודש',
+   currentMonthRankings: 'דירוג החודש הנוכחי',
+   noGamesThisMonth: 'לא היו משחקים החודש',
+   monthlyProfit: 'רווח חודשי',
+   currentMonth: 'חודש נוכחי',
 
    // League Overview Card Subtitles
    positiveProfit: 'תשואה חיובית',

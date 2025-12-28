@@ -44,7 +44,8 @@ type StatType =
    | 'most-active-player'
    | 'highest-single-game-profit'
    | 'biggest-loser'
-   | 'best-winning-streak';
+   | 'best-winning-streak'
+   | 'monthly-profit-leader';
 
 export const GET = withAuth(
    withRateLimit(async (request: Request, user) => {
@@ -115,6 +116,7 @@ export const GET = withAuth(
                'highest-single-game-profit',
                'biggest-loser',
                'best-winning-streak',
+               'monthly-profit-leader',
             ];
             if (!validTypes.includes(typeParam)) {
                return secureResponse(
@@ -675,6 +677,110 @@ async function calculateStat(
                totalProfit: bestPlayer.totalProfit,
                label: 'Winning Streak',
                isAnonymous: isAnon,
+            },
+         };
+      }
+
+      case 'monthly-profit-leader': {
+         // Calculate monthly profit leader (current month only, ignoring year filter)
+         const currentMonth = dayjs().startOf('month').toDate();
+         const nextMonth = dayjs().add(1, 'month').startOf('month').toDate();
+
+         const monthlyConditions = and(
+            eq(games.leagueId, parsedLeagueId),
+            eq(games.status, 'completed'),
+            gte(games.endedAt, currentMonth),
+            lte(games.endedAt, nextMonth)
+         );
+
+         // Check if there are any completed games this month
+         const monthlyGamesCount = await db
+            .select({
+               count: sql<number>`count(*)`.as('count'),
+            })
+            .from(games)
+            .where(monthlyConditions);
+
+         if (!monthlyGamesCount[0]?.count || monthlyGamesCount[0].count === 0) {
+            return null; // No games this month
+         }
+
+         const userMonthlyWhere = and(
+            monthlyConditions,
+            eq(leagueMembers.isActive, true)
+         );
+
+         const anonMonthlyWhere = and(
+            monthlyConditions,
+            isNotNull(gamePlayers.anonymousPlayerId)
+         );
+
+         // Regular User Query for current month
+         const userResult = await db
+            .select({
+               userId: users.id,
+               fullName: users.fullName,
+               profileImageUrl: users.profileImageUrl,
+               value: sum(gamePlayers.profit).as('monthly_profit'),
+               gamesPlayed:
+                  sql<number>`count(distinct ${gamePlayers.gameId})`.as(
+                     'games_played'
+                  ),
+            })
+            .from(gamePlayers)
+            .innerJoin(games, eq(gamePlayers.gameId, games.id))
+            .innerJoin(users, eq(gamePlayers.userId, users.id))
+            .innerJoin(
+               leagueMembers,
+               and(
+                  eq(leagueMembers.userId, users.id),
+                  eq(leagueMembers.leagueId, parsedLeagueId)
+               )
+            )
+            .where(userMonthlyWhere)
+            .groupBy(users.id, users.fullName, users.profileImageUrl)
+            .having(sql`sum(${gamePlayers.profit}) IS NOT NULL`)
+            .orderBy(desc(sum(gamePlayers.profit)))
+            .limit(1);
+
+         // Anonymous Query for current month
+         const anonResult = await db
+            .select({
+               value: sum(gamePlayers.profit).as('monthly_profit'),
+               gamesPlayed:
+                  sql<number>`count(distinct ${gamePlayers.gameId})`.as(
+                     'games_played'
+                  ),
+            })
+            .from(gamePlayers)
+            .innerJoin(games, eq(gamePlayers.gameId, games.id))
+            .where(anonMonthlyWhere);
+
+         const userVal = parseFloat(userResult[0]?.value || '0');
+         const anonVal = parseFloat(anonResult[0]?.value || '0');
+
+         if (anonResult[0] && anonVal > userVal) {
+            return {
+               ...anonymousPlayerProfile,
+               value: anonVal,
+               additionalData: {
+                  gamesPlayed: anonResult[0].gamesPlayed,
+                  label: 'Monthly Profit',
+                  isAnonymous: true,
+               },
+            };
+         }
+
+         if (!userResult.length) return null;
+
+         return {
+            userId: userResult[0].userId,
+            fullName: userResult[0].fullName,
+            profileImageUrl: userResult[0].profileImageUrl,
+            value: userVal,
+            additionalData: {
+               gamesPlayed: userResult[0].gamesPlayed,
+               label: 'Monthly Profit',
             },
          };
       }

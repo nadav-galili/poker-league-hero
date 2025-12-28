@@ -67,6 +67,15 @@ const STAT_CONFIGS = {
          return value.toString();
       },
    },
+   'monthly-profit-leader': {
+      title: 'monthlyProfitLeader',
+      icon: 'calendar',
+      color: colors.neonGreen, // Green for monthly profit
+      secondaryColor: colors.matrixGreen,
+      shadowColor: colors.shadowNeonGreen,
+      formatValue: (value: number | string | undefined | null) =>
+         formatCurrency(value),
+   },
 } as const;
 
 export default function StatsLeaderboardHero({

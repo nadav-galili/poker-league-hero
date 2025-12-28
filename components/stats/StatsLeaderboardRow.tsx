@@ -52,6 +52,12 @@ const STAT_CONFIGS = {
          return value.toString();
       },
    },
+   'monthly-profit-leader': {
+      color: colors.neonGreen, // Green for monthly profit
+      shadowColor: colors.shadowNeonGreen,
+      formatValue: (value: number | string | undefined | null) =>
+         formatCurrency(value),
+   },
 } as const;
 
 export default function StatsLeaderboardRow({
@@ -202,7 +208,8 @@ export default function StatsLeaderboardRow({
                      color:
                         statType === 'top-profit-player' ||
                         statType === 'highest-single-game-profit' ||
-                        statType === 'biggest-loser'
+                        statType === 'biggest-loser' ||
+                        statType === 'monthly-profit-leader'
                            ? typeof player.value === 'number' &&
                              player.value < 0
                               ? colors.neonPink
@@ -220,7 +227,8 @@ export default function StatsLeaderboardRow({
                      backgroundColor:
                         statType === 'top-profit-player' ||
                         statType === 'highest-single-game-profit' ||
-                        statType === 'biggest-loser'
+                        statType === 'biggest-loser' ||
+                        statType === 'monthly-profit-leader'
                            ? typeof player.value === 'number' &&
                              player.value < 0
                               ? colors.neonPink
