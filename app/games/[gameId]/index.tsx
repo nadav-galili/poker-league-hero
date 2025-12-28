@@ -767,6 +767,36 @@ export default function GameScreen() {
 
                {/* Action buttons */}
                <View className="flex-row items-center gap-3">
+                  {/* Add player button */}
+                  <TouchableOpacity
+                     onPress={openAddPlayerModal}
+                     disabled={isProcessing}
+                     style={styles.addPlayerButton}
+                  >
+                     <LinearGradient
+                        colors={[colors.matrixGreenDark, colors.neonGreen]}
+                        style={styles.addPlayerGradient}
+                     >
+                        <Ionicons
+                           name="person-add"
+                           size={18}
+                           color={colors.neonCyan}
+                        />
+                        <Text
+                           className="text-xs font-mono font-bold uppercase tracking-wide"
+                           style={{ color: colors.neonCyan }}
+                        >
+                           +player
+                        </Text>
+                     </LinearGradient>
+                     <View
+                        style={[
+                           styles.buttonGlow,
+                           { shadowColor: colors.neonGreen },
+                        ]}
+                     />
+                  </TouchableOpacity>
+
                   {/* Refresh button */}
                   <TouchableOpacity
                      onPress={handleRefresh}
@@ -834,17 +864,6 @@ export default function GameScreen() {
          </LinearGradient>
          {/* Game Summary */}
          <GameSummary game={game} />
-         <View className="px-4 pb-2 items-center my-4">
-            <CyberpunkButton
-               title={t('addPlayer')}
-               onPress={openAddPlayerModal}
-               variant="join"
-               size="medium"
-               disabled={isProcessing}
-               width="60%"
-               icon="person-add"
-            />
-         </View>
          {/* Cyberpunk Game Events History */}
          <View className="px-4 mb-2">
             <TouchableOpacity
@@ -1086,6 +1105,21 @@ const styles = StyleSheet.create({
       gap: 6,
       borderWidth: 1,
       borderColor: colors.errorGradientEnd,
+   },
+   addPlayerButton: {
+      position: 'relative',
+      borderRadius: 12,
+      overflow: 'hidden',
+   },
+   addPlayerGradient: {
+      paddingHorizontal: 10,
+      paddingVertical: 8,
+      borderRadius: 12,
+      flexDirection: 'row',
+      alignItems: 'center',
+      gap: 4,
+      borderWidth: 1,
+      borderColor: colors.neonGreen,
    },
    headerBorder: {
       position: 'absolute',
